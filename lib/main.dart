@@ -83,7 +83,8 @@ class PriceSettings {
     'sillPerM': sillPerM, 'dripPerM': dripPerM, 'slopePerM': slopePerM,
     'mosquitoPerUnit': mosquitoPerUnit, 'demontagePerUnit': demontagePerUnit,
   };
-}class ProductItem {
+}
+class ProductItem {
   String type;
   String houseType;
   double widthMm;
@@ -208,7 +209,8 @@ class Measurement {
     b.writeln('ИТОГО: ${totalPrice.toStringAsFixed(0)} ₽');
     return b.toString();
   }
-}class WindowCalcApp extends StatefulWidget {
+}
+class WindowCalcApp extends StatefulWidget {
   const WindowCalcApp({super.key});
 
   @override
@@ -382,7 +384,8 @@ class SavedMeasurementsScreen extends StatelessWidget {
             ),
     );
   }
-}class PriceSettingsScreen extends StatefulWidget {
+}
+class PriceSettingsScreen extends StatefulWidget {
   final PriceSettings price;
   final VoidCallback onChanged;
   const PriceSettingsScreen({super.key, required this.price, required this.onChanged});
@@ -914,7 +917,8 @@ Card(
       ],
     ),
   ),
-),        const SizedBox(height: 20),
+),        
+          const SizedBox(height: 20),
         const Text('Поделиться замерным листом:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 8),
         _shareButton(context, icon: Icons.copy, label: 'Скопировать полный текст', color: Colors.blue, onTap: () async {
@@ -939,7 +943,8 @@ Card(
       onTap: onTap,
     ),
   );
-  }void _showText(BuildContext context, String text) {
+  }
+    void _showText(BuildContext context, String text) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
@@ -958,7 +963,8 @@ Card(
       ],
     ),
   );
-  }String _clientVersion(Measurement m) {
+  }
+    String _clientVersion(Measurement m) {
   final b = StringBuffer();
   b.writeln('Здравствуйте, ${m.clientName}!');
   b.writeln('');
@@ -1020,7 +1026,8 @@ Card(
   }
   if (m.notes.isNotEmpty) b.writeln('Примечание: ${m.notes}');
   return b.toString();
-  }  String _dealerVersion(Measurement m) {
+  }  
+    String _dealerVersion(Measurement m) {
     final b = StringBuffer();
     b.writeln('ЗАМЕР #${m.id}');
     b.writeln('');
@@ -1036,7 +1043,8 @@ Card(
     b.writeln('К ОПЛАТЕ: ${m.totalPrice.toStringAsFixed(0)} ₽');
     return b.toString();
   }
-  }class _SectionTitle extends StatelessWidget {
+  }
+  class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
 
