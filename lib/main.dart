@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
 
 void main() => runApp(const WindowCalcApp());
 
@@ -83,6 +85,63 @@ class PriceSettings {
     'sillPerM': sillPerM, 'dripPerM': dripPerM, 'slopePerM': slopePerM,
     'mosquitoPerUnit': mosquitoPerUnit, 'demontagePerUnit': demontagePerUnit,
   };
+
+  void fromMap(Map<String, double> m) {
+    window1Panel = m['window1Panel'] ?? window1Panel;
+    window1Stalin = m['window1Stalin'] ?? window1Stalin;
+    window1Brick = m['window1Brick'] ?? window1Brick;
+    window2Panel = m['window2Panel'] ?? window2Panel;
+    window2Stalin = m['window2Stalin'] ?? window2Stalin;
+    window2Brick = m['window2Brick'] ?? window2Brick;
+    window3Panel = m['window3Panel'] ?? window3Panel;
+    window3Stalin = m['window3Stalin'] ?? window3Stalin;
+    window3Brick = m['window3Brick'] ?? window3Brick;
+    blockSmallPanel = m['blockSmallPanel'] ?? blockSmallPanel;
+    blockSmallStalin = m['blockSmallStalin'] ?? blockSmallStalin;
+    blockSmallBrick = m['blockSmallBrick'] ?? blockSmallBrick;
+    blockBigPanel = m['blockBigPanel'] ?? blockBigPanel;
+    blockBigStalin = m['blockBigStalin'] ?? blockBigStalin;
+    blockBigBrick = m['blockBigBrick'] ?? blockBigBrick;
+    balconyPerM2 = m['balconyPerM2'] ?? balconyPerM2;
+    bezParapetPerM2 = m['bezParapetPerM2'] ?? bezParapetPerM2;
+    slopesPanel = m['slopesPanel'] ?? slopesPanel;
+    slopesStalin = m['slopesStalin'] ?? slopesStalin;
+    slopesBrick = m['slopesBrick'] ?? slopesBrick;
+    glass24 = m['glass24'] ?? glass24;
+    glass32 = m['glass32'] ?? glass32;
+    glass40 = m['glass40'] ?? glass40;
+    extraTinting = m['extraTinting'] ?? extraTinting;
+    extraMulti = m['extraMulti'] ?? extraMulti;
+    sillPerM = m['sillPerM'] ?? sillPerM;
+    dripPerM = m['dripPerM'] ?? dripPerM;
+    slopePerM = m['slopePerM'] ?? slopePerM;
+    mosquitoPerUnit = m['mosquitoPerUnit'] ?? mosquitoPerUnit;
+    demontagePerUnit = m['demontagePerUnit'] ?? demontagePerUnit;
+  }
+}
+
+class PriceStorage {
+  static const _key = 'price_settings';
+
+  static Future<PriceSettings> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ps = PriceSettings();
+    final map = <String, double>{};
+    ps.toMap().forEach((k, _) {
+      final v = prefs.getDouble('${_key}_$k');
+      if (v != null) map[k] = v;
+    });
+    ps.fromMap(map);
+    return ps;
+  }
+
+  static Future<void> save(PriceSettings ps) async {
+    final prefs = await SharedPreferences.getInstance();
+    final m = ps.toMap();
+    for (final e in m.entries) {
+      await prefs.setDouble('${_key}_${e.key}', e.value);
+    }
+  }
 }
 class ProductItem {
   String type;
@@ -149,6 +208,48 @@ class ProductItem {
     }
     return total;
   }
+
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'houseType': houseType,
+    'widthMm': widthMm,
+    'heightMm': heightMm,
+    'count': count,
+    'glassThickness': glassThickness,
+    'tinted': tinted,
+    'multi': multi,
+    'hasSlopes': hasSlopes,
+    'hasSill': hasSill,
+    'sillLengthM': sillLengthM,
+    'hasDrip': hasDrip,
+    'dripLengthM': dripLengthM,
+    'hasExtraSlope': hasExtraSlope,
+    'extraSlopeLengthM': extraSlopeLengthM,
+    'hasMosquito': hasMosquito,
+    'complexInstall': complexInstall,
+    'separateDemontage': separateDemontage,
+  };
+
+  factory ProductItem.fromJson(Map<String, dynamic> j) => ProductItem(
+    type: j['type'] ?? 'Окно 2-створчатое',
+    houseType: j['houseType'] ?? 'Панелька',
+    widthMm: (j['widthMm'] ?? 1300).toDouble(),
+    heightMm: (j['heightMm'] ?? 1400).toDouble(),
+    count: j['count'] ?? 1,
+    glassThickness: (j['glassThickness'] ?? 32).toDouble(),
+    tinted: j['tinted'] ?? false,
+    multi: j['multi'] ?? false,
+    hasSlopes: j['hasSlopes'] ?? false,
+    hasSill: j['hasSill'] ?? false,
+    sillLengthM: (j['sillLengthM'] ?? 1.5).toDouble(),
+    hasDrip: j['hasDrip'] ?? false,
+    dripLengthM: (j['dripLengthM'] ?? 1.5).toDouble(),
+    hasExtraSlope: j['hasExtraSlope'] ?? false,
+    extraSlopeLengthM: (j['extraSlopeLengthM'] ?? 1.5).toDouble(),
+    hasMosquito: j['hasMosquito'] ?? false,
+    complexInstall: j['complexInstall'] ?? true,
+    separateDemontage: j['separateDemontage'] ?? false,
+  );
 }
 
 class Measurement {
@@ -175,14 +276,14 @@ class Measurement {
   double get totalPrice =>
       items.fold(0.0, (s, it) => s + it.calcPrice(priceSettings));
 
-  static String _fmtDate(DateTime d) =>
+  static String fmtDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 
   String toShareText() {
     final b = StringBuffer();
     b.writeln('🧾 ЗАМЕРНЫЙ ЛИСТ');
     b.writeln('═══════════════════════');
-    b.writeln('Дата: ${_fmtDate(createdAt)}');
+    b.writeln('Дата: ${fmtDate(createdAt)}');
     b.writeln('Клиент: $clientName');
     b.writeln('Телефон: $clientPhone');
     b.writeln('Адрес: $clientAddress');
@@ -209,6 +310,65 @@ class Measurement {
     b.writeln('ИТОГО: ${totalPrice.toStringAsFixed(0)} ₽');
     return b.toString();
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'clientName': clientName,
+    'clientPhone': clientPhone,
+    'clientAddress': clientAddress,
+    'notes': notes,
+    'items': items.map((e) => e.toJson()).toList(),
+    'createdAt': createdAt.toIso8601String(),
+  };
+
+  factory Measurement.fromJson(Map<String, dynamic> j, PriceSettings ps) =>
+      Measurement(
+        id: j['id'] ?? '',
+        clientName: j['clientName'] ?? '',
+        clientPhone: j['clientPhone'] ?? '',
+        clientAddress: j['clientAddress'] ?? '',
+        notes: j['notes'] ?? '',
+        items: (j['items'] as List).map((e) => ProductItem.fromJson(e)).toList(),
+        priceSettings: ps,
+        createdAt: DateTime.tryParse(j['createdAt'] ?? '') ?? DateTime.now(),
+      );
+}
+
+class MeasurementStorage {
+  static const _key = 'measurements';
+
+  static Future<List<Measurement>> load(PriceSettings ps) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList(_key) ?? [];
+    return raw
+        .map((s) => Measurement.fromJson(
+              Map<String, dynamic>.from(
+                (s as String).isNotEmpty ? _decode(s) : {},
+              ),
+              ps,
+            ))
+        .toList();
+  }
+
+  static Future<void> save(List<Measurement> list) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        _key, list.map((m) => _encode(m.toJson())).toList());
+  }
+
+  static String _encode(Map<String, dynamic> m) => m.entries
+      .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
+      .join('&');
+
+  static Map<String, dynamic> _decode(String s) {
+    final map = <String, dynamic>{};
+    for (final pair in s.split('&')) {
+      final i = pair.indexOf('=');
+      if (i < 0) continue;
+      map[pair.substring(0, i)] = Uri.decodeComponent(pair.substring(i + 1));
+    }
+    return map;
+  }
 }
 class WindowCalcApp extends StatefulWidget {
   const WindowCalcApp({super.key});
@@ -218,11 +378,46 @@ class WindowCalcApp extends StatefulWidget {
 }
 
 class _WindowCalcAppState extends State<WindowCalcApp> {
-  final PriceSettings _price = PriceSettings();
-  final List<Measurement> _measurements = [];
+  PriceSettings? _price;
+  List<Measurement> _measurements = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final ps = await PriceStorage.load();
+    final ms = await MeasurementStorage.load(ps);
+    setState(() {
+      _price = ps;
+      _measurements = ms;
+      _loading = false;
+    });
+  }
+
+  Future<void> _savePrice() async {
+    if (_price == null) return;
+    await PriceStorage.save(_price!);
+    setState(() {});
+  }
+
+  Future<void> _saveMeasurements() async {
+    await MeasurementStorage.save(_measurements);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
     return MaterialApp(
       title: 'Калькулятор окон',
       debugShowCheckedModeBanner: false,
@@ -231,10 +426,17 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
         useMaterial3: true,
       ),
       home: MainMenuScreen(
-        price: _price,
+        price: _price!,
         measurements: _measurements,
-        onPriceChanged: () => setState(() {}),
-        onMeasurementAdded: (m) => setState(() => _measurements.insert(0, m)),
+        onPriceChanged: _savePrice,
+        onMeasurementAdded: (m) {
+          setState(() => _measurements.insert(0, m));
+          _saveMeasurements();
+        },
+        onMeasurementDeleted: (id) {
+          setState(() => _measurements.removeWhere((m) => m.id == id));
+          _saveMeasurements();
+        },
       ),
     );
   }
@@ -243,8 +445,9 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
 class MainMenuScreen extends StatelessWidget {
   final PriceSettings price;
   final List<Measurement> measurements;
-  final VoidCallback onPriceChanged;
+  final Future<void> Function() onPriceChanged;
   final Function(Measurement) onMeasurementAdded;
+  final Function(String) onMeasurementDeleted;
 
   const MainMenuScreen({
     super.key,
@@ -252,6 +455,7 @@ class MainMenuScreen extends StatelessWidget {
     required this.measurements,
     required this.onPriceChanged,
     required this.onMeasurementAdded,
+    required this.onMeasurementDeleted,
   });
 
   @override
@@ -292,6 +496,7 @@ class MainMenuScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => SavedMeasurementsScreen(
                     measurements: measurements,
+                    onDelete: onMeasurementDeleted,
                   ),
                 ),
               );
@@ -313,7 +518,6 @@ class MainMenuScreen extends StatelessWidget {
                   ),
                 ),
               );
-              onPriceChanged();
             },
           ),
         ],
@@ -346,10 +550,32 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 }
-
-class SavedMeasurementsScreen extends StatelessWidget {
+class SavedMeasurementsScreen extends StatefulWidget {
   final List<Measurement> measurements;
-  const SavedMeasurementsScreen({super.key, required this.measurements});
+  final Function(String) onDelete;
+  const SavedMeasurementsScreen({
+    super.key,
+    required this.measurements,
+    required this.onDelete,
+  });
+
+  @override
+  State<SavedMeasurementsScreen> createState() => _SavedMeasurementsScreenState();
+}
+
+class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
+  late List<Measurement> _list;
+
+  @override
+  void initState() {
+    super.initState();
+    _list = List.from(widget.measurements);
+  }
+
+  void _delete(String id) {
+    setState(() => _list.removeWhere((m) => m.id == id));
+    widget.onDelete(id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -358,20 +584,29 @@ class SavedMeasurementsScreen extends StatelessWidget {
         title: const Text('Сохранённые замеры'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: measurements.isEmpty
+      body: _list.isEmpty
           ? const Center(child: Text('Пока нет сохранённых замеров'))
           : ListView.separated(
-              itemCount: measurements.length,
+              itemCount: _list.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (_, i) {
-                final m = measurements[i];
+                final m = _list[i];
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.window)),
                   title: Text(m.clientName),
-                  subtitle: Text('${Measurement._fmtDate(m.createdAt)} • ${m.items.length} поз.'),
-                  trailing: Text(
-                    '${m.totalPrice.toStringAsFixed(0)} ₽',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  subtitle: Text('${Measurement.fmtDate(m.createdAt)} • ${m.items.length} поз.'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${m.totalPrice.toStringAsFixed(0)} ₽',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => _confirmDelete(m),
+                      ),
+                    ],
                   ),
                   onTap: () => Navigator.push(
                     context,
@@ -384,11 +619,39 @@ class SavedMeasurementsScreen extends StatelessWidget {
             ),
     );
   }
+
+  void _confirmDelete(Measurement m) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Удалить замер?'),
+        content: Text('Замер для "${m.clientName}" будет удалён.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _delete(m.id);
+            },
+            child: const Text('Удалить', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
 class PriceSettingsScreen extends StatefulWidget {
   final PriceSettings price;
-  final VoidCallback onChanged;
-  const PriceSettingsScreen({super.key, required this.price, required this.onChanged});
+  final Future<void> Function() onChanged;
+  const PriceSettingsScreen({
+    super.key,
+    required this.price,
+    required this.onChanged,
+  });
 
   @override
   State<PriceSettingsScreen> createState() => _PriceSettingsScreenState();
@@ -414,7 +677,7 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     super.dispose();
   }
 
-  void _apply() {
+  Future<void> _apply() async {
     final p = widget.price;
     double g(String k) => double.tryParse(_ctrls[k]!.text) ?? 0;
     p.window1Panel = g('window1Panel');
@@ -447,10 +710,12 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     p.slopePerM = g('slopePerM');
     p.mosquitoPerUnit = g('mosquitoPerUnit');
     p.demontagePerUnit = g('demontagePerUnit');
-    widget.onChanged();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Прайс сохранён')),
-    );
+    await widget.onChanged();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Прайс сохранён')),
+      );
+    }
   }
 
   Widget _row(String label, String key) {
@@ -545,7 +810,6 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     );
   }
 }
-
 class MeasurementEditorScreen extends StatefulWidget {
   final PriceSettings price;
   const MeasurementEditorScreen({super.key, required this.price});
@@ -859,13 +1123,25 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
     );
   }
 }
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   final Measurement measurement;
   const ResultScreen({super.key, required this.measurement});
 
   @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+  late Measurement m;
+
+  @override
+  void initState() {
+    super.initState();
+    m = widget.measurement;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final m = measurement;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Замерный лист'),
@@ -925,51 +1201,88 @@ class ResultScreen extends StatelessWidget {
           const SizedBox(height: 20),
           const Text('Поделиться замерным листом:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
-          _shareButton(context, icon: Icons.copy, label: 'Скопировать полный текст', color: Colors.blue, onTap: () async {
-            await Clipboard.setData(ClipboardData(text: m.toShareText()));
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
-            }
-          }),
-          _shareButton(context, icon: Icons.person, label: 'Версия для клиента', color: Colors.green, onTap: () => _showText(context, _clientVersion(m))),
-          _shareButton(context, icon: Icons.factory, label: 'Версия для завода', color: Colors.orange, onTap: () => _showText(context, _factoryVersion(m))),
-          _shareButton(context, icon: Icons.handshake, label: 'Версия для дилера', color: Colors.purple, onTap: () => _showText(context, _dealerVersion(m))),
+          _shareButton(
+            context,
+            icon: Icons.person,
+            label: 'Поделиться с клиентом',
+            subtitle: 'Красивое описание + цена',
+            color: Colors.green,
+            text: _clientVersion(m),
+          ),
+          _shareButton(
+            context,
+            icon: Icons.factory,
+            label: 'Отправить на завод',
+            subtitle: 'Размеры и опции для производства',
+            color: Colors.orange,
+            text: _factoryVersion(m),
+          ),
+          _shareButton(
+            context,
+            icon: Icons.handshake,
+            label: 'Отправить дилеру',
+            subtitle: 'Полная спецификация с ценами',
+            color: Colors.purple,
+            text: _dealerVersion(m),
+          ),
+          _shareButton(
+            context,
+            icon: Icons.copy,
+            label: 'Скопировать полный текст',
+            subtitle: 'В буфер обмена',
+            color: Colors.blue,
+            text: m.toShareText(),
+            copyOnly: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _shareButton(BuildContext context, {required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+  Widget _shareButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required String text,
+    bool copyOnly = false,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)),
-        title: Text(label),
+        leading: CircleAvatar(
+          backgroundColor: color.withOpacity(0.15),
+          child: Icon(icon, color: color),
+        ),
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
         trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-        onTap: onTap,
+        onTap: () => _handleShare(context, label, text, copyOnly: copyOnly),
       ),
     );
   }
 
-  void _showText(BuildContext context, String text) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Предпросмотр'),
-        content: SingleChildScrollView(child: SelectableText(text)),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: text));
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
-            },
-            child: const Text('Скопировать'),
-          ),
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Закрыть')),
-        ],
-      ),
-    );
+  Future<void> _handleShare(BuildContext context, String subject, String text, {bool copyOnly = false}) async {
+    if (copyOnly) {
+      await Clipboard.setData(ClipboardData(text: text));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Скопировано в буфер обмена')),
+        );
+      }
+      return;
+    }
+    try {
+      await Share.share(text, subject: subject);
+    } catch (e) {
+      await Clipboard.setData(ClipboardData(text: text));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка шаринга, текст скопирован: $e')),
+        );
+      }
+    }
   }
 
   String _clientVersion(Measurement m) {
@@ -980,6 +1293,14 @@ class ResultScreen extends StatelessWidget {
     for (var i = 0; i < m.items.length; i++) {
       final it = m.items[i];
       b.writeln('  ${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм — ${it.count} шт.');
+      if (it.hasSill || it.hasDrip || it.hasMosquito || it.hasSlopes) {
+        final opts = <String>[];
+        if (it.hasSlopes) opts.add('откосы');
+        if (it.hasSill) opts.add('подоконник');
+        if (it.hasDrip) opts.add('отлив');
+        if (it.hasMosquito) opts.add('москитная сетка');
+        b.writeln('     Опции: ${opts.join(", ")}');
+      }
     }
     b.writeln('');
     b.writeln('ИТОГО: ${m.totalPrice.toStringAsFixed(0)} ₽');
@@ -1020,7 +1341,7 @@ class ResultScreen extends StatelessWidget {
     b.writeln('');
     b.writeln('Клиент: ${m.clientName} (${m.clientPhone})');
     b.writeln('Адрес: ${m.clientAddress}');
-    b.writeln('Дата: ${Measurement._fmtDate(m.createdAt)}');
+    b.writeln('Дата: ${Measurement.fmtDate(m.createdAt)}');
     b.writeln('');
     for (var i = 0; i < m.items.length; i++) {
       final it = m.items[i];
@@ -1031,7 +1352,6 @@ class ResultScreen extends StatelessWidget {
     return b.toString();
   }
 }
-
 class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
