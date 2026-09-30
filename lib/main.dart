@@ -855,9 +855,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
       ),
     );
   }
-}
-
-class ResultScreen extends StatelessWidget {
+  class ResultScreen extends StatelessWidget {
   final Measurement measurement;
   const ResultScreen({super.key, required this.measurement});
 
@@ -878,141 +876,151 @@ class ResultScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(m.clientName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(m.clientPhone),
-                  Text(m.clientAddress),
-                  const Divider(height: 24),
-                  const Text('Позиции:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...m.items.asMap().entries.map((e) {
-                    final it = e.value;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${e.key + 1}. ${it.type} — ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}'),
-                          Text('   ${it.houseType} • стекло ${it.glassThickness.toInt()} мм', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          Text('   ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽', style: const TextStyle(fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    );
-                  }),
-                  if (m.notes.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Text('Примечание: ${m.notes}'),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('ИТОГО:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text('${m.totalPrice.toStringAsFixed(0)} ₽', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text('Поделиться замерным листом:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 8),
-          _shareButton(context, icon: Icons.copy, label: 'Скопировать полный текст', color: Colors.blue, onTap: () async {
-            await Clipboard.setData(ClipboardData(text: m.toShareText()));
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
-            }
-          }),
-          _shareButton(context, icon: Icons.person, label: 'Версия для клиента', color: Colors.green, onTap: () => _showText(context, _clientVersion(m))),
-          _shareButton(context, icon: Icons.factory, label: 'Версия для завода', color: Colors.orange, onTap: () => _showText(context, _factoryVersion(m))),
-          _shareButton(context, icon: Icons.handshake, label: 'Версия для дилера', color: Colors.purple, onTap: () => _showText(context, _dealerVersion(m))),
+                  Text(m.clientName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),const SizedBox(height: 4),
+Text(m.clientPhone),
+Text(m.clientAddress),
+const Divider(height: 24),
+const Text('Позиции:', style: TextStyle(fontWeight: FontWeight.bold)),
+...m.items.asMap().entries.map((e) {
+  final it = e.value;
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [        Text('${e.key + 1}. ${it.type} — ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}'),
+        Text('   ${it.houseType} • стекло ${it.glassThickness.toInt()} мм', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text('   ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽', style: const TextStyle(fontWeight: FontWeight.w500)),
+      ],
+    ),
+  );
+}),        if (m.notes.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text('Примечание: ${m.notes}'),
         ],
-      ),
-    );
+      ],
+    ),
+  ),
+),
+const SizedBox(height: 16),
+Card(
+  color: Theme.of(context).colorScheme.primaryContainer,
+  child: Padding(
+    padding: const EdgeInsets.all(20),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text('ИТОГО:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text('${m.totalPrice.toStringAsFixed(0)} ₽', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+      ],
+    ),
+  ),
+),        const SizedBox(height: 20),
+        const Text('Поделиться замерным листом:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(height: 8),
+        _shareButton(context, icon: Icons.copy, label: 'Скопировать полный текст', color: Colors.blue, onTap: () async {
+          await Clipboard.setData(ClipboardData(text: m.toShareText()));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
+          }
+        }),
+        _shareButton(context, icon: Icons.person, label: 'Версия для клиента', color: Colors.green, onTap: () => _showText(context, _clientVersion(m))),
+        _shareButton(context, icon: Icons.factory, label: 'Версия для завода', color: Colors.orange, onTap: () => _showText(context, _factoryVersion(m))),
+        _shareButton(context, icon: Icons.handshake, label: 'Версия для дилера', color: Colors.purple, onTap: () => _showText(context, _dealerVersion(m))),
+      ],
+    ),
+  );
+  }Widget _shareButton(BuildContext context, {required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+  return Card(
+    margin: const EdgeInsets.only(bottom: 8),
+    child: ListTile(
+      leading: CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)),
+      title: Text(label),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+      onTap: onTap,
+    ),
+  );
+  }void _showText(BuildContext context, String text) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Предпросмотр'),
+      content: SingleChildScrollView(child: SelectableText(text)),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: text));
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
+          },
+          child: const Text('Скопировать'),
+        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Закрыть')),
+      ],
+    ),
+  );
+  }String _clientVersion(Measurement m) {
+  final b = StringBuffer();
+  b.writeln('Здравствуйте, ${m.clientName}!');
+  b.writeln('');
+  b.writeln('Ваш заказ на окна:');
+  for (var i = 0; i < m.items.length; i++) {
+    final it = m.items[i];
+    b.writeln('  ${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм — ${it.count} шт.');
   }
-
-  Widget _shareButton(BuildContext context, {required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)),
-        title: Text(label),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  void _showText(BuildContext context, String text) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Предпросмотр'),
-        content: SingleChildScrollView(child: SelectableText(text)),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: text));
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
-            },
-            child: const Text('Скопировать'),
-          ),
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Закрыть')),
-        ],
-      ),
-    );
-  }
-
-  String _clientVersion(Measurement m) {
-    final b = StringBuffer();
-    b.writeln('Здравствуйте, ${m.clientName}!');
+  b.writeln('');
+  b.writeln('ИТОГО: ${m.totalPrice.toStringAsFixed(0)} ₽');
+  b.writeln('');
+  b.writeln('По вопросам — звоните!');
+  return b.toString();
+  }String _factoryVersion(Measurement m) {
+  final b = StringBuffer();
+  b.writeln('=== ЗАКАЗ НА ПРОИЗВОДСТВО ===');
+  b.writeln('Клиент: ${m.clientName}');
+  b.writeln('Адрес: ${m.clientAddress}');
+  b.writeln('Тел: ${m.clientPhone}');
+  b.writeln('');
+  for (var i = 0; i < m.items.length; i++) {
+    final it = m.items[i];
+    b.writeln('ПОЗИЦИЯ ${i + 1}:');
+    b.writeln('  Тип: ${it.type}');
+    b.writeln('  Тип дома: ${it.houseType}');
+    b.writeln('  Размер: ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}');
+    b.writeln('  Стеклопакет: ${it.glassThickness.toInt()} мм');
+    if (it.tinted) b.writeln('  + Тонировка');
+    if (it.multi) b.writeln('  + Мультифункция');
+    if (it.hasSlopes) b.writeln('  Откосы: да');
+    if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM} м');
+    if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM} м');
+    if (it.hasMosquito) b.writeln('  Москитка: да');
     b.writeln('');
-    b.writeln('Ваш заказ на окна:');
-    for (var i = 0; i < m.items.length; i++) {
-      final it = m.items[i];
-      b.writeln('  ${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм — ${it.count} шт.');
-    }
-    b.writeln('');
-    b.writeln('ИТОГО: ${m.totalPrice.toStringAsFixed(0)} ₽');
-    b.writeln('');
-    b.writeln('По вопросам — звоните!');
-    return b.toString();
   }
-
-  String _factoryVersion(Measurement m) {
-    final b = StringBuffer();
-    b.writeln('=== ЗАКАЗ НА ПРОИЗВОДСТВО ===');
-    b.writeln('Клиент: ${m.clientName}');
-    b.writeln('Адрес: ${m.clientAddress}');
-    b.writeln('Тел: ${m.clientPhone}');
+  if (m.notes.isNotEmpty) b.writeln('Примечание: ${m.notes}');
+  return b.toString();
+  }String _factoryVersion(Measurement m) {
+  final b = StringBuffer();
+  b.writeln('=== ЗАКАЗ НА ПРОИЗВОДСТВО ===');
+  b.writeln('Клиент: ${m.clientName}');
+  b.writeln('Адрес: ${m.clientAddress}');
+  b.writeln('Тел: ${m.clientPhone}');
+  b.writeln('');
+  for (var i = 0; i < m.items.length; i++) {
+    final it = m.items[i];
+    b.writeln('ПОЗИЦИЯ ${i + 1}:');
+    b.writeln('  Тип: ${it.type}');
+    b.writeln('  Тип дома: ${it.houseType}');
+    b.writeln('  Размер: ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}');
+    b.writeln('  Стеклопакет: ${it.glassThickness.toInt()} мм');
+    if (it.tinted) b.writeln('  + Тонировка');
+    if (it.multi) b.writeln('  + Мультифункция');
+    if (it.hasSlopes) b.writeln('  Откосы: да');
+    if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM} м');
+    if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM} м');
+    if (it.hasMosquito) b.writeln('  Москитка: да');
     b.writeln('');
-    for (var i = 0; i < m.items.length; i++) {
-      final it = m.items[i];
-      b.writeln('ПОЗИЦИЯ ${i + 1}:');
-      b.writeln('  Тип: ${it.type}');
-      b.writeln('  Тип дома: ${it.houseType}');
-      b.writeln('  Размер: ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}');
-      b.writeln('  Стеклопакет: ${it.glassThickness.toInt()} мм');
-      if (it.tinted) b.writeln('  + Тонировка');
-      if (it.multi) b.writeln('  + Мультифункция');
-      if (it.hasSlopes) b.writeln('  Откосы: да');
-      if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM} м');
-      if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM} м');
-      if (it.hasMosquito) b.writeln('  Москитка: да');
-      b.writeln('');
-    }
-    if (m.notes.isNotEmpty) b.writeln('Примечание: ${m.notes}');
-    return b.toString();
   }
-
-  String _dealerVersion(Measurement m) {
+  if (m.notes.isNotEmpty) b.writeln('Примечание: ${m.notes}');
+  return b.toString();
+  }  String _dealerVersion(Measurement m) {
     final b = StringBuffer();
     b.writeln('ЗАМЕР #${m.id}');
     b.writeln('');
@@ -1028,9 +1036,7 @@ class ResultScreen extends StatelessWidget {
     b.writeln('К ОПЛАТЕ: ${m.totalPrice.toStringAsFixed(0)} ₽');
     return b.toString();
   }
-}
-
-class _SectionTitle extends StatelessWidget {
+  }class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
 
@@ -1041,102 +1047,4 @@ class _SectionTitle extends StatelessWidget {
       child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
-}
-
-  Widget _shareButton(BuildContext context, {required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)),
-        title: Text(label),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-        onTap: onTap,
-      ),
-    );
   }
-
-  void _showText(BuildContext context, String text) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Предпросмотр'),
-        content: SingleChildScrollView(child: SelectableText(text)),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: text));
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
-            },
-            child: const Text('Скопировать'),
-          ),
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Закрыть')),
-        ],
-      ),
-    );
-  }
-
-  String _clientVersion(Measurement m) {
-    final b = StringBuffer();
-    b.writeln('Здравствуйте, ${m.clientName}!');
-    b.writeln('');
-    b.writeln('Ваш заказ на окна:');
-    for (var i = 0; i < m.items.length; i++) {
-      final it = m.items[i];
-      b.writeln('  ${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм — ${it.count} шт.');
-    }
-    b.writeln('');
-    b.writeln('ИТОГО: ${m.totalPrice.toStringAsFixed(0)} ₽');
-    b.writeln('');
-    b.writeln('По вопросам — звоните!');
-    return b.toString();
-  }
-
-  String _factoryVersion(Measurement m) {
-    final b = StringBuffer();
-    b.writeln('=== ЗАКАЗ НА ПРОИЗВОДСТВО ===');
-    b.writeln('Клиент: ${m.clientName}');
-    b.writeln('Адрес: ${m.clientAddress}');
-    b.writeln('Тел: ${m.clientPhone}');
-    b.writeln('');
-    for (var i = 0; i < m.items.length; i++) {
-      final it = m.items[i];
-      b.writeln('ПОЗИЦИЯ ${i + 1}:');
-      b.writeln('  Тип: ${it.type}');
-      b.writeln('  Тип дома: ${it.houseType}');
-      b.writeln('  Размер: ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}');
-      b.writeln('  Стеклопакет: ${it.glassThickness.toInt()} мм');
-      if (it.tinted) b.writeln('  + Тонировка');
-      if (it.multi) b.writeln('  + Мультифункция');
-      if (it.hasSlopes) b.writeln('  Откосы: да');
-      if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM} м');
-      if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM} м');
-      if (it.hasMosquito) b.writeln('  Москитка: да');
-      b.writeln('');
-    }
-    if (m.notes.isNotEmpty) b.writeln('Примечание: ${m.notes}');
-    return b.toString();
-  }
-
-  String _dealerVersion(Measurement m) {
-    final b = StringBuffer();
-    b.writeln('ЗАМЕР #${m.id}');
-    b.writeln('');
-    b.writeln('Клиент: ${m.clientName} (${m.clientPhone})');
-    b.writeln('Адрес: ${m.clientAddress}');
-    b.writeln('Дата: ${Measurement._fmtDate(m.createdAt)}');
-    b.writeln('');
-    for (var i = 0; i < m.items.length; i++) {
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-    );
-  }
-}
