@@ -323,18 +323,19 @@ class Measurement {
   };
 
   factory Measurement.fromJson(Map<String, dynamic> j, PriceSettings ps) =>
-    Measurement(
-      id: (j['id'] ?? '').toString(),
-      clientName: (j['clientName'] ?? '').toString(),
-      clientPhone: (j['clientPhone'] ?? '').toString(),
-      clientAddress: (j['clientAddress'] ?? '').toString(),
-      notes: (j['notes'] ?? '').toString(),
-      items: ((j['items'] as List?) ?? [])
-          .map((e) => ProductItem.fromJson(Map<String, dynamic>.from(e)))
-          .toList(),
-      priceSettings: ps,
-      createdAt: DateTime.tryParse(j['createdAt']?.toString() ?? '') ?? DateTime.now(),
-    );
+      Measurement(
+        id: (j['id'] ?? '').toString(),
+        clientName: (j['clientName'] ?? '').toString(),
+        clientPhone: (j['clientPhone'] ?? '').toString(),
+        clientAddress: (j['clientAddress'] ?? '').toString(),
+        notes: (j['notes'] ?? '').toString(),
+        items: ((j['items'] as List?) ?? [])
+            .map((e) => ProductItem.fromJson(Map<String, dynamic>.from(e)))
+            .toList(),
+        priceSettings: ps,
+        createdAt: DateTime.tryParse(j['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      );
+}
 
 class MeasurementStorage {
   static const _key = 'measurements_v2';
