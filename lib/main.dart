@@ -1127,14 +1127,6 @@ class _SectionTitle extends StatelessWidget {
     b.writeln('Дата: ${Measurement._fmtDate(m.createdAt)}');
     b.writeln('');
     for (var i = 0; i < m.items.length; i++) {
-      final it = m.items[i];
-      b.writeln('${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} ×${it.count} — ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽');
-    }
-    b.writeln('');
-    b.writeln('К ОПЛАТЕ: ${m.totalPrice.toStringAsFixed(0)} ₽');
-    return b.toString();
-  }
-}
 
 class _SectionTitle extends StatelessWidget {
   final String text;
