@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
+import 'dart:convert';
 
 void main() => runApp(const WindowCalcApp());
 
@@ -322,52 +323,47 @@ class Measurement {
   };
 
   factory Measurement.fromJson(Map<String, dynamic> j, PriceSettings ps) =>
-      Measurement(
-        id: j['id'] ?? '',
-        clientName: j['clientName'] ?? '',
-        clientPhone: j['clientPhone'] ?? '',
-        clientAddress: j['clientAddress'] ?? '',
-        notes: j['notes'] ?? '',
-        items: (j['items'] as List).map((e) => ProductItem.fromJson(e)).toList(),
-        priceSettings: ps,
-        createdAt: DateTime.tryParse(j['createdAt'] ?? '') ?? DateTime.now(),
-      );
-}
+    Measurement(
+      id: (j['id'] ?? '').toString(),
+      clientName: (j['clientName'] ?? '').toString(),
+      clientPhone: (j['clientPhone'] ?? '').toString(),
+      clientAddress: (j['clientAddress'] ?? '').toString(),
+      notes: (j['notes'] ?? '').toString(),
+      items: ((j['items'] as List?) ?? [])
+          .map((e) => ProductItem.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+      priceSettings: ps,
+      createdAt: DateTime.tryParse(j['createdAt']?.toString() ?? '') ?? DateTime.now(),
+    );
 
 class MeasurementStorage {
-  static const _key = 'measurements';
+  static const _key = 'measurements_v2';
 
   static Future<List<Measurement>> load(PriceSettings ps) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    return raw
-        .map((s) => Measurement.fromJson(
-              Map<String, dynamic>.from(
-                (s as String).isNotEmpty ? _decode(s) : {},
-              ),
-              ps,
-            ))
-        .toList();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList(_key) ?? [];
+      final result = <Measurement>[];
+      for (final s in raw) {
+        try {
+          final json = jsonDecode(s) as Map<String, dynamic>;
+          result.add(Measurement.fromJson(json, ps));
+        } catch (_) {}
+      }
+      return result;
+    } catch (_) {
+      return [];
+    }
   }
 
   static Future<void> save(List<Measurement> list) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-        _key, list.map((m) => _encode(m.toJson())).toList());
-  }
-
-  static String _encode(Map<String, dynamic> m) => m.entries
-      .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
-      .join('&');
-
-  static Map<String, dynamic> _decode(String s) {
-    final map = <String, dynamic>{};
-    for (final pair in s.split('&')) {
-      final i = pair.indexOf('=');
-      if (i < 0) continue;
-      map[pair.substring(0, i)] = Uri.decodeComponent(pair.substring(i + 1));
-    }
-    return map;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+        _key,
+        list.map((m) => jsonEncode(m.toJson())).toList(),
+      );
+    } catch (_) {}
   }
 }
 class WindowCalcApp extends StatefulWidget {
@@ -388,14 +384,25 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
     _loadData();
   }
 
-  Future<void> _loadData() async {
-    final ps = await PriceStorage.load();
-    final ms = await MeasurementStorage.load(ps);
-    setState(() {
-      _price = ps;
-      _measurements = ms;
-      _loading = false;
-    });
+Future<void> _loadData() async {
+  PriceSettings ps;
+  List<Measurement> ms;
+  try {
+    ps = await PriceStorage.load();
+  } catch (_) {
+    ps = PriceSettings();
+  }
+  try {
+    ms = await MeasurementStorage.load(ps);
+  } catch (_) {
+    ms = [];
+  }
+  if (!mounted) return;
+  setState(() {
+    _price = ps;
+    _measurements = ms;
+    _loading = false;
+  });
   }
 
   Future<void> _savePrice() async {
@@ -405,7 +412,9 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
   }
 
   Future<void> _saveMeasurements() async {
+  try {
     await MeasurementStorage.save(_measurements);
+  } catch (_) {}
   }
 
   @override
