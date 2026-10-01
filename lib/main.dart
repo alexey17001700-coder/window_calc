@@ -1114,25 +1114,50 @@ class SavedMeasurementsScreen extends StatefulWidget {
 
 class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
   late List<Measurement> _list;
+  bool _sortDesc = true; // true = свежие сверху
 
   @override
   void initState() {
     super.initState();
     _list = List.from(widget.measurements);
+    _applySort();
+  }
+
+  void _applySort() {
+    _list.sort((a, b) => _sortDesc
+        ? b.createdAt.compareTo(a.createdAt)
+        : a.createdAt.compareTo(b.createdAt));
+  }
+
+  void _toggleSort() {
+    setState(() {
+      _sortDesc = !_sortDesc;
+      _applySort();
+    });
   }
 
   void _delete(String id) {
-    setState(() => _list.removeWhere((m) => m.id == id));
-    widget.onDelete(id);
+  setState(() {
+    _list.removeWhere((m) => m.id == id);
+    _applySort();
+  });
+  widget.onDelete(id);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Сохранённые замеры'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+  title: const Text('Сохранённые замеры'),
+  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+  actions: [
+    IconButton(
+      icon: Icon(_sortDesc ? Icons.arrow_downward : Icons.arrow_upward),
+      tooltip: _sortDesc ? 'Свежие сверху' : 'Старые сверху',
+      onPressed: _toggleSort,
+    ),
+  ],
+),
       body: _list.isEmpty
           ? const Center(child: Text('Пока нет сохранённых замеров'))
           : ListView.separated(
