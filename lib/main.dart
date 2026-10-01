@@ -445,23 +445,46 @@ class Measurement {
     'liftFloors': liftFloors,
     'createdAt': createdAt.toIso8601String(),
   };
-
+  
   factory Measurement.fromJson(Map<String, dynamic> j, PriceSettings ps) =>
       Measurement(
-        id: (j['id'] ?? '').toString(),
-        clientName: (j['clientName'] ?? '').toString(),
-        clientPhone: (j['clientPhone'] ?? '').toString(),
-        clientAddress: (j['clientAddress'] ?? '').toString(),
-        notes: (j['notes'] ?? '').toString(),
-        items: ((j['items'] as List?) ?? [])
-            .map((e) => ProductItem.fromJson(Map<String, dynamic>.from(e)))
-            .toList(),
-        hasTrashRemoval: j['hasTrashRemoval'] ?? false,
-        hasLift: j['hasLift'] ?? false,
-        liftFloors: (j['liftFloors'] ?? 1) as int,
-        priceSettings: ps,
+        ...
         createdAt: DateTime.tryParse(j['createdAt']?.toString() ?? '') ?? DateTime.now(),
       );
+
+  String toShareText() {
+    final b = StringBuffer();
+    b.writeln('🧾 ЗАМЕРНЫЙ ЛИСТ');
+    b.writeln('═══════════════════════');
+    b.writeln('Дата: ${fmtDate(createdAt)}');
+    b.writeln('Клиент: $clientName');
+    b.writeln('Телефон: $clientPhone');
+    b.writeln('Адрес: $clientAddress');
+    b.writeln('═══════════════════════');
+    for (var i = 0; i < items.length; i++) {
+      final it = items[i];
+      b.writeln('');
+      b.writeln('Позиция ${i + 1}: ${it.type}');
+      b.writeln('  Размер: ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count} шт.');
+      b.writeln('  Стеклопакет: ${it.glassThickness.toInt()} мм');
+      if (it.hasSlopes) b.writeln('  Откосы: ${it.slopeCategory} (${it.houseType})');
+      if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM} м × ${it.sillDepthMm.toInt()} мм');
+      if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM} м (${it.dripColor})');
+      if (it.hasFUgol) b.writeln('  F-угол: ${it.fUgolType} × ${it.fUgolCount}');
+      if (it.hasMosquito) b.writeln('  Москитная сетка');
+      if (it.hasPlisse) b.writeln('  Плиссе');
+      b.writeln('  Цена: ${it.calcPrice(priceSettings).toStringAsFixed(0)} ₽');
+    }
+    if (hasTrashRemoval) b.writeln('Вывоз мусора: ${priceSettings.trashRemoval.toStringAsFixed(0)} ₽');
+    if (hasLift) b.writeln('Подъём на ${liftFloors} эт.: ${(priceSettings.liftPerFloor * liftFloors).toStringAsFixed(0)} ₽');
+    if (notes.isNotEmpty) {
+      b.writeln('');
+      b.writeln('Примечание: $notes');
+    }
+    b.writeln('═══════════════════════');
+    b.writeln('ИТОГО: ${totalPrice.toStringAsFixed(0)} ₽');
+    return b.toString();
+  }
 }
 // Продолжение Measurement - ProductItem.toJson/fromJson и MeasurementStorage
 
@@ -552,7 +575,23 @@ ProductItem productItemFromJson(Map<String, dynamic> j) => ProductItem(
   complexInstall: j['complexInstall'] ?? true,
   separateDemontage: j['separateDemontage'] ?? false,
 );
-
+String toShareText() {
+  final b = StringBuffer();
+  b.writeln('ЗАМЕРНЫЙ ЛИСТ');
+  b.writeln('Клиент: $clientName');
+  b.writeln('Телефон: $clientPhone');
+  b.writeln('Адрес: $clientAddress');
+  b.writeln('');
+  for (var i = 0; i < items.length; i++) {
+    final it = items[i];
+    b.writeln('${i + 1}. ${it.type} ${it.widthMm.toInt()}x${it.heightMm.toInt()} x${it.count} — ${it.calcPrice(priceSettings).toStringAsFixed(0)} руб');
+  }
+  if (hasTrashRemoval) b.writeln('Вывоз мусора: ${priceSettings.trashRemoval.toStringAsFixed(0)} руб');
+  if (hasLift) b.writeln('Подъём ${liftFloors} эт.: ${(priceSettings.liftPerFloor * liftFloors).toStringAsFixed(0)} руб');
+  b.writeln('');
+  b.writeln('ИТОГО: ${totalPrice.toStringAsFixed(0)} руб');
+  return b.toString();
+}
 class MeasurementStorage {
   static const _key = 'measurements_v2';
 
