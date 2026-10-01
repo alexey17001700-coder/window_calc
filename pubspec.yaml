@@ -10,7 +10,12 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.2.2
-  share_plus: ^10.1.2
+  share_plus: ^7.2.2
+  package_info_plus: ^5.0.1
+  http: ^1.1.0
+  path_provider: ^2.1.1
+  open_filex: ^4.3.4
+  dio: ^5.4.0
 
 flutter:
   uses-material-design: true
