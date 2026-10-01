@@ -6,251 +6,386 @@ import 'dart:convert';
 
 void main() => runApp(const WindowCalcApp());
 
+// ═══════════════════════════════════════════════════════════
+// ПРАЙС
+// ═══════════════════════════════════════════════════════════
+
 class PriceSettings {
-  double window1Panel = 15000;
-  double window1Stalin = 17000;
-  double window1Brick = 19000;
-  double window2Panel = 25000;
-  double window2Stalin = 28000;
-  double window2Brick = 31000;
-  double window3Panel = 35000;
-  double window3Stalin = 39000;
-  double window3Brick = 43000;
-  double blockSmallPanel = 40000;
-  double blockSmallStalin = 45000;
-  double blockSmallBrick = 50000;
-  double blockBigPanel = 60000;
-  double blockBigStalin = 68000;
-  double blockBigBrick = 75000;
-  double balconyPerM2 = 8000;
-  double bezParapetPerM2 = 9500;
-  double slopesPanel = 3000;
-  double slopesStalin = 4000;
-  double slopesBrick = 5000;
+  // Окна
+  double window1 = 15000;
+  double window2 = 25000;
+  double window3 = 35000;
+
+  // Балконы
+  double balconyBlock = 45000;
+  double balconyGlazingPerM2 = 8000;
+  double loggiaGlazingPerM2 = 8500;
+  double panoramicPerM2 = 11000;
+
+  // Двери
+  double balconyDoor = 25000;
+  double pvcDoor = 30000;
+  double entranceGroup = 60000;
+
+  // Отделка - Подоконник
+  double sillEconomPerM2 = 2000;
+  double sillOtherPerM2 = 3000;
+
+  // Отлив
+  double dripWhitePerM2 = 1500;
+  double dripBrownPerM2 = 1800;
+
+  // Откосы
+  double slopePiterPerM2 = 3000;
+  double slopeEconomPerM2 = 2200;
+
+  // Откосы доп.
+  double slopeExtraPiterPerM2 = 3200;
+  double slopeExtraEconomPerM2 = 2400;
+
+  // F-угол
+  double fUgol40 = 350;
+  double fUgol50 = 400;
+  double fUgol60 = 450;
+
+  // Абрис, ПСУЛ, Отмазка
+  double abrisPerM = 200;
+  double psulPerM = 150;
+  double otmazkaPerM = 250;
+
+  // Сетки
+  double mosquito = 2500;
+  double anticat = 3000;
+  double antidust = 2800;
+  double frameNet = 2200;
+  double plisse = 4500;
+
+  // Стеклопакеты
   double glass24 = 2500;
   double glass32 = 3500;
   double glass40 = 4500;
   double extraTinting = 1000;
   double extraMulti = 1500;
-  double sillPerM = 2500;
-  double dripPerM = 1500;
-  double slopePerM = 2000;
-  double mosquitoPerUnit = 2500;
-  double demontagePerUnit = 3000;
+
+  // Услуги
+  double demontagePerItem = 3000;
+  double montagePerItem = 3500;
+  double trashRemoval = 2000;
+  double liftPerFloor = 500;
+
+  // Нестандарт
+  double erkerPerM2 = 12000;
+  double archWindow = 40000;
+  double facadeAlumPerM2 = 15000;
 
   PriceSettings();
 
-  double basePrice(String type, String houseType) {
-    final p = type;
-    final h = houseType;
-    if (p == 'Окно 1-створчатое') {
-      return h == 'Панелька' ? window1Panel : (h == 'Сталинка' ? window1Stalin : window1Brick);
+  double basePrice(String type) {
+    switch (type) {
+      case 'Окно 1-створчатое': return window1;
+      case 'Окно 2-створчатое': return window2;
+      case 'Окно 3-створчатое': return window3;
+      case 'Балконный блок': return balconyBlock;
+      case 'Балконная дверь': return balconyDoor;
+      case 'Дверь ПВХ': return pvcDoor;
+      case 'Входная группа': return entranceGroup;
+      case 'Арочное окно': return archWindow;
+      default: return 0;
     }
-    if (p == 'Окно 2-створчатое') {
-      return h == 'Панелька' ? window2Panel : (h == 'Сталинка' ? window2Stalin : window2Brick);
-    }
-    if (p == 'Окно 3-створчатое') {
-      return h == 'Панелька' ? window3Panel : (h == 'Сталинка' ? window3Stalin : window3Brick);
-    }
-    if (p == 'Балконный блок малый') {
-      return h == 'Панелька' ? blockSmallPanel : (h == 'Сталинка' ? blockSmallStalin : blockSmallBrick);
-    }
-    if (p == 'Балконный блок большой') {
-      return h == 'Панелька' ? blockBigPanel : (h == 'Сталинка' ? blockBigStalin : blockBigBrick);
-    }
-    return 0;
   }
 
-  double slopesPrice(String houseType) {
-    if (houseType == 'Панелька') return slopesPanel;
-    if (houseType == 'Сталинка') return slopesStalin;
-    return slopesBrick;
-  }
-
-  double glassPrice(double thickness) {
-    if (thickness <= 24) return glass24;
-    if (thickness <= 32) return glass32;
-    return glass40;
+  double perM2Price(String type) {
+    switch (type) {
+      case 'Балконное остекление': return balconyGlazingPerM2;
+      case 'Остекление лоджии': return loggiaGlazingPerM2;
+      case 'Панорамное остекление': return panoramicPerM2;
+      case 'Эркерное остекление': return erkerPerM2;
+      case 'Фасадное алюминиевое остекление': return facadeAlumPerM2;
+      default: return 0;
+    }
   }
 
   Map<String, double> toMap() => {
-    'window1Panel': window1Panel, 'window1Stalin': window1Stalin, 'window1Brick': window1Brick,
-    'window2Panel': window2Panel, 'window2Stalin': window2Stalin, 'window2Brick': window2Brick,
-    'window3Panel': window3Panel, 'window3Stalin': window3Stalin, 'window3Brick': window3Brick,
-    'blockSmallPanel': blockSmallPanel, 'blockSmallStalin': blockSmallStalin, 'blockSmallBrick': blockSmallBrick,
-    'blockBigPanel': blockBigPanel, 'blockBigStalin': blockBigStalin, 'blockBigBrick': blockBigBrick,
-    'balconyPerM2': balconyPerM2, 'bezParapetPerM2': bezParapetPerM2,
-    'slopesPanel': slopesPanel, 'slopesStalin': slopesStalin, 'slopesBrick': slopesBrick,
+    'window1': window1, 'window2': window2, 'window3': window3,
+    'balconyBlock': balconyBlock, 'balconyGlazingPerM2': balconyGlazingPerM2,
+    'loggiaGlazingPerM2': loggiaGlazingPerM2, 'panoramicPerM2': panoramicPerM2,
+    'balconyDoor': balconyDoor, 'pvcDoor': pvcDoor, 'entranceGroup': entranceGroup,
+    'sillEconomPerM2': sillEconomPerM2, 'sillOtherPerM2': sillOtherPerM2,
+    'dripWhitePerM2': dripWhitePerM2, 'dripBrownPerM2': dripBrownPerM2,
+    'slopePiterPerM2': slopePiterPerM2, 'slopeEconomPerM2': slopeEconomPerM2,
+    'slopeExtraPiterPerM2': slopeExtraPiterPerM2, 'slopeExtraEconomPerM2': slopeExtraEconomPerM2,
+    'fUgol40': fUgol40, 'fUgol50': fUgol50, 'fUgol60': fUgol60,
+    'abrisPerM': abrisPerM, 'psulPerM': psulPerM, 'otmazkaPerM': otmazkaPerM,
+    'mosquito': mosquito, 'anticat': anticat, 'antidust': antidust,
+    'frameNet': frameNet, 'plisse': plisse,
     'glass24': glass24, 'glass32': glass32, 'glass40': glass40,
     'extraTinting': extraTinting, 'extraMulti': extraMulti,
-    'sillPerM': sillPerM, 'dripPerM': dripPerM, 'slopePerM': slopePerM,
-    'mosquitoPerUnit': mosquitoPerUnit, 'demontagePerUnit': demontagePerUnit,
+    'demontagePerItem': demontagePerItem, 'montagePerItem': montagePerItem,
+    'trashRemoval': trashRemoval, 'liftPerFloor': liftPerFloor,
+    'erkerPerM2': erkerPerM2, 'archWindow': archWindow, 'facadeAlumPerM2': facadeAlumPerM2,
   };
 
   void fromMap(Map<String, double> m) {
-    window1Panel = m['window1Panel'] ?? window1Panel;
-    window1Stalin = m['window1Stalin'] ?? window1Stalin;
-    window1Brick = m['window1Brick'] ?? window1Brick;
-    window2Panel = m['window2Panel'] ?? window2Panel;
-    window2Stalin = m['window2Stalin'] ?? window2Stalin;
-    window2Brick = m['window2Brick'] ?? window2Brick;
-    window3Panel = m['window3Panel'] ?? window3Panel;
-    window3Stalin = m['window3Stalin'] ?? window3Stalin;
-    window3Brick = m['window3Brick'] ?? window3Brick;
-    blockSmallPanel = m['blockSmallPanel'] ?? blockSmallPanel;
-    blockSmallStalin = m['blockSmallStalin'] ?? blockSmallStalin;
-    blockSmallBrick = m['blockSmallBrick'] ?? blockSmallBrick;
-    blockBigPanel = m['blockBigPanel'] ?? blockBigPanel;
-    blockBigStalin = m['blockBigStalin'] ?? blockBigStalin;
-    blockBigBrick = m['blockBigBrick'] ?? blockBigBrick;
-    balconyPerM2 = m['balconyPerM2'] ?? balconyPerM2;
-    bezParapetPerM2 = m['bezParapetPerM2'] ?? bezParapetPerM2;
-    slopesPanel = m['slopesPanel'] ?? slopesPanel;
-    slopesStalin = m['slopesStalin'] ?? slopesStalin;
-    slopesBrick = m['slopesBrick'] ?? slopesBrick;
+    window1 = m['window1'] ?? window1;
+    window2 = m['window2'] ?? window2;
+    window3 = m['window3'] ?? window3;
+    balconyBlock = m['balconyBlock'] ?? balconyBlock;
+    balconyGlazingPerM2 = m['balconyGlazingPerM2'] ?? balconyGlazingPerM2;
+    loggiaGlazingPerM2 = m['loggiaGlazingPerM2'] ?? loggiaGlazingPerM2;
+    panoramicPerM2 = m['panoramicPerM2'] ?? panoramicPerM2;
+    balconyDoor = m['balconyDoor'] ?? balconyDoor;
+    pvcDoor = m['pvcDoor'] ?? pvcDoor;
+    entranceGroup = m['entranceGroup'] ?? entranceGroup;
+    sillEconomPerM2 = m['sillEconomPerM2'] ?? sillEconomPerM2;
+    sillOtherPerM2 = m['sillOtherPerM2'] ?? sillOtherPerM2;
+    dripWhitePerM2 = m['dripWhitePerM2'] ?? dripWhitePerM2;
+    dripBrownPerM2 = m['dripBrownPerM2'] ?? dripBrownPerM2;
+    slopePiterPerM2 = m['slopePiterPerM2'] ?? slopePiterPerM2;
+    slopeEconomPerM2 = m['slopeEconomPerM2'] ?? slopeEconomPerM2;
+    slopeExtraPiterPerM2 = m['slopeExtraPiterPerM2'] ?? slopeExtraPiterPerM2;
+    slopeExtraEconomPerM2 = m['slopeExtraEconomPerM2'] ?? slopeExtraEconomPerM2;
+    fUgol40 = m['fUgol40'] ?? fUgol40;
+    fUgol50 = m['fUgol50'] ?? fUgol50;
+    fUgol60 = m['fUgol60'] ?? fUgol60;
+    abrisPerM = m['abrisPerM'] ?? abrisPerM;
+    psulPerM = m['psulPerM'] ?? psulPerM;
+    otmazkaPerM = m['otmazkaPerM'] ?? otmazkaPerM;
+    mosquito = m['mosquito'] ?? mosquito;
+    anticat = m['anticat'] ?? anticat;
+    antidust = m['antidust'] ?? antidust;
+    frameNet = m['frameNet'] ?? frameNet;
+    plisse = m['plisse'] ?? plisse;
     glass24 = m['glass24'] ?? glass24;
     glass32 = m['glass32'] ?? glass32;
     glass40 = m['glass40'] ?? glass40;
     extraTinting = m['extraTinting'] ?? extraTinting;
     extraMulti = m['extraMulti'] ?? extraMulti;
-    sillPerM = m['sillPerM'] ?? sillPerM;
-    dripPerM = m['dripPerM'] ?? dripPerM;
-    slopePerM = m['slopePerM'] ?? slopePerM;
-    mosquitoPerUnit = m['mosquitoPerUnit'] ?? mosquitoPerUnit;
-    demontagePerUnit = m['demontagePerUnit'] ?? demontagePerUnit;
+    demontagePerItem = m['demontagePerItem'] ?? demontagePerItem;
+    montagePerItem = m['montagePerItem'] ?? montagePerItem;
+    trashRemoval = m['trashRemoval'] ?? trashRemoval;
+    liftPerFloor = m['liftPerFloor'] ?? liftPerFloor;
+    erkerPerM2 = m['erkerPerM2'] ?? erkerPerM2;
+    archWindow = m['archWindow'] ?? archWindow;
+    facadeAlumPerM2 = m['facadeAlumPerM2'] ?? facadeAlumPerM2;
   }
 }
 
 class PriceStorage {
-  static const _key = 'price_settings';
+  static const _key = 'price_v2';
 
   static Future<PriceSettings> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final ps = PriceSettings();
-    final map = <String, double>{};
-    ps.toMap().forEach((k, _) {
-      final v = prefs.getDouble('${_key}_$k');
-      if (v != null) map[k] = v;
-    });
-    ps.fromMap(map);
-    return ps;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      final ps = PriceSettings();
+      if (raw != null) {
+        final map = <String, double>{};
+        final json = jsonDecode(raw) as Map<String, dynamic>;
+        json.forEach((k, v) {
+          if (v is num) map[k] = v.toDouble();
+        });
+        ps.fromMap(map);
+      }
+      return ps;
+    } catch (_) {
+      return PriceSettings();
+    }
   }
 
   static Future<void> save(PriceSettings ps) async {
-    final prefs = await SharedPreferences.getInstance();
-    final m = ps.toMap();
-    for (final e in m.entries) {
-      await prefs.setDouble('${_key}_${e.key}', e.value);
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_key, jsonEncode(ps.toMap()));
+    } catch (_) {}
   }
 }
+// ═══════════════════════════════════════════════════════════
+// МОДЕЛИ
+// ═══════════════════════════════════════════════════════════
+
 class ProductItem {
-  String type;
-  String houseType;
+  String type;          // Окно 2-створчатое, Балконный блок и т.д.
   double widthMm;
   double heightMm;
   int count;
-  double glassThickness;
+
+  // Стеклопакет
+  double glassThickness; // 24, 32, 40
   bool tinted;
   bool multi;
-  bool hasSlopes;
+
+  // Отделка - Подоконник
   bool hasSill;
   double sillLengthM;
+  double sillDepthMm;
+  String sillCategory; // 'Эконом' / 'Другое'
+
+  // Отделка - Отлив
   bool hasDrip;
   double dripLengthM;
-  bool hasExtraSlope;
+  double dripDepthMm;
+  String dripColor; // 'Белый' / 'Коричневый'
+
+  // Отделка - Откосы
+  bool hasSlopes;
+  String houseType; // 'Панелька' / 'Сталинка' / 'Кирпич'
+  double slopeLengthM;
+  double slopeDepthMm;
+  String slopeCategory; // 'Питер' / 'Эконом'
+
+  // Отделка - Откосы доп.
+  bool hasExtraSlopes;
   double extraSlopeLengthM;
+  double extraSlopeDepthMm;
+  String extraSlopeCategory;
+
+  // Отделка - F-угол
+  bool hasFUgol;
+  String fUgolType; // '40×3.20' / '50×3.20' / '60×3.20'
+  int fUgolCount;
+
+  // Монтаж - Абрис/ПСУЛ/Отмазка
+  bool hasAbris;
+  double abrisLengthM;
+  bool hasPsul;
+  double psulLengthM;
+  bool hasOtmazka;
+  double otmazkaLengthM;
+
+  // Сетки
   bool hasMosquito;
-  bool complexInstall;
-  bool separateDemontage;
+  bool hasAnticat;
+  bool hasAntidust;
+  bool hasFrameNet;
+  bool hasPlisse;
+
+  // Услуги по изделию
+  bool complexInstall; // демонтаж включён
+  bool separateDemontage; // демонтаж отдельно
 
   ProductItem({
     this.type = 'Окно 2-створчатое',
-    this.houseType = 'Панелька',
     this.widthMm = 1300,
     this.heightMm = 1400,
     this.count = 1,
     this.glassThickness = 32,
     this.tinted = false,
     this.multi = false,
-    this.hasSlopes = false,
     this.hasSill = false,
     this.sillLengthM = 1.5,
+    this.sillDepthMm = 300,
+    this.sillCategory = 'Эконом',
     this.hasDrip = false,
     this.dripLengthM = 1.5,
-    this.hasExtraSlope = false,
+    this.dripDepthMm = 200,
+    this.dripColor = 'Белый',
+    this.hasSlopes = false,
+    this.houseType = 'Панелька',
+    this.slopeLengthM = 1.5,
+    this.slopeDepthMm = 250,
+    this.slopeCategory = 'Эконом',
+    this.hasExtraSlopes = false,
     this.extraSlopeLengthM = 1.5,
+    this.extraSlopeDepthMm = 250,
+    this.extraSlopeCategory = 'Эконом',
+    this.hasFUgol = false,
+    this.fUgolType = '40×3.20',
+    this.fUgolCount = 1,
+    this.hasAbris = false,
+    this.abrisLengthM = 5.0,
+    this.hasPsul = false,
+    this.psulLengthM = 5.0,
+    this.hasOtmazka = false,
+    this.otmazkaLengthM = 5.0,
     this.hasMosquito = false,
+    this.hasAnticat = false,
+    this.hasAntidust = false,
+    this.hasFrameNet = false,
+    this.hasPlisse = false,
     this.complexInstall = true,
     this.separateDemontage = false,
   });
 
-  bool get isBalcony => type == 'Балкон' || type == 'Безпарапетка';
   double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
+  double get perimeterM => ((widthMm + heightMm) * 2 / 1000) * count;
 
   double calcPrice(PriceSettings ps) {
     double total = 0;
-    if (isBalcony) {
-      final perM2 = type == 'Балкон' ? ps.balconyPerM2 : ps.bezParapetPerM2;
-      total += perM2 * areaM2;
+
+    // Базовая цена изделия
+    if (ps.perM2Price(type) > 0) {
+      total += ps.perM2Price(type) * areaM2;
     } else {
-      total += ps.basePrice(type, houseType) * count;
+      total += ps.basePrice(type) * count;
     }
-    total += ps.glassPrice(glassThickness) * areaM2;
+
+    // Стеклопакет
+    double glassPrice = 0;
+    if (glassThickness <= 24) glassPrice = ps.glass24;
+    else if (glassThickness <= 32) glassPrice = ps.glass32;
+    else glassPrice = ps.glass40;
+    total += glassPrice * areaM2;
     if (tinted) total += ps.extraTinting * areaM2;
     if (multi) total += ps.extraMulti * areaM2;
-    if (hasSlopes) total += ps.slopesPrice(houseType) * count;
-    if (hasSill) total += ps.sillPerM * sillLengthM;
-    if (hasDrip) total += ps.dripPerM * dripLengthM;
-    if (hasExtraSlope) total += ps.slopePerM * extraSlopeLengthM;
-    if (hasMosquito) total += ps.mosquitoPerUnit * count;
-    if (separateDemontage && !complexInstall) {
-      total += ps.demontagePerUnit * count;
+
+    // Подоконник
+    if (hasSill) {
+      final pricePerM2 = sillCategory == 'Эконом' ? ps.sillEconomPerM2 : ps.sillOtherPerM2;
+      final area = sillLengthM * (sillDepthMm / 1000) * count;
+      total += area * pricePerM2;
     }
+
+    // Отлив
+    if (hasDrip) {
+      final pricePerM2 = dripColor == 'Белый' ? ps.dripWhitePerM2 : ps.dripBrownPerM2;
+      final area = dripLengthM * (dripDepthMm / 1000) * count;
+      total += area * pricePerM2;
+    }
+
+    // Откосы
+    if (hasSlopes) {
+      final pricePerM2 = slopeCategory == 'Питер' ? ps.slopePiterPerM2 : ps.slopeEconomPerM2;
+      final area = slopeLengthM * (slopeDepthMm / 1000) * count;
+      total += area * pricePerM2;
+    }
+
+    // Откосы доп.
+    if (hasExtraSlopes) {
+      final pricePerM2 = extraSlopeCategory == 'Питер' ? ps.slopeExtraPiterPerM2 : ps.slopeExtraEconomPerM2;
+      final area = extraSlopeLengthM * (extraSlopeDepthMm / 1000) * count;
+      total += area * pricePerM2;
+    }
+
+    // F-угол
+    if (hasFUgol) {
+      double p = ps.fUgol40;
+      if (fUgolType.startsWith('50')) p = ps.fUgol50;
+      if (fUgolType.startsWith('60')) p = ps.fUgol60;
+      total += p * fUgolCount;
+    }
+
+    // Абрис, ПСУЛ, Отмазка
+    if (hasAbris) total += ps.abrisPerM * abrisLengthM * count;
+    if (hasPsul) total += ps.psulPerM * psulLengthM * count;
+    if (hasOtmazka) total += ps.otmazkaPerM * otmazkaLengthM * count;
+
+    // Сетки
+    if (hasMosquito) total += ps.mosquito * count;
+    if (hasAnticat) total += ps.anticat * count;
+    if (hasAntidust) total += ps.antidust * count;
+    if (hasFrameNet) total += ps.frameNet * count;
+    if (hasPlisse) total += ps.plisse * count;
+
+    // Демонтаж/монтаж
+    if (complexInstall) {
+      total += ps.montagePerItem * count;
+    } else {
+      total += ps.montagePerItem * count;
+      if (separateDemontage) total += ps.demontagePerItem * count;
+    }
+
     return total;
   }
-
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    'houseType': houseType,
-    'widthMm': widthMm,
-    'heightMm': heightMm,
-    'count': count,
-    'glassThickness': glassThickness,
-    'tinted': tinted,
-    'multi': multi,
-    'hasSlopes': hasSlopes,
-    'hasSill': hasSill,
-    'sillLengthM': sillLengthM,
-    'hasDrip': hasDrip,
-    'dripLengthM': dripLengthM,
-    'hasExtraSlope': hasExtraSlope,
-    'extraSlopeLengthM': extraSlopeLengthM,
-    'hasMosquito': hasMosquito,
-    'complexInstall': complexInstall,
-    'separateDemontage': separateDemontage,
-  };
-
-  factory ProductItem.fromJson(Map<String, dynamic> j) => ProductItem(
-    type: j['type'] ?? 'Окно 2-створчатое',
-    houseType: j['houseType'] ?? 'Панелька',
-    widthMm: (j['widthMm'] ?? 1300).toDouble(),
-    heightMm: (j['heightMm'] ?? 1400).toDouble(),
-    count: j['count'] ?? 1,
-    glassThickness: (j['glassThickness'] ?? 32).toDouble(),
-    tinted: j['tinted'] ?? false,
-    multi: j['multi'] ?? false,
-    hasSlopes: j['hasSlopes'] ?? false,
-    hasSill: j['hasSill'] ?? false,
-    sillLengthM: (j['sillLengthM'] ?? 1.5).toDouble(),
-    hasDrip: j['hasDrip'] ?? false,
-    dripLengthM: (j['dripLengthM'] ?? 1.5).toDouble(),
-    hasExtraSlope: j['hasExtraSlope'] ?? false,
-    extraSlopeLengthM: (j['extraSlopeLengthM'] ?? 1.5).toDouble(),
-    hasMosquito: j['hasMosquito'] ?? false,
-    complexInstall: j['complexInstall'] ?? true,
-    separateDemontage: j['separateDemontage'] ?? false,
-  );
 }
 
 class Measurement {
@@ -260,6 +395,12 @@ class Measurement {
   String clientAddress;
   String notes;
   List<ProductItem> items;
+
+  // Услуги по замеру в целом
+  bool hasTrashRemoval;
+  bool hasLift;
+  int liftFloors;
+
   PriceSettings priceSettings;
   DateTime createdAt;
 
@@ -270,47 +411,27 @@ class Measurement {
     required this.clientAddress,
     this.notes = '',
     required this.items,
+    this.hasTrashRemoval = false,
+    this.hasLift = false,
+    this.liftFloors = 1,
     required this.priceSettings,
     required this.createdAt,
   });
 
-  double get totalPrice =>
+  double get itemsPrice =>
       items.fold(0.0, (s, it) => s + it.calcPrice(priceSettings));
+
+  double get servicesPrice {
+    double t = 0;
+    if (hasTrashRemoval) t += priceSettings.trashRemoval;
+    if (hasLift) t += priceSettings.liftPerFloor * liftFloors;
+    return t;
+  }
+
+  double get totalPrice => itemsPrice + servicesPrice;
 
   static String fmtDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
-
-  String toShareText() {
-    final b = StringBuffer();
-    b.writeln('🧾 ЗАМЕРНЫЙ ЛИСТ');
-    b.writeln('═══════════════════════');
-    b.writeln('Дата: ${fmtDate(createdAt)}');
-    b.writeln('Клиент: $clientName');
-    b.writeln('Телефон: $clientPhone');
-    b.writeln('Адрес: $clientAddress');
-    b.writeln('═══════════════════════');
-    for (var i = 0; i < items.length; i++) {
-      final it = items[i];
-      b.writeln('');
-      b.writeln('Позиция ${i + 1}: ${it.type}');
-      b.writeln('  Тип дома: ${it.houseType}');
-      b.writeln('  Размер: ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count} шт.');
-      b.writeln('  Площадь: ${it.areaM2.toStringAsFixed(2)} м²');
-      b.writeln('  Стеклопакет: ${it.glassThickness.toInt()} мм');
-      if (it.hasSlopes) b.writeln('  Откосы: да');
-      if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM} м');
-      if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM} м');
-      if (it.hasMosquito) b.writeln('  Москитная сетка: да');
-      b.writeln('  Цена: ${it.calcPrice(priceSettings).toStringAsFixed(0)} ₽');
-    }
-    if (notes.isNotEmpty) {
-      b.writeln('');
-      b.writeln('Примечание: $notes');
-    }
-    b.writeln('═══════════════════════');
-    b.writeln('ИТОГО: ${totalPrice.toStringAsFixed(0)} ₽');
-    return b.toString();
-  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -319,6 +440,9 @@ class Measurement {
     'clientAddress': clientAddress,
     'notes': notes,
     'items': items.map((e) => e.toJson()).toList(),
+    'hasTrashRemoval': hasTrashRemoval,
+    'hasLift': hasLift,
+    'liftFloors': liftFloors,
     'createdAt': createdAt.toIso8601String(),
   };
 
@@ -332,10 +456,102 @@ class Measurement {
         items: ((j['items'] as List?) ?? [])
             .map((e) => ProductItem.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
+        hasTrashRemoval: j['hasTrashRemoval'] ?? false,
+        hasLift: j['hasLift'] ?? false,
+        liftFloors: (j['liftFloors'] ?? 1) as int,
         priceSettings: ps,
         createdAt: DateTime.tryParse(j['createdAt']?.toString() ?? '') ?? DateTime.now(),
       );
 }
+// Продолжение Measurement - ProductItem.toJson/fromJson и MeasurementStorage
+
+extension ProductItemJson on ProductItem {
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'widthMm': widthMm,
+    'heightMm': heightMm,
+    'count': count,
+    'glassThickness': glassThickness,
+    'tinted': tinted,
+    'multi': multi,
+    'hasSill': hasSill,
+    'sillLengthM': sillLengthM,
+    'sillDepthMm': sillDepthMm,
+    'sillCategory': sillCategory,
+    'hasDrip': hasDrip,
+    'dripLengthM': dripLengthM,
+    'dripDepthMm': dripDepthMm,
+    'dripColor': dripColor,
+    'hasSlopes': hasSlopes,
+    'houseType': houseType,
+    'slopeLengthM': slopeLengthM,
+    'slopeDepthMm': slopeDepthMm,
+    'slopeCategory': slopeCategory,
+    'hasExtraSlopes': hasExtraSlopes,
+    'extraSlopeLengthM': extraSlopeLengthM,
+    'extraSlopeDepthMm': extraSlopeDepthMm,
+    'extraSlopeCategory': extraSlopeCategory,
+    'hasFUgol': hasFUgol,
+    'fUgolType': fUgolType,
+    'fUgolCount': fUgolCount,
+    'hasAbris': hasAbris,
+    'abrisLengthM': abrisLengthM,
+    'hasPsul': hasPsul,
+    'psulLengthM': psulLengthM,
+    'hasOtmazka': hasOtmazka,
+    'otmazkaLengthM': otmazkaLengthM,
+    'hasMosquito': hasMosquito,
+    'hasAnticat': hasAnticat,
+    'hasAntidust': hasAntidust,
+    'hasFrameNet': hasFrameNet,
+    'hasPlisse': hasPlisse,
+    'complexInstall': complexInstall,
+    'separateDemontage': separateDemontage,
+  };
+}
+
+ProductItem productItemFromJson(Map<String, dynamic> j) => ProductItem(
+  type: j['type'] ?? 'Окно 2-створчатое',
+  widthMm: (j['widthMm'] ?? 1300).toDouble(),
+  heightMm: (j['heightMm'] ?? 1400).toDouble(),
+  count: (j['count'] ?? 1) as int,
+  glassThickness: (j['glassThickness'] ?? 32).toDouble(),
+  tinted: j['tinted'] ?? false,
+  multi: j['multi'] ?? false,
+  hasSill: j['hasSill'] ?? false,
+  sillLengthM: (j['sillLengthM'] ?? 1.5).toDouble(),
+  sillDepthMm: (j['sillDepthMm'] ?? 300).toDouble(),
+  sillCategory: j['sillCategory'] ?? 'Эконом',
+  hasDrip: j['hasDrip'] ?? false,
+  dripLengthM: (j['dripLengthM'] ?? 1.5).toDouble(),
+  dripDepthMm: (j['dripDepthMm'] ?? 200).toDouble(),
+  dripColor: j['dripColor'] ?? 'Белый',
+  hasSlopes: j['hasSlopes'] ?? false,
+  houseType: j['houseType'] ?? 'Панелька',
+  slopeLengthM: (j['slopeLengthM'] ?? 1.5).toDouble(),
+  slopeDepthMm: (j['slopeDepthMm'] ?? 250).toDouble(),
+  slopeCategory: j['slopeCategory'] ?? 'Эконом',
+  hasExtraSlopes: j['hasExtraSlopes'] ?? false,
+  extraSlopeLengthM: (j['extraSlopeLengthM'] ?? 1.5).toDouble(),
+  extraSlopeDepthMm: (j['extraSlopeDepthMm'] ?? 250).toDouble(),
+  extraSlopeCategory: j['extraSlopeCategory'] ?? 'Эконом',
+  hasFUgol: j['hasFUgol'] ?? false,
+  fUgolType: j['fUgolType'] ?? '40×3.20',
+  fUgolCount: (j['fUgolCount'] ?? 1) as int,
+  hasAbris: j['hasAbris'] ?? false,
+  abrisLengthM: (j['abrisLengthM'] ?? 5.0).toDouble(),
+  hasPsul: j['hasPsul'] ?? false,
+  psulLengthM: (j['psulLengthM'] ?? 5.0).toDouble(),
+  hasOtmazka: j['hasOtmazka'] ?? false,
+  otmazkaLengthM: (j['otmazkaLengthM'] ?? 5.0).toDouble(),
+  hasMosquito: j['hasMosquito'] ?? false,
+  hasAnticat: j['hasAnticat'] ?? false,
+  hasAntidust: j['hasAntidust'] ?? false,
+  hasFrameNet: j['hasFrameNet'] ?? false,
+  hasPlisse: j['hasPlisse'] ?? false,
+  complexInstall: j['complexInstall'] ?? true,
+  separateDemontage: j['separateDemontage'] ?? false,
+);
 
 class MeasurementStorage {
   static const _key = 'measurements_v2';
@@ -367,6 +583,11 @@ class MeasurementStorage {
     } catch (_) {}
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// ГЛАВНОЕ ПРИЛОЖЕНИЕ
+// ═══════════════════════════════════════════════════════════
+
 class WindowCalcApp extends StatefulWidget {
   const WindowCalcApp({super.key});
 
@@ -385,25 +606,25 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
     _loadData();
   }
 
-Future<void> _loadData() async {
-  PriceSettings ps;
-  List<Measurement> ms;
-  try {
-    ps = await PriceStorage.load();
-  } catch (_) {
-    ps = PriceSettings();
-  }
-  try {
-    ms = await MeasurementStorage.load(ps);
-  } catch (_) {
-    ms = [];
-  }
-  if (!mounted) return;
-  setState(() {
-    _price = ps;
-    _measurements = ms;
-    _loading = false;
-  });
+  Future<void> _loadData() async {
+    PriceSettings ps;
+    List<Measurement> ms;
+    try {
+      ps = await PriceStorage.load();
+    } catch (_) {
+      ps = PriceSettings();
+    }
+    try {
+      ms = await MeasurementStorage.load(ps);
+    } catch (_) {
+      ms = [];
+    }
+    if (!mounted) return;
+    setState(() {
+      _price = ps;
+      _measurements = ms;
+      _loading = false;
+    });
   }
 
   Future<void> _savePrice() async {
@@ -413,9 +634,9 @@ Future<void> _loadData() async {
   }
 
   Future<void> _saveMeasurements() async {
-  try {
-    await MeasurementStorage.save(_measurements);
-  } catch (_) {}
+    try {
+      await MeasurementStorage.save(_measurements);
+    } catch (_) {}
   }
 
   @override
@@ -423,13 +644,11 @@ Future<void> _loadData() async {
     if (_loading) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
     return MaterialApp(
-      title: 'Калькулятор окон',
+      title: 'Замерщик окон Almas',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -450,7 +669,9 @@ Future<void> _loadData() async {
       ),
     );
   }
-}
+}// ═══════════════════════════════════════════════════════════
+// ГЛАВНОЕ МЕНЮ
+// ═══════════════════════════════════════════════════════════
 
 class MainMenuScreen extends StatelessWidget {
   final PriceSettings price;
@@ -472,7 +693,7 @@ class MainMenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Калькулятор окон'),
+        title: const Text('Замерщик окон Almas'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: ListView(
@@ -516,7 +737,7 @@ class MainMenuScreen extends StatelessWidget {
             context,
             icon: Icons.settings,
             color: Colors.orange,
-            title: 'Настройки (прайс)',
+            title: 'Настройки прайса',
             subtitle: 'Цены на изделия и услуги',
             onTap: () async {
               await Navigator.push(
@@ -560,6 +781,11 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// СОХРАНЁННЫЕ ЗАМЕРЫ
+// ═══════════════════════════════════════════════════════════
+
 class SavedMeasurementsScreen extends StatefulWidget {
   final List<Measurement> measurements;
   final Function(String) onDelete;
@@ -653,6 +879,9 @@ class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
     );
   }
 }
+// ═══════════════════════════════════════════════════════════
+// НАСТРОЙКИ ПРАЙСА (сворачиваемые категории)
+// ═══════════════════════════════════════════════════════════
 
 class PriceSettingsScreen extends StatefulWidget {
   final PriceSettings price;
@@ -669,6 +898,8 @@ class PriceSettingsScreen extends StatefulWidget {
 
 class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
   late Map<String, TextEditingController> _ctrls;
+  // Какие категории раскрыты
+  final Set<String> _expanded = {};
 
   @override
   void initState() {
@@ -681,45 +912,54 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
 
   @override
   void dispose() {
-    for (var c in _ctrls.values) {
-      c.dispose();
-    }
+    for (var c in _ctrls.values) c.dispose();
     super.dispose();
   }
 
   Future<void> _apply() async {
     final p = widget.price;
     double g(String k) => double.tryParse(_ctrls[k]!.text) ?? 0;
-    p.window1Panel = g('window1Panel');
-    p.window1Stalin = g('window1Stalin');
-    p.window1Brick = g('window1Brick');
-    p.window2Panel = g('window2Panel');
-    p.window2Stalin = g('window2Stalin');
-    p.window2Brick = g('window2Brick');
-    p.window3Panel = g('window3Panel');
-    p.window3Stalin = g('window3Stalin');
-    p.window3Brick = g('window3Brick');
-    p.blockSmallPanel = g('blockSmallPanel');
-    p.blockSmallStalin = g('blockSmallStalin');
-    p.blockSmallBrick = g('blockSmallBrick');
-    p.blockBigPanel = g('blockBigPanel');
-    p.blockBigStalin = g('blockBigStalin');
-    p.blockBigBrick = g('blockBigBrick');
-    p.balconyPerM2 = g('balconyPerM2');
-    p.bezParapetPerM2 = g('bezParapetPerM2');
-    p.slopesPanel = g('slopesPanel');
-    p.slopesStalin = g('slopesStalin');
-    p.slopesBrick = g('slopesBrick');
+    p.window1 = g('window1');
+    p.window2 = g('window2');
+    p.window3 = g('window3');
+    p.balconyBlock = g('balconyBlock');
+    p.balconyGlazingPerM2 = g('balconyGlazingPerM2');
+    p.loggiaGlazingPerM2 = g('loggiaGlazingPerM2');
+    p.panoramicPerM2 = g('panoramicPerM2');
+    p.balconyDoor = g('balconyDoor');
+    p.pvcDoor = g('pvcDoor');
+    p.entranceGroup = g('entranceGroup');
+    p.sillEconomPerM2 = g('sillEconomPerM2');
+    p.sillOtherPerM2 = g('sillOtherPerM2');
+    p.dripWhitePerM2 = g('dripWhitePerM2');
+    p.dripBrownPerM2 = g('dripBrownPerM2');
+    p.slopePiterPerM2 = g('slopePiterPerM2');
+    p.slopeEconomPerM2 = g('slopeEconomPerM2');
+    p.slopeExtraPiterPerM2 = g('slopeExtraPiterPerM2');
+    p.slopeExtraEconomPerM2 = g('slopeExtraEconomPerM2');
+    p.fUgol40 = g('fUgol40');
+    p.fUgol50 = g('fUgol50');
+    p.fUgol60 = g('fUgol60');
+    p.abrisPerM = g('abrisPerM');
+    p.psulPerM = g('psulPerM');
+    p.otmazkaPerM = g('otmazkaPerM');
+    p.mosquito = g('mosquito');
+    p.anticat = g('anticat');
+    p.antidust = g('antidust');
+    p.frameNet = g('frameNet');
+    p.plisse = g('plisse');
     p.glass24 = g('glass24');
     p.glass32 = g('glass32');
     p.glass40 = g('glass40');
     p.extraTinting = g('extraTinting');
     p.extraMulti = g('extraMulti');
-    p.sillPerM = g('sillPerM');
-    p.dripPerM = g('dripPerM');
-    p.slopePerM = g('slopePerM');
-    p.mosquitoPerUnit = g('mosquitoPerUnit');
-    p.demontagePerUnit = g('demontagePerUnit');
+    p.demontagePerItem = g('demontagePerItem');
+    p.montagePerItem = g('montagePerItem');
+    p.trashRemoval = g('trashRemoval');
+    p.liftPerFloor = g('liftPerFloor');
+    p.erkerPerM2 = g('erkerPerM2');
+    p.archWindow = g('archWindow');
+    p.facadeAlumPerM2 = g('facadeAlumPerM2');
     await widget.onChanged();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -728,21 +968,22 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     }
   }
 
-  Widget _row(String label, String key) {
+  Widget _row(String label, String key, {String suffix = '₽'}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Expanded(child: Text(label)),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
           SizedBox(
             width: 110,
             child: TextField(
               controller: _ctrls[key],
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 isDense: true,
-                border: OutlineInputBorder(),
-                suffixText: '₽',
+                border: const OutlineInputBorder(),
+                suffixText: suffix,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               ),
             ),
           ),
@@ -751,10 +992,36 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     );
   }
 
-  Widget _title(String t) => Padding(
-        padding: const EdgeInsets.only(top: 20, bottom: 8),
-        child: Text(t, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
-      );
+  Widget _category(String title, IconData icon, List<Widget> children, {String id = ''}) {
+    final key = id.isEmpty ? title : id;
+    final isOpen = _expanded.contains(key);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(icon, color: Colors.blue),
+            title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            trailing: Icon(isOpen ? Icons.expand_less : Icons.expand_more),
+            onTap: () {
+              setState(() {
+                if (isOpen) {
+                  _expanded.remove(key);
+                } else {
+                  _expanded.add(key);
+                }
+              });
+            },
+          ),
+          if (isOpen)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Column(children: children),
+            ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -769,45 +1036,75 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _title('Окно 1-створчатое'),
-          _row('Панелька', 'window1Panel'),
-          _row('Сталинка', 'window1Stalin'),
-          _row('Кирпич', 'window1Brick'),
-          _title('Окно 2-створчатое'),
-          _row('Панелька', 'window2Panel'),
-          _row('Сталинка', 'window2Stalin'),
-          _row('Кирпич', 'window2Brick'),
-          _title('Окно 3-створчатое'),
-          _row('Панелька', 'window3Panel'),
-          _row('Сталинка', 'window3Stalin'),
-          _row('Кирпич', 'window3Brick'),
-          _title('Балконный блок (малый)'),
-          _row('Панелька', 'blockSmallPanel'),
-          _row('Сталинка', 'blockSmallStalin'),
-          _row('Кирпич', 'blockSmallBrick'),
-          _title('Балконный блок (большой)'),
-          _row('Панелька', 'blockBigPanel'),
-          _row('Сталинка', 'blockBigStalin'),
-          _row('Кирпич', 'blockBigBrick'),
-          _title('Балкон (за м²)'),
-          _row('Остекление балкона', 'balconyPerM2'),
-          _row('Безпарапетка', 'bezParapetPerM2'),
-          _title('Откосы (доплата)'),
-          _row('Панелька', 'slopesPanel'),
-          _row('Сталинка', 'slopesStalin'),
-          _row('Кирпич', 'slopesBrick'),
-          _title('Стеклопакеты (за м²)'),
-          _row('24 мм', 'glass24'),
-          _row('32 мм', 'glass32'),
-          _row('40 мм', 'glass40'),
-          _row('Тонировка (доплата)', 'extraTinting'),
-          _row('Мультифункция (доплата)', 'extraMulti'),
-          _title('Доп. услуги'),
-          _row('Подоконник (за м)', 'sillPerM'),
-          _row('Отлив (за м)', 'dripPerM'),
-          _row('Откосы доп. (за м)', 'slopePerM'),
-          _row('Москитная сетка (шт.)', 'mosquitoPerUnit'),
-          _row('Демонтаж (за изделие)', 'demontagePerUnit'),
+          _category('Окна', Icons.window, [
+            _row('Одностворчатое', 'window1'),
+            _row('Двухстворчатое', 'window2'),
+            _row('Трёхстворчатое', 'window3'),
+          ]),
+          _category('Балконы и лоджии', Icons.balcony, [
+            _row('Балконный блок', 'balconyBlock'),
+            _row('Балконное остекление', 'balconyGlazingPerM2', suffix: '₽/м²'),
+            _row('Остекление лоджии', 'loggiaGlazingPerM2', suffix: '₽/м²'),
+            _row('Панорамное остекление', 'panoramicPerM2', suffix: '₽/м²'),
+          ]),
+          _category('Двери', Icons.door_front_door, [
+            _row('Балконная дверь', 'balconyDoor'),
+            _row('Дверь ПВХ', 'pvcDoor'),
+            _row('Входная группа', 'entranceGroup'),
+          ]),
+          _category('Отделка', Icons.construction, [
+            const Divider(),
+            const Text('Подоконник (за м²)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            _row('Эконом', 'sillEconomPerM2', suffix: '₽/м²'),
+            _row('Другое', 'sillOtherPerM2', suffix: '₽/м²'),
+            const Divider(),
+            const Text('Отлив (за м²)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            _row('Белый', 'dripWhitePerM2', suffix: '₽/м²'),
+            _row('Коричневый', 'dripBrownPerM2', suffix: '₽/м²'),
+            const Divider(),
+            const Text('Откосы (за м²)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            _row('Питер', 'slopePiterPerM2', suffix: '₽/м²'),
+            _row('Эконом', 'slopeEconomPerM2', suffix: '₽/м²'),
+            const Divider(),
+            const Text('Откосы доп. (за м²)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            _row('Питер', 'slopeExtraPiterPerM2', suffix: '₽/м²'),
+            _row('Эконом', 'slopeExtraEconomPerM2', suffix: '₽/м²'),
+            const Divider(),
+            const Text('F-угол (за шт)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            _row('40×3.20', 'fUgol40'),
+            _row('50×3.20', 'fUgol50'),
+            _row('60×3.20', 'fUgol60'),
+            const Divider(),
+            const Text('Ленты и замазка (за м)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            _row('Абрис', 'abrisPerM', suffix: '₽/м'),
+            _row('ПСУЛ', 'psulPerM', suffix: '₽/м'),
+            _row('Отмазка', 'otmazkaPerM', suffix: '₽/м'),
+          ]),
+          _category('Сетки', Icons.grid_on, [
+            _row('Москитная сетка', 'mosquito'),
+            _row('Антикошка', 'anticat'),
+            _row('Антипыль', 'antidust'),
+            _row('Рамная', 'frameNet'),
+            _row('Плиссе', 'plisse'),
+          ]),
+          _category('Стеклопакеты', Icons.layers, [
+            _row('24 мм', 'glass24', suffix: '₽/м²'),
+            _row('32 мм', 'glass32', suffix: '₽/м²'),
+            _row('40 мм', 'glass40', suffix: '₽/м²'),
+            _row('Тонировка (доплата)', 'extraTinting', suffix: '₽/м²'),
+            _row('Мультифункция (доплата)', 'extraMulti', suffix: '₽/м²'),
+          ]),
+          _category('Услуги', Icons.handyman, [
+            _row('Демонтаж (за изделие)', 'demontagePerItem'),
+            _row('Монтаж (за изделие)', 'montagePerItem'),
+            _row('Вывоз мусора', 'trashRemoval'),
+            _row('Подъём (за этаж)', 'liftPerFloor'),
+          ]),
+          _category('Нестандарт', Icons.star, [
+            _row('Эркерное остекление', 'erkerPerM2', suffix: '₽/м²'),
+            _row('Арочное окно', 'archWindow'),
+            _row('Фасадное алюм. остекление', 'facadeAlumPerM2', suffix: '₽/м²'),
+          ]),
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: _apply,
@@ -820,6 +1117,10 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     );
   }
 }
+// ═══════════════════════════════════════════════════════════
+// РЕДАКТОР ЗАМЕРА
+// ═══════════════════════════════════════════════════════════
+
 class MeasurementEditorScreen extends StatefulWidget {
   final PriceSettings price;
   const MeasurementEditorScreen({super.key, required this.price});
@@ -835,12 +1136,17 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
   final _notesCtrl = TextEditingController();
   final List<ProductItem> _items = [ProductItem()];
 
+  bool _hasTrashRemoval = false;
+  bool _hasLift = false;
+  final _liftFloorsCtrl = TextEditingController(text: '1');
+
   @override
   void dispose() {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
     _addrCtrl.dispose();
     _notesCtrl.dispose();
+    _liftFloorsCtrl.dispose();
     super.dispose();
   }
 
@@ -858,13 +1164,28 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
       clientAddress: _addrCtrl.text.trim(),
       notes: _notesCtrl.text.trim(),
       items: List.from(_items),
+      hasTrashRemoval: _hasTrashRemoval,
+      hasLift: _hasLift,
+      liftFloors: int.tryParse(_liftFloorsCtrl.text) ?? 1,
       priceSettings: widget.price,
       createdAt: DateTime.now(),
     );
     Navigator.pop(context, m);
   }
 
-  double get _total => _items.fold(0.0, (s, it) => s + it.calcPrice(widget.price));
+  double get _itemsTotal =>
+      _items.fold(0.0, (s, it) => s + it.calcPrice(widget.price));
+
+  double get _servicesTotal {
+    double t = 0;
+    if (_hasTrashRemoval) t += widget.price.trashRemoval;
+    if (_hasLift) {
+      t += widget.price.liftPerFloor * (int.tryParse(_liftFloorsCtrl.text) ?? 1);
+    }
+    return t;
+  }
+
+  double get _total => _itemsTotal + _servicesTotal;
 
   @override
   Widget build(BuildContext context) {
@@ -903,6 +1224,30 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             icon: const Icon(Icons.add),
             label: const Text('Добавить изделие'),
           ),
+          const SizedBox(height: 24),
+          const _SectionTitle('Услуги по замеру'),
+          CheckboxListTile(
+            value: _hasTrashRemoval,
+            onChanged: (v) => setState(() => _hasTrashRemoval = v!),
+            title: Text('Вывоз мусора (${widget.price.trashRemoval.toStringAsFixed(0)} ₽)'),
+            dense: true,
+          ),
+          CheckboxListTile(
+            value: _hasLift,
+            onChanged: (v) => setState(() => _hasLift = v!),
+            title: Text('Подъём на этаж (${widget.price.liftPerFloor.toStringAsFixed(0)} ₽/этаж)'),
+            dense: true,
+          ),
+          if (_hasLift)
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: TextField(
+                controller: _liftFloorsCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Количество этажей'),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
           const SizedBox(height: 20),
           Card(
             color: Theme.of(context).colorScheme.primaryContainer,
@@ -939,6 +1284,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
   Widget _itemCard(int index) {
     final it = _items[index];
     final price = it.calcPrice(widget.price);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -948,7 +1294,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
           children: [
             Row(
               children: [
-                Text('Изделие ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Изделие ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const Spacer(),
                 if (_items.length > 1)
                   IconButton(
@@ -964,23 +1310,18 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
                 DropdownMenuItem(value: 'Окно 1-створчатое', child: Text('Окно 1-створчатое')),
                 DropdownMenuItem(value: 'Окно 2-створчатое', child: Text('Окно 2-створчатое')),
                 DropdownMenuItem(value: 'Окно 3-створчатое', child: Text('Окно 3-створчатое')),
-                DropdownMenuItem(value: 'Балкон', child: Text('Балкон')),
-                DropdownMenuItem(value: 'Безпарапетка', child: Text('Безпарапетка')),
-                DropdownMenuItem(value: 'Балконный блок малый', child: Text('Балконный блок малый')),
-                DropdownMenuItem(value: 'Балконный блок большой', child: Text('Балконный блок большой')),
+                DropdownMenuItem(value: 'Балконный блок', child: Text('Балконный блок')),
+                DropdownMenuItem(value: 'Балконное остекление', child: Text('Балконное остекление')),
+                DropdownMenuItem(value: 'Остекление лоджии', child: Text('Остекление лоджии')),
+                DropdownMenuItem(value: 'Панорамное остекление', child: Text('Панорамное остекление')),
+                DropdownMenuItem(value: 'Балконная дверь', child: Text('Балконная дверь')),
+                DropdownMenuItem(value: 'Дверь ПВХ', child: Text('Дверь ПВХ')),
+                DropdownMenuItem(value: 'Входная группа', child: Text('Входная группа')),
+                DropdownMenuItem(value: 'Эркерное остекление', child: Text('Эркерное остекление')),
+                DropdownMenuItem(value: 'Арочное окно', child: Text('Арочное окно')),
+                DropdownMenuItem(value: 'Фасадное алюминиевое остекление', child: Text('Фасадное алюм. остекление')),
               ],
               onChanged: (v) => setState(() => it.type = v!),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: it.houseType,
-              decoration: const InputDecoration(labelText: 'Тип дома'),
-              items: const [
-                DropdownMenuItem(value: 'Панелька', child: Text('Панелька')),
-                DropdownMenuItem(value: 'Сталинка', child: Text('Сталинка')),
-                DropdownMenuItem(value: 'Кирпич', child: Text('Кирпич')),
-              ],
-              onChanged: (v) => setState(() => it.houseType = v!),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1037,72 +1378,267 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               title: const Text('Мультифункциональное'),
               dense: true,
             ),
+
             const Divider(),
-            CheckboxListTile(
-              value: it.hasSlopes,
-              onChanged: (v) => setState(() => it.hasSlopes = v!),
-              title: const Text('Откосы (в комплекте)'),
-              dense: true,
-            ),
+            const Text('Отделка', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+            const SizedBox(height: 8),
+                        // ───── Подоконник ─────
             CheckboxListTile(
               value: it.hasSill,
               onChanged: (v) => setState(() => it.hasSill = v!),
               title: const Text('Подоконник'),
               dense: true,
             ),
-            if (it.hasSill)
-              Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 8),
-                child: TextFormField(
-                  initialValue: it.sillLengthM.toString(),
-                  decoration: const InputDecoration(labelText: 'Длина, м'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => setState(() => it.sillLengthM = double.tryParse(v) ?? 0),
+            if (it.hasSill) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(children: [
+                Row(children: [
+                  Expanded(child: TextFormField(
+                    initialValue: it.sillLengthM.toString(),
+                    decoration: const InputDecoration(labelText: 'Длина, м'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.sillLengthM = double.tryParse(v) ?? 0),
+                  )),
+                  const SizedBox(width: 8),
+                  Expanded(child: TextFormField(
+                    initialValue: it.sillDepthMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.sillDepthMm = double.tryParse(v) ?? 0),
+                  )),
+                ]),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: it.sillCategory,
+                  decoration: const InputDecoration(labelText: 'Категория'),
+                  items: const [
+                    DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
+                    DropdownMenuItem(value: 'Другое', child: Text('Другое')),
+                  ],
+                  onChanged: (v) => setState(() => it.sillCategory = v!),
                 ),
-              ),
+              ]),
+            ),
+
+            // ───── Отлив ─────
             CheckboxListTile(
               value: it.hasDrip,
               onChanged: (v) => setState(() => it.hasDrip = v!),
               title: const Text('Отлив'),
               dense: true,
             ),
-            if (it.hasDrip)
-              Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 8),
-                child: TextFormField(
-                  initialValue: it.dripLengthM.toString(),
-                  decoration: const InputDecoration(labelText: 'Длина, м'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => setState(() => it.dripLengthM = double.tryParse(v) ?? 0),
+            if (it.hasDrip) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(children: [
+                Row(children: [
+                  Expanded(child: TextFormField(
+                    initialValue: it.dripLengthM.toString(),
+                    decoration: const InputDecoration(labelText: 'Длина, м'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.dripLengthM = double.tryParse(v) ?? 0),
+                  )),
+                  const SizedBox(width: 8),
+                  Expanded(child: TextFormField(
+                    initialValue: it.dripDepthMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.dripDepthMm = double.tryParse(v) ?? 0),
+                  )),
+                ]),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: it.dripColor,
+                  decoration: const InputDecoration(labelText: 'Цвет'),
+                  items: const [
+                    DropdownMenuItem(value: 'Белый', child: Text('Белый')),
+                    DropdownMenuItem(value: 'Коричневый', child: Text('Коричневый')),
+                  ],
+                  onChanged: (v) => setState(() => it.dripColor = v!),
                 ),
-              ),
+              ]),
+            ),
+
+            // ───── Откосы ─────
             CheckboxListTile(
-              value: it.hasExtraSlope,
-              onChanged: (v) => setState(() => it.hasExtraSlope = v!),
-              title: const Text('Откосы доп. (за м)'),
+              value: it.hasSlopes,
+              onChanged: (v) => setState(() => it.hasSlopes = v!),
+              title: const Text('Откосы'),
               dense: true,
             ),
-            if (it.hasExtraSlope)
-              Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 8),
-                child: TextFormField(
-                  initialValue: it.extraSlopeLengthM.toString(),
-                  decoration: const InputDecoration(labelText: 'Длина, м'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => setState(() => it.extraSlopeLengthM = double.tryParse(v) ?? 0),
+            if (it.hasSlopes) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(children: [
+                DropdownButtonFormField<String>(
+                  value: it.houseType,
+                  decoration: const InputDecoration(labelText: 'Тип дома'),
+                  items: const [
+                    DropdownMenuItem(value: 'Панелька', child: Text('Панелька')),
+                    DropdownMenuItem(value: 'Сталинка', child: Text('Сталинка')),
+                    DropdownMenuItem(value: 'Кирпич', child: Text('Кирпич')),
+                  ],
+                  onChanged: (v) => setState(() => it.houseType = v!),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Row(children: [
+                  Expanded(child: TextFormField(
+                    initialValue: it.slopeLengthM.toString(),
+                    decoration: const InputDecoration(labelText: 'Длина, м'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.slopeLengthM = double.tryParse(v) ?? 0),
+                  )),
+                  const SizedBox(width: 8),
+                  Expanded(child: TextFormField(
+                    initialValue: it.slopeDepthMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.slopeDepthMm = double.tryParse(v) ?? 0),
+                  )),
+                ]),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: it.slopeCategory,
+                  decoration: const InputDecoration(labelText: 'Категория откоса'),
+                  items: const [
+                    DropdownMenuItem(value: 'Питер', child: Text('Питер')),
+                    DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
+                  ],
+                  onChanged: (v) => setState(() => it.slopeCategory = v!),
+                ),
+              ]),
+            ),
+
+            // ───── Откосы доп. ─────
             CheckboxListTile(
-              value: it.hasMosquito,
-              onChanged: (v) => setState(() => it.hasMosquito = v!),
-              title: const Text('Москитная сетка'),
+              value: it.hasExtraSlopes,
+              onChanged: (v) => setState(() => it.hasExtraSlopes = v!),
+              title: const Text('Откосы доп. (с улицы)'),
               dense: true,
             ),
+            if (it.hasExtraSlopes) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(children: [
+                Row(children: [
+                  Expanded(child: TextFormField(
+                    initialValue: it.extraSlopeLengthM.toString(),
+                    decoration: const InputDecoration(labelText: 'Длина, м'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.extraSlopeLengthM = double.tryParse(v) ?? 0),
+                  )),
+                  const SizedBox(width: 8),
+                  Expanded(child: TextFormField(
+                    initialValue: it.extraSlopeDepthMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.extraSlopeDepthMm = double.tryParse(v) ?? 0),
+                  )),
+                ]),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: it.extraSlopeCategory,
+                  decoration: const InputDecoration(labelText: 'Категория'),
+                  items: const [
+                    DropdownMenuItem(value: 'Питер', child: Text('Питер')),
+                    DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
+                  ],
+                  onChanged: (v) => setState(() => it.extraSlopeCategory = v!),
+                ),
+              ]),
+            ),
+
+            // ───── F-угол ─────
+            CheckboxListTile(
+              value: it.hasFUgol,
+              onChanged: (v) => setState(() => it.hasFUgol = v!),
+              title: const Text('F-угол'),
+              dense: true,
+            ),
+            if (it.hasFUgol) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(children: [
+                DropdownButtonFormField<String>(
+                  value: it.fUgolType,
+                  decoration: const InputDecoration(labelText: 'Тип'),
+                  items: const [
+                    DropdownMenuItem(value: '40×3.20', child: Text('40×3.20')),
+                    DropdownMenuItem(value: '50×3.20', child: Text('50×3.20')),
+                    DropdownMenuItem(value: '60×3.20', child: Text('60×3.20')),
+                  ],
+                  onChanged: (v) => setState(() => it.fUgolType = v!),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  initialValue: it.fUgolCount.toString(),
+                  decoration: const InputDecoration(labelText: 'Количество, шт'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setState(() => it.fUgolCount = int.tryParse(v) ?? 1),
+                ),
+              ]),
+            ),
+
+            // ───── Монтаж: Абрис / ПСУЛ / Отмазка ─────
+            const Divider(),
+            const Text('Монтажные работы', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+            CheckboxListTile(
+              value: it.hasAbris,
+              onChanged: (v) => setState(() => it.hasAbris = v!),
+              title: const Text('Абрис'),
+              dense: true,
+            ),
+            if (it.hasAbris) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: TextFormField(
+                initialValue: it.abrisLengthM.toString(),
+                decoration: const InputDecoration(labelText: 'Длина, м'),
+                keyboardType: TextInputType.number,
+                onChanged: (v) => setState(() => it.abrisLengthM = double.tryParse(v) ?? 0),
+              ),
+            ),
+            CheckboxListTile(
+              value: it.hasPsul,
+              onChanged: (v) => setState(() => it.hasPsul = v!),
+              title: const Text('ПСУЛ'),
+              dense: true,
+            ),
+            if (it.hasPsul) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: TextFormField(
+                initialValue: it.psulLengthM.toString(),
+                decoration: const InputDecoration(labelText: 'Длина, м'),
+                keyboardType: TextInputType.number,
+                onChanged: (v) => setState(() => it.psulLengthM = double.tryParse(v) ?? 0),
+              ),
+            ),
+            CheckboxListTile(
+              value: it.hasOtmazka,
+              onChanged: (v) => setState(() => it.hasOtmazka = v!),
+              title: const Text('Отмазка'),
+              dense: true,
+            ),
+            if (it.hasOtmazka) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: TextFormField(
+                initialValue: it.otmazkaLengthM.toString(),
+                decoration: const InputDecoration(labelText: 'Длина, м'),
+                keyboardType: TextInputType.number,
+                onChanged: (v) => setState(() => it.otmazkaLengthM = double.tryParse(v) ?? 0),
+              ),
+            ),
+
+            // ───── Сетки ─────
+            const Divider(),
+            const Text('Сетки', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+            CheckboxListTile(value: it.hasMosquito, onChanged: (v) => setState(() => it.hasMosquito = v!), title: const Text('Москитная'), dense: true),
+            CheckboxListTile(value: it.hasAnticat, onChanged: (v) => setState(() => it.hasAnticat = v!), title: const Text('Антикошка'), dense: true),
+            CheckboxListTile(value: it.hasAntidust, onChanged: (v) => setState(() => it.hasAntidust = v!), title: const Text('Антипыль'), dense: true),
+            CheckboxListTile(value: it.hasFrameNet, onChanged: (v) => setState(() => it.hasFrameNet = v!), title: const Text('Рамная'), dense: true),
+            CheckboxListTile(value: it.hasPlisse, onChanged: (v) => setState(() => it.hasPlisse = v!), title: const Text('Плиссе'), dense: true),
+
+            // ───── Услуги по изделию ─────
             const Divider(),
             CheckboxListTile(
               value: it.complexInstall,
               onChanged: (v) => setState(() => it.complexInstall = v!),
-              title: const Text('Комплекс (демонтаж включён)'),
+              title: const Text('Комплекс (монтаж включён)'),
               dense: true,
             ),
             if (!it.complexInstall)
@@ -1112,6 +1648,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
                 title: const Text('Демонтаж отдельно'),
                 dense: true,
               ),
+
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
@@ -1122,7 +1659,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Стоимость позиции:', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const Text('Стоимость:', style: TextStyle(fontWeight: FontWeight.w500)),
                   Text('${price.toStringAsFixed(0)} ₽', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ],
               ),
@@ -1133,25 +1670,17 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
     );
   }
 }
-class ResultScreen extends StatefulWidget {
+// ═══════════════════════════════════════════════════════════
+// ЭКРАН РЕЗУЛЬТАТА
+// ═══════════════════════════════════════════════════════════
+
+class ResultScreen extends StatelessWidget {
   final Measurement measurement;
   const ResultScreen({super.key, required this.measurement});
 
   @override
-  State<ResultScreen> createState() => _ResultScreenState();
-}
-
-class _ResultScreenState extends State<ResultScreen> {
-  late Measurement m;
-
-  @override
-  void initState() {
-    super.initState();
-    m = widget.measurement;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final m = measurement;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Замерный лист'),
@@ -1175,17 +1704,30 @@ class _ResultScreenState extends State<ResultScreen> {
                   ...m.items.asMap().entries.map((e) {
                     final it = e.value;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${e.key + 1}. ${it.type} — ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}'),
-                          Text('   ${it.houseType} • стекло ${it.glassThickness.toInt()} мм', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          Text('${e.key + 1}. ${it.type} — ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}',
+                              style: const TextStyle(fontWeight: FontWeight.w500)),
+                          Text('   Стекло ${it.glassThickness.toInt()} мм', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          if (it.hasSlopes) Text('   Откосы: ${it.slopeCategory} (${it.houseType})', style: const TextStyle(fontSize: 12)),
+                          if (it.hasSill) Text('   Подоконник: ${it.sillLengthM} м × ${it.sillDepthMm.toInt()} мм (${it.sillCategory})', style: const TextStyle(fontSize: 12)),
+                          if (it.hasDrip) Text('   Отлив: ${it.dripLengthM} м (${it.dripColor})', style: const TextStyle(fontSize: 12)),
+                          if (it.hasFUgol) Text('   F-угол: ${it.fUgolType} × ${it.fUgolCount}', style: const TextStyle(fontSize: 12)),
+                          if (it.hasMosquito) Text('   + Москитная сетка', style: const TextStyle(fontSize: 12)),
+                          if (it.hasPlisse) Text('   + Плиссе', style: const TextStyle(fontSize: 12)),
                           Text('   ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽', style: const TextStyle(fontWeight: FontWeight.w500)),
                         ],
                       ),
                     );
                   }),
+                  if (m.hasTrashRemoval || m.hasLift) ...[
+                    const Divider(height: 24),
+                    const Text('Услуги:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    if (m.hasTrashRemoval) Text('• Вывоз мусора — ${m.priceSettings.trashRemoval.toStringAsFixed(0)} ₽'),
+                    if (m.hasLift) Text('• Подъём на ${m.liftFloors} эт. — ${(m.priceSettings.liftPerFloor * m.liftFloors).toStringAsFixed(0)} ₽'),
+                  ],
                   if (m.notes.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Text('Примечание: ${m.notes}'),
@@ -1209,119 +1751,63 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          const Text('Поделиться замерным листом:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const Text('Поделиться:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
-          _shareButton(
-            context,
-            icon: Icons.person,
-            label: 'Поделиться с клиентом',
-            subtitle: 'Красивое описание + цена',
-            color: Colors.green,
-            text: _clientVersion(m),
-          ),
-          _shareButton(
-            context,
-            icon: Icons.factory,
-            label: 'Отправить на завод',
-            subtitle: 'Размеры и опции для производства',
-            color: Colors.orange,
-            text: _factoryVersion(m),
-          ),
-          _shareButton(
-            context,
-            icon: Icons.handshake,
-            label: 'Отправить дилеру',
-            subtitle: 'Полная спецификация с ценами',
-            color: Colors.purple,
-            text: _dealerVersion(m),
-          ),
-          _shareButton(
-            context,
-            icon: Icons.copy,
-            label: 'Скопировать полный текст',
-            subtitle: 'В буфер обмена',
-            color: Colors.blue,
-            text: m.toShareText(),
-            copyOnly: true,
-          ),
+          _shareButton(context, Icons.person, 'Поделиться с клиентом', 'Красивое описание + цена', Colors.green, _clientVersion(m)),
+          _shareButton(context, Icons.factory, 'Отправить на завод', 'Размеры и опции', Colors.orange, _factoryVersion(m)),
+          _shareButton(context, Icons.handshake, 'Отправить дилеру', 'Полная спецификация', Colors.purple, _dealerVersion(m)),
+          _shareButton(context, Icons.copy, 'Скопировать текст', 'В буфер обмена', Colors.blue, m.toShareText(), copyOnly: true),
         ],
       ),
     );
   }
 
-  Widget _shareButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required Color color,
-    required String text,
-    bool copyOnly = false,
-  }) {
+  Widget _shareButton(BuildContext context, IconData icon, String label, String sub, Color color, String text, {bool copyOnly = false}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
-          child: Icon(icon, color: color),
-        ),
+        leading: CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)),
         title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        subtitle: Text(sub, style: const TextStyle(fontSize: 12)),
         trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-        onTap: () => _handleShare(context, label, text, copyOnly: copyOnly),
+        onTap: () async {
+          if (copyOnly) {
+            await Clipboard.setData(ClipboardData(text: text));
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано')));
+            }
+            return;
+          }
+          try {
+            await Share.share(text, subject: label);
+          } catch (_) {
+            await Clipboard.setData(ClipboardData(text: text));
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано в буфер')));
+            }
+          }
+        },
       ),
     );
-  }
-
-  Future<void> _handleShare(BuildContext context, String subject, String text, {bool copyOnly = false}) async {
-    if (copyOnly) {
-      await Clipboard.setData(ClipboardData(text: text));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Скопировано в буфер обмена')),
-        );
-      }
-      return;
-    }
-    try {
-      await Share.share(text, subject: subject);
-    } catch (e) {
-      await Clipboard.setData(ClipboardData(text: text));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка шаринга, текст скопирован: $e')),
-        );
-      }
-    }
   }
 
   String _clientVersion(Measurement m) {
     final b = StringBuffer();
     b.writeln('Здравствуйте, ${m.clientName}!');
     b.writeln('');
-    b.writeln('Ваш заказ на окна:');
+    b.writeln('Ваш заказ:');
     for (var i = 0; i < m.items.length; i++) {
       final it = m.items[i];
-      b.writeln('  ${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм — ${it.count} шт.');
-      if (it.hasSill || it.hasDrip || it.hasMosquito || it.hasSlopes) {
-        final opts = <String>[];
-        if (it.hasSlopes) opts.add('откосы');
-        if (it.hasSill) opts.add('подоконник');
-        if (it.hasDrip) opts.add('отлив');
-        if (it.hasMosquito) opts.add('москитная сетка');
-        b.writeln('     Опции: ${opts.join(", ")}');
-      }
+      b.writeln('${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм — ${it.count} шт.');
     }
     b.writeln('');
     b.writeln('ИТОГО: ${m.totalPrice.toStringAsFixed(0)} ₽');
-    b.writeln('');
-    b.writeln('По вопросам — звоните!');
     return b.toString();
   }
 
   String _factoryVersion(Measurement m) {
     final b = StringBuffer();
-    b.writeln('=== ЗАКАЗ НА ПРОИЗВОДСТВО ===');
+    b.writeln('=== ЗАКАЗ ===');
     b.writeln('Клиент: ${m.clientName}');
     b.writeln('Адрес: ${m.clientAddress}');
     b.writeln('Тел: ${m.clientPhone}');
@@ -1330,38 +1816,43 @@ class _ResultScreenState extends State<ResultScreen> {
       final it = m.items[i];
       b.writeln('ПОЗИЦИЯ ${i + 1}:');
       b.writeln('  Тип: ${it.type}');
-      b.writeln('  Тип дома: ${it.houseType}');
       b.writeln('  Размер: ${it.widthMm.toInt()}×${it.heightMm.toInt()} мм × ${it.count}');
-      b.writeln('  Стеклопакет: ${it.glassThickness.toInt()} мм');
-      if (it.tinted) b.writeln('  + Тонировка');
-      if (it.multi) b.writeln('  + Мультифункция');
-      if (it.hasSlopes) b.writeln('  Откосы: да');
-      if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM} м');
-      if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM} м');
-      if (it.hasMosquito) b.writeln('  Москитка: да');
+      b.writeln('  Стекло: ${it.glassThickness.toInt()} мм');
+      if (it.hasSlopes) b.writeln('  Откосы: ${it.slopeCategory} ${it.slopeLengthM}м × ${it.slopeDepthMm.toInt()}мм');
+      if (it.hasSill) b.writeln('  Подоконник: ${it.sillLengthM}м × ${it.sillDepthMm.toInt()}мм');
+      if (it.hasDrip) b.writeln('  Отлив: ${it.dripLengthM}м × ${it.dripDepthMm.toInt()}мм (${it.dripColor})');
+      if (it.hasFUgol) b.writeln('  F-угол: ${it.fUgolType} × ${it.fUgolCount}');
+      if (it.hasAbris) b.writeln('  Абрис: ${it.abrisLengthM}м');
+      if (it.hasPsul) b.writeln('  ПСУЛ: ${it.psulLengthM}м');
+      if (it.hasOtmazka) b.writeln('  Отмазка: ${it.otmazkaLengthM}м');
       b.writeln('');
     }
-    if (m.notes.isNotEmpty) b.writeln('Примечание: ${m.notes}');
     return b.toString();
   }
 
   String _dealerVersion(Measurement m) {
     final b = StringBuffer();
     b.writeln('ЗАМЕР #${m.id}');
-    b.writeln('');
     b.writeln('Клиент: ${m.clientName} (${m.clientPhone})');
     b.writeln('Адрес: ${m.clientAddress}');
     b.writeln('Дата: ${Measurement.fmtDate(m.createdAt)}');
     b.writeln('');
     for (var i = 0; i < m.items.length; i++) {
       final it = m.items[i];
-      b.writeln('${i + 1}. ${it.type} ${it.widthMm.toInt()}×${it.heightMm.toInt()} ×${it.count} — ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽');
+      b.writeln('${i + 1}. ${it.type} — ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽');
     }
+    if (m.hasTrashRemoval) b.writeln('Вывоз мусора — ${m.priceSettings.trashRemoval.toStringAsFixed(0)} ₽');
+    if (m.hasLift) b.writeln('Подъём ${m.liftFloors} эт. — ${(m.priceSettings.liftPerFloor * m.liftFloors).toStringAsFixed(0)} ₽');
     b.writeln('');
     b.writeln('К ОПЛАТЕ: ${m.totalPrice.toStringAsFixed(0)} ₽');
     return b.toString();
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// ВСПОМОГАТЕЛЬНОЕ
+// ═══════════════════════════════════════════════════════════
+
 class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
