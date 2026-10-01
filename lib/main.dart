@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:convert';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'update_checker.dart';
 
 void main() => runApp(const WindowCalcApp());
@@ -896,6 +897,42 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
   PriceSettings? _price;
   List<Measurement> _measurements = [];
   bool _loading = true;
+  ThemeMode _themeMode = ThemeMode.system;
+
+  static const _themeKey = 'theme_mode';
+
+  Future<void> _loadTheme() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_themeKey);
+      if (raw == 'light') _themeMode = ThemeMode.light;
+      else if (raw == 'dark') _themeMode = ThemeMode.dark;
+      else _themeMode = ThemeMode.system;
+    } catch (_) {}
+  }
+
+  Future<void> _saveTheme(ThemeMode mode) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final str = mode == ThemeMode.light
+          ? 'light'
+          : (mode == ThemeMode.dark ? 'dark' : 'system');
+      await prefs.setString(_themeKey, str);
+    } catch (_) {}
+  }
+
+  void _cycleTheme() {
+    setState(() {
+      if (_themeMode == ThemeMode.system) {
+        _themeMode = ThemeMode.light;
+      } else if (_themeMode == ThemeMode.light) {
+        _themeMode = ThemeMode.dark;
+      } else {
+        _themeMode = ThemeMode.system;
+      }
+      _saveTheme(_themeMode);
+    });
+  }
 
   @override
   void initState() {
@@ -907,24 +944,25 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
   }
 
   Future<void> _loadData() async {
-    PriceSettings ps;
-    List<Measurement> ms;
-    try {
-      ps = await PriceStorage.load();
-    } catch (_) {
-      ps = PriceSettings();
-    }
-    try {
-      ms = await MeasurementStorage.load(ps);
-    } catch (_) {
-      ms = [];
-    }
-    if (!mounted) return;
-    setState(() {
-      _price = ps;
-      _measurements = ms;
-      _loading = false;
-    });
+  PriceSettings ps;
+  List<Measurement> ms;
+  try {
+    ps = await PriceStorage.load();
+  } catch (_) {
+    ps = PriceSettings();
+  }
+  try {
+    ms = await MeasurementStorage.load(ps);
+  } catch (_) {
+    ms = [];
+  }
+  await _loadTheme();
+  if (!mounted) return;
+  setState(() {
+    _price = ps;
+    _measurements = ms;
+    _loading = false;
+  });
   }
 
   Future<void> _savePrice() async {
@@ -948,33 +986,43 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
       );
     }
     return MaterialApp(
-      title: 'Замерщик окон Almas',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: MainMenuScreen(
-        price: _price!,
-        measurements: _measurements,
-        onPriceChanged: _savePrice,
-        onMeasurementAdded: (m) {
-          setState(() => _measurements.insert(0, m));
-          _saveMeasurements();
-        },
-        onMeasurementDeleted: (id) {
-          setState(() => _measurements.removeWhere((m) => m.id == id));
-          _saveMeasurements();
-        },
-        onMeasurementUpdated: (updated) {
-          setState(() {
-            final idx = _measurements.indexWhere((m) => m.id == updated.id);
-            if (idx >= 0) _measurements[idx] = updated;
-          });
-          _saveMeasurements();
-        },
-      ),
-    );
+  title: 'Замерщик окон Almas',
+  debugShowCheckedModeBanner: false,
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+    useMaterial3: true,
+  ),
+  darkTheme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: Brightness.dark,
+    ),
+    useMaterial3: true,
+  ),
+  themeMode: _themeMode,
+  home: MainMenuScreen(
+    price: _price!,
+    measurements: _measurements,
+    onPriceChanged: _savePrice,
+    onMeasurementAdded: (m) {
+      setState(() => _measurements.insert(0, m));
+      _saveMeasurements();
+    },
+    onMeasurementDeleted: (id) {
+      setState(() => _measurements.removeWhere((m) => m.id == id));
+      _saveMeasurements();
+    },
+    onMeasurementUpdated: (updated) {
+      setState(() {
+        final idx = _measurements.indexWhere((m) => m.id == updated.id);
+        if (idx >= 0) _measurements[idx] = updated;
+      });
+      _saveMeasurements();
+    },
+    onCycleTheme: _cycleTheme,
+    themeMode: _themeMode,
+  ),
+);
   }
 }
 // ═══════════════════════════════════════════════════════════
@@ -988,6 +1036,8 @@ class MainMenuScreen extends StatelessWidget {
   final Function(Measurement) onMeasurementAdded;
   final Function(String) onMeasurementDeleted;
   final Function(Measurement) onMeasurementUpdated;
+  final VoidCallback onCycleTheme;
+  final ThemeMode themeMode;
 
   const MainMenuScreen({
     super.key,
@@ -997,15 +1047,46 @@ class MainMenuScreen extends StatelessWidget {
     required this.onMeasurementAdded,
     required this.onMeasurementDeleted,
     required this.onMeasurementUpdated,
+    required this.onCycleTheme,
+    required this.themeMode,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Замерщик окон Almas'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+  title: const Text('Замерщик окон Almas'),
+  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+  actions: [
+    FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final v = snapshot.data?.version ?? '';
+        if (v.isEmpty) return const SizedBox.shrink();
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Text(
+              'v$v',
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+        );
+      },
+    ),
+    IconButton(
+      tooltip: 'Тема',
+      icon: Icon(
+        themeMode == ThemeMode.light
+            ? Icons.light_mode
+            : (themeMode == ThemeMode.dark
+                ? Icons.dark_mode
+                : Icons.brightness_auto),
       ),
+      onPressed: onCycleTheme,
+    ),
+  ],
+),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
