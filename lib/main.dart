@@ -934,7 +934,7 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
     });
   }
 
-  @override
+@override
 void initState() {
   super.initState();
   _loadData();
