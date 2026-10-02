@@ -13,7 +13,6 @@ class UpdateChecker {
   static Future<String> getReport() async {
     final sb = StringBuffer();
 
-    // 1. Текущая версия
     String currentVersion = '?';
     String buildNumber = '?';
     try {
@@ -25,7 +24,6 @@ class UpdateChecker {
       sb.writeln('Ошибка PackageInfo: $e');
     }
 
-    // 2. Запрос к GitHub
     String? latestVersion;
     try {
       final url = Uri.parse(
@@ -45,14 +43,11 @@ class UpdateChecker {
         } else {
           sb.writeln('Не найден tag_name в ответе');
         }
-      } else {
-        sb.writeln('Body (первые 200): ${resp.body.substring(0, resp.body.length > 200 ? 200 : resp.body.length)}');
       }
     } catch (e) {
       sb.writeln('Ошибка сети: $e');
     }
 
-    // 3. Сравнение
     if (latestVersion != null) {
       final isNewer = _isNewer(latestVersion, currentVersion);
       sb.writeln('');
@@ -93,58 +88,70 @@ class UpdateChecker {
       return 'Ошибка скачивания: $e';
     }
   }
+
+  /// Проверка при запуске с задержкой и логированием ошибок
   static Future<void> checkOnStart(BuildContext context) async {
-  try {
-    final info = await PackageInfo.fromPlatform();
-    final currentVersion = info.version;
+    await Future.delayed(const Duration(seconds: 2));
+    if (!context.mounted) return;
 
-    final url = Uri.parse(
-        'https://api.github.com/repos/$owner/$repo/releases/latest');
-    final resp = await http.get(url, headers: {
-      'Accept': 'application/vnd.github+json',
-    });
-    if (resp.statusCode != 200) return;
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final currentVersion = info.version;
 
-    final match = RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(resp.body);
-    if (match == null) return;
+      final url = Uri.parse(
+          'https://api.github.com/repos/$owner/$repo/releases/latest');
+      final resp = await http.get(url, headers: {
+        'Accept': 'application/vnd.github+json',
+      });
+      if (resp.statusCode != 200) return;
 
-    final tag = match.group(1) ?? '';
-    final latestVersion = tag.split('+').first;
+      final match =
+          RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(resp.body);
+      if (match == null) return;
 
-    if (_isNewer(latestVersion, currentVersion)) {
+      final tag = match.group(1) ?? '';
+      final latestVersion = tag.split('+').first;
+
+      if (_isNewer(latestVersion, currentVersion)) {
+        if (context.mounted) {
+          _showUpdateDialog(context, latestVersion);
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
-        _showUpdateDialog(context, latestVersion);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка проверки: $e')),
+        );
       }
     }
-  } catch (_) {}
-}
+  }
 
-static void _showUpdateDialog(BuildContext context, String newVersion) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => AlertDialog(
-      title: const Text('Доступно обновление'),
-      content: Text('Версия $newVersion доступна.\nСкачать и установить?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Позже'),
-        ),
-        TextButton(
-          onPressed: () async {
-            Navigator.pop(context);
-            final msg = await UpdateChecker.downloadAndInstall();
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(msg)),
-              );
-            }
-          },
-          child: const Text('Обновить'),
-        ),
-      ],
-    ),
-  );
-}
+  static void _showUpdateDialog(BuildContext context, String newVersion) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text('Доступно обновление'),
+        content: Text('Версия $newVersion доступна.\nСкачать и установить?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Позже'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final msg = await downloadAndInstall();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(msg)),
+                );
+              }
+            },
+            child: const Text('Обновить'),
+          ),
+        ],
+      ),
+    );
+  }
 }
