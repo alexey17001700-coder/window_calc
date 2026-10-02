@@ -31,9 +31,9 @@ jobs:
       - name: Set app name
         run: |
           sed -i 's|android:label="[^"]*"|android:label="Замерщик окон Almas"|' android/app/src/main/AndroidManifest.xml
-      - name: Add install permission
+      - name: Add permissions
         run: |
-          sed -i 's|<application|<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <application|' android/app/src/main/AndroidManifest.xml
+          sed -i 's|<application|<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <uses-permission android:name="android.permission.INTERNET" />\n    <application|' android/app/src/main/AndroidManifest.xml
       - run: flutter build apk --release
       - name: Get version
         id: version
