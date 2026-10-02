@@ -45,41 +45,13 @@ jobs:
           keyAlias=${{ secrets.KEY_ALIAS }}
           storeFile=upload-keystore.jks
           EOF
-      - name: Configure signing in build.gradle
+      - name: Show build.gradle
         run: |
-          cd android/app
-          python3 - <<'PY'
-          import re
-          with open('build.gradle', 'r') as f:
-              content = f.read()
-          # Добавляем загрузку key.properties перед android {
-          props_code = """
-          def keystoreProperties = new Properties()
-          def keystorePropertiesFile = rootProject.file('key.properties')
-          if (keystorePropertiesFile.exists()) {
-              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-          }
-          """
-          if 'keystoreProperties' not in content:
-              content = content.replace('android {', props_code + '\nandroid {', 1)
-          # Заменяем signingConfigs и buildTypes
-          if 'signingConfigs' not in content:
-              sign_block = """
-              signingConfigs {
-                  release {
-                      keyAlias keystoreProperties['keyAlias']
-                      keyPassword keystoreProperties['keyPassword']
-                      storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-                      storePassword keystoreProperties['storePassword']
-                  }
-              }
-              """
-              content = content.replace('buildTypes {', sign_block + '\nbuildTypes {', 1)
-          content = content.replace('signingConfig signingConfigs.debug', 'signingConfig signingConfigs.release')
-          with open('build.gradle', 'w') as f:
-              f.write(content)
-          PY
-          cd ../..
+          echo "=== build.gradle ==="
+          cat android/app/build.gradle || echo "не найден build.gradle"
+          echo ""
+          echo "=== build.gradle.kts ==="
+          cat android/app/build.gradle.kts || echo "не найден build.gradle.kts"
       - run: flutter build apk --release
       - name: Get version
         id: version
