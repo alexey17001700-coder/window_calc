@@ -938,9 +938,6 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
   void initState() {
     super.initState();
     _loadData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-  if (mounted) UpdateChecker.checkOnStart(context);
-});
   }
 
   Future<void> _loadData() async {
