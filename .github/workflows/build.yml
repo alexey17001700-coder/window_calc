@@ -45,13 +45,13 @@ jobs:
           keyAlias=${{ secrets.KEY_ALIAS }}
           storeFile=upload-keystore.jks
           EOF
-      - name: Show build.gradle
+      - name: Configure signing
         run: |
-          echo "=== build.gradle ==="
-          cat android/app/build.gradle || echo "не найден build.gradle"
-          echo ""
-          echo "=== build.gradle.kts ==="
-          cat android/app/build.gradle.kts || echo "не найден build.gradle.kts"
+          cd android/app
+          sed -i 's|^android {|def keystoreProperties = new Properties()\ndef keystorePropertiesFile = rootProject.file("key.properties")\nif (keystorePropertiesFile.exists()) {\n    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n}\n\nandroid {|' build.gradle
+          sed -i 's|    buildTypes {|    signingConfigs {\n        release {\n            keyAlias = keystoreProperties["keyAlias"]\n            keyPassword = keystoreProperties["keyPassword"]\n            storeFile = keystoreProperties["storeFile"] ? file(keystoreProperties["storeFile"]) : null\n            storePassword = keystoreProperties["storePassword"]\n        }\n    }\n    buildTypes {|' build.gradle
+          sed -i 's|signingConfig = signingConfigs.debug|signingConfig = signingConfigs.release|' build.gradle
+          cd ../..
       - run: flutter build apk --release
       - name: Get version
         id: version
