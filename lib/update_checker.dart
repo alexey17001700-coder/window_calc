@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -10,42 +9,85 @@ class UpdateChecker {
   static const String owner = 'alexey17001700-coder';
   static const String repo = 'window_calc';
 
-  /// Вызвать при старте приложения
   static Future<void> checkOnStart(BuildContext context) async {
     try {
       final info = await PackageInfo.fromPlatform();
-      final currentVersion = info.version; // например 1.0.0
-      final latest = await _getLatestVersion();
+      final currentVersion = info.version;
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Текущая версия: $currentVersion'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+
+      final latest = await _getLatestVersion(context);
       if (latest == null) return;
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Последняя на GitHub: $latest'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+
       if (_isNewer(latest, currentVersion)) {
         if (context.mounted) {
           _showUpdateDialog(context, latest);
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка проверки: $e'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
-  static Future<String?> _getLatestVersion() async {
+  static Future<String?> _getLatestVersion(BuildContext context) async {
     try {
       final url = Uri.parse(
           'https://api.github.com/repos/$owner/$repo/releases/latest');
       final resp = await http.get(url, headers: {
         'Accept': 'application/vnd.github+json',
       });
-      if (resp.statusCode != 200) return null;
+      if (resp.statusCode != 200) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('GitHub вернул: ${resp.statusCode}'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+        return null;
+      }
       final data = resp.body;
-      // Простой парсинг tag_name без json_decode — но используем jsonDecode
       final match = RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(data);
       if (match == null) return null;
-      // Убираем +build из тега если есть
       final tag = match.group(1) ?? '';
       return tag.split('+').first;
-    } catch (_) {
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Сеть: $e'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
       return null;
     }
   }
 
-  /// Возвращает true, если latest > current
   static bool _isNewer(String latest, String current) {
     final l = latest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
     final c = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
@@ -100,7 +142,7 @@ class UpdateChecker {
       final result = await OpenFilex.open(savePath);
       if (result.type != ResultType.done && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Не удалось открыть установщик: ${result.message}')),
+          SnackBar(content: Text('Не установилось: ${result.message}')),
         );
       }
     } catch (e) {
