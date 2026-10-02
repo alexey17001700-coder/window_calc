@@ -93,4 +93,58 @@ class UpdateChecker {
       return 'Ошибка скачивания: $e';
     }
   }
+  static Future<void> checkOnStart(BuildContext context) async {
+  try {
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = info.version;
+
+    final url = Uri.parse(
+        'https://api.github.com/repos/$owner/$repo/releases/latest');
+    final resp = await http.get(url, headers: {
+      'Accept': 'application/vnd.github+json',
+    });
+    if (resp.statusCode != 200) return;
+
+    final match = RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(resp.body);
+    if (match == null) return;
+
+    final tag = match.group(1) ?? '';
+    final latestVersion = tag.split('+').first;
+
+    if (_isNewer(latestVersion, currentVersion)) {
+      if (context.mounted) {
+        _showUpdateDialog(context, latestVersion);
+      }
+    }
+  } catch (_) {}
+}
+
+static void _showUpdateDialog(BuildContext context, String newVersion) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => AlertDialog(
+      title: const Text('Доступно обновление'),
+      content: Text('Версия $newVersion доступна.\nСкачать и установить?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Позже'),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(context);
+            final msg = await UpdateChecker.downloadAndInstall();
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(msg)),
+              );
+            }
+          },
+          child: const Text('Обновить'),
+        ),
+      ],
+    ),
+  );
+}
 }
