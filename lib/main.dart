@@ -1143,6 +1143,14 @@ class MainMenuScreen extends StatelessWidget {
               );
             },
           ),
+        _menuCard(
+  context,
+  icon: Icons.system_update,
+  color: Colors.purple,
+  title: 'Проверить обновление',
+  subtitle: 'Диагностика + обновление',
+  onTap: () => _showUpdateReport(context),
+),
         ],
       ),
     );
@@ -1168,7 +1176,50 @@ class MainMenuScreen extends StatelessWidget {
         title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: onTap,
+                onTap: onTap,
+      ),
+    );
+  }
+
+  Future<void> _showUpdateReport(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final report = await UpdateChecker.getReport();
+
+    if (context.mounted) Navigator.pop(context);
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Проверка обновления'),
+        content: SingleChildScrollView(
+          child: SelectableText(report),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Закрыть'),
+          ),
+          if (report.contains('ДОСТУПНО ОБНОВЛЕНИЕ'))
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                final msg = await UpdateChecker.downloadAndInstall();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(msg)),
+                  );
+                }
+              },
+              child: const Text('Обновить'),
+            ),
+        ],
       ),
     );
   }
