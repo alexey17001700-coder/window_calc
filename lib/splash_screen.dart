@@ -191,7 +191,7 @@ bool _isNewer(String latest, String current) {
               child: FilledButton.icon(
                 onPressed: _done ? _continue : null,
                 icon: const Icon(Icons.arrow_forward),
-                label: const Text('Продолжить'),
+                label: const Text('Начать замеры'),
               ),
             ),
           ],
