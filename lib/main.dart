@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'update_checker.dart';
 import 'splash_screen.dart';
+import 'service_screen.dart';
 
 void main() => runApp(const WindowCalcApp());
 
@@ -1304,16 +1305,36 @@ class MainMenuScreen extends StatelessWidget {
               );
             },
           ),
-          _menuCard(
-            context,
-            icon: Icons.system_update,
-            color: Colors.purple,
-            title: 'Проверить обновление',
-            subtitle: 'Диагностика + обновление',
-            onTap: () => _showUpdateReport(context),
+              _menuCard(
+      context,
+      icon: Icons.build,
+      color: Colors.teal,
+      title: 'Сервис и ремонт',
+      subtitle: 'Отдельные работы',
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ServiceListScreen(
+              price: price,
+              measurements: const [],
+              onAdded: (_) {},
+              onDeleted: (_) {},
+            ),
           ),
-        ],
-      ),
+        );
+      },
+    ),
+    _menuCard(
+      context,
+      icon: Icons.system_update,
+      color: Colors.purple,
+      title: 'Проверить обновление',
+      subtitle: 'Диагностика + обновление',
+      onTap: () => _showUpdateReport(context),
+    ),
+  ],
+),
     );
   }
     Widget _menuCard(
