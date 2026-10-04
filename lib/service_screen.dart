@@ -61,14 +61,9 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       ),
                     ],
                   ),
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ServiceResultScreen(measurement: m),
-                      ),
-                    );
-                  },
+                  onTap: () {
+  // Результат — в следующей части
+},
                 );
               },
             ),
@@ -116,33 +111,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   }
 }
 
-// Заглушка — редактор сделаем в следующей части
-class ServiceEditorScreen extends StatelessWidget {
-  final PriceSettings price;
-  const ServiceEditorScreen({super.key, required this.price});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Новый сервисный заказ')),
-      body: const Center(child: Text('Редактор будет в следующей части')),
-    );
-  }
-}
-
-// Заглушка — результат сделаем позже
-class ServiceResultScreen extends StatelessWidget {
-  final ServiceMeasurement measurement;
-  const ServiceResultScreen({super.key, required this.measurement});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Заказ сервиса')),
-      body: const Center(child: Text('Экран результата будет позже')),
-    );
-  }
-}
 class ServiceEditorScreen extends StatefulWidget {
   final PriceSettings price;
   const ServiceEditorScreen({super.key, required this.price});
@@ -166,7 +135,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
     'Замена ручки',
     'Замена резинки',
     'Замена стеклопакета',
-    'Замена фурнитуры',
+    'Замена фурнитуры',л
     'Замена подоконника',
   ];
 
