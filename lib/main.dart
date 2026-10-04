@@ -70,6 +70,19 @@ class PriceSettings {
   double archWindow = 40000;
   double facadeAlumPerM2 = 15000;
 
+  // Сервис и ремонт
+  double mountSillServicePerM = 0;
+  double mountSlopeServicePerM = 0;
+  double mountNetServicePerPc = 0;
+  double regulationPerPc = 0;
+  double handleReplacePerPc = 0;
+  double rubberReplacePerSash = 0;
+  double rubberReplaceBlindExtra = 0;
+  double glassReplacePerPc = 0;
+  double glassReplaceBlindExtra = 0;
+  double furnitureReplacePerPc = 0;
+  double sillReplacePerM = 0;
+
   PriceSettings();
 
   double basePrice(String type) {
@@ -139,7 +152,18 @@ class PriceSettings {
     'demontagePerItem': demontagePerItem, 'montagePerItem': montagePerItem,
     'trashRemoval': trashRemoval, 'liftPerFloor': liftPerFloor, 'delivery': delivery,
     'erkerPerM2': erkerPerM2, 'archWindow': archWindow, 'facadeAlumPerM2': facadeAlumPerM2,
-  };
+  'mountSillServicePerM': mountSillServicePerM,
+  'mountSlopeServicePerM': mountSlopeServicePerM,
+  'mountNetServicePerPc': mountNetServicePerPc,
+  'regulationPerPc': regulationPerPc,
+  'handleReplacePerPc': handleReplacePerPc,
+  'rubberReplacePerSash': rubberReplacePerSash,
+  'rubberReplaceBlindExtra': rubberReplaceBlindExtra,
+  'glassReplacePerPc': glassReplacePerPc,
+  'glassReplaceBlindExtra': glassReplaceBlindExtra,
+  'furnitureReplacePerPc': furnitureReplacePerPc,
+  'sillReplacePerM': sillReplacePerM,
+};
 
   void fromMap(Map<String, double> m) {
     window1 = m['window1'] ?? window1;
@@ -195,11 +219,21 @@ class PriceSettings {
     liftPerFloor = m['liftPerFloor'] ?? liftPerFloor;
     delivery = m['delivery'] ?? delivery;
     erkerPerM2 = m['erkerPerM2'] ?? erkerPerM2;
-    archWindow = m['archWindow'] ?? archWindow;
-    facadeAlumPerM2 = m['facadeAlumPerM2'] ?? facadeAlumPerM2;
-  }
+   archWindow = m['archWindow'] ?? archWindow;
+   facadeAlumPerM2 = m['facadeAlumPerM2'] ?? facadeAlumPerM2;
+   mountSillServicePerM = m['mountSillServicePerM'] ?? mountSillServicePerM;
+   mountSlopeServicePerM = m['mountSlopeServicePerM'] ?? mountSlopeServicePerM;
+   mountNetServicePerPc = m['mountNetServicePerPc'] ?? mountNetServicePerPc;
+   regulationPerPc = m['regulationPerPc'] ?? regulationPerPc;
+   handleReplacePerPc = m['handleReplacePerPc'] ?? handleReplacePerPc;
+   rubberReplacePerSash = m['rubberReplacePerSash'] ?? rubberReplacePerSash;
+   rubberReplaceBlindExtra = m['rubberReplaceBlindExtra'] ?? rubberReplaceBlindExtra;
+   glassReplacePerPc = m['glassReplacePerPc'] ?? glassReplacePerPc;
+   glassReplaceBlindExtra = m['glassReplaceBlindExtra'] ?? glassReplaceBlindExtra;
+   furnitureReplacePerPc = m['furnitureReplacePerPc'] ?? furnitureReplacePerPc;
+   sillReplacePerM = m['sillReplacePerM'] ?? sillReplacePerM;
+ }
 }
-
 class PriceStorage {
   static const _key = 'price_v3';
 
@@ -816,6 +850,197 @@ class MeasurementStorage {
   }
 
   static Future<void> save(List<Measurement> list) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+        _key,
+        list.map((m) => jsonEncode(m.toJson())).toList(),
+      );
+    } catch (_) {}
+  }
+}
+// ═══════════════════════════════════════════════════════════
+// СЕРВИС И РЕМОНТ — МОДЕЛИ
+// ═══════════════════════════════════════════════════════════
+
+class ServiceItem {
+  String type; // 'Монтаж подоконника', 'Замена ручки' и т.д.
+  int count;   // количество
+  double lengthMm; // для позиций "за м"
+  double pricePerUnit; // цена за единицу (из прайса, можно править)
+  // Для резинки
+  int sashesCount;
+  int blindCount;
+  String rubberColor; // 'Серая' / 'Черная'
+  // Для стеклопакета
+  double glassWidthMm;
+  double glassHeightMm;
+  int glassSashesCount;
+  int glassBlindCount;
+
+  ServiceItem({
+    required this.type,
+    this.count = 1,
+    this.lengthMm = 0,
+    this.pricePerUnit = 0,
+    this.sashesCount = 0,
+    this.blindCount = 0,
+    this.rubberColor = 'Серая',
+    this.glassWidthMm = 0,
+    this.glassHeightMm = 0,
+    this.glassSashesCount = 0,
+    this.glassBlindCount = 0,
+  });
+
+  double calcPrice(PriceSettings ps) {
+    switch (type) {
+      case 'Монтаж подоконника':
+        return (lengthMm / 1000) * pricePerUnit;
+      case 'Монтаж откоса':
+        return (lengthMm / 1000) * pricePerUnit;
+      case 'Монтаж сетки':
+        return pricePerUnit * count;
+      case 'Регулировка':
+        return pricePerUnit * count;
+      case 'Замена ручки':
+        return pricePerUnit * count;
+      case 'Замена резинки':
+        final base = pricePerUnit * sashesCount;
+        final extra = (pricePerUnit + ps.rubberReplaceBlindExtra) * blindCount;
+        return base + extra;
+      case 'Замена стеклопакета':
+        final base = pricePerUnit * glassSashesCount;
+        final extra = (pricePerUnit + ps.glassReplaceBlindExtra) * glassBlindCount;
+        return base + extra;
+      case 'Замена фурнитуры':
+        return pricePerUnit * count;
+      case 'Замена подоконника':
+        return (lengthMm / 1000) * pricePerUnit;
+      default:
+        return 0;
+    }
+  }
+
+  int get rubberMeters => (sashesCount + blindCount) * 8;
+  int get totalGlassPieces => glassSashesCount + glassBlindCount;
+  double get glassAreaM2 =>
+      (glassWidthMm / 1000) * (glassHeightMm / 1000) * totalGlassPieces;
+
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'count': count,
+    'lengthMm': lengthMm,
+    'pricePerUnit': pricePerUnit,
+    'sashesCount': sashesCount,
+    'blindCount': blindCount,
+    'rubberColor': rubberColor,
+    'glassWidthMm': glassWidthMm,
+    'glassHeightMm': glassHeightMm,
+    'glassSashesCount': glassSashesCount,
+    'glassBlindCount': glassBlindCount,
+  };
+
+  factory ServiceItem.fromJson(Map<String, dynamic> j) => ServiceItem(
+    type: (j['type'] ?? '').toString(),
+    count: (j['count'] ?? 1) as int,
+    lengthMm: (j['lengthMm'] ?? 0).toDouble(),
+    pricePerUnit: (j['pricePerUnit'] ?? 0).toDouble(),
+    sashesCount: (j['sashesCount'] ?? 0) as int,
+    blindCount: (j['blindCount'] ?? 0) as int,
+    rubberColor: (j['rubberColor'] ?? 'Серая').toString(),
+    glassWidthMm: (j['glassWidthMm'] ?? 0).toDouble(),
+    glassHeightMm: (j['glassHeightMm'] ?? 0).toDouble(),
+    glassSashesCount: (j['glassSashesCount'] ?? 0) as int,
+    glassBlindCount: (j['glassBlindCount'] ?? 0) as int,
+  );
+}
+
+class ServiceMeasurement {
+  String id;
+  String clientName;
+  String clientPhone;
+  String clientAddress;
+  String notes;
+  List<ServiceItem> items;
+  PriceSettings priceSettings;
+  DateTime createdAt;
+
+  ServiceMeasurement({
+    required this.id,
+    required this.clientName,
+    required this.clientPhone,
+    required this.clientAddress,
+    this.notes = '',
+    required this.items,
+    required this.priceSettings,
+    required this.createdAt,
+  });
+
+  double get totalPrice =>
+      items.fold(0.0, (s, it) => s + it.calcPrice(priceSettings));
+
+  static String fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'clientName': clientName,
+    'clientPhone': clientPhone,
+    'clientAddress': clientAddress,
+    'notes': notes,
+    'items': items.map((e) => e.toJson()).toList(),
+    'createdAt': createdAt.toIso8601String(),
+  };
+
+  factory ServiceMeasurement.fromJson(Map<String, dynamic> j, PriceSettings ps) =>
+      ServiceMeasurement(
+        id: (j['id'] ?? '').toString(),
+        clientName: (j['clientName'] ?? '').toString(),
+        clientPhone: (j['clientPhone'] ?? '').toString(),
+        clientAddress: (j['clientAddress'] ?? '').toString(),
+        notes: (j['notes'] ?? '').toString(),
+        items: ((j['items'] as List?) ?? [])
+            .map((e) => ServiceItem.fromJson(Map<String, dynamic>.from(e)))
+            .toList(),
+        priceSettings: ps,
+        createdAt: DateTime.tryParse(j['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      );
+
+  String toClientText() {
+    final b = StringBuffer();
+    b.writeln('Здравствуйте, $clientName!');
+    b.writeln('');
+    b.writeln('Работы:');
+    for (final it in items) {
+      b.writeln('  ${it.type} — ${it.calcPrice(priceSettings).toStringAsFixed(0)} ₽');
+    }
+    b.writeln('');
+    b.writeln('ИТОГО: ${totalPrice.toStringAsFixed(0)} ₽');
+    return b.toString();
+  }
+}
+
+class ServiceStorage {
+  static const _key = 'service_v1';
+
+  static Future<List<ServiceMeasurement>> load(PriceSettings ps) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList(_key) ?? [];
+      final result = <ServiceMeasurement>[];
+      for (final s in raw) {
+        try {
+          final json = jsonDecode(s) as Map<String, dynamic>;
+          result.add(ServiceMeasurement.fromJson(json, ps));
+        } catch (_) {}
+      }
+      return result;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<void> save(List<ServiceMeasurement> list) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList(
