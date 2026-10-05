@@ -135,7 +135,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
     'Замена ручки',
     'Замена резинки',
     'Замена стеклопакета',
-    'Замена фурнитуры',л
+    'Замена фурнитуры',
     'Замена подоконника',
   ];
 
