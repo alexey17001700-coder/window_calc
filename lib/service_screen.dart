@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'main.dart';
 
 class ServiceListScreen extends StatefulWidget {
@@ -61,9 +60,25 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       ),
                     ],
                   ),
-                  onTap: () {
-  // Результат — в следующей части
-},
+                  onTap: () async {
+                    final result = await Navigator.push<ServiceMeasurement>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ServiceEditorScreen(
+                          price: widget.price,
+                          existing: m,
+                        ),
+                      ),
+                    );
+                    if (result != null) {
+                      setState(() {
+                        final idx = _list.indexWhere((x) => x.id == result.id);
+                        if (idx >= 0) {
+                          _list[idx] = result;
+                        }
+                      });
+                    }
+                  },
                 );
               },
             ),
@@ -110,11 +125,10 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     );
   }
 }
-
-
 class ServiceEditorScreen extends StatefulWidget {
   final PriceSettings price;
-  const ServiceEditorScreen({super.key, required this.price});
+  final ServiceMeasurement? existing;
+  const ServiceEditorScreen({super.key, required this.price, this.existing});
 
   @override
   State<ServiceEditorScreen> createState() => _ServiceEditorScreenState();
@@ -138,6 +152,19 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
     'Замена фурнитуры',
     'Замена подоконника',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existing != null) {
+      final e = widget.existing!;
+      _nameCtrl.text = e.clientName;
+      _phoneCtrl.text = e.clientPhone;
+      _addrCtrl.text = e.clientAddress;
+      _notesCtrl.text = e.notes;
+      _items.addAll(e.items);
+    }
+  }
 
   @override
   void dispose() {
@@ -187,14 +214,15 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
       return;
     }
     final m = ServiceMeasurement(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.existing?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       clientName: _nameCtrl.text.trim(),
       clientPhone: _phoneCtrl.text.trim(),
       clientAddress: _addrCtrl.text.trim(),
       notes: _notesCtrl.text.trim(),
       items: List.from(_items),
       priceSettings: widget.price,
-      createdAt: DateTime.now(),
+      createdAt: widget.existing?.createdAt ?? DateTime.now(),
     );
     Navigator.pop(context, m);
   }
@@ -206,7 +234,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Новый заказ'),
+        title: Text(widget.existing == null ? 'Новый заказ' : 'Редактировать'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(icon: const Icon(Icons.check), onPressed: _save),
@@ -292,8 +320,8 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         }).toList(),
       ),
     );
-    
-  Widget _itemCard(int index, ServiceItem it) {
+  }
+    Widget _itemCard(int index, ServiceItem it) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -321,33 +349,25 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
               onChanged: (v) => setState(() => it.pricePerUnit = double.tryParse(v) ?? 0),
             ),
             const SizedBox(height: 8),
-
-            // За м
             if (it.type == 'Монтаж подоконника' ||
                 it.type == 'Монтаж откоса' ||
-                it.type == 'Замена подоконника') ...[
+                it.type == 'Замена подоконника')
               TextFormField(
                 initialValue: it.lengthMm.toStringAsFixed(0),
                 decoration: const InputDecoration(labelText: 'Длина, мм'),
                 keyboardType: TextInputType.number,
                 onChanged: (v) => setState(() => it.lengthMm = double.tryParse(v) ?? 0),
               ),
-            ],
-
-            // За шт
             if (it.type == 'Монтаж сетки' ||
                 it.type == 'Регулировка' ||
                 it.type == 'Замена ручки' ||
-                it.type == 'Замена фурнитуры') ...[
+                it.type == 'Замена фурнитуры')
               TextFormField(
                 initialValue: it.count.toString(),
                 decoration: const InputDecoration(labelText: 'Количество, шт'),
                 keyboardType: TextInputType.number,
                 onChanged: (v) => setState(() => it.count = int.tryParse(v) ?? 1),
               ),
-            ],
-
-            // Замена резинки
             if (it.type == 'Замена резинки') ...[
               Row(children: [
                 Expanded(child: TextFormField(
@@ -381,8 +401,6 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
                 ),
               ]),
             ],
-
-            // Замена стеклопакета
             if (it.type == 'Замена стеклопакета') ...[
               Row(children: [
                 Expanded(child: TextFormField(
@@ -419,7 +437,6 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
               Text('Площадь: ${it.glassAreaM2.toStringAsFixed(2)} м²  •  Всего: ${it.totalGlassPieces} шт',
                   style: const TextStyle(fontWeight: FontWeight.w500)),
             ],
-
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(8),
@@ -440,5 +457,5 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         ),
       ),
     );
-   }
   }
+}
