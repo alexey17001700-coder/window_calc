@@ -1066,7 +1066,8 @@ class WindowCalcApp extends StatefulWidget {
 class _WindowCalcAppState extends State<WindowCalcApp> {
   PriceSettings? _price;
   List<Measurement> _measurements = [];
-  ThemeMode _themeMode = ThemeMode.system;
+  List<ServiceMeasurement> _serviceMeasurements = [];
+  ThemeMode _themeMode = ThemeMode.system;;
 
   static const _themeKey = 'theme_mode';
 
@@ -1109,26 +1110,33 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
     });
   }
 
-  Future<void> _loadData() async {
-    PriceSettings ps;
-    List<Measurement> ms;
-    try {
-      ps = await PriceStorage.load();
-    } catch (_) {
-      ps = PriceSettings();
-    }
-    try {
-      ms = await MeasurementStorage.load(ps);
-    } catch (_) {
-      ms = [];
-    }
-    await _loadTheme();
-    if (!mounted) return;
-    setState(() {
-      _price = ps;
-      _measurements = ms;
-    });
+Future<void> _loadData() async {
+  PriceSettings ps;
+  List<Measurement> ms;
+  List<ServiceMeasurement> sm;
+  try {
+    ps = await PriceStorage.load();
+  } catch (_) {
+    ps = PriceSettings();
   }
+  try {
+    ms = await MeasurementStorage.load(ps);
+  } catch (_) {
+    ms = [];
+  }
+  try {
+    sm = await ServiceStorage.load(ps);
+  } catch (_) {
+    sm = [];
+  }
+  await _loadTheme();
+  if (!mounted) return;
+  setState(() {
+    _price = ps;
+    _measurements = ms;
+    _serviceMeasurements = sm;
+  });
+}
 
   Future<void> _savePrice() async {
     if (_price == null) return;
@@ -1137,10 +1145,16 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
   }
 
   Future<void> _saveMeasurements() async {
-    try {
-      await MeasurementStorage.save(_measurements);
-    } catch (_) {}
-  }
+  try {
+    await MeasurementStorage.save(_measurements);
+  } catch (_) {}
+}
+
+Future<void> _saveServiceMeasurements() async {
+  try {
+    await ServiceStorage.save(_serviceMeasurements);
+  } catch (_) {}
+}
     @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -1161,12 +1175,28 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
       home: SplashScreen(
         loadData: _loadData,
         buildMainMenu: () => MainMenuScreen(
-          price: _price!,
-          measurements: _measurements,
-          onPriceChanged: _savePrice,
+  price: _price!,
+  measurements: _measurements,
+  serviceMeasurements: _serviceMeasurements,
+  onPriceChanged: _savePrice,
           onMeasurementAdded: (m) {
             setState(() => _measurements.insert(0, m));
-            _saveMeasurements();
+            _saveMeasurements();          onCycleTheme: _cycleTheme,
+          themeMode: _themeMode,
+          onServiceAdded: (m) {
+            setState(() => _serviceMeasurements.insert(0, m));
+            _saveServiceMeasurements();
+          },
+          onServiceDeleted: (id) {
+            setState(() =>
+                _serviceMeasurements.removeWhere((m) => m.id == id));
+            _saveServiceMeasurements();
+          },
+        ),
+      ),
+    );
+  }
+          }
           },
           onMeasurementDeleted: (id) {
             setState(() => _measurements.removeWhere((m) => m.id == id));
@@ -1194,23 +1224,29 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
 class MainMenuScreen extends StatelessWidget {
   final PriceSettings price;
   final List<Measurement> measurements;
+  final List<ServiceMeasurement> serviceMeasurements;
   final Future<void> Function() onPriceChanged;
   final Function(Measurement) onMeasurementAdded;
   final Function(String) onMeasurementDeleted;
   final Function(Measurement) onMeasurementUpdated;
   final VoidCallback onCycleTheme;
   final ThemeMode themeMode;
+  final Function(ServiceMeasurement) onServiceAdded;
+  final Function(String) onServiceDeleted;
 
-  const MainMenuScreen({
-    super.key,
-    required this.price,
-    required this.measurements,
+const MainMenuScreen({
+  super.key,
+  required this.price,
+  required this.measurements,
+  required this.serviceMeasurements,
     required this.onPriceChanged,
     required this.onMeasurementAdded,
     required this.onMeasurementDeleted,
     required this.onMeasurementUpdated,
     required this.onCycleTheme,
     required this.themeMode,
+    required this.onServiceAdded,
+    required this.onServiceDeleted,
   });
 
   @override
