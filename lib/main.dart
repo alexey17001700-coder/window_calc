@@ -1305,26 +1305,7 @@ class MainMenuScreen extends StatelessWidget {
               );
             },
           ),
-              _menuCard(
-      context,
-      icon: Icons.build,
-      color: Colors.teal,
-      title: 'Сервис и ремонт',
-      subtitle: 'Отдельные работы',
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ServiceListScreen(
-              price: price,
-              measurements: const [],
-              onAdded: (_) {},
-              onDeleted: (_) {},
-            ),
-          ),
-        );
-      },
-    ),
+              
     _menuCard(
       context,
       icon: Icons.build,
