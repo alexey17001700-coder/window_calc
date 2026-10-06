@@ -1174,14 +1174,27 @@ Future<void> _saveServiceMeasurements() async {
       themeMode: _themeMode,
       home: SplashScreen(
         loadData: _loadData,
-        buildMainMenu: () => MainMenuScreen(
-  price: _price!,
-  measurements: _measurements,
-  serviceMeasurements: _serviceMeasurements,
-  onPriceChanged: _savePrice,
+                buildMainMenu: () => MainMenuScreen(
+          price: _price!,
+          measurements: _measurements,
+          serviceMeasurements: _serviceMeasurements,
+          onPriceChanged: _savePrice,
           onMeasurementAdded: (m) {
             setState(() => _measurements.insert(0, m));
-            _saveMeasurements();          onCycleTheme: _cycleTheme,
+            _saveMeasurements();
+          },
+          onMeasurementDeleted: (id) {
+            setState(() => _measurements.removeWhere((m) => m.id == id));
+            _saveMeasurements();
+          },
+          onMeasurementUpdated: (updated) {
+            setState(() {
+              final idx = _measurements.indexWhere((m) => m.id == updated.id);
+              if (idx >= 0) _measurements[idx] = updated;
+            });
+            _saveMeasurements();
+          },
+          onCycleTheme: _cycleTheme,
           themeMode: _themeMode,
           onServiceAdded: (m) {
             setState(() => _serviceMeasurements.insert(0, m));
@@ -1196,8 +1209,7 @@ Future<void> _saveServiceMeasurements() async {
       ),
     );
   }
-          }
-          },
+}
           onMeasurementDeleted: (id) {
             setState(() => _measurements.removeWhere((m) => m.id == id));
             _saveMeasurements();
