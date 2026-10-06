@@ -1214,7 +1214,7 @@ Future<void> _saveServiceMeasurements() async {
             setState(() => _measurements.removeWhere((m) => m.id == id));
             _saveMeasurements();
           },
-          onMeasurementUpdated: (updated) {
+                    onMeasurementUpdated: (updated) {
             setState(() {
               final idx = _measurements.indexWhere((m) => m.id == updated.id);
               if (idx >= 0) _measurements[idx] = updated;
@@ -1223,6 +1223,15 @@ Future<void> _saveServiceMeasurements() async {
           },
           onCycleTheme: _cycleTheme,
           themeMode: _themeMode,
+          onServiceAdded: (m) {
+            setState(() => _serviceMeasurements.insert(0, m));
+            _saveServiceMeasurements();
+          },
+          onServiceDeleted: (id) {
+            setState(() =>
+                _serviceMeasurements.removeWhere((m) => m.id == id));
+            _saveServiceMeasurements();
+          },
         ),
       ),
     );
