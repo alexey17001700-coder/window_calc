@@ -70,8 +70,6 @@ class PriceSettings {
   double erkerPerM2 = 12000;
   double archWindow = 40000;
   double facadeAlumPerM2 = 15000;
-
-  // Сервис и ремонт
   double mountSillServicePerM = 0;
   double mountSlopeServicePerM = 0;
   double mountNetServicePerPc = 0;
@@ -131,7 +129,7 @@ class PriceSettings {
       default: return furOther;
     }
   }
-    Map<String, double> toMap() => {
+  Map<String, double> toMap() => {
     'window1': window1, 'window2': window2, 'window3': window3,
     'balconyBlock': balconyBlock, 'balconyGlazingPerM2': balconyGlazingPerM2,
     'loggiaGlazingPerM2': loggiaGlazingPerM2, 'panoramicPerM2': panoramicPerM2,
@@ -153,18 +151,18 @@ class PriceSettings {
     'demontagePerItem': demontagePerItem, 'montagePerItem': montagePerItem,
     'trashRemoval': trashRemoval, 'liftPerFloor': liftPerFloor, 'delivery': delivery,
     'erkerPerM2': erkerPerM2, 'archWindow': archWindow, 'facadeAlumPerM2': facadeAlumPerM2,
-  'mountSillServicePerM': mountSillServicePerM,
-  'mountSlopeServicePerM': mountSlopeServicePerM,
-  'mountNetServicePerPc': mountNetServicePerPc,
-  'regulationPerPc': regulationPerPc,
-  'handleReplacePerPc': handleReplacePerPc,
-  'rubberReplacePerSash': rubberReplacePerSash,
-  'rubberReplaceBlindExtra': rubberReplaceBlindExtra,
-  'glassReplacePerPc': glassReplacePerPc,
-  'glassReplaceBlindExtra': glassReplaceBlindExtra,
-  'furnitureReplacePerPc': furnitureReplacePerPc,
-  'sillReplacePerM': sillReplacePerM,
-};
+    'mountSillServicePerM': mountSillServicePerM,
+    'mountSlopeServicePerM': mountSlopeServicePerM,
+    'mountNetServicePerPc': mountNetServicePerPc,
+    'regulationPerPc': regulationPerPc,
+    'handleReplacePerPc': handleReplacePerPc,
+    'rubberReplacePerSash': rubberReplacePerSash,
+    'rubberReplaceBlindExtra': rubberReplaceBlindExtra,
+    'glassReplacePerPc': glassReplacePerPc,
+    'glassReplaceBlindExtra': glassReplaceBlindExtra,
+    'furnitureReplacePerPc': furnitureReplacePerPc,
+    'sillReplacePerM': sillReplacePerM,
+  };
 
   void fromMap(Map<String, double> m) {
     window1 = m['window1'] ?? window1;
@@ -220,21 +218,22 @@ class PriceSettings {
     liftPerFloor = m['liftPerFloor'] ?? liftPerFloor;
     delivery = m['delivery'] ?? delivery;
     erkerPerM2 = m['erkerPerM2'] ?? erkerPerM2;
-   archWindow = m['archWindow'] ?? archWindow;
-   facadeAlumPerM2 = m['facadeAlumPerM2'] ?? facadeAlumPerM2;
-   mountSillServicePerM = m['mountSillServicePerM'] ?? mountSillServicePerM;
-   mountSlopeServicePerM = m['mountSlopeServicePerM'] ?? mountSlopeServicePerM;
-   mountNetServicePerPc = m['mountNetServicePerPc'] ?? mountNetServicePerPc;
-   regulationPerPc = m['regulationPerPc'] ?? regulationPerPc;
-   handleReplacePerPc = m['handleReplacePerPc'] ?? handleReplacePerPc;
-   rubberReplacePerSash = m['rubberReplacePerSash'] ?? rubberReplacePerSash;
-   rubberReplaceBlindExtra = m['rubberReplaceBlindExtra'] ?? rubberReplaceBlindExtra;
-   glassReplacePerPc = m['glassReplacePerPc'] ?? glassReplacePerPc;
-   glassReplaceBlindExtra = m['glassReplaceBlindExtra'] ?? glassReplaceBlindExtra;
-   furnitureReplacePerPc = m['furnitureReplacePerPc'] ?? furnitureReplacePerPc;
-   sillReplacePerM = m['sillReplacePerM'] ?? sillReplacePerM;
- }
+    archWindow = m['archWindow'] ?? archWindow;
+    facadeAlumPerM2 = m['facadeAlumPerM2'] ?? facadeAlumPerM2;
+    mountSillServicePerM = m['mountSillServicePerM'] ?? mountSillServicePerM;
+    mountSlopeServicePerM = m['mountSlopeServicePerM'] ?? mountSlopeServicePerM;
+    mountNetServicePerPc = m['mountNetServicePerPc'] ?? mountNetServicePerPc;
+    regulationPerPc = m['regulationPerPc'] ?? regulationPerPc;
+    handleReplacePerPc = m['handleReplacePerPc'] ?? handleReplacePerPc;
+    rubberReplacePerSash = m['rubberReplacePerSash'] ?? rubberReplacePerSash;
+    rubberReplaceBlindExtra = m['rubberReplaceBlindExtra'] ?? rubberReplaceBlindExtra;
+    glassReplacePerPc = m['glassReplacePerPc'] ?? glassReplacePerPc;
+    glassReplaceBlindExtra = m['glassReplaceBlindExtra'] ?? glassReplaceBlindExtra;
+    furnitureReplacePerPc = m['furnitureReplacePerPc'] ?? furnitureReplacePerPc;
+    sillReplacePerM = m['sillReplacePerM'] ?? sillReplacePerM;
+  }
 }
+
 class PriceStorage {
   static const _key = 'price_v3';
 
@@ -298,16 +297,13 @@ class ProductItem {
   String type;
   String profile;
   String furniture;
-
   double widthMm;
   double heightMm;
   int count;
   int sashes;
-
   double glassThickness;
   bool tinted;
   bool multi;
-
   bool hasSlopes;
   String houseType;
   String slopeCategory;
@@ -315,39 +311,32 @@ class ProductItem {
   double slopeLengthSideMm;
   double slopeLengthTopMm;
   bool mountSlopesSeparately;
-
   bool hasExtraSlopes;
   String extraSlopeCategory;
   double extraSlopeDepthMm;
   double extraSlopeLengthSideMm;
   double extraSlopeLengthTopMm;
-
   bool hasSill;
   List<SillItem> sills;
   bool mountSillSeparately;
-
   bool hasDrip;
   double dripLengthMm;
   double dripDepthMm;
   String dripColor;
-
   bool hasFUgol;
   String fUgolType;
   int fUgolCount;
-
   bool hasAbris;
   double abrisLengthMm;
   bool hasPsul;
   double psulLengthMm;
   bool hasOtmazka;
   double otmazkaLengthMm;
-
   bool hasMosquito;
   bool hasAnticat;
   bool hasAntidust;
   bool hasFrameNet;
   bool hasPlisse;
-
   bool complexInstall;
   bool separateDemontage;
 
@@ -412,18 +401,15 @@ class ProductItem {
       default: return 1;
     }
   }
-  double calcPrice(PriceSettings ps) {
+double calcPrice(PriceSettings ps) {
   double total = 0;
-
   final perM2 = ps.perM2Price(type);
   if (perM2 > 0) {
     total += perM2 * areaM2 * ps.profileCoef(profile);
   } else {
     total += ps.basePrice(type) * count * ps.profileCoef(profile);
   }
-
   total += ps.furniturePrice(furniture) * sashes * count;
-
   double glassPrice = ps.glass32;
   if (glassThickness <= 24) glassPrice = ps.glass24;
   else if (glassThickness <= 32) glassPrice = ps.glass32;
@@ -431,7 +417,6 @@ class ProductItem {
   total += glassPrice * areaM2;
   if (tinted) total += ps.extraTinting * areaM2;
   if (multi) total += ps.extraMulti * areaM2;
-
   if (hasSlopes) {
     final pricePerM2 = slopeCategory == 'Питер' ? ps.slopePiterPerM2 : ps.slopeEconomPerM2;
     final totalLengthMm = slopeLengthSideMm * 2 + slopeLengthTopMm;
@@ -439,14 +424,12 @@ class ProductItem {
     total += area * pricePerM2;
     if (mountSlopesSeparately) total += area * ps.mountSlopesPerM2;
   }
-
   if (hasExtraSlopes) {
     final pricePerM2 = extraSlopeCategory == 'Питер' ? ps.slopeExtraPiterPerM2 : ps.slopeExtraEconomPerM2;
     final totalLengthMm = extraSlopeLengthSideMm * 2 + extraSlopeLengthTopMm;
     final area = (totalLengthMm * extraSlopeDepthMm) / 1000000 * count;
     total += area * pricePerM2;
   }
-
   if (hasSill && sills.isNotEmpty) {
     for (final s in sills) {
       final pricePerM2 = s.category == 'Эконом' ? ps.sillEconomPerM2 : ps.sillOtherPerM2;
@@ -454,35 +437,29 @@ class ProductItem {
       if (mountSillSeparately) total += s.areaM2 * ps.mountSillPerM2 * count;
     }
   }
-
   if (hasDrip) {
     final pricePerM2 = dripColor == 'Белый' ? ps.dripWhitePerM2 : ps.dripBrownPerM2;
     final area = (dripLengthMm * dripDepthMm) / 1000000 * count;
     total += area * pricePerM2;
   }
-
   if (hasFUgol) {
     double p = ps.fUgol40;
     if (fUgolType.startsWith('50')) p = ps.fUgol50;
     if (fUgolType.startsWith('60')) p = ps.fUgol60;
     total += p * fUgolCount;
   }
-
   if (hasAbris) total += (abrisLengthMm / 1000) * ps.abrisPerM * count;
   if (hasPsul) total += (psulLengthMm / 1000) * ps.psulPerM * count;
   if (hasOtmazka) total += (otmazkaLengthMm / 1000) * ps.otmazkaPerM * count;
-
   if (hasMosquito) total += ps.mosquito * count;
   if (hasAnticat) total += ps.anticat * count;
   if (hasAntidust) total += ps.antidust * count;
   if (hasFrameNet) total += ps.frameNet * count;
   if (hasPlisse) total += ps.plisse * count;
-
   total += ps.montagePerItem * count;
   if (!complexInstall && separateDemontage) {
     total += ps.demontagePerItem * count;
   }
-
   return total;
 }
 
@@ -507,7 +484,7 @@ double calcExtrasPrice(PriceSettings ps) {
   }
   return t;
 }
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
     'type': type,
     'profile': profile,
     'furniture': furniture,
@@ -605,6 +582,7 @@ double calcExtrasPrice(PriceSettings ps) {
     separateDemontage: j['separateDemontage'] ?? false,
   );
 }
+
 // ═══════════════════════════════════════════════════════════
 // ЗАМЕР
 // ═══════════════════════════════════════════════════════════
@@ -616,14 +594,11 @@ class Measurement {
   String clientAddress;
   String notes;
   List<ProductItem> items;
-
   bool hasTrashRemoval;
   bool hasLift;
   int liftFloors;
   bool hasDelivery;
-
   double? customClientPrice;
-
   PriceSettings priceSettings;
   DateTime createdAt;
 
@@ -655,7 +630,6 @@ class Measurement {
   }
 
   double get totalPrice => itemsPrice + servicesPrice;
-
   double get clientPrice => customClientPrice ?? totalPrice;
 
   double get dealerMountPrice {
@@ -709,7 +683,8 @@ class Measurement {
         priceSettings: ps,
         createdAt: DateTime.tryParse(j['createdAt']?.toString() ?? '') ?? DateTime.now(),
       );
-    String toFactoryText() {
+
+  String toFactoryText() {
     final b = StringBuffer();
     b.writeln('=== ЗАКАЗ НА ПРОИЗВОДСТВО ===');
     b.writeln('Дата: ${fmtDate(createdAt)}');
@@ -860,20 +835,19 @@ class MeasurementStorage {
     } catch (_) {}
   }
 }
+
 // ═══════════════════════════════════════════════════════════
 // СЕРВИС И РЕМОНТ — МОДЕЛИ
 // ═══════════════════════════════════════════════════════════
 
 class ServiceItem {
-  String type; // 'Монтаж подоконника', 'Замена ручки' и т.д.
-  int count;   // количество
-  double lengthMm; // для позиций "за м"
-  double pricePerUnit; // цена за единицу (из прайса, можно править)
-  // Для резинки
+  String type;
+  int count;
+  double lengthMm;
+  double pricePerUnit;
   int sashesCount;
   int blindCount;
-  String rubberColor; // 'Серая' / 'Черная'
-  // Для стеклопакета
+  String rubberColor;
   double glassWidthMm;
   double glassHeightMm;
   int glassSashesCount;
@@ -1051,7 +1025,6 @@ class ServiceStorage {
     } catch (_) {}
   }
 }
-
 // ═══════════════════════════════════════════════════════════
 // ГЛАВНОЕ ПРИЛОЖЕНИЕ
 // ═══════════════════════════════════════════════════════════
@@ -1067,7 +1040,7 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
   PriceSettings? _price;
   List<Measurement> _measurements = [];
   List<ServiceMeasurement> _serviceMeasurements = [];
-  ThemeMode _themeMode = ThemeMode.system;;
+  ThemeMode _themeMode = ThemeMode.system;
 
   static const _themeKey = 'theme_mode';
 
@@ -1110,33 +1083,33 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
     });
   }
 
-Future<void> _loadData() async {
-  PriceSettings ps;
-  List<Measurement> ms;
-  List<ServiceMeasurement> sm;
-  try {
-    ps = await PriceStorage.load();
-  } catch (_) {
-    ps = PriceSettings();
+  Future<void> _loadData() async {
+    PriceSettings ps;
+    List<Measurement> ms;
+    List<ServiceMeasurement> sm;
+    try {
+      ps = await PriceStorage.load();
+    } catch (_) {
+      ps = PriceSettings();
+    }
+    try {
+      ms = await MeasurementStorage.load(ps);
+    } catch (_) {
+      ms = [];
+    }
+    try {
+      sm = await ServiceStorage.load(ps);
+    } catch (_) {
+      sm = [];
+    }
+    await _loadTheme();
+    if (!mounted) return;
+    setState(() {
+      _price = ps;
+      _measurements = ms;
+      _serviceMeasurements = sm;
+    });
   }
-  try {
-    ms = await MeasurementStorage.load(ps);
-  } catch (_) {
-    ms = [];
-  }
-  try {
-    sm = await ServiceStorage.load(ps);
-  } catch (_) {
-    sm = [];
-  }
-  await _loadTheme();
-  if (!mounted) return;
-  setState(() {
-    _price = ps;
-    _measurements = ms;
-    _serviceMeasurements = sm;
-  });
-}
 
   Future<void> _savePrice() async {
     if (_price == null) return;
@@ -1145,17 +1118,18 @@ Future<void> _loadData() async {
   }
 
   Future<void> _saveMeasurements() async {
-  try {
-    await MeasurementStorage.save(_measurements);
-  } catch (_) {}
-}
+    try {
+      await MeasurementStorage.save(_measurements);
+    } catch (_) {}
+  }
 
-Future<void> _saveServiceMeasurements() async {
-  try {
-    await ServiceStorage.save(_serviceMeasurements);
-  } catch (_) {}
-}
-    @override
+  Future<void> _saveServiceMeasurements() async {
+    try {
+      await ServiceStorage.save(_serviceMeasurements);
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Замерщик окон Almas',
@@ -1174,7 +1148,7 @@ Future<void> _saveServiceMeasurements() async {
       themeMode: _themeMode,
       home: SplashScreen(
         loadData: _loadData,
-                buildMainMenu: () => MainMenuScreen(
+        buildMainMenu: () => MainMenuScreen(
           price: _price!,
           measurements: _measurements,
           serviceMeasurements: _serviceMeasurements,
@@ -1210,34 +1184,6 @@ Future<void> _saveServiceMeasurements() async {
     );
   }
 }
-          onMeasurementDeleted: (id) {
-            setState(() => _measurements.removeWhere((m) => m.id == id));
-            _saveMeasurements();
-          },
-                    onMeasurementUpdated: (updated) {
-            setState(() {
-              final idx = _measurements.indexWhere((m) => m.id == updated.id);
-              if (idx >= 0) _measurements[idx] = updated;
-            });
-            _saveMeasurements();
-          },
-          onCycleTheme: _cycleTheme,
-          themeMode: _themeMode,
-          onServiceAdded: (m) {
-            setState(() => _serviceMeasurements.insert(0, m));
-            _saveServiceMeasurements();
-          },
-          onServiceDeleted: (id) {
-            setState(() =>
-                _serviceMeasurements.removeWhere((m) => m.id == id));
-            _saveServiceMeasurements();
-          },
-        ),
-      ),
-    );
-  }
-}
-
 // ═══════════════════════════════════════════════════════════
 // ГЛАВНОЕ МЕНЮ
 // ═══════════════════════════════════════════════════════════
@@ -1255,11 +1201,11 @@ class MainMenuScreen extends StatelessWidget {
   final Function(ServiceMeasurement) onServiceAdded;
   final Function(String) onServiceDeleted;
 
-const MainMenuScreen({
-  super.key,
-  required this.price,
-  required this.measurements,
-  required this.serviceMeasurements,
+  const MainMenuScreen({
+    super.key,
+    required this.price,
+    required this.measurements,
+    required this.serviceMeasurements,
     required this.onPriceChanged,
     required this.onMeasurementAdded,
     required this.onMeasurementDeleted,
@@ -1362,40 +1308,40 @@ const MainMenuScreen({
               );
             },
           ),
-              
-    _menuCard(
-      context,
-      icon: Icons.build,
-      color: Colors.teal,
-      title: 'Сервис и ремонт',
-      subtitle: 'Отдельные работы',
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ServiceListScreen(
-              price: price,
-              measurements: const [],
-              onAdded: (_) {},
-              onDeleted: (_) {},
-            ),
+          _menuCard(
+            context,
+            icon: Icons.build,
+            color: Colors.teal,
+            title: 'Сервис и ремонт',
+            subtitle: '${serviceMeasurements.length} шт.',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ServiceListScreen(
+                    price: price,
+                    measurements: serviceMeasurements,
+                    onAdded: onServiceAdded,
+                    onDeleted: onServiceDeleted,
+                  ),
+                ),
+              );
+            },
           ),
-        );
-      },
-    ),
-    _menuCard(
-      context,
-      icon: Icons.system_update,
-      color: Colors.purple,
-      title: 'Проверить обновление',
-      subtitle: 'Диагностика + обновление',
-      onTap: () => _showUpdateReport(context),
-    ),
-  ],
-),
+          _menuCard(
+            context,
+            icon: Icons.system_update,
+            color: Colors.purple,
+            title: 'Проверить обновление',
+            subtitle: 'Диагностика + обновление',
+            onTap: () => _showUpdateReport(context),
+          ),
+        ],
+      ),
     );
   }
-    Widget _menuCard(
+
+  Widget _menuCard(
     BuildContext context, {
     required IconData icon,
     required Color color,
@@ -1426,12 +1372,9 @@ const MainMenuScreen({
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
-
     final report = await UpdateChecker.getReport();
-
     if (context.mounted) Navigator.pop(context);
     if (!context.mounted) return;
-
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -1462,7 +1405,6 @@ const MainMenuScreen({
     );
   }
 }
-
 // ═══════════════════════════════════════════════════════════
 // СОХРАНЁННЫЕ ЗАМЕРЫ
 // ═══════════════════════════════════════════════════════════
@@ -1694,6 +1636,17 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     p.erkerPerM2 = g('erkerPerM2');
     p.archWindow = g('archWindow');
     p.facadeAlumPerM2 = g('facadeAlumPerM2');
+    p.mountSillServicePerM = g('mountSillServicePerM');
+    p.mountSlopeServicePerM = g('mountSlopeServicePerM');
+    p.mountNetServicePerPc = g('mountNetServicePerPc');
+    p.regulationPerPc = g('regulationPerPc');
+    p.handleReplacePerPc = g('handleReplacePerPc');
+    p.rubberReplacePerSash = g('rubberReplacePerSash');
+    p.rubberReplaceBlindExtra = g('rubberReplaceBlindExtra');
+    p.glassReplacePerPc = g('glassReplacePerPc');
+    p.glassReplaceBlindExtra = g('glassReplaceBlindExtra');
+    p.furnitureReplacePerPc = g('furnitureReplacePerPc');
+    p.sillReplacePerM = g('sillReplacePerM');
     await widget.onChanged();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1858,6 +1811,21 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
             _row('Подъём (за этаж)', 'liftPerFloor'),
             _row('Доставка', 'delivery'),
           ]),
+          _category('Сервис и ремонт (за работу)', Icons.build_circle, [
+            _subtitle('Монтаж отдельно'),
+            _row('Монтаж подоконника (за м)', 'mountSillServicePerM', suffix: '₽/м'),
+            _row('Монтаж откоса (за м)', 'mountSlopeServicePerM', suffix: '₽/м'),
+            _row('Монтаж сетки (за шт)', 'mountNetServicePerPc'),
+            _subtitle('Ремонт'),
+            _row('Регулировка (за шт)', 'regulationPerPc'),
+            _row('Замена ручки (за шт)', 'handleReplacePerPc'),
+            _row('Замена резинки (за створку)', 'rubberReplacePerSash'),
+            _row('Глушняк — надбавка', 'rubberReplaceBlindExtra'),
+            _row('Замена стеклопакета (за шт)', 'glassReplacePerPc'),
+            _row('Стеклопакет глушняк — надбавка', 'glassReplaceBlindExtra'),
+            _row('Замена фурнитуры (за шт)', 'furnitureReplacePerPc'),
+            _row('Замена подоконника (за м)', 'sillReplacePerM', suffix: '₽/м'),
+          ]),
           _category('Нестандарт', Icons.star, [
             _row('Эркерное остекление', 'erkerPerM2', suffix: '₽/м²'),
             _row('Арочное окно', 'archWindow'),
@@ -1894,7 +1862,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
   final _notesCtrl = TextEditingController();
   final _liftFloorsCtrl = TextEditingController(text: '1');
   final List<ProductItem> _items = [ProductItem()];
-
   bool _hasTrashRemoval = false;
   bool _hasLift = false;
   bool _hasDelivery = false;
@@ -2049,7 +2016,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
   Widget _itemCard(int index) {
     final it = _items[index];
     final price = it.calcPrice(widget.price);
-
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -2121,45 +2087,37 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: it.widthMm.toStringAsFixed(0),
-                    decoration: const InputDecoration(labelText: 'Ширина, мм'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.widthMm = double.tryParse(v) ?? 0),
-                  ),
-                ),
+                Expanded(child: TextFormField(
+                  initialValue: it.widthMm.toStringAsFixed(0),
+                  decoration: const InputDecoration(labelText: 'Ширина, мм'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setState(() => it.widthMm = double.tryParse(v) ?? 0),
+                )),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: it.heightMm.toStringAsFixed(0),
-                    decoration: const InputDecoration(labelText: 'Высота, мм'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.heightMm = double.tryParse(v) ?? 0),
-                  ),
-                ),
+                Expanded(child: TextFormField(
+                  initialValue: it.heightMm.toStringAsFixed(0),
+                  decoration: const InputDecoration(labelText: 'Высота, мм'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setState(() => it.heightMm = double.tryParse(v) ?? 0),
+                )),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: it.count.toString(),
-                    decoration: const InputDecoration(labelText: 'Кол-во'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.count = int.tryParse(v) ?? 1),
-                  ),
-                ),
+                Expanded(child: TextFormField(
+                  initialValue: it.count.toString(),
+                  decoration: const InputDecoration(labelText: 'Кол-во'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setState(() => it.count = int.tryParse(v) ?? 1),
+                )),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: it.sashes.toString(),
-                    decoration: const InputDecoration(labelText: 'Створок'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.sashes = int.tryParse(v) ?? 1),
-                  ),
-                ),
+                Expanded(child: TextFormField(
+                  initialValue: it.sashes.toString(),
+                  decoration: const InputDecoration(labelText: 'Створок'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setState(() => it.sashes = int.tryParse(v) ?? 1),
+                )),
               ],
             ),
             const SizedBox(height: 8),
@@ -2188,224 +2146,188 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             const Divider(),
             const Text('Отделка', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
             const SizedBox(height: 8),
-            CheckboxListTile(
-  value: it.hasSlopes,
-  onChanged: (v) => setState(() => it.hasSlopes = v!),
-  title: const Text('Откосы'),
-  dense: true,
-),
-if (it.hasSlopes) Padding(
-  padding: const EdgeInsets.only(left: 16, bottom: 8),
-  child: Column(children: [
-    DropdownButtonFormField<String>(
-      value: it.houseType,
-      decoration: const InputDecoration(labelText: 'Тип дома'),
-      items: const [
-        DropdownMenuItem(value: 'Панелька', child: Text('Панелька')),
-        DropdownMenuItem(value: 'Сталинка', child: Text('Сталинка')),
-        DropdownMenuItem(value: 'Кирпич', child: Text('Кирпич')),
-      ],
-      onChanged: (v) => setState(() => it.houseType = v!),
-    ),
-    const SizedBox(height: 6),
-    DropdownButtonFormField<String>(
-      value: it.slopeCategory,
-      decoration: const InputDecoration(labelText: 'Категория'),
-      items: const [
-        DropdownMenuItem(value: 'Питер', child: Text('Питер')),
-        DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
-      ],
-      onChanged: (v) => setState(() => it.slopeCategory = v!),
-    ),
-    const SizedBox(height: 6),
-    Row(children: [
-      Expanded(child: TextFormField(
-        initialValue: it.slopeDepthMm.toStringAsFixed(0),
-        decoration: const InputDecoration(labelText: 'Глубина, мм'),
-        keyboardType: TextInputType.number,
-        onChanged: (v) => setState(() => it.slopeDepthMm = double.tryParse(v) ?? 0),
-      )),
-      const SizedBox(width: 8),
-      Expanded(child: TextFormField(
-        initialValue: it.slopeLengthSideMm.toStringAsFixed(0),
-        decoration: const InputDecoration(labelText: 'Бок, мм'),
-        keyboardType: TextInputType.number,
-        onChanged: (v) => setState(() => it.slopeLengthSideMm = double.tryParse(v) ?? 0),
-      )),
-    ]),
-    const SizedBox(height: 6),
-    TextFormField(
-      initialValue: it.slopeLengthTopMm.toStringAsFixed(0),
-      decoration: const InputDecoration(labelText: 'Верх, мм'),
-      keyboardType: TextInputType.number,
-      onChanged: (v) => setState(() => it.slopeLengthTopMm = double.tryParse(v) ?? 0),
-    ),
-    CheckboxListTile(
-      value: it.mountSlopesSeparately,
-      onChanged: (v) => setState(() => it.mountSlopesSeparately = v!),
-      title: const Text('Монтаж откосов отдельно'),
-      dense: true,
-    ),
-  ]),
-),
-CheckboxListTile(
-  value: it.hasExtraSlopes,
-  onChanged: (v) => setState(() => it.hasExtraSlopes = v!),
-  title: const Text('Откосы доп. (с улицы)'),
-  dense: true,
-),
-if (it.hasExtraSlopes) Padding(
-  padding: const EdgeInsets.only(left: 16, bottom: 8),
-  child: Column(children: [
-    DropdownButtonFormField<String>(
-      value: it.extraSlopeCategory,
-      decoration: const InputDecoration(labelText: 'Категория'),
-      items: const [
-        DropdownMenuItem(value: 'Питер', child: Text('Питер')),
-        DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
-      ],
-      onChanged: (v) => setState(() => it.extraSlopeCategory = v!),
-    ),
-    const SizedBox(height: 6),
-    Row(children: [
-      Expanded(child: TextFormField(
-        initialValue: it.extraSlopeDepthMm.toStringAsFixed(0),
-        decoration: const InputDecoration(labelText: 'Глубина, мм'),
-        keyboardType: TextInputType.number,
-        onChanged: (v) => setState(() => it.extraSlopeDepthMm = double.tryParse(v) ?? 0),
-      )),
-      const SizedBox(width: 8),
-      Expanded(child: TextFormField(
-        initialValue: it.extraSlopeLengthSideMm.toStringAsFixed(0),
-        decoration: const InputDecoration(labelText: 'Бок, мм'),
-        keyboardType: TextInputType.number,
-        onChanged: (v) => setState(() => it.extraSlopeLengthSideMm = double.tryParse(v) ?? 0),
-      )),
-    ]),
-    const SizedBox(height: 6),
-    TextFormField(
-      initialValue: it.extraSlopeLengthTopMm.toStringAsFixed(0),
-      decoration: const InputDecoration(labelText: 'Верх, мм'),
-      keyboardType: TextInputType.number,
-      onChanged: (v) => setState(() => it.extraSlopeLengthTopMm = double.tryParse(v) ?? 0),
-    ),
-  ]),
-),
-CheckboxListTile(
-  value: it.hasSill,
-  onChanged: (v) => setState(() {
-    it.hasSill = v!;
-    if (v && it.sills.isEmpty) {
-      final len = it.hasSlopes
-          ? (it.slopeLengthTopMm + 200)
-          : (it.widthMm + 400);
-      final dep = it.hasSlopes
-          ? (it.slopeDepthMm + 50)
-          : 250.0;
-      it.sills = [SillItem(lengthMm: len, depthMm: dep)];
-    }
-  }),
-  title: const Text('Подоконники'),
-  dense: true,
-),
-if (it.hasSill) Padding(
-  padding: const EdgeInsets.only(left: 16, bottom: 8),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      for (var k = 0; k < it.sills.length; k++)
-        Card(
-          color: Colors.grey.shade100,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text('Подоконник ${k + 1}',
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                    const Spacer(),
-                    if (it.sills.length > 1)
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 20),
-                        onPressed: () => setState(() => it.sills.removeAt(k)),
-                      ),
+                        CheckboxListTile(value: it.hasSlopes, onChanged: (v) => setState(() => it.hasSlopes = v!), title: const Text('Откосы'), dense: true),
+            if (it.hasSlopes) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(children: [
+                DropdownButtonFormField<String>(
+                  value: it.houseType,
+                  decoration: const InputDecoration(labelText: 'Тип дома'),
+                  items: const [
+                    DropdownMenuItem(value: 'Панелька', child: Text('Панелька')),
+                    DropdownMenuItem(value: 'Сталинка', child: Text('Сталинка')),
+                    DropdownMenuItem(value: 'Кирпич', child: Text('Кирпич')),
                   ],
+                  onChanged: (v) => setState(() => it.houseType = v!),
                 ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  value: it.slopeCategory,
+                  decoration: const InputDecoration(labelText: 'Категория'),
+                  items: const [
+                    DropdownMenuItem(value: 'Питер', child: Text('Питер')),
+                    DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
+                  ],
+                  onChanged: (v) => setState(() => it.slopeCategory = v!),
+                ),
+                const SizedBox(height: 6),
                 Row(children: [
                   Expanded(child: TextFormField(
-                    initialValue: it.sills[k].lengthMm.toStringAsFixed(0),
-                    decoration: const InputDecoration(labelText: 'Длина, мм'),
+                    initialValue: it.slopeDepthMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
                     keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.sills[k].lengthMm = double.tryParse(v) ?? 0),
+                    onChanged: (v) => setState(() => it.slopeDepthMm = double.tryParse(v) ?? 0),
                   )),
                   const SizedBox(width: 8),
                   Expanded(child: TextFormField(
-                    initialValue: it.sills[k].depthMm.toStringAsFixed(0),
-                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
+                    initialValue: it.slopeLengthSideMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Бок, мм'),
                     keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.sills[k].depthMm = double.tryParse(v) ?? 0),
+                    onChanged: (v) => setState(() => it.slopeLengthSideMm = double.tryParse(v) ?? 0),
                   )),
                 ]),
+                const SizedBox(height: 6),
+                TextFormField(
+                  initialValue: it.slopeLengthTopMm.toStringAsFixed(0),
+                  decoration: const InputDecoration(labelText: 'Верх, мм'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setState(() => it.slopeLengthTopMm = double.tryParse(v) ?? 0),
+                ),
+                CheckboxListTile(
+                  value: it.mountSlopesSeparately,
+                  onChanged: (v) => setState(() => it.mountSlopesSeparately = v!),
+                  title: const Text('Монтаж откосов отдельно'),
+                  dense: true,
+                ),
+              ]),
+            ),
+            CheckboxListTile(value: it.hasExtraSlopes, onChanged: (v) => setState(() => it.hasExtraSlopes = v!), title: const Text('Откосы доп. (с улицы)'), dense: true),
+            if (it.hasExtraSlopes) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(children: [
                 DropdownButtonFormField<String>(
-                  value: it.sills[k].category,
+                  value: it.extraSlopeCategory,
                   decoration: const InputDecoration(labelText: 'Категория'),
                   items: const [
+                    DropdownMenuItem(value: 'Питер', child: Text('Питер')),
                     DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
-                    DropdownMenuItem(value: 'Другое', child: Text('Другое')),
                   ],
-                  onChanged: (v) => setState(() => it.sills[k].category = v!),
+                  onChanged: (v) => setState(() => it.extraSlopeCategory = v!),
                 ),
-              ],
+                const SizedBox(height: 6),
+                Row(children: [
+                  Expanded(child: TextFormField(
+                    initialValue: it.extraSlopeDepthMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.extraSlopeDepthMm = double.tryParse(v) ?? 0),
+                  )),
+                  const SizedBox(width: 8),
+                  Expanded(child: TextFormField(
+                    initialValue: it.extraSlopeLengthSideMm.toStringAsFixed(0),
+                    decoration: const InputDecoration(labelText: 'Бок, мм'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setState(() => it.extraSlopeLengthSideMm = double.tryParse(v) ?? 0),
+                  )),
+                ]),
+                const SizedBox(height: 6),
+                TextFormField(
+                  initialValue: it.extraSlopeLengthTopMm.toStringAsFixed(0),
+                  decoration: const InputDecoration(labelText: 'Верх, мм'),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setState(() => it.extraSlopeLengthTopMm = double.tryParse(v) ?? 0),
+                ),
+              ]),
             ),
-          ),
-        ),
-      OutlinedButton.icon(
-        onPressed: () => setState(() {
-          it.sills.add(SillItem(
-            lengthMm: it.widthMm + 400,
-            depthMm: 250,
-          ));
-        }),
-        icon: const Icon(Icons.add),
-        label: const Text('Добавить подоконник'),
-      ),
-      CheckboxListTile(
-        value: it.mountSillSeparately,
-        onChanged: (v) => setState(() => it.mountSillSeparately = v!),
-        title: const Text('Монтаж подоконников отдельно'),
-        dense: true,
-      ),
-    ],
-  ),
-),
-                        CheckboxListTile(
-              value: it.hasDrip,
+            CheckboxListTile(
+              value: it.hasSill,
               onChanged: (v) => setState(() {
-                it.hasDrip = v!;
-                if (v) it.dripLengthMm = it.widthMm;
+                it.hasSill = v!;
+                if (v && it.sills.isEmpty) {
+                  final len = it.hasSlopes ? (it.slopeLengthTopMm + 200) : (it.widthMm + 400);
+                  final dep = it.hasSlopes ? (it.slopeDepthMm + 50) : 250.0;
+                  it.sills = [SillItem(lengthMm: len, depthMm: dep)];
+                }
               }),
-              title: const Text('Отлив'),
+              title: const Text('Подоконники'),
               dense: true,
             ),
+            if (it.hasSill) Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var k = 0; k < it.sills.length; k++)
+                    Card(
+                      color: Colors.grey.shade100,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text('Подоконник ${k + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                const Spacer(),
+                                if (it.sills.length > 1)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, size: 20),
+                                    onPressed: () => setState(() => it.sills.removeAt(k)),
+                                  ),
+                              ],
+                            ),
+                            Row(children: [
+                              Expanded(child: TextFormField(
+                                initialValue: it.sills[k].lengthMm.toStringAsFixed(0),
+                                decoration: const InputDecoration(labelText: 'Длина, мм'),
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) => setState(() => it.sills[k].lengthMm = double.tryParse(v) ?? 0),
+                              )),
+                              const SizedBox(width: 8),
+                              Expanded(child: TextFormField(
+                                initialValue: it.sills[k].depthMm.toStringAsFixed(0),
+                                decoration: const InputDecoration(labelText: 'Глубина, мм'),
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) => setState(() => it.sills[k].depthMm = double.tryParse(v) ?? 0),
+                              )),
+                            ]),
+                            DropdownButtonFormField<String>(
+                              value: it.sills[k].category,
+                              decoration: const InputDecoration(labelText: 'Категория'),
+                              items: const [
+                                DropdownMenuItem(value: 'Эконом', child: Text('Эконом')),
+                                DropdownMenuItem(value: 'Другое', child: Text('Другое')),
+                              ],
+                              onChanged: (v) => setState(() => it.sills[k].category = v!),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  OutlinedButton.icon(
+                    onPressed: () => setState(() {
+                      it.sills.add(SillItem(lengthMm: it.widthMm + 400, depthMm: 250));
+                    }),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Добавить подоконник'),
+                  ),
+                  CheckboxListTile(
+                    value: it.mountSillSeparately,
+                    onChanged: (v) => setState(() => it.mountSillSeparately = v!),
+                    title: const Text('Монтаж подоконников отдельно'),
+                    dense: true,
+                  ),
+                ],
+              ),
+            ),
+            CheckboxListTile(value: it.hasDrip, onChanged: (v) => setState(() { it.hasDrip = v!; if (v) it.dripLengthMm = it.widthMm; }), title: const Text('Отлив'), dense: true),
             if (it.hasDrip) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
               child: Column(children: [
                 Row(children: [
-                  Expanded(child: TextFormField(
-                    initialValue: it.dripLengthMm.toStringAsFixed(0),
-                    decoration: const InputDecoration(labelText: 'Длина, мм'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.dripLengthMm = double.tryParse(v) ?? 0),
-                  )),
+                  Expanded(child: TextFormField(initialValue: it.dripLengthMm.toStringAsFixed(0), decoration: const InputDecoration(labelText: 'Длина, мм'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.dripLengthMm = double.tryParse(v) ?? 0))),
                   const SizedBox(width: 8),
-                  Expanded(child: TextFormField(
-                    initialValue: it.dripDepthMm.toStringAsFixed(0),
-                    decoration: const InputDecoration(labelText: 'Глубина, мм'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => setState(() => it.dripDepthMm = double.tryParse(v) ?? 0),
-                  )),
+                  Expanded(child: TextFormField(initialValue: it.dripDepthMm.toStringAsFixed(0), decoration: const InputDecoration(labelText: 'Глубина, мм'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.dripDepthMm = double.tryParse(v) ?? 0))),
                 ]),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
@@ -2419,12 +2341,7 @@ if (it.hasSill) Padding(
                 ),
               ]),
             ),
-            CheckboxListTile(
-              value: it.hasFUgol,
-              onChanged: (v) => setState(() => it.hasFUgol = v!),
-              title: const Text('F-угол'),
-              dense: true,
-            ),
+            CheckboxListTile(value: it.hasFUgol, onChanged: (v) => setState(() => it.hasFUgol = v!), title: const Text('F-угол'), dense: true),
             if (it.hasFUgol) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
               child: Column(children: [
@@ -2439,60 +2356,25 @@ if (it.hasSill) Padding(
                   onChanged: (v) => setState(() => it.fUgolType = v!),
                 ),
                 const SizedBox(height: 6),
-                TextFormField(
-                  initialValue: it.fUgolCount.toString(),
-                  decoration: const InputDecoration(labelText: 'Количество, шт'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => setState(() => it.fUgolCount = int.tryParse(v) ?? 1),
-                ),
+                TextFormField(initialValue: it.fUgolCount.toString(), decoration: const InputDecoration(labelText: 'Количество, шт'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.fUgolCount = int.tryParse(v) ?? 1)),
               ]),
             ),
             const Divider(),
             const Text('Монтажные работы', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-            CheckboxListTile(
-              value: it.hasAbris,
-              onChanged: (v) => setState(() => it.hasAbris = v!),
-              title: const Text('Абрис'),
-              dense: true,
-            ),
+            CheckboxListTile(value: it.hasAbris, onChanged: (v) => setState(() => it.hasAbris = v!), title: const Text('Абрис'), dense: true),
             if (it.hasAbris) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
-              child: TextFormField(
-                initialValue: it.abrisLengthMm.toStringAsFixed(0),
-                decoration: const InputDecoration(labelText: 'Длина, мм'),
-                keyboardType: TextInputType.number,
-                onChanged: (v) => setState(() => it.abrisLengthMm = double.tryParse(v) ?? 0),
-              ),
+              child: TextFormField(initialValue: it.abrisLengthMm.toStringAsFixed(0), decoration: const InputDecoration(labelText: 'Длина, мм'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.abrisLengthMm = double.tryParse(v) ?? 0)),
             ),
-            CheckboxListTile(
-              value: it.hasPsul,
-              onChanged: (v) => setState(() => it.hasPsul = v!),
-              title: const Text('ПСУЛ'),
-              dense: true,
-            ),
+            CheckboxListTile(value: it.hasPsul, onChanged: (v) => setState(() => it.hasPsul = v!), title: const Text('ПСУЛ'), dense: true),
             if (it.hasPsul) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
-              child: TextFormField(
-                initialValue: it.psulLengthMm.toStringAsFixed(0),
-                decoration: const InputDecoration(labelText: 'Длина, мм'),
-                keyboardType: TextInputType.number,
-                onChanged: (v) => setState(() => it.psulLengthMm = double.tryParse(v) ?? 0),
-              ),
+              child: TextFormField(initialValue: it.psulLengthMm.toStringAsFixed(0), decoration: const InputDecoration(labelText: 'Длина, мм'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.psulLengthMm = double.tryParse(v) ?? 0)),
             ),
-            CheckboxListTile(
-              value: it.hasOtmazka,
-              onChanged: (v) => setState(() => it.hasOtmazka = v!),
-              title: const Text('Отмазка'),
-              dense: true,
-            ),
+            CheckboxListTile(value: it.hasOtmazka, onChanged: (v) => setState(() => it.hasOtmazka = v!), title: const Text('Отмазка'), dense: true),
             if (it.hasOtmazka) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
-              child: TextFormField(
-                initialValue: it.otmazkaLengthMm.toStringAsFixed(0),
-                decoration: const InputDecoration(labelText: 'Длина, мм'),
-                keyboardType: TextInputType.number,
-                onChanged: (v) => setState(() => it.otmazkaLengthMm = double.tryParse(v) ?? 0),
-              ),
+              child: TextFormField(initialValue: it.otmazkaLengthMm.toStringAsFixed(0), decoration: const InputDecoration(labelText: 'Длина, мм'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.otmazkaLengthMm = double.tryParse(v) ?? 0)),
             ),
             const Divider(),
             const Text('Сетки', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
@@ -2502,19 +2384,9 @@ if (it.hasSill) Padding(
             CheckboxListTile(value: it.hasFrameNet, onChanged: (v) => setState(() => it.hasFrameNet = v!), title: const Text('Рамная'), dense: true),
             CheckboxListTile(value: it.hasPlisse, onChanged: (v) => setState(() => it.hasPlisse = v!), title: const Text('Плиссе'), dense: true),
             const Divider(),
-            CheckboxListTile(
-              value: it.complexInstall,
-              onChanged: (v) => setState(() => it.complexInstall = v!),
-              title: const Text('Комплекс (монтаж + демонтаж)'),
-              dense: true,
-            ),
+            CheckboxListTile(value: it.complexInstall, onChanged: (v) => setState(() => it.complexInstall = v!), title: const Text('Комплекс (монтаж + демонтаж)'), dense: true),
             if (!it.complexInstall)
-              CheckboxListTile(
-                value: it.separateDemontage,
-                onChanged: (v) => setState(() => it.separateDemontage = v!),
-                title: const Text('Демонтаж отдельно'),
-                dense: true,
-              ),
+              CheckboxListTile(value: it.separateDemontage, onChanged: (v) => setState(() => it.separateDemontage = v!), title: const Text('Демонтаж отдельно'), dense: true),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
@@ -2638,13 +2510,20 @@ class _ResultScreenState extends State<ResultScreen> {
                         children: [
                           Text('${e.key + 1}. ${it.type} — ${it.widthMm.toInt()}x${it.heightMm.toInt()} мм x ${it.count}',
                               style: const TextStyle(fontWeight: FontWeight.w500)),
-                          Text('   ${it.profile} • ${it.furniture} • ${it.sashes} ств.', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          Text('   Стекло ${it.glassThickness.toInt()} мм', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          if (it.hasSlopes) Text('   Откосы: ${it.slopeCategory} (${it.houseType})', style: const TextStyle(fontSize: 12)),
-                          if (it.hasSill && it.sills.isNotEmpty) Text('   Подоконники: ${it.sills.length} шт', style: const TextStyle(fontSize: 12)),
-                          if (it.hasDrip) Text('   Отлив: ${it.dripColor}', style: const TextStyle(fontSize: 12)),
-                          if (it.hasFUgol) Text('   F-угол: ${it.fUgolType} x ${it.fUgolCount}', style: const TextStyle(fontSize: 12)),
-                          Text('   ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽', style: const TextStyle(fontWeight: FontWeight.w500)),
+                          Text('   ${it.profile} • ${it.furniture} • ${it.sashes} ств.',
+                              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          Text('   Стекло ${it.glassThickness.toInt()} мм',
+                              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          if (it.hasSlopes) Text('   Откосы: ${it.slopeCategory} (${it.houseType})',
+                              style: const TextStyle(fontSize: 12)),
+                          if (it.hasSill && it.sills.isNotEmpty) Text('   Подоконники: ${it.sills.length} шт',
+                              style: const TextStyle(fontSize: 12)),
+                          if (it.hasDrip) Text('   Отлив: ${it.dripColor}',
+                              style: const TextStyle(fontSize: 12)),
+                          if (it.hasFUgol) Text('   F-угол: ${it.fUgolType} x ${it.fUgolCount}',
+                              style: const TextStyle(fontSize: 12)),
+                          Text('   ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽',
+                              style: const TextStyle(fontWeight: FontWeight.w500)),
                         ],
                       ),
                     );
@@ -2652,9 +2531,12 @@ class _ResultScreenState extends State<ResultScreen> {
                   if (m.hasTrashRemoval || m.hasLift || m.hasDelivery) ...[
                     const Divider(height: 24),
                     const Text('Услуги:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    if (m.hasTrashRemoval) Text('• Вывоз мусора — ${m.priceSettings.trashRemoval.toStringAsFixed(0)} ₽'),
-                    if (m.hasLift) Text('• Подъём на ${m.liftFloors} эт. — ${(m.priceSettings.liftPerFloor * m.liftFloors).toStringAsFixed(0)} ₽'),
-                    if (m.hasDelivery) Text('• Доставка — ${m.priceSettings.delivery.toStringAsFixed(0)} ₽'),
+                    if (m.hasTrashRemoval)
+                      Text('• Вывоз мусора — ${m.priceSettings.trashRemoval.toStringAsFixed(0)} ₽'),
+                    if (m.hasLift)
+                      Text('• Подъём на ${m.liftFloors} эт. — ${(m.priceSettings.liftPerFloor * m.liftFloors).toStringAsFixed(0)} ₽'),
+                    if (m.hasDelivery)
+                      Text('• Доставка — ${m.priceSettings.delivery.toStringAsFixed(0)} ₽'),
                   ],
                   if (m.notes.isNotEmpty) ...[
                     const SizedBox(height: 12),
@@ -2675,7 +2557,8 @@ class _ResultScreenState extends State<ResultScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Расчётная цена:', style: TextStyle(fontSize: 15)),
-                      Text('${m.totalPrice.toStringAsFixed(0)} ₽', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('${m.totalPrice.toStringAsFixed(0)} ₽',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   if (m.customClientPrice != null) ...[
@@ -2683,7 +2566,8 @@ class _ResultScreenState extends State<ResultScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Цена для клиента:', style: TextStyle(fontSize: 15, color: Colors.green)),
+                        const Text('Цена для клиента:',
+                            style: TextStyle(fontSize: 15, color: Colors.green)),
                         Text('${m.customClientPrice!.toStringAsFixed(0)} ₽',
                             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
                       ],
@@ -2717,15 +2601,7 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  Widget _shareButton(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String sub,
-    Color color,
-    String text, {
-    bool copyOnly = false,
-  }) {
+  Widget _shareButton(BuildContext context, IconData icon, String label, String sub, Color color, String text, {bool copyOnly = false}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -2754,6 +2630,7 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 }
+
 // ═══════════════════════════════════════════════════════════
 // ВСПОМОГАТЕЛЬНОЕ
 // ═══════════════════════════════════════════════════════════
@@ -2766,10 +2643,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
+      child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
 }
