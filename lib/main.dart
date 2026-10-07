@@ -609,9 +609,9 @@ double calcExtrasPrice(PriceSettings ps) {
     hasPlisse: j['hasPlisse'] ?? false,
       complexInstall: j['complexInstall'] ?? true,
   separateDemontage: j['separateDemontage'] ?? false,
-  sashTypes: ((j['sashTypes'] as List?) ?? [])
-      .map((e) => e.toString())
-      .toList(),
+  sashTypesParam: ((j['sashTypes'] as List?) ?? [])
+    .map((e) => e.toString())
+    .toList(),
 );
 }
 
