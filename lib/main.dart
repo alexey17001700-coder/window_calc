@@ -114,7 +114,7 @@ class PriceSettings {
     switch (profile) {
       case 'Rehau': return coefRehau;
       case 'Bauline': return coefBauline;
-      case 'Novoline': return coefNovoline;
+      case 'Novoline': return coefNovoline;щ
       case 'Brusbox': return coefBrusbox;
       case 'Veka': return coefVeka;
       case 'KBE': return coefKBE;
@@ -392,20 +392,43 @@ class ProductItem {
     List<String>? sashTypes,
 })  : sills = sills ?? [],
       sashTypes = sashTypes ?? defaultSashTypes(type);
+    
+
 
   double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
 
-  static int defaultSashes(String type) {
-    switch (type) {
-      case 'Окно 1-створчатое': return 1;
-      case 'Окно 2-створчатое': return 2;
-      case 'Окно 3-створчатое': return 3;
-      case 'Балконный блок': return 3;
-      case 'Балконная дверь': return 1;
-      case 'Дверь ПВХ': return 1;
-      default: return 1;
-    }
+static List<String> defaultSashTypes(String type) {
+  switch (type) {
+    case 'Окно 1-створчатое':
+      return ['Поворотно-откидная'];
+    case 'Окно 2-створчатое':
+      return ['Поворотно-откидная', 'Глухая'];
+    case 'Окно 3-створчатое':
+      return ['Поворотная', 'Глухая', 'Поворотная'];
+    case 'Балконный блок':
+      return ['Поворотно-откидная', 'Глухая', 'Поворотная'];
+    case 'Балконная дверь':
+      return ['Поворотная'];
+    case 'Дверь ПВХ':
+      return ['Поворотная'];
+    case 'Балконное остекление':
+      return ['Глухая', 'Поворотная', 'Глухая'];
+    case 'Остекление лоджии':
+      return ['Глухая', 'Поворотная', 'Глухая'];
+    case 'Панорамное остекление':
+      return ['Глухая', 'Поворотная', 'Глухая'];
+    case 'Эркерное остекление':
+      return ['Глухая', 'Поворотная', 'Глухая'];
+    case 'Арочное окно':
+      return ['Глухая'];
+    case 'Входная группа':
+      return ['Поворотная'];
+    case 'Фасадное алюминиевое остекление':
+      return ['Глухая', 'Поворотная', 'Глухая'];
+    default:
+      return ['Глухая'];
   }
+}
 double calcPrice(PriceSettings ps) {
   double total = 0;
   final perM2 = ps.perM2Price(type);
@@ -533,9 +556,10 @@ double calcExtrasPrice(PriceSettings ps) {
     'hasAntidust': hasAntidust,
     'hasFrameNet': hasFrameNet,
     'hasPlisse': hasPlisse,
-    'complexInstall': complexInstall,
-    'separateDemontage': separateDemontage,
-  };
+      'complexInstall': complexInstall,
+  'separateDemontage': separateDemontage,
+  'sashTypes': sashTypes,
+};
 
   factory ProductItem.fromJson(Map<String, dynamic> j) => ProductItem(
     type: (j['type'] ?? 'Окно 2-створчатое').toString(),
@@ -583,9 +607,12 @@ double calcExtrasPrice(PriceSettings ps) {
     hasAntidust: j['hasAntidust'] ?? false,
     hasFrameNet: j['hasFrameNet'] ?? false,
     hasPlisse: j['hasPlisse'] ?? false,
-    complexInstall: j['complexInstall'] ?? true,
-    separateDemontage: j['separateDemontage'] ?? false,
-  );
+      complexInstall: j['complexInstall'] ?? true,
+  separateDemontage: j['separateDemontage'] ?? false,
+  sashTypes: ((j['sashTypes'] as List?) ?? [])
+      .map((e) => e.toString())
+      .toList(),
+);
 }
 
 // ═══════════════════════════════════════════════════════════
