@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -73,20 +74,58 @@ class UpdateChecker {
 
   /// Скачивает и открывает APK последнего релиза
   static Future<String> downloadAndInstall() async {
-    try {
-      final url =
-          'https://github.com/$owner/$repo/releases/latest/download/app-release.apk';
-      final dir = await getExternalStorageDirectory();
-      final savePath = '${dir!.path}/update.apk';
-      await Dio().download(url, savePath);
-      final result = await OpenFilex.open(savePath);
-      if (result.type != ResultType.done) {
-        return 'Не удалось открыть установщик: ${result.message}';
-      }
-      return 'Установщик открыт';
-    } catch (e) {
-      return 'Ошибка скачивания: $e';
+  try {
+    // 1. Получаем точный URL из GitHub API
+    final apiUrl = Uri.parse(
+        'https://api.github.com/repos/$owner/$repo/releases/latest');
+    final resp = await http.get(apiUrl, headers: {
+      'Accept': 'application/vnd.github+json',
+    });
+    if (resp.statusCode != 200) {
+      return 'GitHub API: ${resp.statusCode}';
     }
+
+    final body = resp.body;
+    final match = RegExp(
+            r'"browser_download_url"\s*:\s*"([^"]+app-release\.apk)"')
+        .firstMatch(body);
+    if (match == null) {
+      return 'APK не найден в Release';
+    }
+    final apkUrl = match.group(1)!;
+
+    // 2. Сохраняем в постоянную папку приложения
+    final dir = await getApplicationDocumentsDirectory();
+    final savePath = '${dir.path}/update.apk';
+
+    // 3. Скачиваем через http stream
+    final client = http.Client();
+    final request = http.Request('GET', Uri.parse(apkUrl));
+    final streamed = await client.send(request);
+    if (streamed.statusCode != 200) {
+      return 'Ошибка скачивания: ${streamed.statusCode}';
+    }
+    final file = File(savePath);
+    final sink = file.openWrite();
+    await streamed.stream.pipe(sink);
+    await sink.close();
+    client.close();
+
+    // 4. Проверка размера
+    final size = await file.length();
+    if (size < 1000000) {
+      return 'Файл недокачался: ${size} байт';
+    }
+
+    // 5. Открываем установщик
+    final result = await OpenFilex.open(savePath);
+    if (result.type != ResultType.done) {
+      return 'Открыть установщик не удалось: ${result.message}';
+    }
+    return 'Установщик открыт (${(size / 1024 / 1024).toStringAsFixed(1)} МБ)';
+  } catch (e) {
+    return 'Ошибка: $e';
+  }
   }
 
   /// Проверка при запуске с задержкой и логированием ошибок
