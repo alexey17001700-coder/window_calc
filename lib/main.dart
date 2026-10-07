@@ -2099,6 +2099,25 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               }),
             ),
             const SizedBox(height: 8),
+
+// Схема окна
+Center(
+  child: Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey.shade300),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: WindowScheme(
+      sashes: it.sashes,
+      sashTypes: it.sashTypes,
+      hasMosquito: it.hasMosquito,
+      width: 220,
+      height: 260,
+    ),
+  ),
+),
+const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: it.profile,
               decoration: const InputDecoration(labelText: 'Профиль'),
