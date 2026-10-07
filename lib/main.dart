@@ -114,7 +114,7 @@ class PriceSettings {
     switch (profile) {
       case 'Rehau': return coefRehau;
       case 'Bauline': return coefBauline;
-      case 'Novoline': return coefNovoline;щ
+      case 'Novoline': return coefNovoline;
       case 'Brusbox': return coefBrusbox;
       case 'Veka': return coefVeka;
       case 'KBE': return coefKBE;
