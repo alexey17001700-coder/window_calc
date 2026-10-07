@@ -390,6 +390,11 @@ class ProductItem {
     this.complexInstall = true,
     this.separateDemontage = false,
   }) : sills = sills ?? [];
+    this.complexInstall = true,
+  this.separateDemontage = false,
+  List<String>? sashTypes,
+})  : sills = sills ?? [],
+      sashTypes = sashTypes ?? defaultSashTypes(type);
 
   double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
 
