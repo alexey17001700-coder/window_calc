@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'update_checker.dart';
 import 'splash_screen.dart';
 import 'service_screen.dart';
+import 'window_scheme.dart';
 
 void main() => runApp(const WindowCalcApp());
 
@@ -339,7 +340,9 @@ class ProductItem {
   bool hasPlisse;
   bool complexInstall;
   bool separateDemontage;
+  List<String> sashTypes;
 
+  
   ProductItem({
     this.type = 'Окно 2-створчатое',
     this.profile = 'Novoline',
