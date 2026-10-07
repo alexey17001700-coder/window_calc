@@ -389,9 +389,9 @@ class ProductItem {
     this.hasPlisse = false,
     this.complexInstall = true,
     this.separateDemontage = false,
-    List<String>? sashTypes,
+    List<String>? sashTypesParam,
 })  : sills = sills ?? [],
-      sashTypes = sashTypes ?? defaultSashTypes(type);
+    sashTypes = sashTypesParam ?? defaultSashTypes(type);
     
 
 
