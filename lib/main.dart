@@ -393,10 +393,19 @@ class ProductItem {
 })  : sills = sills ?? [],
     sashTypes = sashTypesParam ?? defaultSashTypes(type);
     
+double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
 
-
-  double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
-
+static int defaultSashes(String type) {
+  switch (type) {
+    case 'Окно 1-створчатое': return 1;
+    case 'Окно 2-створчатое': return 2;
+    case 'Окно 3-створчатое': return 3;
+    case 'Балконный блок': return 3;
+    case 'Балконная дверь': return 1;
+    case 'Дверь ПВХ': return 1;
+    default: return 1;
+  }
+}
 static List<String> defaultSashTypes(String type) {
   switch (type) {
     case 'Окно 1-створчатое':
