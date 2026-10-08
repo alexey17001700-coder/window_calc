@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
+import 'templates.dart';
 
 class WindowScheme extends StatelessWidget {
-  final int sashes;
-  final List<String> sashTypes;
-  final bool hasMosquito;
+  final List<Column> columns;
   final double width;
   final double height;
 
   const WindowScheme({
     super.key,
-    required this.sashes,
-    required this.sashTypes,
-    this.hasMosquito = false,
+    required this.columns,
     this.width = 200,
     this.height = 240,
   });
@@ -20,25 +17,15 @@ class WindowScheme extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size(width, height),
-      painter: _WindowSchemePainter(
-        sashes: sashes,
-        sashTypes: sashTypes,
-        hasMosquito: hasMosquito,
-      ),
+      painter: _WindowSchemePainter(columns: columns),
     );
   }
 }
 
 class _WindowSchemePainter extends CustomPainter {
-  final int sashes;
-  final List<String> sashTypes;
-  final bool hasMosquito;
+  final List<Column> columns;
 
-  _WindowSchemePainter({
-    required this.sashes,
-    required this.sashTypes,
-    required this.hasMosquito,
-  });
+  _WindowSchemePainter({required this.columns});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -71,122 +58,129 @@ class _WindowSchemePainter extends CustomPainter {
     canvas.drawRect(fullRect, glassPaint);
     canvas.drawRect(fullRect, framePaint);
 
-    final sashWidth = w / sashes;
-    for (var i = 1; i < sashes; i++) {
-      final x = left + sashWidth * i;
-      canvas.drawLine(Offset(x, top), Offset(x, top + h), sashLinePaint);
+    if (columns.isEmpty) return;
+
+    // Пропорции колонок
+    final totalWidthMm = columns.fold<double>(0, (s, c) => s + c.widthMm);
+    final List<double> colWidths = [];
+    for (var i = 0; i < columns.length; i++) {
+      if (totalWidthMm > 0 && columns[i].widthMm > 0) {
+        colWidths.add(w * (columns[i].widthMm / totalWidthMm));
+      } else {
+        colWidths.add(w / columns.length);
+      }
     }
 
-    for (var i = 0; i < sashes; i++) {
-      final sashLeft = left + sashWidth * i;
-      final sashRect = Rect.fromLTWH(sashLeft, top, sashWidth, h);
-      final type = i < sashTypes.length ? sashTypes[i] : 'Глухая';
-      _drawSashSymbol(canvas, sashRect, type, symbolPaint);
+    // Рисуем вертикальные разделители
+    var xAcc = left;
+    for (var i = 0; i < colWidths.length - 1; i++) {
+      xAcc += colWidths[i];
+      canvas.drawLine(Offset(xAcc, top), Offset(xAcc, top + h), sashLinePaint);
+    }
+
+    // Рисуем секции внутри колонок
+    var xCol = left;
+    for (var c = 0; c < columns.length; c++) {
+      final col = columns[c];
+      final colW = colWidths[c];
+      if (col.sections.length > 1) {
+        final sectionH = h / col.sections.length;
+        for (var s = 1; s < col.sections.length; s++) {
+          final y = top + sectionH * s;
+          canvas.drawLine(Offset(xCol, y), Offset(xCol + colW, y), sashLinePaint);
+        }
+      }
+      // Символы для секций
+      if (col.sections.isNotEmpty) {
+        final sectionH = h / col.sections.length;
+        for (var s = 0; s < col.sections.length; s++) {
+          final sec = col.sections[s];
+          final secRect = Rect.fromLTWH(xCol, top + sectionH * s, colW, sectionH);
+          _drawSashSymbol(canvas, secRect, sec.type, symbolPaint, sec.hasMosquito);
+        }
+      }
+      xCol += colW;
     }
   }
-    void _drawSashSymbol(Canvas canvas, Rect rect, String type, Paint paint) {
-    final cx = rect.center.dx;
-    final cy = rect.center.dy;
-    final w = rect.width;
-    final h = rect.height;
-    final pad = 8.0;
-    final l = rect.left + pad;
-    final t = rect.top + pad;
-    final r = rect.right - pad;
-    final b = rect.bottom - pad;
+  void _drawSashSymbol(Canvas canvas, Rect rect, String type, Paint paint, bool hasMosquito) {
+  final cx = rect.center.dx;
+  final cy = rect.center.dy;
+  final w = rect.width;
+  final h = rect.height;
+  final pad = 6.0;
+  final l = rect.left + pad;
+  final t = rect.top + pad;
+  final r = rect.right - pad;
+  final b = rect.bottom - pad;
 
-    switch (type) {
-      case 'Глухая':
-        // Крест в центре
-        final armX = w * 0.18;
-        final armY = h * 0.18;
-        canvas.drawLine(Offset(cx - armX, cy), Offset(cx + armX, cy), paint);
-        canvas.drawLine(Offset(cx, cy - armY), Offset(cx, cy + armY), paint);
-        break;
+  switch (type) {
+    case 'Глухая':
+      final armX = w * 0.18;
+      final armY = h * 0.18;
+      canvas.drawLine(Offset(cx - armX, cy), Offset(cx + armX, cy), paint);
+      canvas.drawLine(Offset(cx, cy - armY), Offset(cx, cy + armY), paint);
+      break;
 
-      case 'Поворотная':
-        // Треугольник вершиной влево (от петли справа)
-        final path = Path();
-        path.moveTo(l, cy);
-        path.lineTo(r, t);
-        path.lineTo(r, b);
-        path.close();
-        canvas.drawPath(path, paint);
-        break;
+    case 'Поворотная':
+      final path = Path();
+      path.moveTo(l, cy);
+      path.lineTo(r, t);
+      path.lineTo(r, b);
+      path.close();
+      canvas.drawPath(path, paint);
+      break;
 
-      case 'Откидная':
-        // Треугольник вершиной вверх
-        final path = Path();
-        path.moveTo(cx, t);
-        path.lineTo(l, b);
-        path.lineTo(r, b);
-        path.close();
-        canvas.drawPath(path, paint);
-        break;
+    case 'Откидная':
+      final path = Path();
+      path.moveTo(cx, t);
+      path.lineTo(l, b);
+      path.lineTo(r, b);
+      path.close();
+      canvas.drawPath(path, paint);
+      break;
 
-      case 'Поворотно-откидная':
-        // Двойная диагональ + треугольник
-        canvas.drawLine(Offset(l, t), Offset(r, b), paint);
-        canvas.drawLine(Offset(l, b), Offset(r, t), paint);
-        final path = Path();
-        path.moveTo(cx, t + h * 0.1);
-        path.lineTo(cx - w * 0.18, b - h * 0.05);
-        path.lineTo(cx + w * 0.18, b - h * 0.05);
-        path.close();
-        canvas.drawPath(path, paint);
-        break;
+    case 'Поворотно-откидная':
+      canvas.drawLine(Offset(l, t), Offset(r, b), paint);
+      canvas.drawLine(Offset(l, b), Offset(r, t), paint);
+      final path = Path();
+      path.moveTo(cx, t + h * 0.1);
+      path.lineTo(cx - w * 0.18, b - h * 0.05);
+      path.lineTo(cx + w * 0.18, b - h * 0.05);
+      path.close();
+      canvas.drawPath(path, paint);
+      break;
 
-      case 'Сэндвич':
-        final fill = Paint()
-          ..color = Colors.grey.shade300
-          ..style = PaintingStyle.fill;
-        canvas.drawRect(rect, fill);
-        final tp = TextPainter(
-          text: const TextSpan(
-            text: 'S',
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+    case 'Сэндвич':
+      final fill = Paint()
+        ..color = Colors.grey.shade300
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(rect, fill);
+      final tp = TextPainter(
+        text: const TextSpan(
+          text: 'S',
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
-          textDirection: TextDirection.ltr,
-        )..layout();
-        tp.paint(canvas, Offset(cx - tp.width / 2, cy - tp.height / 2));
-        break;
-    }
-
-    if (hasMosquito) {
-      // Решётка в центре — знак #
-      final sz = w * 0.12;
-      final off = sz * 0.6;
-      canvas.drawLine(
-        Offset(cx - sz, cy - off),
-        Offset(cx + sz, cy - off),
-        paint,
-      );
-      canvas.drawLine(
-        Offset(cx - sz, cy + off),
-        Offset(cx + sz, cy + off),
-        paint,
-      );
-      canvas.drawLine(
-        Offset(cx - off, cy - sz),
-        Offset(cx - off, cy + sz),
-        paint,
-      );
-      canvas.drawLine(
-        Offset(cx + off, cy - sz),
-        Offset(cx + off, cy + sz),
-        paint,
-      );
-    }
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(cx - tp.width / 2, cy - tp.height / 2));
+      break;
   }
 
-  @override
+  if (hasMosquito) {
+    final sz = w * 0.12;
+    final off = sz * 0.6;
+    canvas.drawLine(Offset(cx - sz, cy - off), Offset(cx + sz, cy - off), paint);
+    canvas.drawLine(Offset(cx - sz, cy + off), Offset(cx + sz, cy + off), paint);
+    canvas.drawLine(Offset(cx - off, cy - sz), Offset(cx - off, cy + sz), paint);
+    canvas.drawLine(Offset(cx + off, cy - sz), Offset(cx + off, cy + sz), paint);
+  }
+  }
+    @override
   bool shouldRepaint(covariant _WindowSchemePainter old) {
-    return old.sashes != sashes ||
-        old.sashTypes != sashTypes ||
-        old.hasMosquito != hasMosquito;
+    return old.columns != columns;
   }
 }
