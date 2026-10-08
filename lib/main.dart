@@ -344,7 +344,7 @@ class ProductItem {
   bool complexInstall;
   bool separateDemontage;
 
-  List<Column> columns;
+  List<SchemeColumn> columns;
 
   ProductItem({
     this.type = 'Окно 2-створчатое',
@@ -392,7 +392,7 @@ class ProductItem {
     this.hasPlisse = false,
     this.complexInstall = true,
     this.separateDemontage = false,
-    List<Column>? columnsParam,
+    List<SchemeColumn>? columnsParam,
   })  : sills = sills ?? [],
         columns = columnsParam ?? defaultColumns(type);
 
