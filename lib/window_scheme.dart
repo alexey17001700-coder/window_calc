@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'templates.dart';
 
 class WindowScheme extends StatelessWidget {
-  final List<Column> columns;
+  final List<SchemeColumn> columns;
   final double width;
   final double height;
 
@@ -22,8 +22,8 @@ class WindowScheme extends StatelessWidget {
   }
 }
 
-class _WindowSchemePainter extends CustomPainter {
-  final List<Column> columns;
+class _WindowSchemePainter({required this.columns});
+final List<SchemeColumn> columns;
 
   _WindowSchemePainter({required this.columns});
 
