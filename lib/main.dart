@@ -123,13 +123,16 @@ class PriceSettings {
     }
   }
 
-  double furniturePrice(String furniture) {
-    switch (furniture) {
-      case 'Roto': return furRoto;
-      case 'Maco': return furMaco;
-      case 'Reze': return furReze;
-      default: return furOther;
-    }
+double furniturePrice(String furniture) {
+  switch (furniture) {
+    case 'Roto': return furRoto;
+    case 'Maco': return furMaco;
+    case 'Reze': return furReze;
+    default: return furOther;
+  }
+}
+
+Map<String, double> toMap() => {
     Map<String, double> toMap() => {
     'window1': window1, 'window2': window2, 'window3': window3,
     'balconyBlock': balconyBlock, 'balconyGlazingPerM2': balconyGlazingPerM2,
