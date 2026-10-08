@@ -8,6 +8,7 @@ import 'update_checker.dart';
 import 'splash_screen.dart';
 import 'service_screen.dart';
 import 'window_scheme.dart';
+import 'templates.dart';
 
 void main() => runApp(const WindowCalcApp());
 
@@ -129,8 +130,7 @@ class PriceSettings {
       case 'Reze': return furReze;
       default: return furOther;
     }
-  }
-  Map<String, double> toMap() => {
+    Map<String, double> toMap() => {
     'window1': window1, 'window2': window2, 'window3': window3,
     'balconyBlock': balconyBlock, 'balconyGlazingPerM2': balconyGlazingPerM2,
     'loggiaGlazingPerM2': loggiaGlazingPerM2, 'panoramicPerM2': panoramicPerM2,
@@ -264,7 +264,7 @@ class PriceStorage {
     } catch (_) {}
   }
 }
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // МОДЕЛИ
 // ═══════════════════════════════════════════════════════════
 
@@ -340,9 +340,9 @@ class ProductItem {
   bool hasPlisse;
   bool complexInstall;
   bool separateDemontage;
-  List<String> sashTypes;
 
-  
+  List<Column> columns;
+
   ProductItem({
     this.type = 'Окно 2-створчатое',
     this.profile = 'Novoline',
@@ -389,13 +389,142 @@ class ProductItem {
     this.hasPlisse = false,
     this.complexInstall = true,
     this.separateDemontage = false,
-    List<String>? sashTypesParam,
-})  : sills = sills ?? [],
-    sashTypes = sashTypesParam ?? defaultSashTypes(type);
-    
-double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
+    List<Column>? columnsParam,
+  })  : sills = sills ?? [],
+        columns = columnsParam ?? defaultColumns(type);
 
-static int defaultSashes(String type) {
+  double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
+  // ═══════════════════════════════════════════════════════════
+// МОДЕЛИ
+// ═══════════════════════════════════════════════════════════
+
+class SillItem {
+  double lengthMm;
+  double depthMm;
+  String category;
+
+  SillItem({
+    this.lengthMm = 1700,
+    this.depthMm = 250,
+    this.category = 'Эконом',
+  });
+
+  double get areaM2 => (lengthMm / 1000) * (depthMm / 1000);
+
+  Map<String, dynamic> toJson() => {
+    'lengthMm': lengthMm,
+    'depthMm': depthMm,
+    'category': category,
+  };
+
+  factory SillItem.fromJson(Map<String, dynamic> j) => SillItem(
+    lengthMm: (j['lengthMm'] ?? 1700).toDouble(),
+    depthMm: (j['depthMm'] ?? 250).toDouble(),
+    category: (j['category'] ?? 'Эконом').toString(),
+  );
+}
+
+class ProductItem {
+  String type;
+  String profile;
+  String furniture;
+  double widthMm;
+  double heightMm;
+  int count;
+  int sashes;
+  double glassThickness;
+  bool tinted;
+  bool multi;
+  bool hasSlopes;
+  String houseType;
+  String slopeCategory;
+  double slopeDepthMm;
+  double slopeLengthSideMm;
+  double slopeLengthTopMm;
+  bool mountSlopesSeparately;
+  bool hasExtraSlopes;
+  String extraSlopeCategory;
+  double extraSlopeDepthMm;
+  double extraSlopeLengthSideMm;
+  double extraSlopeLengthTopMm;
+  bool hasSill;
+  List<SillItem> sills;
+  bool mountSillSeparately;
+  bool hasDrip;
+  double dripLengthMm;
+  double dripDepthMm;
+  String dripColor;
+  bool hasFUgol;
+  String fUgolType;
+  int fUgolCount;
+  bool hasAbris;
+  double abrisLengthMm;
+  bool hasPsul;
+  double psulLengthMm;
+  bool hasOtmazka;
+  double otmazkaLengthMm;
+  bool hasMosquito;
+  bool hasAnticat;
+  bool hasAntidust;
+  bool hasFrameNet;
+  bool hasPlisse;
+  bool complexInstall;
+  bool separateDemontage;
+
+  List<Column> columns;
+
+  ProductItem({
+    this.type = 'Окно 2-створчатое',
+    this.profile = 'Novoline',
+    this.furniture = 'Roto',
+    this.widthMm = 1300,
+    this.heightMm = 1400,
+    this.count = 1,
+    this.sashes = 2,
+    this.glassThickness = 32,
+    this.tinted = false,
+    this.multi = false,
+    this.hasSlopes = false,
+    this.houseType = 'Панелька',
+    this.slopeCategory = 'Эконом',
+    this.slopeDepthMm = 200,
+    this.slopeLengthSideMm = 1400,
+    this.slopeLengthTopMm = 1300,
+    this.mountSlopesSeparately = false,
+    this.hasExtraSlopes = false,
+    this.extraSlopeCategory = 'Эконом',
+    this.extraSlopeDepthMm = 200,
+    this.extraSlopeLengthSideMm = 1400,
+    this.extraSlopeLengthTopMm = 1300,
+    this.hasSill = false,
+    List<SillItem>? sills,
+    this.mountSillSeparately = false,
+    this.hasDrip = false,
+    this.dripLengthMm = 1300,
+    this.dripDepthMm = 200,
+    this.dripColor = 'Белый',
+    this.hasFUgol = false,
+    this.fUgolType = '40×3.20',
+    this.fUgolCount = 1,
+    this.hasAbris = false,
+    this.abrisLengthMm = 5000,
+    this.hasPsul = false,
+    this.psulLengthMm = 5000,
+    this.hasOtmazka = false,
+    this.otmazkaLengthMm = 5000,
+    this.hasMosquito = false,
+    this.hasAnticat = false,
+    this.hasAntidust = false,
+    this.hasFrameNet = false,
+    this.hasPlisse = false,
+    this.complexInstall = true,
+    this.separateDemontage = false,
+    List<Column>? columnsParam,
+  })  : sills = sills ?? [],
+        columns = columnsParam ?? defaultColumns(type);
+
+  double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
+  static int defaultSashes(String type) {
   switch (type) {
     case 'Окно 1-створчатое': return 1;
     case 'Окно 2-створчатое': return 2;
@@ -406,38 +535,32 @@ static int defaultSashes(String type) {
     default: return 1;
   }
 }
-static List<String> defaultSashTypes(String type) {
-  switch (type) {
-    case 'Окно 1-створчатое':
-      return ['Поворотно-откидная'];
-    case 'Окно 2-створчатое':
-      return ['Поворотно-откидная', 'Глухая'];
-    case 'Окно 3-створчатое':
-      return ['Поворотная', 'Глухая', 'Поворотная'];
-    case 'Балконный блок':
-      return ['Поворотно-откидная', 'Глухая', 'Поворотная'];
-    case 'Балконная дверь':
-      return ['Поворотная'];
-    case 'Дверь ПВХ':
-      return ['Поворотная'];
-    case 'Балконное остекление':
-      return ['Глухая', 'Поворотная', 'Глухая'];
-    case 'Остекление лоджии':
-      return ['Глухая', 'Поворотная', 'Глухая'];
-    case 'Панорамное остекление':
-      return ['Глухая', 'Поворотная', 'Глухая'];
-    case 'Эркерное остекление':
-      return ['Глухая', 'Поворотная', 'Глухая'];
-    case 'Арочное окно':
-      return ['Глухая'];
-    case 'Входная группа':
-      return ['Поворотная'];
-    case 'Фасадное алюминиевое остекление':
-      return ['Глухая', 'Поворотная', 'Глухая'];
-    default:
-      return ['Глухая'];
-  }
+
+static List<Column> defaultColumns(String type) {
+  final template = allTemplates.firstWhere(
+    (t) => t.id.startsWith(_templatePrefix(type)),
+    orElse: () => allTemplates[0],
+  );
+  return _columnsFromTemplate(template);
 }
+
+static String _templatePrefix(String type) {
+  if (type.contains('Балконный блок')) return 'bb';
+  if (type == 'Окно 1-створчатое') return 'win1';
+  if (type == 'Окно 2-створчатое') return 'win2';
+  if (type == 'Окно 3-створчатое') return 'win3';
+  return 'win';
+}
+
+static List<Column> _columnsFromTemplate(WindowTemplate template) {
+  final columns = <Column>[];
+  for (final col in template.sectionTypes) {
+    final sections = col.map((t) => Section(type: t)).toList();
+    columns.add(Column(widthMm: 0, sections: sections));
+  }
+  return columns;
+}
+
 double calcPrice(PriceSettings ps) {
   double total = 0;
   final perM2 = ps.perM2Price(type);
@@ -521,7 +644,7 @@ double calcExtrasPrice(PriceSettings ps) {
   }
   return t;
 }
-  Map<String, dynamic> toJson() => {
+    Map<String, dynamic> toJson() => {
     'type': type,
     'profile': profile,
     'furniture': furniture,
@@ -565,10 +688,10 @@ double calcExtrasPrice(PriceSettings ps) {
     'hasAntidust': hasAntidust,
     'hasFrameNet': hasFrameNet,
     'hasPlisse': hasPlisse,
-      'complexInstall': complexInstall,
-  'separateDemontage': separateDemontage,
-  'sashTypes': sashTypes,
-};
+    'complexInstall': complexInstall,
+    'separateDemontage': separateDemontage,
+    'columns': columns.map((e) => e.toJson()).toList(),
+  };
 
   factory ProductItem.fromJson(Map<String, dynamic> j) => ProductItem(
     type: (j['type'] ?? 'Окно 2-створчатое').toString(),
@@ -616,15 +739,14 @@ double calcExtrasPrice(PriceSettings ps) {
     hasAntidust: j['hasAntidust'] ?? false,
     hasFrameNet: j['hasFrameNet'] ?? false,
     hasPlisse: j['hasPlisse'] ?? false,
-      complexInstall: j['complexInstall'] ?? true,
-  separateDemontage: j['separateDemontage'] ?? false,
-  sashTypesParam: ((j['sashTypes'] as List?) ?? [])
-    .map((e) => e.toString())
-    .toList(),
-);
+    complexInstall: j['complexInstall'] ?? true,
+    separateDemontage: j['separateDemontage'] ?? false,
+    columnsParam: ((j['columns'] as List?) ?? [])
+        .map((e) => Column.fromJson(Map<String, dynamic>.from(e)))
+        .toList(),
+  );
 }
-
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // ЗАМЕР
 // ═══════════════════════════════════════════════════════════
 
@@ -770,8 +892,7 @@ class Measurement {
     if (notes.isNotEmpty) b.writeln('Примечание: $notes');
     return b.toString();
   }
-
-  String toClientText() {
+    String toClientText() {
     final b = StringBuffer();
     b.writeln('Здравствуйте, $clientName!');
     b.writeln('');
@@ -842,6 +963,7 @@ class Measurement {
     return b.toString();
   }
 }
+
 // ═══════════════════════════════════════════════════════════
 // ХРАНЕНИЕ ЗАМЕРОВ
 // ═══════════════════════════════════════════════════════════
@@ -876,8 +998,7 @@ class MeasurementStorage {
     } catch (_) {}
   }
 }
-
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // СЕРВИС И РЕМОНТ — МОДЕЛИ
 // ═══════════════════════════════════════════════════════════
 
@@ -1066,7 +1187,7 @@ class ServiceStorage {
     } catch (_) {}
   }
 }
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // ГЛАВНОЕ ПРИЛОЖЕНИЕ
 // ═══════════════════════════════════════════════════════════
 
@@ -1225,7 +1346,7 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
     );
   }
 }
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // ГЛАВНОЕ МЕНЮ
 // ═══════════════════════════════════════════════════════════
 
@@ -1446,7 +1567,7 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 }
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // СОХРАНЁННЫЕ ЗАМЕРЫ
 // ═══════════════════════════════════════════════════════════
 
@@ -1581,7 +1702,7 @@ class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
     );
   }
 }
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // НАСТРОЙКИ ПРАЙСА
 // ═══════════════════════════════════════════════════════════
 
@@ -1884,7 +2005,7 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     );
   }
 }
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // РЕДАКТОР ЗАМЕРА
 // ═══════════════════════════════════════════════════════════
 
@@ -2053,116 +2174,134 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
       ),
     );
   }
-
   Widget _itemCard(int index) {
-    final it = _items[index];
-    final price = it.calcPrice(widget.price);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text('Изделие ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                const Spacer(),
-                if (_items.length > 1)
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => setState(() => _items.removeAt(index)),
-                  ),
-              ],
-            ),
-            DropdownButtonFormField<String>(
-              value: it.type,
-              decoration: const InputDecoration(labelText: 'Тип изделия'),
-              items: const [
-                DropdownMenuItem(value: 'Окно 1-створчатое', child: Text('Окно 1-створчатое')),
-                DropdownMenuItem(value: 'Окно 2-створчатое', child: Text('Окно 2-створчатое')),
-                DropdownMenuItem(value: 'Окно 3-створчатое', child: Text('Окно 3-створчатое')),
-                DropdownMenuItem(value: 'Балконный блок', child: Text('Балконный блок')),
-                DropdownMenuItem(value: 'Балконное остекление', child: Text('Балконное остекление')),
-                DropdownMenuItem(value: 'Остекление лоджии', child: Text('Остекление лоджии')),
-                DropdownMenuItem(value: 'Панорамное остекление', child: Text('Панорамное остекление')),
-                DropdownMenuItem(value: 'Балконная дверь', child: Text('Балконная дверь')),
-                DropdownMenuItem(value: 'Дверь ПВХ', child: Text('Дверь ПВХ')),
-                DropdownMenuItem(value: 'Входная группа', child: Text('Входная группа')),
-                DropdownMenuItem(value: 'Эркерное остекление', child: Text('Эркерное остекление')),
-                DropdownMenuItem(value: 'Арочное окно', child: Text('Арочное окно')),
-                DropdownMenuItem(value: 'Фасадное алюминиевое остекление', child: Text('Фасадное алюм.')),
-              ],
-              onChanged: (v) => setState(() {
-                it.type = v!;
-                it.sashes = ProductItem.defaultSashes(v);
-              }),
-            ),
-            const SizedBox(height: 8),
+  final it = _items[index];
+  final price = it.calcPrice(widget.price);
+  return Card(
+    margin: const EdgeInsets.only(bottom: 12),
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('Изделие ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Spacer(),
+              if (_items.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => setState(() => _items.removeAt(index)),
+                ),
+            ],
+          ),
 
-// Схема окна
-Center(
-  child: Container(
-    padding: const EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey.shade300),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: WindowScheme(
-      sashes: it.sashes,
-      sashTypes: it.sashTypes,
-      hasMosquito: it.hasMosquito,
-      width: 220,
-      height: 260,
-    ),
-  ),
-),
-const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: it.profile,
-              decoration: const InputDecoration(labelText: 'Профиль'),
-              items: const [
-                DropdownMenuItem(value: 'Rehau', child: Text('Rehau')),
-                DropdownMenuItem(value: 'Bauline', child: Text('Bauline')),
-                DropdownMenuItem(value: 'Novoline', child: Text('Novoline')),
-                DropdownMenuItem(value: 'Brusbox', child: Text('Brusbox')),
-                DropdownMenuItem(value: 'Veka', child: Text('Veka')),
-                DropdownMenuItem(value: 'KBE', child: Text('KBE')),
-                DropdownMenuItem(value: 'Другой', child: Text('Другой')),
-              ],
-              onChanged: (v) => setState(() => it.profile = v!),
+          // Тип изделия
+          DropdownButtonFormField<String>(
+            value: it.type,
+            decoration: const InputDecoration(labelText: 'Тип изделия'),
+            items: const [
+              DropdownMenuItem(value: 'Окно 1-створчатое', child: Text('Окно 1-створчатое')),
+              DropdownMenuItem(value: 'Окно 2-створчатое', child: Text('Окно 2-створчатое')),
+              DropdownMenuItem(value: 'Окно 3-створчатое', child: Text('Окно 3-створчатое')),
+              DropdownMenuItem(value: 'Балконный блок', child: Text('Балконный блок')),
+              DropdownMenuItem(value: 'Балконное остекление', child: Text('Балконное остекление')),
+              DropdownMenuItem(value: 'Остекление лоджии', child: Text('Остекление лоджии')),
+              DropdownMenuItem(value: 'Панорамное остекление', child: Text('Панорамное остекление')),
+              DropdownMenuItem(value: 'Балконная дверь', child: Text('Балконная дверь')),
+              DropdownMenuItem(value: 'Дверь ПВХ', child: Text('Дверь ПВХ')),
+              DropdownMenuItem(value: 'Входная группа', child: Text('Входная группа')),
+              DropdownMenuItem(value: 'Эркерное остекление', child: Text('Эркерное остекление')),
+              DropdownMenuItem(value: 'Арочное окно', child: Text('Арочное окно')),
+              DropdownMenuItem(value: 'Фасадное алюминиевое остекление', child: Text('Фасадное алюм.')),
+            ],
+            onChanged: (v) => setState(() {
+              it.type = v!;
+              it.sashes = ProductItem.defaultSashes(v);
+              it.columns = ProductItem.defaultColumns(v);
+            }),
+          ),
+
+          // Выбор шаблона
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => _showTemplateDialog(index),
+            icon: const Icon(Icons.dashboard_customize),
+            label: const Text('Выбрать шаблон'),
+          ),
+
+          // Схема
+          const SizedBox(height: 8),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: WindowScheme(
+                columns: it.columns,
+                width: 240,
+                height: 280,
+              ),
             ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: it.furniture,
-              decoration: const InputDecoration(labelText: 'Фурнитура'),
-              items: const [
-                DropdownMenuItem(value: 'Roto', child: Text('Roto')),
-                DropdownMenuItem(value: 'Maco', child: Text('Maco')),
-                DropdownMenuItem(value: 'Reze', child: Text('Reze')),
-                DropdownMenuItem(value: 'Другой', child: Text('Другой')),
-              ],
-              onChanged: (v) => setState(() => it.furniture = v!),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(child: TextFormField(
-                  initialValue: it.widthMm.toStringAsFixed(0),
-                  decoration: const InputDecoration(labelText: 'Ширина, мм'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => setState(() => it.widthMm = double.tryParse(v) ?? 0),
-                )),
-                const SizedBox(width: 8),
-                Expanded(child: TextFormField(
-                  initialValue: it.heightMm.toStringAsFixed(0),
-                  decoration: const InputDecoration(labelText: 'Высота, мм'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => setState(() => it.heightMm = double.tryParse(v) ?? 0),
-                )),
-              ],
-            ),
-            const SizedBox(height: 8),
+          ),
+          const SizedBox(height: 8),
+
+          // Профиль
+          DropdownButtonFormField<String>(
+            value: it.profile,
+            decoration: const InputDecoration(labelText: 'Профиль'),
+            items: const [
+              DropdownMenuItem(value: 'Rehau', child: Text('Rehau')),
+              DropdownMenuItem(value: 'Bauline', child: Text('Bauline')),
+              DropdownMenuItem(value: 'Novoline', child: Text('Novoline')),
+              DropdownMenuItem(value: 'Brusbox', child: Text('Brusbox')),
+              DropdownMenuItem(value: 'Veka', child: Text('Veka')),
+              DropdownMenuItem(value: 'KBE', child: Text('KBE')),
+              DropdownMenuItem(value: 'Другой', child: Text('Другой')),
+            ],
+            onChanged: (v) => setState(() => it.profile = v!),
+          ),
+          const SizedBox(height: 8),
+
+          // Фурнитура
+          DropdownButtonFormField<String>(
+            value: it.furniture,
+            decoration: const InputDecoration(labelText: 'Фурнитура'),
+            items: const [
+              DropdownMenuItem(value: 'Roto', child: Text('Roto')),
+              DropdownMenuItem(value: 'Maco', child: Text('Maco')),
+              DropdownMenuItem(value: 'Reze', child: Text('Reze')),
+              DropdownMenuItem(value: 'Другой', child: Text('Другой')),
+            ],
+            onChanged: (v) => setState(() => it.furniture = v!),
+          ),
+          const SizedBox(height: 8),
+
+          // Общие размеры
+          Row(
+            children: [
+              Expanded(child: TextFormField(
+                initialValue: it.widthMm.toStringAsFixed(0),
+                decoration: const InputDecoration(labelText: 'Ширина, мм'),
+                keyboardType: TextInputType.number,
+                onChanged: (v) => setState(() => it.widthMm = double.tryParse(v) ?? 0),
+              )),
+              const SizedBox(width: 8),
+              Expanded(child: TextFormField(
+                initialValue: it.heightMm.toStringAsFixed(0),
+                decoration: const InputDecoration(labelText: 'Высота, мм'),
+                keyboardType: TextInputType.number,
+                onChanged: (v) => setState(() => it.heightMm = double.tryParse(v) ?? 0),
+              )),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Размеры колонок
+          ..._columnFields(index),
+                      // Количество и створки
             Row(
               children: [
                 Expanded(child: TextFormField(
@@ -2181,6 +2320,7 @@ const SizedBox(height: 8),
               ],
             ),
             const SizedBox(height: 8),
+
             DropdownButtonFormField<double>(
               value: it.glassThickness,
               decoration: const InputDecoration(labelText: 'Стеклопакет, мм'),
@@ -2203,10 +2343,12 @@ const SizedBox(height: 8),
               title: const Text('Мультифункциональное'),
               dense: true,
             ),
+
             const Divider(),
             const Text('Отделка', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
             const SizedBox(height: 8),
-                        CheckboxListTile(value: it.hasSlopes, onChanged: (v) => setState(() => it.hasSlopes = v!), title: const Text('Откосы'), dense: true),
+
+            CheckboxListTile(value: it.hasSlopes, onChanged: (v) => setState(() => it.hasSlopes = v!), title: const Text('Откосы'), dense: true),
             if (it.hasSlopes) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
               child: Column(children: [
@@ -2467,8 +2609,78 @@ const SizedBox(height: 8),
       ),
     );
   }
+
+  List<Widget> _columnFields(int itemIndex) {
+    final it = _items[itemIndex];
+    final result = <Widget>[];
+    for (var c = 0; c < it.columns.length; c++) {
+      final col = it.columns[c];
+      result.add(const SizedBox(height: 6));
+      result.add(Text('Колонка ${c + 1}', style: const TextStyle(fontWeight: FontWeight.bold)));
+      result.add(const SizedBox(height: 4));
+      result.add(TextFormField(
+        initialValue: col.widthMm.toStringAsFixed(0),
+        decoration: InputDecoration(labelText: 'Ширина колонки ${c + 1}, мм'),
+        keyboardType: TextInputType.number,
+        onChanged: (v) => setState(() => col.widthMm = double.tryParse(v) ?? 0),
+      ));
+      for (var s = 0; s < col.sections.length; s++) {
+        final sec = col.sections[s];
+        result.add(const SizedBox(height: 4));
+        result.add(
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Секция ${s + 1} (${sec.type})',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ),
+              Checkbox(
+                value: sec.hasMosquito,
+                onChanged: (v) => setState(() => sec.hasMosquito = v ?? false),
+              ),
+              const Text('сетка', style: TextStyle(fontSize: 11)),
+            ],
+          ),
+        );
+      }
+    }
+    return result;
+  }
+
+  void _showTemplateDialog(int itemIndex) {
+    final it = _items[itemIndex];
+    final filtered = allTemplates.where((t) => _matchTemplate(t, it.type)).toList();
+    showDialog(
+      context: context,
+      builder: (_) => SimpleDialog(
+        title: const Text('Выберите шаблон'),
+        children: filtered.map((t) {
+          return SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                it.columns = ProductItem._columnsFromTemplate(t);
+                it.sashes = it.columns.length;
+              });
+            },
+            child: Text(t.name),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  bool _matchTemplate(WindowTemplate t, String type) {
+    if (type.contains('Балконный блок')) return t.id.startsWith('bb');
+    if (type == 'Окно 1-створчатое') return t.id == 'win1';
+    if (type == 'Окно 2-створчатое') return t.id.startsWith('win2');
+    if (type == 'Окно 3-створчатое') return t.id == 'win3';
+    return true;
+  }
 }
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // ЭКРАН РЕЗУЛЬТАТА
 // ═══════════════════════════════════════════════════════════
 
@@ -2574,6 +2786,21 @@ class _ResultScreenState extends State<ResultScreen> {
                               style: const TextStyle(fontSize: 12, color: Colors.grey)),
                           Text('   Стекло ${it.glassThickness.toInt()} мм',
                               style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          const SizedBox(height: 4),
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: WindowScheme(
+                                columns: it.columns,
+                                width: 180,
+                                height: 210,
+                              ),
+                            ),
+                          ),
                           if (it.hasSlopes) Text('   Откосы: ${it.slopeCategory} (${it.houseType})',
                               style: const TextStyle(fontSize: 12)),
                           if (it.hasSill && it.sills.isNotEmpty) Text('   Подоконники: ${it.sills.length} шт',
@@ -2690,8 +2917,7 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
 // ВСПОМОГАТЕЛЬНОЕ
 // ═══════════════════════════════════════════════════════════
 
@@ -2707,3 +2933,5 @@ class _SectionTitle extends StatelessWidget {
     );
   }
 }
+  
+        
