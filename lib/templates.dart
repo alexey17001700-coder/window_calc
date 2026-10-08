@@ -18,11 +18,11 @@ class Section {
   );
 }
 
-class Column {
+class SchemeColumn {
   double widthMm;
   List<Section> sections;
 
-  Column({
+  SchemeColumn({
     this.widthMm = 0,
     List<Section>? sections,
   }) : sections = sections ?? [Section()];
@@ -32,7 +32,7 @@ class Column {
     'sections': sections.map((e) => e.toJson()).toList(),
   };
 
-  factory Column.fromJson(Map<String, dynamic> j) => Column(
+  factory SchemeColumn.fromJson(Map<String, dynamic> j) => SchemeColumn(
     widthMm: (j['widthMm'] ?? 0).toDouble(),
     sections: ((j['sections'] as List?) ?? [])
         .map((e) => Section.fromJson(Map<String, dynamic>.from(e)))
