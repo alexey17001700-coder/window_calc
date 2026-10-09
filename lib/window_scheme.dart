@@ -22,8 +22,8 @@ class WindowScheme extends StatelessWidget {
   }
 }
 
-class _WindowSchemePainter({required this.columns});
-final List<SchemeColumn> columns;
+class _WindowSchemePainter extends CustomPainter {
+  final List<SchemeColumn> columns;
 
   _WindowSchemePainter({required this.columns});
 
@@ -60,7 +60,6 @@ final List<SchemeColumn> columns;
 
     if (columns.isEmpty) return;
 
-    // Пропорции колонок
     final totalWidthMm = columns.fold<double>(0, (s, c) => s + c.widthMm);
     final List<double> colWidths = [];
     for (var i = 0; i < columns.length; i++) {
@@ -71,14 +70,12 @@ final List<SchemeColumn> columns;
       }
     }
 
-    // Рисуем вертикальные разделители
     var xAcc = left;
     for (var i = 0; i < colWidths.length - 1; i++) {
       xAcc += colWidths[i];
       canvas.drawLine(Offset(xAcc, top), Offset(xAcc, top + h), sashLinePaint);
     }
 
-    // Рисуем секции внутри колонок
     var xCol = left;
     for (var c = 0; c < columns.length; c++) {
       final col = columns[c];
@@ -90,7 +87,6 @@ final List<SchemeColumn> columns;
           canvas.drawLine(Offset(xCol, y), Offset(xCol + colW, y), sashLinePaint);
         }
       }
-      // Символы для секций
       if (col.sections.isNotEmpty) {
         final sectionH = h / col.sections.length;
         for (var s = 0; s < col.sections.length; s++) {
@@ -102,84 +98,86 @@ final List<SchemeColumn> columns;
       xCol += colW;
     }
   }
+
   void _drawSashSymbol(Canvas canvas, Rect rect, String type, Paint paint, bool hasMosquito) {
-  final cx = rect.center.dx;
-  final cy = rect.center.dy;
-  final w = rect.width;
-  final h = rect.height;
-  final pad = 6.0;
-  final l = rect.left + pad;
-  final t = rect.top + pad;
-  final r = rect.right - pad;
-  final b = rect.bottom - pad;
+    final cx = rect.center.dx;
+    final cy = rect.center.dy;
+    final w = rect.width;
+    final h = rect.height;
+    final pad = 6.0;
+    final l = rect.left + pad;
+    final t = rect.top + pad;
+    final r = rect.right - pad;
+    final b = rect.bottom - pad;
 
-  switch (type) {
-    case 'Глухая':
-      final armX = w * 0.18;
-      final armY = h * 0.18;
-      canvas.drawLine(Offset(cx - armX, cy), Offset(cx + armX, cy), paint);
-      canvas.drawLine(Offset(cx, cy - armY), Offset(cx, cy + armY), paint);
-      break;
+    switch (type) {
+      case 'Глухая':
+        final armX = w * 0.18;
+        final armY = h * 0.18;
+        canvas.drawLine(Offset(cx - armX, cy), Offset(cx + armX, cy), paint);
+        canvas.drawLine(Offset(cx, cy - armY), Offset(cx, cy + armY), paint);
+        break;
 
-    case 'Поворотная':
-      final path = Path();
-      path.moveTo(l, cy);
-      path.lineTo(r, t);
-      path.lineTo(r, b);
-      path.close();
-      canvas.drawPath(path, paint);
-      break;
+      case 'Поворотная':
+        final path = Path();
+        path.moveTo(l, cy);
+        path.lineTo(r, t);
+        path.lineTo(r, b);
+        path.close();
+        canvas.drawPath(path, paint);
+        break;
 
-    case 'Откидная':
-      final path = Path();
-      path.moveTo(cx, t);
-      path.lineTo(l, b);
-      path.lineTo(r, b);
-      path.close();
-      canvas.drawPath(path, paint);
-      break;
+      case 'Откидная':
+        final path = Path();
+        path.moveTo(cx, t);
+        path.lineTo(l, b);
+        path.lineTo(r, b);
+        path.close();
+        canvas.drawPath(path, paint);
+        break;
 
-    case 'Поворотно-откидная':
-      canvas.drawLine(Offset(l, t), Offset(r, b), paint);
-      canvas.drawLine(Offset(l, b), Offset(r, t), paint);
-      final path = Path();
-      path.moveTo(cx, t + h * 0.1);
-      path.lineTo(cx - w * 0.18, b - h * 0.05);
-      path.lineTo(cx + w * 0.18, b - h * 0.05);
-      path.close();
-      canvas.drawPath(path, paint);
-      break;
+      case 'Поворотно-откидная':
+        canvas.drawLine(Offset(l, t), Offset(r, b), paint);
+        canvas.drawLine(Offset(l, b), Offset(r, t), paint);
+        final path = Path();
+        path.moveTo(cx, t + h * 0.1);
+        path.lineTo(cx - w * 0.18, b - h * 0.05);
+        path.lineTo(cx + w * 0.18, b - h * 0.05);
+        path.close();
+        canvas.drawPath(path, paint);
+        break;
 
-    case 'Сэндвич':
-      final fill = Paint()
-        ..color = Colors.grey.shade300
-        ..style = PaintingStyle.fill;
-      canvas.drawRect(rect, fill);
-      final tp = TextPainter(
-        text: const TextSpan(
-          text: 'S',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+      case 'Сэндвич':
+        final fill = Paint()
+          ..color = Colors.grey.shade300
+          ..style = PaintingStyle.fill;
+        canvas.drawRect(rect, fill);
+        final tp = TextPainter(
+          text: const TextSpan(
+            text: 'S',
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      tp.paint(canvas, Offset(cx - tp.width / 2, cy - tp.height / 2));
-      break;
+          textDirection: TextDirection.ltr,
+        )..layout();
+        tp.paint(canvas, Offset(cx - tp.width / 2, cy - tp.height / 2));
+        break;
+    }
+
+    if (hasMosquito) {
+      final sz = w * 0.12;
+      final off = sz * 0.6;
+      canvas.drawLine(Offset(cx - sz, cy - off), Offset(cx + sz, cy - off), paint);
+      canvas.drawLine(Offset(cx - sz, cy + off), Offset(cx + sz, cy + off), paint);
+      canvas.drawLine(Offset(cx - off, cy - sz), Offset(cx - off, cy + sz), paint);
+      canvas.drawLine(Offset(cx + off, cy - sz), Offset(cx + off, cy + sz), paint);
+    }
   }
 
-  if (hasMosquito) {
-    final sz = w * 0.12;
-    final off = sz * 0.6;
-    canvas.drawLine(Offset(cx - sz, cy - off), Offset(cx + sz, cy - off), paint);
-    canvas.drawLine(Offset(cx - sz, cy + off), Offset(cx + sz, cy + off), paint);
-    canvas.drawLine(Offset(cx - off, cy - sz), Offset(cx - off, cy + sz), paint);
-    canvas.drawLine(Offset(cx + off, cy - sz), Offset(cx + off, cy + sz), paint);
-  }
-  }
-    @override
+  @override
   bool shouldRepaint(covariant _WindowSchemePainter old) {
     return old.columns != columns;
   }
