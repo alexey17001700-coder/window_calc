@@ -20,136 +20,132 @@ class Section {
 
 class SchemeColumn {
   double widthMm;
+  double heightRatio;
   List<Section> sections;
 
   SchemeColumn({
     this.widthMm = 0,
+    this.heightRatio = 1.0,
     List<Section>? sections,
   }) : sections = sections ?? [Section()];
 
   Map<String, dynamic> toJson() => {
     'widthMm': widthMm,
+    'heightRatio': heightRatio,
     'sections': sections.map((e) => e.toJson()).toList(),
   };
 
   factory SchemeColumn.fromJson(Map<String, dynamic> j) => SchemeColumn(
     widthMm: (j['widthMm'] ?? 0).toDouble(),
+    heightRatio: (j['heightRatio'] ?? 1.0).toDouble(),
     sections: ((j['sections'] as List?) ?? [])
         .map((e) => Section.fromJson(Map<String, dynamic>.from(e)))
         .toList(),
   );
 }
 
+class TemplateColumn {
+  final double heightRatio;
+  final List<String> sections;
+
+  const TemplateColumn({
+    this.heightRatio = 1.0,
+    required this.sections,
+  });
+}
+
 class WindowTemplate {
   final String id;
   final String name;
-  final int columnsCount;
-  final List<List<String>> sectionTypes; // [колонка][секция] = тип
+  final List<TemplateColumn> columns;
 
   const WindowTemplate({
     required this.id,
     required this.name,
-    required this.columnsCount,
-    required this.sectionTypes,
+    required this.columns,
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-// ШАБЛОНЫ
-// ═══════════════════════════════════════════════════════════
-
 const List<WindowTemplate> allTemplates = [
-  // ─── Окна ───
   WindowTemplate(
     id: 'win1',
     name: 'Окно 1-створчатое',
-    columnsCount: 1,
-    sectionTypes: [
-      ['Поворотно-откидная'],
-    ],
+    columns: [TemplateColumn(sections: ['Поворотно-откидная'])],
   ),
   WindowTemplate(
     id: 'win2_povorot_gluh',
     name: 'Окно 2-ств. (поворотная + глухая)',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Поворотная'],
-      ['Глухая'],
+    columns: [
+      TemplateColumn(sections: ['Поворотная']),
+      TemplateColumn(sections: ['Глухая']),
     ],
   ),
   WindowTemplate(
     id: 'win2_povorot_otkid',
     name: 'Окно 2-ств. (поворотно-откидная + глухая)',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Поворотно-откидная'],
-      ['Глухая'],
+    columns: [
+      TemplateColumn(sections: ['Поворотно-откидная']),
+      TemplateColumn(sections: ['Глухая']),
     ],
   ),
   WindowTemplate(
     id: 'win3',
     name: 'Окно 3-ств. (поворотная + глухая + поворотная)',
-    columnsCount: 3,
-    sectionTypes: [
-      ['Поворотная'],
-      ['Глухая'],
-      ['Поворотная'],
+    columns: [
+      TemplateColumn(sections: ['Поворотная']),
+      TemplateColumn(sections: ['Глухая']),
+      TemplateColumn(sections: ['Поворотная']),
     ],
   ),
 
   // ─── Балконные блоки ───
+
   WindowTemplate(
     id: 'bb1',
-    name: 'ББ: глухое + дверь (стекло/сэндвич)',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Глухая'],
-      ['Поворотная', 'Сэндвич'],
+    name: 'ББ: глухое окно (короче) + дверь (стекло/сэндвич)',
+    columns: [
+      TemplateColumn(heightRatio: 0.65, sections: ['Глухая']),
+      TemplateColumn(heightRatio: 1.0, sections: ['Поворотная', 'Сэндвич']),
     ],
   ),
   WindowTemplate(
     id: 'bb2',
-    name: 'ББ: дверь (поворотно-откидная + сэндвич) + глухое',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Поворотно-откидная', 'Сэндвич'],
-      ['Глухая'],
+    name: 'ББ: дверь (стекло/сэндвич) + глухое окно (короче)',
+    columns: [
+      TemplateColumn(heightRatio: 1.0, sections: ['Поворотная', 'Сэндвич']),
+      TemplateColumn(heightRatio: 0.65, sections: ['Глухая']),
     ],
   ),
   WindowTemplate(
     id: 'bb3',
-    name: 'ББ: глухое + дверь (стекло + стекло)',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Глухая'],
-      ['Поворотная', 'Глухая'],
+    name: 'ББ: глухое окно (короче) + дверь (стекло/стекло)',
+    columns: [
+      TemplateColumn(heightRatio: 0.65, sections: ['Глухая']),
+      TemplateColumn(heightRatio: 1.0, sections: ['Поворотная', 'Глухая']),
     ],
   ),
   WindowTemplate(
     id: 'bb4',
-    name: 'ББ: глухое + дверь (стекло/сэндвич) + створка сверху',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Глухая'],
-      ['Поворотная', 'Поворотная'],
+    name: 'ББ: глухое окно (короче) + дверь поворотно-откидная',
+    columns: [
+      TemplateColumn(heightRatio: 0.65, sections: ['Глухая']),
+      TemplateColumn(heightRatio: 1.0, sections: ['Поворотно-откидная', 'Сэндвич']),
     ],
   ),
   WindowTemplate(
     id: 'bb5',
-    name: 'ББ: створка+створка (обе поворотные)',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Поворотная'],
-      ['Поворотная'],
+    name: 'ББ: створка + створка (обе полные)',
+    columns: [
+      TemplateColumn(sections: ['Поворотная']),
+      TemplateColumn(sections: ['Поворотная']),
     ],
   ),
   WindowTemplate(
     id: 'bb6',
-    name: 'ББ: глухое + поворотно-откидная (без деления)',
-    columnsCount: 2,
-    sectionTypes: [
-      ['Глухая'],
-      ['Поворотно-откидная'],
+    name: 'ББ: глухое + поворотно-откидная (полные)',
+    columns: [
+      TemplateColumn(sections: ['Глухая']),
+      TemplateColumn(sections: ['Поворотно-откидная']),
     ],
   ),
 ];
