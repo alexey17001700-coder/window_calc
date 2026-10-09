@@ -123,49 +123,50 @@ class PriceSettings {
     }
   }
 
-double furniturePrice(String furniture) {
-  switch (furniture) {
-    case 'Roto': return furRoto;
-    case 'Maco': return furMaco;
-    case 'Reze': return furReze;
-    default: return furOther;
+  double furniturePrice(String furniture) {
+    switch (furniture) {
+      case 'Roto': return furRoto;
+      case 'Maco': return furMaco;
+      case 'Reze': return furReze;
+      default: return furOther;
+    }
   }
-}
-
-   Map<String, double> toMap() => {
-    'window1': window1, 'window2': window2, 'window3': window3,
-    'balconyBlock': balconyBlock, 'balconyGlazingPerM2': balconyGlazingPerM2,
-    'loggiaGlazingPerM2': loggiaGlazingPerM2, 'panoramicPerM2': panoramicPerM2,
-    'balconyDoor': balconyDoor, 'pvcDoor': pvcDoor, 'entranceGroup': entranceGroup,
-    'furRoto': furRoto, 'furMaco': furMaco, 'furReze': furReze, 'furOther': furOther,
-    'coefRehau': coefRehau, 'coefBauline': coefBauline, 'coefNovoline': coefNovoline,
-    'coefBrusbox': coefBrusbox, 'coefVeka': coefVeka, 'coefKBE': coefKBE, 'coefOther': coefOther,
-    'sillEconomPerM2': sillEconomPerM2, 'sillOtherPerM2': sillOtherPerM2,
-    'dripWhitePerM2': dripWhitePerM2, 'dripBrownPerM2': dripBrownPerM2,
-    'slopePiterPerM2': slopePiterPerM2, 'slopeEconomPerM2': slopeEconomPerM2,
-    'slopeExtraPiterPerM2': slopeExtraPiterPerM2, 'slopeExtraEconomPerM2': slopeExtraEconomPerM2,
-    'mountSlopesPerM2': mountSlopesPerM2, 'mountSillPerM2': mountSillPerM2,
-    'fUgol40': fUgol40, 'fUgol50': fUgol50, 'fUgol60': fUgol60,
-    'abrisPerM': abrisPerM, 'psulPerM': psulPerM, 'otmazkaPerM': otmazkaPerM,
-    'mosquito': mosquito, 'anticat': anticat, 'antidust': antidust,
-    'frameNet': frameNet, 'plisse': plisse,
-    'glass24': glass24, 'glass32': glass32, 'glass40': glass40,
-    'extraTinting': extraTinting, 'extraMulti': extraMulti,
-    'demontagePerItem': demontagePerItem, 'montagePerItem': montagePerItem,
-    'trashRemoval': trashRemoval, 'liftPerFloor': liftPerFloor, 'delivery': delivery,
-    'erkerPerM2': erkerPerM2, 'archWindow': archWindow, 'facadeAlumPerM2': facadeAlumPerM2,
-    'mountSillServicePerM': mountSillServicePerM,
-    'mountSlopeServicePerM': mountSlopeServicePerM,
-    'mountNetServicePerPc': mountNetServicePerPc,
-    'regulationPerPc': regulationPerPc,
-    'handleReplacePerPc': handleReplacePerPc,
-    'rubberReplacePerSash': rubberReplacePerSash,
-    'rubberReplaceBlindExtra': rubberReplaceBlindExtra,
-    'glassReplacePerPc': glassReplacePerPc,
-    'glassReplaceBlindExtra': glassReplaceBlindExtra,
-    'furnitureReplacePerPc': furnitureReplacePerPc,
-    'sillReplacePerM': sillReplacePerM,
-  };
+    Map<String, double> toMap() {
+    return {
+      'window1': window1, 'window2': window2, 'window3': window3,
+      'balconyBlock': balconyBlock, 'balconyGlazingPerM2': balconyGlazingPerM2,
+      'loggiaGlazingPerM2': loggiaGlazingPerM2, 'panoramicPerM2': panoramicPerM2,
+      'balconyDoor': balconyDoor, 'pvcDoor': pvcDoor, 'entranceGroup': entranceGroup,
+      'furRoto': furRoto, 'furMaco': furMaco, 'furReze': furReze, 'furOther': furOther,
+      'coefRehau': coefRehau, 'coefBauline': coefBauline, 'coefNovoline': coefNovoline,
+      'coefBrusbox': coefBrusbox, 'coefVeka': coefVeka, 'coefKBE': coefKBE, 'coefOther': coefOther,
+      'sillEconomPerM2': sillEconomPerM2, 'sillOtherPerM2': sillOtherPerM2,
+      'dripWhitePerM2': dripWhitePerM2, 'dripBrownPerM2': dripBrownPerM2,
+      'slopePiterPerM2': slopePiterPerM2, 'slopeEconomPerM2': slopeEconomPerM2,
+      'slopeExtraPiterPerM2': slopeExtraPiterPerM2, 'slopeExtraEconomPerM2': slopeExtraEconomPerM2,
+      'mountSlopesPerM2': mountSlopesPerM2, 'mountSillPerM2': mountSillPerM2,
+      'fUgol40': fUgol40, 'fUgol50': fUgol50, 'fUgol60': fUgol60,
+      'abrisPerM': abrisPerM, 'psulPerM': psulPerM, 'otmazkaPerM': otmazkaPerM,
+      'mosquito': mosquito, 'anticat': anticat, 'antidust': antidust,
+      'frameNet': frameNet, 'plisse': plisse,
+      'glass24': glass24, 'glass32': glass32, 'glass40': glass40,
+      'extraTinting': extraTinting, 'extraMulti': extraMulti,
+      'demontagePerItem': demontagePerItem, 'montagePerItem': montagePerItem,
+      'trashRemoval': trashRemoval, 'liftPerFloor': liftPerFloor, 'delivery': delivery,
+      'erkerPerM2': erkerPerM2, 'archWindow': archWindow, 'facadeAlumPerM2': facadeAlumPerM2,
+      'mountSillServicePerM': mountSillServicePerM,
+      'mountSlopeServicePerM': mountSlopeServicePerM,
+      'mountNetServicePerPc': mountNetServicePerPc,
+      'regulationPerPc': regulationPerPc,
+      'handleReplacePerPc': handleReplacePerPc,
+      'rubberReplacePerSash': rubberReplacePerSash,
+      'rubberReplaceBlindExtra': rubberReplaceBlindExtra,
+      'glassReplacePerPc': glassReplacePerPc,
+      'glassReplaceBlindExtra': glassReplaceBlindExtra,
+      'furnitureReplacePerPc': furnitureReplacePerPc,
+      'sillReplacePerM': sillReplacePerM,
+    };
+  }
 
   void fromMap(Map<String, double> m) {
     window1 = m['window1'] ?? window1;
@@ -266,7 +267,7 @@ class PriceStorage {
     } catch (_) {}
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // МОДЕЛИ
 // ═══════════════════════════════════════════════════════════
 
@@ -342,7 +343,6 @@ class ProductItem {
   bool hasPlisse;
   bool complexInstall;
   bool separateDemontage;
-
   List<SchemeColumn> columns;
 
   ProductItem({
@@ -396,136 +396,6 @@ class ProductItem {
         columns = columnsParam ?? defaultColumns(type);
 
   double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
-  // ═══════════════════════════════════════════════════════════
-// МОДЕЛИ
-// ═══════════════════════════════════════════════════════════
-
-class SillItem {
-  double lengthMm;
-  double depthMm;
-  String category;
-
-  SillItem({
-    this.lengthMm = 1700,
-    this.depthMm = 250,
-    this.category = 'Эконом',
-  });
-
-  double get areaM2 => (lengthMm / 1000) * (depthMm / 1000);
-
-  Map<String, dynamic> toJson() => {
-    'lengthMm': lengthMm,
-    'depthMm': depthMm,
-    'category': category,
-  };
-
-  factory SillItem.fromJson(Map<String, dynamic> j) => SillItem(
-    lengthMm: (j['lengthMm'] ?? 1700).toDouble(),
-    depthMm: (j['depthMm'] ?? 250).toDouble(),
-    category: (j['category'] ?? 'Эконом').toString(),
-  );
-}
-
-class ProductItem {
-  String type;
-  String profile;
-  String furniture;
-  double widthMm;
-  double heightMm;
-  int count;
-  int sashes;
-  double glassThickness;
-  bool tinted;
-  bool multi;
-  bool hasSlopes;
-  String houseType;
-  String slopeCategory;
-  double slopeDepthMm;
-  double slopeLengthSideMm;
-  double slopeLengthTopMm;
-  bool mountSlopesSeparately;
-  bool hasExtraSlopes;
-  String extraSlopeCategory;
-  double extraSlopeDepthMm;
-  double extraSlopeLengthSideMm;
-  double extraSlopeLengthTopMm;
-  bool hasSill;
-  List<SillItem> sills;
-  bool mountSillSeparately;
-  bool hasDrip;
-  double dripLengthMm;
-  double dripDepthMm;
-  String dripColor;
-  bool hasFUgol;
-  String fUgolType;
-  int fUgolCount;
-  bool hasAbris;
-  double abrisLengthMm;
-  bool hasPsul;
-  double psulLengthMm;
-  bool hasOtmazka;
-  double otmazkaLengthMm;
-  bool hasMosquito;
-  bool hasAnticat;
-  bool hasAntidust;
-  bool hasFrameNet;
-  bool hasPlisse;
-  bool complexInstall;
-  bool separateDemontage;
-
-  List<Column> columns;
-
-  ProductItem({
-    this.type = 'Окно 2-створчатое',
-    this.profile = 'Novoline',
-    this.furniture = 'Roto',
-    this.widthMm = 1300,
-    this.heightMm = 1400,
-    this.count = 1,
-    this.sashes = 2,
-    this.glassThickness = 32,
-    this.tinted = false,
-    this.multi = false,
-    this.hasSlopes = false,
-    this.houseType = 'Панелька',
-    this.slopeCategory = 'Эконом',
-    this.slopeDepthMm = 200,
-    this.slopeLengthSideMm = 1400,
-    this.slopeLengthTopMm = 1300,
-    this.mountSlopesSeparately = false,
-    this.hasExtraSlopes = false,
-    this.extraSlopeCategory = 'Эконом',
-    this.extraSlopeDepthMm = 200,
-    this.extraSlopeLengthSideMm = 1400,
-    this.extraSlopeLengthTopMm = 1300,
-    this.hasSill = false,
-    List<SillItem>? sills,
-    this.mountSillSeparately = false,
-    this.hasDrip = false,
-    this.dripLengthMm = 1300,
-    this.dripDepthMm = 200,
-    this.dripColor = 'Белый',
-    this.hasFUgol = false,
-    this.fUgolType = '40×3.20',
-    this.fUgolCount = 1,
-    this.hasAbris = false,
-    this.abrisLengthMm = 5000,
-    this.hasPsul = false,
-    this.psulLengthMm = 5000,
-    this.hasOtmazka = false,
-    this.otmazkaLengthMm = 5000,
-    this.hasMosquito = false,
-    this.hasAnticat = false,
-    this.hasAntidust = false,
-    this.hasFrameNet = false,
-    this.hasPlisse = false,
-    this.complexInstall = true,
-    this.separateDemontage = false,
-    List<Column>? columnsParam,
-  })  : sills = sills ?? [],
-        columns = columnsParam ?? defaultColumns(type);
-
-  double get areaM2 => (widthMm / 1000) * (heightMm / 1000) * count;
   static int defaultSashes(String type) {
   switch (type) {
     case 'Окно 1-створчатое': return 1;
@@ -538,7 +408,7 @@ class ProductItem {
   }
 }
 
-static List<Column> defaultColumns(String type) {
+static List<SchemeColumn> defaultColumns(String type) {
   final template = allTemplates.firstWhere(
     (t) => t.id.startsWith(_templatePrefix(type)),
     orElse: () => allTemplates[0],
@@ -554,11 +424,11 @@ static String _templatePrefix(String type) {
   return 'win';
 }
 
-static List<Column> _columnsFromTemplate(WindowTemplate template) {
-  final columns = <Column>[];
+static List<SchemeColumn> _columnsFromTemplate(WindowTemplate template) {
+  final columns = <SchemeColumn>[];
   for (final col in template.sectionTypes) {
     final sections = col.map((t) => Section(type: t)).toList();
-    columns.add(Column(widthMm: 0, sections: sections));
+    columns.add(SchemeColumn(widthMm: 0, sections: sections));
   }
   return columns;
 }
@@ -744,11 +614,11 @@ double calcExtrasPrice(PriceSettings ps) {
     complexInstall: j['complexInstall'] ?? true,
     separateDemontage: j['separateDemontage'] ?? false,
     columnsParam: ((j['columns'] as List?) ?? [])
-        .map((e) => Column.fromJson(Map<String, dynamic>.from(e)))
+        .map((e) => SchemeColumn.fromJson(Map<String, dynamic>.from(e)))
         .toList(),
   );
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // ЗАМЕР
 // ═══════════════════════════════════════════════════════════
 
@@ -1000,7 +870,7 @@ class MeasurementStorage {
     } catch (_) {}
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // СЕРВИС И РЕМОНТ — МОДЕЛИ
 // ═══════════════════════════════════════════════════════════
 
@@ -1189,7 +1059,7 @@ class ServiceStorage {
     } catch (_) {}
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // ГЛАВНОЕ ПРИЛОЖЕНИЕ
 // ═══════════════════════════════════════════════════════════
 
@@ -1348,7 +1218,7 @@ class _WindowCalcAppState extends State<WindowCalcApp> {
     );
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // ГЛАВНОЕ МЕНЮ
 // ═══════════════════════════════════════════════════════════
 
@@ -1569,7 +1439,7 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // СОХРАНЁННЫЕ ЗАМЕРЫ
 // ═══════════════════════════════════════════════════════════
 
@@ -1704,7 +1574,7 @@ class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
     );
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // НАСТРОЙКИ ПРАЙСА
 // ═══════════════════════════════════════════════════════════
 
@@ -2007,7 +1877,7 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     );
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // РЕДАКТОР ЗАМЕРА
 // ═══════════════════════════════════════════════════════════
 
@@ -2198,7 +2068,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             ],
           ),
 
-          // Тип изделия
           DropdownButtonFormField<String>(
             value: it.type,
             decoration: const InputDecoration(labelText: 'Тип изделия'),
@@ -2224,7 +2093,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             }),
           ),
 
-          // Выбор шаблона
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: () => _showTemplateDialog(index),
@@ -2232,7 +2100,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             label: const Text('Выбрать шаблон'),
           ),
 
-          // Схема
           const SizedBox(height: 8),
           Center(
             child: Container(
@@ -2250,7 +2117,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Профиль
           DropdownButtonFormField<String>(
             value: it.profile,
             decoration: const InputDecoration(labelText: 'Профиль'),
@@ -2267,7 +2133,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Фурнитура
           DropdownButtonFormField<String>(
             value: it.furniture,
             decoration: const InputDecoration(labelText: 'Фурнитура'),
@@ -2281,7 +2146,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Общие размеры
           Row(
             children: [
               Expanded(child: TextFormField(
@@ -2300,11 +2164,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             ],
           ),
           const SizedBox(height: 8),
-
-          // Размеры колонок
-          ..._columnFields(index),
-                      // Количество и створки
-            Row(
+                      Row(
               children: [
                 Expanded(child: TextFormField(
                   initialValue: it.count.toString(),
@@ -2322,7 +2182,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               ],
             ),
             const SizedBox(height: 8),
-
             DropdownButtonFormField<double>(
               value: it.glassThickness,
               decoration: const InputDecoration(labelText: 'Стеклопакет, мм'),
@@ -2345,6 +2204,9 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               title: const Text('Мультифункциональное'),
               dense: true,
             ),
+
+            // Размеры колонок
+            ..._columnFields(index),
 
             const Divider(),
             const Text('Отделка', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
@@ -2673,7 +2535,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
       ),
     );
   }
-
   bool _matchTemplate(WindowTemplate t, String type) {
     if (type.contains('Балконный блок')) return t.id.startsWith('bb');
     if (type == 'Окно 1-створчатое') return t.id == 'win1';
@@ -2682,7 +2543,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
     return true;
   }
 }
-  // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // ЭКРАН РЕЗУЛЬТАТА
 // ═══════════════════════════════════════════════════════════
 
@@ -2919,7 +2780,8 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 }
-  // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
 // ВСПОМОГАТЕЛЬНОЕ
 // ═══════════════════════════════════════════════════════════
 
@@ -2935,5 +2797,3 @@ class _SectionTitle extends StatelessWidget {
     );
   }
 }
-  
-        
