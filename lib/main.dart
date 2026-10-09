@@ -408,12 +408,17 @@ class ProductItem {
   }
 }
 
-static List<SchemeColumn> defaultColumns(String type) {
-  final template = allTemplates.firstWhere(
-    (t) => t.id.startsWith(_templatePrefix(type)),
-    orElse: () => allTemplates[0],
-  );
-  return _columnsFromTemplate(template);
+static List<SchemeColumn> _columnsFromTemplate(WindowTemplate template) {
+  final columns = <SchemeColumn>[];
+  for (final col in template.columns) {
+    final sections = col.sections.map((t) => Section(type: t)).toList();
+    columns.add(SchemeColumn(
+      widthMm: 0,
+      heightRatio: col.heightRatio,
+      sections: sections,
+    ));
+  }
+  return columns;
 }
 
 static String _templatePrefix(String type) {
