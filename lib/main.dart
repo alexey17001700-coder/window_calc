@@ -132,8 +132,7 @@ double furniturePrice(String furniture) {
   }
 }
 
-Map<String, double> toMap() => {
-    Map<String, double> toMap() => {
+   Map<String, double> toMap() => {
     'window1': window1, 'window2': window2, 'window3': window3,
     'balconyBlock': balconyBlock, 'balconyGlazingPerM2': balconyGlazingPerM2,
     'loggiaGlazingPerM2': loggiaGlazingPerM2, 'panoramicPerM2': panoramicPerM2,
