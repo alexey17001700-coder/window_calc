@@ -60,6 +60,7 @@ class _WindowSchemePainter extends CustomPainter {
 
     if (columns.isEmpty) return;
 
+    // Пропорции по ширине
     final totalWidthMm = columns.fold<double>(0, (s, c) => s + c.widthMm);
     final List<double> colWidths = [];
     for (var i = 0; i < columns.length; i++) {
@@ -70,31 +71,39 @@ class _WindowSchemePainter extends CustomPainter {
       }
     }
 
+    // Вертикальные линии между колонками
     var xAcc = left;
     for (var i = 0; i < colWidths.length - 1; i++) {
       xAcc += colWidths[i];
       canvas.drawLine(Offset(xAcc, top), Offset(xAcc, top + h), sashLinePaint);
     }
 
+    // Рисуем колонки
     var xCol = left;
     for (var c = 0; c < columns.length; c++) {
       final col = columns[c];
       final colW = colWidths[c];
+      final colH = h * col.heightRatio;
+
+      // Горизонтальные разделители между секциями внутри колонки
       if (col.sections.length > 1) {
-        final sectionH = h / col.sections.length;
+        final sectionH = colH / col.sections.length;
         for (var s = 1; s < col.sections.length; s++) {
           final y = top + sectionH * s;
           canvas.drawLine(Offset(xCol, y), Offset(xCol + colW, y), sashLinePaint);
         }
       }
+
+      // Символы для секций
       if (col.sections.isNotEmpty) {
-        final sectionH = h / col.sections.length;
+        final sectionH = colH / col.sections.length;
         for (var s = 0; s < col.sections.length; s++) {
           final sec = col.sections[s];
           final secRect = Rect.fromLTWH(xCol, top + sectionH * s, colW, sectionH);
           _drawSashSymbol(canvas, secRect, sec.type, symbolPaint, sec.hasMosquito);
         }
       }
+
       xCol += colW;
     }
   }
@@ -104,16 +113,17 @@ class _WindowSchemePainter extends CustomPainter {
     final cy = rect.center.dy;
     final w = rect.width;
     final h = rect.height;
-    final pad = 6.0;
-    final l = rect.left + pad;
-    final t = rect.top + pad;
-    final r = rect.right - pad;
-    final b = rect.bottom - pad;
+    final padX = w * 0.12;
+    final padY = h * 0.08;
+    final l = rect.left + padX;
+    final t = rect.top + padY;
+    final r = rect.right - padX;
+    final b = rect.bottom - padY;
 
     switch (type) {
       case 'Глухая':
-        final armX = w * 0.18;
-        final armY = h * 0.18;
+        final armX = w * 0.15;
+        final armY = h * 0.12;
         canvas.drawLine(Offset(cx - armX, cy), Offset(cx + armX, cy), paint);
         canvas.drawLine(Offset(cx, cy - armY), Offset(cx, cy + armY), paint);
         break;
@@ -140,9 +150,9 @@ class _WindowSchemePainter extends CustomPainter {
         canvas.drawLine(Offset(l, t), Offset(r, b), paint);
         canvas.drawLine(Offset(l, b), Offset(r, t), paint);
         final path = Path();
-        path.moveTo(cx, t + h * 0.1);
-        path.lineTo(cx - w * 0.18, b - h * 0.05);
-        path.lineTo(cx + w * 0.18, b - h * 0.05);
+        path.moveTo(cx, t + h * 0.05);
+        path.lineTo(cx - w * 0.12, b - h * 0.05);
+        path.lineTo(cx + w * 0.12, b - h * 0.05);
         path.close();
         canvas.drawPath(path, paint);
         break;
@@ -157,7 +167,7 @@ class _WindowSchemePainter extends CustomPainter {
             text: 'S',
             style: TextStyle(
               color: Colors.black87,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -168,8 +178,8 @@ class _WindowSchemePainter extends CustomPainter {
     }
 
     if (hasMosquito) {
-      final sz = w * 0.12;
-      final off = sz * 0.6;
+      final sz = w * 0.10;
+      final off = sz * 0.5;
       canvas.drawLine(Offset(cx - sz, cy - off), Offset(cx + sz, cy - off), paint);
       canvas.drawLine(Offset(cx - sz, cy + off), Offset(cx + sz, cy + off), paint);
       canvas.drawLine(Offset(cx - off, cy - sz), Offset(cx - off, cy + sz), paint);
