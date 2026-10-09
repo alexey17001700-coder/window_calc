@@ -428,7 +428,14 @@ static String _templatePrefix(String type) {
   if (type == 'Окно 3-створчатое') return 'win3';
   return 'win';
 }
-
+static List<SchemeColumn> defaultColumns(String type) {
+  final template = allTemplates.firstWhere(
+    (t) => t.id.startsWith(_templatePrefix(type)),
+    orElse: () => allTemplates[0],
+  );
+  return _columnsFromTemplate(template);
+}
+  
 double calcPrice(PriceSettings ps) {
   double total = 0;
   final perM2 = ps.perM2Price(type);
