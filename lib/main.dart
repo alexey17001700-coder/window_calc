@@ -429,15 +429,6 @@ static String _templatePrefix(String type) {
   return 'win';
 }
 
-static List<SchemeColumn> _columnsFromTemplate(WindowTemplate template) {
-  final columns = <SchemeColumn>[];
-  for (final col in template.sectionTypes) {
-    final sections = col.map((t) => Section(type: t)).toList();
-    columns.add(SchemeColumn(widthMm: 0, sections: sections));
-  }
-  return columns;
-}
-
 double calcPrice(PriceSettings ps) {
   double total = 0;
   final perM2 = ps.perM2Price(type);
