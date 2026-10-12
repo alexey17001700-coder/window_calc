@@ -188,7 +188,5 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _WindowSchemePainter old) {
-    return old.columns != columns;
-  }
+   bool shouldRepaint(covariant _WindowSchemePainter old) => true;
 }
