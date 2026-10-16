@@ -103,7 +103,19 @@ class _WindowSchemePainter extends CustomPainter {
           _drawSashSymbol(canvas, secRect, sec.type, symbolPaint, sec.hasMosquito);
         }
       }
-
+// Закрываем короткую колонку снизу + заливаем пустоту
+if (col.heightRatio < 1.0) {
+  final emptyRect = Rect.fromLTWH(xCol, top + colH, colW, h - colH);
+  canvas.drawRect(
+    emptyRect,
+    Paint()..color = Colors.grey.shade400..style = PaintingStyle.fill,
+  );
+  canvas.drawLine(
+    Offset(xCol, top + colH),
+    Offset(xCol + colW, top + colH),
+    framePaint,
+  );
+}
       xCol += colW;
     }
   }
