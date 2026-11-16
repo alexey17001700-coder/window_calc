@@ -502,10 +502,22 @@ class _WindowSchemePainter extends CustomPainter {
     for (final c in layout.cols) {
       final col = columns[c.index];
       final secs = col.sections.isEmpty ? <Section>[Section()] : col.sections;
+      // Створка-полотно балконной двери (стекло + сэндвич): символ
+      // открывания рисуется один раз на ВСЮ высоту створки.
+      final isLeaf = secs.any((s) => s.type == 'Сэндвич');
       for (var s = 0; s < c.secRects.length; s++) {
         final sec = s < secs.length ? secs[s] : null;
-        _paintSection(canvas, c.secRects[s], sec, sashW, c.hingeLeft);
+        _paintSection(
+          canvas,
+          c.secRects[s],
+          sec,
+          sashW,
+          c.hingeLeft,
+          drawSymbol: !isLeaf,
+          drawHandle: !isLeaf,
+        );
       }
+      if (isLeaf) _paintLeaf(canvas, c, secs, sashW);
     }
 
     // ── Вспышка отклика на тап
