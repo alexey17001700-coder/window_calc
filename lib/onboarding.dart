@@ -855,8 +855,17 @@ class _TrailPainter extends CustomPainter {
   final double intensity;
   final Size cardSize;
 
-  static const _silver = Color(0xFFDCE6F2);
-  static const _silverDim = Color(0xFF9FB4CC);
+  // Ядро — бело-голубое, дымка — серебристо-серая с лёгким золотом.
+  static const _core = Color(0xFFEAF4FF);
+  static const _ice = Color(0xFFB9D4F2);
+  static const _silver = Color(0xFFA9B8CC);
+  static const _gold = Color(0xFFC9A227);
+
+  /// Детерминированный «шум» — стабилен между кадрами, без Random.
+  static double _hash(int i, double k) {
+    final x = math.sin(i * 12.9898 + k * 78.233) * 43758.5453;
+    return x - x.floorToDouble();
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -878,70 +887,99 @@ class _TrailPainter extends CustomPainter {
     final halfHp = (halfH * scale) / w;
     final top = size.height / 2 - halfHp;
     final bot = size.height / 2 + halfHp;
+    final h = bot - top;
 
-    // 1. Тлеющий торец — мягкое свечение по всей высоте.
-    canvas.drawRect(
-      Rect.fromLTRB(edgeX - 30, top, edgeX + 30, bot),
-      Paint()
-        ..shader = ui.Gradient.linear(
-          Offset(edgeX - 30, 0),
-          Offset(edgeX + 30, 0),
-          [
-            _silver.withOpacity(0.0),
-            _silver.withOpacity(0.30 * intensity),
-            _silver.withOpacity(0.0),
-          ],
-          const [0.0, 0.5, 1.0],
+    // Раскрытие разворота — максимум в середине.
+    final open = math.sin(t * math.pi).clamp(0.0, 1.0).toDouble();
+    final glow = intensity * (0.35 + 0.65 * open);
+
+    // ── 1. ДЫМКА: слоистые полупрозрачные градиенты (не сплошной блок) ──
+    for (var i = 0; i < 3; i++) {
+      final k = i / 2.0;
+      final reach = (10 + 46 * open) * scale * (0.45 + k * 0.85);
+      final a = glow * (0.085 - k * 0.022);
+      canvas.drawRect(
+        Rect.fromLTRB(
+          s > 0 ? edgeX : edgeX - reach,
+          top + h * 0.04 * k,
+          s > 0 ? edgeX + reach : edgeX,
+          bot - h * 0.04 * k,
         ),
-    );
+        Paint()
+          ..shader = ui.Gradient.linear(
+            Offset(edgeX, 0),
+            Offset(edgeX + s * reach, 0),
+            [
+              _silver.withOpacity(a * 1.6),
+              _ice.withOpacity(a * 0.7),
+              _silver.withOpacity(0.0),
+            ],
+            const [0.0, 0.35, 1.0],
+          ),
+      );
+    }
 
-    // 2. Дымка, тянущаяся наружу от торца.
-    final trailW = (14 + 34 * math.sin(t * math.pi)) * scale;
-    canvas.drawRect(
-      Rect.fromLTRB(
-        s > 0 ? edgeX : edgeX - trailW,
-        top,
-        s > 0 ? edgeX + trailW : edgeX,
-        bot,
-      ),
-      Paint()
-        ..shader = ui.Gradient.linear(
-          Offset(edgeX, 0),
-          Offset(edgeX + s * trailW, 0),
-          [
-            _silver.withOpacity(0.22 * intensity),
-            _silver.withOpacity(0.0),
-          ],
-        ),
-    );
+    // ── 2. ШУМ: мягкие сгустки, стелющиеся от торца ──
+    for (var i = 0; i < 16; i++) {
+      final ph = _hash(i, 1.0);
+      final prog = ((t * 0.85 + ph) % 1.0);
+      final dist = (6 + prog * (16 + 54 * open)) * scale;
+      final cy = top + _hash(i, 2.0) * h;
+      final cx = edgeX + s * dist;
+      final rad = (7 + _hash(i, 3.0) * 13) * scale * (0.6 + prog * 0.7);
+      final a = glow * (1.0 - prog) * (0.055 + _hash(i, 4.0) * 0.05);
+      final col = _hash(i, 5.0) > 0.78 ? _gold : _silver;
+      final cy2 = cy + math.sin(t * 3.1 + ph * 6.3) * 4 * scale;
+      canvas.drawCircle(
+        Offset(cx, cy2),
+        rad,
+        Paint()
+          ..shader = ui.Gradient.radial(Offset(cx, cy2), rad, [
+            col.withOpacity(a),
+            col.withOpacity(0.0),
+          ]),
+      );
+    }
 
-    // 3. Раскалённая кромка торца.
+    // ── 3. РАСКАЛЁННАЯ КРОМКА: узкое свечение + почти белая нить ──
     canvas.drawLine(
-      Offset(edgeX, top),
-      Offset(edgeX, bot),
+      Offset(edgeX, top + h * 0.02),
+      Offset(edgeX, bot - h * 0.02),
       Paint()
-        ..color = _silver.withOpacity(0.55 * intensity)
-        ..strokeWidth = 1.6
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
+        ..color = _ice.withOpacity(0.30 * glow)
+        ..strokeWidth = 3.2
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0),
+    );
+    canvas.drawLine(
+      Offset(edgeX, top + h * 0.03),
+      Offset(edgeX, bot - h * 0.03),
+      Paint()
+        ..color = _core.withOpacity(0.85 * glow)
+        ..strokeWidth = 1.0,
     );
 
-    // 4. Частицы дымки — расходятся от торца и растворяются.
+    // ── 4. ИСКРЫ: мелкие, разной скорости, с вилянием, быстро гаснут ──
     final p = Paint();
-    for (var i = 0; i < 20; i++) {
-      final seed = i * 2.37;
-      final ph = (i % 7) / 7.0;
-      final prog = ((t * 1.4 + ph) % 1.0);
-      final dist = (8 + prog * 52) * scale;
+    for (var i = 0; i < 44; i++) {
+      final ph = _hash(i, 11.0);
+      final speed = 0.55 + _hash(i, 12.0) * 1.35;
+      final prog = ((t * speed + ph) % 1.0);
+      final ease = (1.0 - math.pow(1.0 - prog, 2.2)).toDouble();
+      final dist = (4 + ease * (14 + 62 * open)) * scale;
+      final wob =
+          math.sin(prog * 9.0 + ph * 12.0) * (2.5 + _hash(i, 13.0) * 5.0);
       final px = edgeX + s * dist;
-      final py = top +
-          (((i * 41) % 100) / 100.0) * (bot - top) +
-          math.sin(t * 5.2 + seed) * 8 * scale;
-      final a = intensity * (1.0 - prog) * 0.40;
-      final r = (1.4 + (1.0 - prog) * 3.0) * scale;
+      final py = top + _hash(i, 14.0) * h + wob * scale;
+      final fade = math.pow(1.0 - prog, 1.8).toDouble();
+      final a = glow * fade * (0.35 + _hash(i, 15.0) * 0.5);
+      final r = (0.55 + _hash(i, 16.0) * 1.9) * scale;
 
-      p.color = _silverDim.withOpacity(a * 0.5);
-      canvas.drawCircle(Offset(px, py), r * 2.1, p);
-      p.color = _silver.withOpacity(a);
+      // Ореол — только у самых ярких искр.
+      if (r > 1.5) {
+        p.color = _ice.withOpacity(a * 0.22);
+        canvas.drawCircle(Offset(px, py), r * 2.4, p);
+      }
+      p.color = (i % 9 == 0 ? _gold : _core).withOpacity(a);
       canvas.drawCircle(Offset(px, py), r, p);
     }
   }
