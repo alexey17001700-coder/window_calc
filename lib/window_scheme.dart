@@ -684,8 +684,10 @@ class _WindowSchemePainter extends CustomPainter {
     Rect rect,
     Section? sec,
     double sashW,
-    bool hingeLeft,
-  ) {
+    bool hingeLeft, {
+    bool drawSymbol = true,
+    bool drawHandle = true,
+  }) {
     final type = sec?.type ?? 'Глухая';
     final r = rect.deflate(0.6);
     if (r.width <= 3 || r.height <= 3) return;
