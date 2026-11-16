@@ -2551,11 +2551,65 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
         children: [
           Row(
             children: [
-              Text('Изделие ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const Spacer(),
+              Container(
+                width: 30,
+                height: 30,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppTheme.goldLight, AppTheme.bronze],
+                  ),
+                ),
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    color: Color(0xFF1A1305),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Изделие',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, letterSpacing: -0.2),
+                    ),
+                    Text(
+                      it.type,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.gold.withOpacity(0.14),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: AppTheme.gold.withOpacity(0.35)),
+                ),
+                child: Text(
+                  '${price.toStringAsFixed(0)} ₽',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
+                    color: AppTheme.bronze,
+                  ),
+                ),
+              ),
               if (_items.length > 1)
                 IconButton(
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const Icon(Icons.delete_outline, size: 20),
                   onPressed: () => setState(() => _items.removeAt(index)),
                 ),
             ],
