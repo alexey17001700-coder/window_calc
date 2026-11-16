@@ -1731,24 +1731,92 @@ class MainMenuScreen extends StatelessWidget {
   Widget _menuCard(
     BuildContext context, {
     required IconData icon,
-    required Color color,
+    required Color accent,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        leading: CircleAvatar(
-          radius: 28,
-          backgroundColor: color.withOpacity(0.15),
-          child: Icon(icon, color: color, size: 30),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Material(
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
+              ),
+              boxShadow: isDark
+                  ? null
+                  : const [
+                      BoxShadow(
+                        color: Color(0x121B2A4A),
+                        blurRadius: 18,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        accent.withOpacity(isDark ? 0.30 : 0.16),
+                        accent.withOpacity(isDark ? 0.10 : 0.05),
+                      ],
+                    ),
+                    border: Border.all(color: accent.withOpacity(0.35)),
+                  ),
+                  child: Icon(icon, color: accent, size: 26),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.25,
+                          color: onSurface.withOpacity(0.55),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 15,
+                  color: onSurface.withOpacity(0.28),
+                ),
+              ],
+            ),
+          ),
         ),
-        title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: onTap,
       ),
     );
   }
