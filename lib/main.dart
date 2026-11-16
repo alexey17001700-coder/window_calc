@@ -3310,9 +3310,35 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      padding: const EdgeInsets.only(bottom: 12, top: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 16,
+            decoration: BoxDecoration(
+              color: AppTheme.gold,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            text.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.6,
+              color: onSurface.withOpacity(0.72),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(height: 1, color: onSurface.withOpacity(0.08)),
+          ),
+        ],
+      ),
     );
   }
 }
