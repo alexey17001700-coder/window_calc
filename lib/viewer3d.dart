@@ -368,6 +368,26 @@ void _buildWindow(List<_Prim> out) {
       const _V3(_W * 2 + 0.30, 0.014, 0.040), _pvcInner);
 }
 
+/// Масштаб модели окна. Уменьшен, чтобы инструменты на орбитах
+/// (радиус 1.16–1.46) не пролетали сквозь раму и стеклопакеты.
+const _winScale = 0.60;
+
+/// Пропорциональное масштабирование готовых примитивов от центра сцены.
+void _scalePrims(List<_Prim> list, double s) {
+  for (var i = 0; i < list.length; i++) {
+    final p = list[i];
+    list[i] = _Prim(
+      p.pts.map((v) => _V3(v.x * s, v.y * s, v.z * s)).toList(),
+      p.color,
+      alpha: p.alpha,
+      fill: p.fill,
+      stroke: p.stroke,
+      glow: p.glow,
+      glass: p.glass,
+    );
+  }
+}
+
 // ═══════════════════════════ ИНСТРУМЕНТЫ ═══════════════════════════
 
 /// Точка на наклонной орбите. У каждого инструмента СВОЯ плоскость:
