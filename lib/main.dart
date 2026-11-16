@@ -200,17 +200,7 @@ class _SplashScreenState extends State<SplashScreen>
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          Positioned.fill(
-            child: ModelViewer(
-              backgroundColor: const Color(0xFF0A1220),
-              src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
-              alt: '3D модель',
-              ar: false,
-              autoRotate: true,
-              cameraControls: true,
-              disableZoom: false,
-            ),
-          ),
+          const Positioned.fill(child: Viewer3D()),
           Positioned(
             left: 12,
             top: 12,
