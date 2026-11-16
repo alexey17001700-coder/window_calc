@@ -29,6 +29,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late final AnimationController _shine;
   late final AnimationController _flip;
 
+  /// Шлейф от ближнего торца карточки (серебристая дымка).
+  late final AnimationController _trail;
+
+  /// Ключ карточки — нужен, чтобы знать её габариты для шлейфа.
+  final GlobalKey _cardKey = GlobalKey();
+  Size _cardSize = const Size(300, 240);
+
   /// Текущая (целевая) страница — шапка, прогресс и точки реагируют сразу.
   int _page = 0;
 
