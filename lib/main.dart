@@ -2388,21 +2388,39 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
   }
 
   Widget _row(String label, String key, {String suffix = '₽', bool isCoef = false}) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+                color: onSurface.withOpacity(0.82),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           SizedBox(
-            width: 110,
+            width: 116,
             child: TextField(
               controller: _ctrls[key],
+              textAlign: TextAlign.right,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
               decoration: InputDecoration(
                 isDense: true,
-                border: const OutlineInputBorder(),
+                filled: true,
                 suffixText: isCoef ? 'x' : suffix,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                suffixStyle: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: onSurface.withOpacity(0.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               ),
             ),
           ),
