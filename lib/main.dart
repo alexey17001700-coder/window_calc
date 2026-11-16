@@ -2526,10 +2526,30 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
   }
 
   Widget _subtitle(String text) => Padding(
-        padding: const EdgeInsets.only(top: 12, bottom: 4),
-        child: Text(
-          text,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+        padding: const EdgeInsets.only(top: 14, bottom: 6),
+        child: Row(
+          children: [
+            Container(
+              width: 3,
+              height: 12,
+              decoration: BoxDecoration(
+                color: AppTheme.gold,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text.toUpperCase(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 10.5,
+                  letterSpacing: 1.4,
+                  color: AppTheme.bronze,
+                ),
+              ),
+            ),
+          ],
         ),
       );
     @override
