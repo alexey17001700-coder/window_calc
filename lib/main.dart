@@ -613,7 +613,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: accent.withValues(alpha: 0.12),
+                      color: accent.withOpacity(0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.arrow_forward_rounded,
