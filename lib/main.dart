@@ -203,27 +203,6 @@ class _SplashScreenState extends State<SplashScreen>
         children: [
           const Positioned.fill(child: Viewer3D()),
           Positioned(
-            left: 12,
-            top: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: AppColors.gold.withOpacity(0.14),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.gold.withOpacity(0.35)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.view_in_ar_rounded,
-                      size: 12, color: AppColors.gold),
-                  const SizedBox(width: 6),
-                  AppUi.label('3D ПРОСМОТР', color: AppColors.gold, size: 9.5),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
             right: 12,
             bottom: 12,
             child: Container(
