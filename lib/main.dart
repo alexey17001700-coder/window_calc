@@ -128,7 +128,13 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Spacer(),
+              Expanded(
+                child: FadeTransition(
+                  opacity: _c,
+                  child: _model3d(),
+                ),
+              ),
+              const SizedBox(height: 22),
               FadeTransition(
                 opacity: _c,
                 child: Row(
