@@ -3267,6 +3267,43 @@ class _ResultScreenState extends State<ResultScreen> {
 // ВСПОМОГАТЕЛЬНОЕ
 // ═══════════════════════════════════════════════════════════
 
+/// Плавное появление карточки меню (fade + подъём) с каскадной задержкой.
+class _Reveal extends StatefulWidget {
+  final Widget child;
+  final int index;
+  const _Reveal({required this.child, this.index = 0});
+
+  @override
+  State<_Reveal> createState() => _RevealState();
+}
+
+class _RevealState extends State<_Reveal> {
+  bool _show = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 55 * widget.index), () {
+      if (mounted) setState(() => _show = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSlide(
+      offset: _show ? Offset.zero : const Offset(0, 0.12),
+      duration: const Duration(milliseconds: 430),
+      curve: Curves.easeOutCubic,
+      child: AnimatedOpacity(
+        opacity: _show ? 1 : 0,
+        duration: const Duration(milliseconds: 380),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
