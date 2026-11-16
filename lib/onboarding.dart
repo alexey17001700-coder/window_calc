@@ -69,6 +69,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       ..repeat();
     _flip = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 660));
+    _trail = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 660));
   }
 
   @override
