@@ -20,7 +20,7 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
-  final PageController _pc = PageController(viewportFraction: 0.90);
+  final PageController _pc = PageController(viewportFraction: 1.0);
   final TextEditingController _name = TextEditingController();
   final TextEditingController _addr = TextEditingController();
   final TextEditingController _flat = TextEditingController();
