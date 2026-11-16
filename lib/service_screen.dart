@@ -319,64 +319,149 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
         children: [
-          const Text('Клиент', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(labelText: 'Имя клиента', border: OutlineInputBorder()),
-          ),
+          Row(children: [
+            Container(width: 3, height: 16,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFC9A227),
+                    borderRadius: BorderRadius.circular(2))),
+            const SizedBox(width: 8),
+            const Text('КЛИЕНТ',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                    letterSpacing: 1.6, color: Color(0xFF0F1B2D))),
+            const SizedBox(width: 10),
+            Expanded(child: Container(height: 1, color: Colors.black12)),
+          ]),
           const SizedBox(height: 12),
-          TextField(
-            controller: _phoneCtrl,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(labelText: 'Телефон', border: OutlineInputBorder()),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _addrCtrl,
-            decoration: const InputDecoration(labelText: 'Адрес', border: OutlineInputBorder()),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.05),
+                    blurRadius: 18, offset: const Offset(0, 6)),
+              ],
+            ),
+            child: Column(children: [
+              TextField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(
+                    labelText: 'Имя клиента',
+                    prefixIcon: Icon(Icons.person_outline, size: 20),
+                    border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                    labelText: 'Телефон',
+                    prefixIcon: Icon(Icons.phone_outlined, size: 20),
+                    border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _addrCtrl,
+                decoration: const InputDecoration(
+                    labelText: 'Адрес',
+                    prefixIcon: Icon(Icons.location_on_outlined, size: 20),
+                    border: OutlineInputBorder()),
+              ),
+            ]),
           ),
           const SizedBox(height: 24),
-          const Text('Работы', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          Row(children: [
+            Container(width: 3, height: 16,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFC9A227),
+                    borderRadius: BorderRadius.circular(2))),
+            const SizedBox(width: 8),
+            const Text('РАБОТЫ',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                    letterSpacing: 1.6, color: Color(0xFF0F1B2D))),
+            const SizedBox(width: 10),
+            Expanded(child: Container(height: 1, color: Colors.black12)),
+          ]),
+          const SizedBox(height: 12),
           ..._items.asMap().entries.map((e) => _itemCard(e.key, e.value)),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: _showAddDialog,
-            icon: const Icon(Icons.add),
-            label: const Text('Добавить работу'),
-          ),
-          const SizedBox(height: 20),
-          Card(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('ИТОГО:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text('${_total.toStringAsFixed(0)} ₽', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                ],
-              ),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton.icon(
+              onPressed: _showAddDialog,
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('ДОБАВИТЬ РАБОТУ',
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6)),
             ),
           ),
-          const SizedBox(height: 20),
-          const Text('Примечание', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF16233A), Color(0xFF0F1B2D)]),
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(color: const Color(0xFF0F1B2D).withOpacity(0.28),
+                    blurRadius: 24, offset: const Offset(0, 10)),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('ИТОГО',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                        letterSpacing: 1.6, color: Colors.white70)),
+                Row(children: [
+                  Text('${_total.toStringAsFixed(0)}',
+                      style: const TextStyle(fontSize: 30,
+                          fontWeight: FontWeight.w800, color: Colors.white)),
+                  const SizedBox(width: 4),
+                  const Text('₽', style: TextStyle(fontSize: 20,
+                      fontWeight: FontWeight.w700, color: Color(0xFFC9A227))),
+                ]),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(children: [
+            Container(width: 3, height: 16,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFC9A227),
+                    borderRadius: BorderRadius.circular(2))),
+            const SizedBox(width: 8),
+            const Text('ПРИМЕЧАНИЕ',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                    letterSpacing: 1.6, color: Color(0xFF0F1B2D))),
+            const SizedBox(width: 10),
+            Expanded(child: Container(height: 1, color: Colors.black12)),
+          ]),
+          const SizedBox(height: 12),
           TextField(
             controller: _notesCtrl,
             maxLines: 3,
-            decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Например: завтра в 10:00'),
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Например: завтра в 10:00'),
           ),
           const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: _save,
-            icon: const Icon(Icons.save),
-            label: const Text('Сохранить заказ'),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: FilledButton.icon(
+              onPressed: _save,
+              icon: const Icon(Icons.save_outlined, size: 20),
+              label: const Text('СОХРАНИТЬ ЗАКАЗ',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8)),
+            ),
           ),
-          const SizedBox(height: 40),
         ],
       ),
     );
