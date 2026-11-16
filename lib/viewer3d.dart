@@ -703,7 +703,10 @@ class _Viewer3DState extends State<Viewer3D>
         builder: (_, __) {
           final t = _c.value * math.pi * 2;
           final prims = <_Prim>[];
-          _buildWindow(prims);
+          final win = <_Prim>[];
+          _buildWindow(win);
+          _scalePrims(win, _winScale);
+          prims.addAll(win);
           _buildTools(prims, t);
           return CustomPaint(
             painter: _ScenePainter(
