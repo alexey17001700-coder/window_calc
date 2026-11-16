@@ -1154,16 +1154,38 @@ class AppTheme {
         iconTheme: IconThemeData(color: isDark ? goldLight : navy),
       ),
       cardTheme: CardTheme(
-        elevation: isDark ? 0 : 5,
-        shadowColor: isDark ? Colors.black54 : const Color(0x141B2A4A),
+        elevation: isDark ? 0 : 6,
+        shadowColor: isDark ? Colors.black54 : const Color(0x181B2A4A),
         color: isDark ? surfaceDark : Colors.white,
         surfaceTintColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           side: BorderSide(
             color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
           ),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: isDark ? const Color(0xFF1A2130) : const Color(0xFFF2F5FA),
+        side: BorderSide(color: isDark ? const Color(0xFF2A3346) : const Color(0xFFE1E7F0)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5, color: onSurface.withOpacity(0.8)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: isDark ? surfaceDark : Colors.white,
+        indicatorColor: (isDark ? goldLight : navy).withOpacity(0.14),
+        elevation: 0,
+        labelTextStyle: WidgetStatePropertyAll(
+          TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: onSurface),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: isDark ? surfaceDark : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
         ),
       ),
       dialogTheme: DialogTheme(
