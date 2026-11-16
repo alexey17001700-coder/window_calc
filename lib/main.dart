@@ -2140,7 +2140,7 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
       child: Column(
         children: [
           ListTile(
-            leading: Icon(icon, color: Colors.blue),
+            leading: Icon(icon, color: AppTheme.bronze),
             title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             trailing: Icon(isOpen ? Icons.expand_less : Icons.expand_more),
             onTap: () {
