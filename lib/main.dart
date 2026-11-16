@@ -183,6 +183,61 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
+  Widget _model3d() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF1B2C44)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.gold.withOpacity(0.10),
+            blurRadius: 26,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ModelViewer(
+              backgroundColor: const Color(0xFF0A1220),
+              src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+              alt: '3D модель',
+              ar: false,
+              autoRotate: true,
+              cameraControls: true,
+              disableZoom: false,
+            ),
+          ),
+          Positioned(
+            left: 12,
+            top: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppColors.gold.withOpacity(0.14),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.gold.withOpacity(0.35)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.view_in_ar_rounded,
+                      size: 12, color: AppColors.gold),
+                  const SizedBox(width: 6),
+                  AppUi.label('3D ПРОСМОТР', color: AppColors.gold, size: 9.5),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _logo() {
     return Container(
       width: 58,
