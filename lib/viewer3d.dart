@@ -662,9 +662,18 @@ class _Viewer3DState extends State<Viewer3D>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
 
+  /// Геометрия окна статична — собираем её ОДИН раз при старте.
+  /// Раньше ~290 примитивов пересобирались каждый кадр: это давало
+  /// постоянные аллокации и просадку FPS на слабых телефонах.
+  late final List<_Prim> _windowPrims;
+
   @override
   void initState() {
     super.initState();
+    final win = <_Prim>[];
+    _buildWindow(win);
+    _scalePrims(win, _winScale);
+    _windowPrims = win;
     _c = AnimationController(vsync: this, duration: const Duration(seconds: 24))
       ..repeat();
   }
