@@ -3512,12 +3512,72 @@ class _ResultScreenState extends State<ResultScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(m.clientName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(m.clientPhone),
-                  Text(m.clientAddress),
-                  const Divider(height: 24),
-                  const Text('Позиции:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [AppTheme.goldLight, AppTheme.bronze],
+                          ),
+                        ),
+                        child: Text(
+                          (m.clientName.trim().isEmpty ? '?' : m.clientName.trim()[0]).toUpperCase(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
+                            color: Color(0xFF1A1305),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              m.clientName.isEmpty ? 'Без имени' : m.clientName,
+                              style: const TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.4,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'ЗАМЕР ОТ ${Measurement.fmtDate(m.createdAt)}',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.4,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  if (m.clientPhone.isNotEmpty)
+                    _infoRow(context, Icons.phone_outlined, m.clientPhone),
+                  if (m.clientAddress.isNotEmpty)
+                    _infoRow(context, Icons.location_on_outlined, m.clientAddress),
+                  const Divider(height: 26),
+                  const Text(
+                    'ПОЗИЦИИ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11.5,
+                      letterSpacing: 1.6,
+                      color: AppTheme.bronze,
+                    ),
+                  ),
                   ...m.items.asMap().entries.map((e) {
                     final it = e.value;
                     return Padding(
