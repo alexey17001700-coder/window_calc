@@ -879,6 +879,72 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────────────
+  // 4в. ПОДПИСИ СЕКЦИЙ — П / О / ПО / Гл / СП
+  //     Короткие ГОСТ-обозначения типа открывания в углу секции.
+  // ─────────────────────────────────────────────────────────────────
+  void _paintSectionLabels(Canvas canvas, _SchemeLayout L) {
+    for (final c in L.cols) {
+      final col = columns[c.index];
+      final secs = col.sections.isEmpty ? <Section>[Section()] : col.sections;
+      final isLeaf = secs.any((s) => s.type == 'Сэндвич');
+
+      if (isLeaf) {
+        final type = _leafOpenType(secs);
+        if (type == null) continue;
+        _secLabel(canvas, _shortType(type), c.glass);
+        continue;
+      }
+
+      for (var s = 0; s < c.secRects.length; s++) {
+        final sec = s < secs.length ? secs[s] : null;
+        final type = sec?.type ?? 'Глухая';
+        _secLabel(canvas, _shortType(type), c.secRects[s]);
+      }
+    }
+  }
+
+  String _shortType(String type) {
+    switch (type) {
+      case 'Поворотная':
+        return 'П';
+      case 'Откидная':
+        return 'О';
+      case 'Поворотно-откидная':
+        return 'ПО';
+      case 'Глухая':
+        return 'Гл';
+      case 'Сэндвич':
+        return 'СП';
+      default:
+        return '';
+    }
+  }
+
+  /// Подпись типа открывания в левом нижнем углу секции.
+  void _secLabel(Canvas canvas, String text, Rect rect) {
+    if (text.isEmpty) return;
+    if (rect.width < 22 || rect.height < 16) return;
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: const TextStyle(
+          color: _accent,
+          fontSize: 8.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final x = rect.left + 2.5;
+    final y = rect.bottom - tp.height - 2.0;
+    canvas.drawRect(
+      Rect.fromLTWH(x - 1.5, y - 1.0, tp.width + 3, tp.height + 2),
+      Paint()..color = Colors.white.withOpacity(0.72),
+    );
+    tp.paint(canvas, Offset(x, y));
+  }
+
+  // ─────────────────────────────────────────────────────────────────
   // Стеклопакет
   // ─────────────────────────────────────────────────────────────────
   void _paintGlass(Canvas canvas, Rect rect) {
