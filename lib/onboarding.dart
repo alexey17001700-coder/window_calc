@@ -77,6 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void dispose() {
     _shine.dispose();
     _flip.dispose();
+    _trail.dispose();
     _name.dispose();
     _addr.dispose();
     _flat.dispose();
