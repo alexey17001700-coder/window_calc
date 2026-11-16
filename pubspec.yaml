@@ -16,7 +16,8 @@ dependencies:
   path_provider: ^2.1.1
   open_filex: ^4.3.4
   dio: ^5.4.0
-  model_viewer_plus: 1.7.2
+  # 3D-просмотр реализован собственным рендерером (lib/viewer3d.dart):
+  # без WebView, WebGL и внешних пакетов — сборка APK остаётся стабильной.
 
 flutter:
   uses-material-design: true
