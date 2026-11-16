@@ -760,22 +760,29 @@ class _WindowSchemePainter extends CustomPainter {
         // фиксированное остекление — символа нет
         break;
       case 'Поворотная':
+        // Вершина → РУЧКА, основание → ПЕТЛИ
         if (hingeLeft) {
-          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
-        } else {
+          // петли слева, ручка справа → острие вправо
           _triangle(canvas, Offset(r, cy), Offset(l, t), Offset(l, b));
+        } else {
+          // петли справа, ручка слева → острие влево
+          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
         }
         break;
       case 'Откидная':
         _triangle(canvas, Offset(cx, t), Offset(l, b), Offset(r, b));
         break;
       case 'Поворотно-откидная':
+        // Поворотная часть — на всю высоту
         if (hingeLeft) {
-          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
-        } else {
           _triangle(canvas, Offset(r, cy), Offset(l, t), Offset(l, b));
+        } else {
+          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
         }
-        _triangle(canvas, Offset(cx, t), Offset(l, b), Offset(r, b));
+        // Откидная часть — верхняя половина
+        final tt = rect.top + rect.height * 0.06;
+        final tb = rect.top + rect.height * 0.46;
+        _triangle(canvas, Offset(cx, tt), Offset(l, tb), Offset(r, tb));
         break;
       default:
         break;
