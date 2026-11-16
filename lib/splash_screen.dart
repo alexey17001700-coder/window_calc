@@ -167,6 +167,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final showUpdateCard = _hasUpdate && !_updateDismissed;
+    // Ограничение высоты блока «Что нового»: длинный список не выталкивает
+    // кнопки за пределы экрана, текст прокручивается внутри блока.
+    final clMaxHeight =
+        (MediaQuery.of(context).size.height * 0.18).clamp(80.0, 150.0);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F1B2D),
