@@ -445,6 +445,9 @@ class _WindowSchemePainter extends CustomPainter {
     // 4б. Символы открывания, петли, ручки
     _paintOpenSymbols(canvas, L);
 
+    // 4в. Подписи секций (П / О / ПО / Гл / СП)
+    _paintSectionLabels(canvas, L);
+
     // 5. Вспышка отклика на тап
     _paintFlash(canvas);
 
