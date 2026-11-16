@@ -3045,7 +3045,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               ]),
             ),
             const Divider(),
-            const Text('Монтажные работы', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.bronze, letterSpacing: 0.2)),
+            const Text('МОНТАЖНЫЕ РАБОТЫ', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppTheme.bronze, letterSpacing: 1.6)),
             CheckboxListTile(value: it.hasAbris, onChanged: (v) => setState(() => it.hasAbris = v!), title: const Text('Абрис'), dense: true),
             if (it.hasAbris) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
