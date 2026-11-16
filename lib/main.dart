@@ -2472,12 +2472,22 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
           const SizedBox(height: 26),
           const _SectionTitle('Изделия'),
           ...List.generate(_items.length, (i) => _itemCard(i)),
-          OutlinedButton.icon(
-            onPressed: () => setState(() => _items.add(ProductItem())),
-            icon: const Icon(Icons.add),
-            label: const Text('Добавить изделие'),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => setState(() => _items.add(ProductItem())),
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: const Text('ДОБАВИТЬ ИЗДЕЛИЕ'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 54),
+                foregroundColor: AppTheme.bronze,
+                side: BorderSide(color: AppTheme.gold.withOpacity(0.5), width: 1.4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.8, fontSize: 13),
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 26),
           const _SectionTitle('Услуги по замеру'),
           CheckboxListTile(
             value: _hasTrashRemoval,
