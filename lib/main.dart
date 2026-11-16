@@ -2113,8 +2113,10 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               ),
               child: WindowScheme(
                 columns: it.columns,
-                width: 240,
-                height: 280,
+                width: 250,
+                height: 290,
+                widthMm: it.widthMm,
+                heightMm: it.heightMm,
               ),
             ),
           ),
