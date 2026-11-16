@@ -1,5 +1,14 @@
 # История версий
 
+## 2.0.1+39 — Исправление сборки
+
+Сборка падала из-за несовместимости кода с Flutter 3.24.0 (версия в GitHub Actions).
+
+- `Color.withValues(alpha: x)` → `Color.withOpacity(x)` — метод `withValues` появился только в Flutter 3.27
+- `CardThemeData` → `CardTheme` — тип `CardThemeData` появился только в Flutter 3.27
+- Правки в `lib/theme.dart`, `lib/main.dart`, `lib/wizard_screen.dart`
+- Логика обновления приложения не тронута
+
 ## 2.0.0+38 — Новый старт
 
 Полная переработка приложения с нуля. Премиальный дизайн уровня элитного B2B-софта.
