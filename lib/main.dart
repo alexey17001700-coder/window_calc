@@ -1463,6 +1463,7 @@ class MainMenuScreen extends StatelessWidget {
                   context,
                   icon: Icons.add_rounded,
                   accent: AppTheme.gold,
+                  index: 0,
                   title: 'Создать замер',
                   subtitle: 'Новый замер клиента',
                   onTap: () async {
