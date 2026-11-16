@@ -2435,22 +2435,41 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           const _SectionTitle('Клиент'),
-          TextField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(labelText: 'Имя клиента', border: OutlineInputBorder()),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _nameCtrl,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Имя клиента',
+                      prefixIcon: Icon(Icons.person_outline_rounded),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _phoneCtrl,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: 'Телефон',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _addrCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Адрес',
+                      prefixIcon: Icon(Icons.location_on_outlined),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _phoneCtrl,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(labelText: 'Телефон', border: OutlineInputBorder()),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _addrCtrl,
-            decoration: const InputDecoration(labelText: 'Адрес', border: OutlineInputBorder()),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 26),
           const _SectionTitle('Изделия'),
           ...List.generate(_items.length, (i) => _itemCard(i)),
           OutlinedButton.icon(
