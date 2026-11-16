@@ -36,49 +36,127 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: _list.isEmpty
-          ? const Center(child: Text('Нет заказов на сервис'))
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFF0F1B2D).withOpacity(0.06),
+                    ),
+                    child: const Icon(Icons.build_outlined,
+                        size: 42, color: Color(0xFF0F1B2D)),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text('СЕРВИСНЫХ ЗАКАЗОВ НЕТ',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.6,
+                          color: Color(0xFF0F1B2D))),
+                  const SizedBox(height: 6),
+                  const Text('Создайте первый заказ на ремонт',
+                      style: TextStyle(fontSize: 13, color: Colors.black45)),
+                ],
+              ),
+            )
           : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               itemCount: _list.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
                 final m = _list[i];
-                return ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.build)),
-                  title: Text(m.clientName),
-                  subtitle: Text(
-                      '${ServiceMeasurement.fmtDate(m.createdAt)} • ${m.items.length} работ'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${m.totalPrice.toStringAsFixed(0)} ₽',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
-                        onPressed: () => _confirmDelete(m),
-                      ),
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6)),
                     ],
                   ),
-                  onTap: () async {
-                    final result = await Navigator.push<ServiceMeasurement>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ServiceEditorScreen(
-                          price: widget.price,
-                          existing: m,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () async {
+                        final result = await Navigator.push<ServiceMeasurement>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ServiceEditorScreen(
+                              price: widget.price,
+                              existing: m,
+                            ),
+                          ),
+                        );
+                        if (result != null) {
+                          setState(() {
+                            final idx =
+                                _list.indexWhere((x) => x.id == result.id);
+                            if (idx >= 0) {
+                              _list[idx] = result;
+                            }
+                          });
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                    colors: [Color(0xFFC9A227), Color(0xFFE0C25A)]),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.build,
+                                  color: Colors.white, size: 22),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(m.clientName,
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700)),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                      '${ServiceMeasurement.fmtDate(m.createdAt)} · ${m.items.length} работ',
+                                      style: const TextStyle(
+                                          fontSize: 12.5, color: Colors.black45)),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('${m.totalPrice.toStringAsFixed(0)} ₽',
+                                    style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0F1B2D))),
+                                const SizedBox(height: 4),
+                                InkWell(
+                                  onTap: () => _confirmDelete(m),
+                                  child: const Icon(Icons.delete_outline,
+                                      size: 18, color: Colors.black26),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                    if (result != null) {
-                      setState(() {
-                        final idx = _list.indexWhere((x) => x.id == result.id);
-                        if (idx >= 0) {
-                          _list[idx] = result;
-                        }
-                      });
-                    }
-                  },
+                    ),
+                  ),
                 );
               },
             ),
