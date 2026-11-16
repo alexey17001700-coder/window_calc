@@ -1416,125 +1416,315 @@ class MainMenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Замерщик окон Almas'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          FutureBuilder<PackageInfo>(
-            future: PackageInfo.fromPlatform(),
-            builder: (context, snapshot) {
-              final v = snapshot.data?.version ?? '';
-              if (v.isEmpty) return const SizedBox.shrink();
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Text(
-                    'v$v',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            tooltip: 'Тема',
-            icon: Icon(
-              themeMode == ThemeMode.light
-                  ? Icons.light_mode
-                  : (themeMode == ThemeMode.dark
-                      ? Icons.dark_mode
-                      : Icons.brightness_auto),
-            ),
-            onPressed: onCycleTheme,
-          ),
-        ],
-      ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.zero,
         children: [
-          _menuCard(
-            context,
-            icon: Icons.add_circle,
-            color: Colors.blue,
-            title: 'Создать замер',
-            subtitle: 'Новый замер клиента',
-            onTap: () async {
-              final result = await Navigator.push<Measurement>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MeasurementEditorScreen(price: price),
+          _header(context),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 24, 18, 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionLabel(context, 'РАБОТА'),
+                const SizedBox(height: 12),
+                _menuCard(
+                  context,
+                  icon: Icons.add_rounded,
+                  accent: AppTheme.gold,
+                  title: 'Создать замер',
+                  subtitle: 'Новый замер клиента',
+                  onTap: () async {
+                    final result = await Navigator.push<Measurement>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MeasurementEditorScreen(price: price),
+                      ),
+                    );
+                    if (result != null) onMeasurementAdded(result);
+                  },
                 ),
-              );
-              if (result != null) onMeasurementAdded(result);
-            },
-          ),
-          _menuCard(
-            context,
-            icon: Icons.folder,
-            color: Colors.green,
-            title: 'Сохранённые замеры',
-            subtitle: '${measurements.length} шт.',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SavedMeasurementsScreen(
-                    measurements: measurements,
-                    onDelete: onMeasurementDeleted,
-                    onUpdate: onMeasurementUpdated,
+                _menuCard(
+                  context,
+                  icon: Icons.folder_copy_rounded,
+                  accent: const Color(0xFF3E7CB1),
+                  title: 'Сохранённые замеры',
+                  subtitle: '${measurements.length} шт. в архиве',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SavedMeasurementsScreen(
+                          measurements: measurements,
+                          onDelete: onMeasurementDeleted,
+                          onUpdate: onMeasurementUpdated,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _menuCard(
+                  context,
+                  icon: Icons.tune_rounded,
+                  accent: AppTheme.bronze,
+                  title: 'Настройки прайса',
+                  subtitle: 'Цены и коэффициенты',
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PriceSettingsScreen(
+                          price: price,
+                          onChanged: onPriceChanged,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _sectionLabel(context, 'СЕРВИС'),
+                const SizedBox(height: 12),
+                _menuCard(
+                  context,
+                  icon: Icons.handyman_rounded,
+                  accent: const Color(0xFF2E9E8F),
+                  title: 'Сервис и ремонт',
+                  subtitle: '${serviceMeasurements.length} шт. в работе',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ServiceListScreen(
+                          price: price,
+                          measurements: serviceMeasurements,
+                          onAdded: onServiceAdded,
+                          onDeleted: onServiceDeleted,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _menuCard(
+                  context,
+                  icon: Icons.system_update_alt_rounded,
+                  accent: const Color(0xFF7A6BD6),
+                  title: 'Проверить обновление',
+                  subtitle: 'Диагностика и установка новой версии',
+                  onTap: () => _showUpdateReport(context),
+                ),
+                const SizedBox(height: 26),
+                Center(
+                  child: Text(
+                    'ALMAS · ЗАМЕРЩИК ОКОН',
+                    style: TextStyle(
+                      fontSize: 11,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.32),
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-          _menuCard(
-            context,
-            icon: Icons.settings,
-            color: Colors.orange,
-            title: 'Настройки прайса',
-            subtitle: 'Цены и коэффициенты',
-            onTap: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PriceSettingsScreen(
-                    price: price,
-                    onChanged: onPriceChanged,
-                  ),
-                ),
-              );
-            },
-          ),
-          _menuCard(
-            context,
-            icon: Icons.build,
-            color: Colors.teal,
-            title: 'Сервис и ремонт',
-            subtitle: '${serviceMeasurements.length} шт.',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ServiceListScreen(
-                    price: price,
-                    measurements: serviceMeasurements,
-                    onAdded: onServiceAdded,
-                    onDeleted: onServiceDeleted,
-                  ),
-                ),
-              );
-            },
-          ),
-          _menuCard(
-            context,
-            icon: Icons.system_update,
-            color: Colors.purple,
-            title: 'Проверить обновление',
-            subtitle: 'Диагностика + обновление',
-            onTap: () => _showUpdateReport(context),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _header(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        MediaQuery.of(context).padding.top + 20,
+        20,
+        24,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF16233C), Color(0xFF0A1120)],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 26,
+            offset: Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppTheme.goldLight, AppTheme.bronze],
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x59C9A227),
+                      blurRadius: 18,
+                      offset: Offset(0, 7),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.window_rounded,
+                  color: Color(0xFF1A1305),
+                  size: 27,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ALMAS',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 23,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 4,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Замерщик окон',
+                      style: TextStyle(
+                        color: Color(0xFF9FB0CC),
+                        fontSize: 13,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _roundAction(
+                icon: themeMode == ThemeMode.light
+                    ? Icons.light_mode_rounded
+                    : (themeMode == ThemeMode.dark
+                        ? Icons.dark_mode_rounded
+                        : Icons.brightness_auto_rounded),
+                tooltip: 'Тема',
+                onTap: onCycleTheme,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            height: 2,
+            width: 56,
+            decoration: BoxDecoration(
+              color: AppTheme.gold,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final v = snapshot.data?.version ?? '';
+                  if (v.isEmpty) return const SizedBox.shrink();
+                  return _pill('v$v', Icons.verified_rounded);
+                },
+              ),
+              const SizedBox(width: 8),
+              _pill('${measurements.length} замеров', Icons.description_rounded),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pill(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0x1AFFFFFF),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: const Color(0x26FFFFFF)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppTheme.goldLight),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Color(0xFFD8E1F0),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _roundAction({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: const Color(0x1AFFFFFF),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: Color(0x26FFFFFF)),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: SizedBox(
+            width: 46,
+            height: 46,
+            child: Icon(icon, color: AppTheme.goldLight, size: 22),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionLabel(BuildContext context, String text) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 2,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.42),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+          ),
+        ),
+      ],
     );
   }
 
