@@ -274,46 +274,59 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
               ),
-            if (showUpdateCard)
-              Card(
-                color: Colors.green.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
+              if (showUpdateCard)
+                Container(
+                  margin: const EdgeInsets.only(top: 14),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4ADE80).withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                        color: const Color(0xFF4ADE80).withOpacity(0.35)),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.system_update, color: Colors.green),
+                          const Icon(Icons.system_update,
+                              color: Color(0xFF4ADE80), size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Доступно обновление: $_latestVersion',
+                              'ДОСТУПНО ОБНОВЛЕНИЕ · $_latestVersion',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: Color(0xFF4ADE80)),
                             ),
                           ),
                         ],
                       ),
                       if (_changelogText.isNotEmpty) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         const Text('Что нового:',
-                            style: TextStyle(fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 4),
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white70)),
+                        const SizedBox(height: 6),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             _changelogText,
-                            style: const TextStyle(fontSize: 13),
+                            style: const TextStyle(
+                                fontSize: 12.5, color: Colors.white70),
                           ),
                         ),
                       ],
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -323,10 +336,14 @@ class _SplashScreenState extends State<SplashScreen> {
                                 _updateDismissed = true;
                               });
                             },
-                            child: const Text('Позже'),
+                            child: const Text('Позже',
+                                style: TextStyle(color: Colors.white54)),
                           ),
                           const SizedBox(width: 8),
                           FilledButton(
+                            style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF4ADE80),
+                                foregroundColor: const Color(0xFF0F1B2D)),
                             onPressed: () async {
                               final msg =
                                   await UpdateChecker.downloadAndInstall();
@@ -336,24 +353,38 @@ class _SplashScreenState extends State<SplashScreen> {
                                 );
                               }
                             },
-                            child: const Text('Обновить'),
+                            child: const Text('ОБНОВИТЬ',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.6)),
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFC9A227),
+                    foregroundColor: const Color(0xFF0F1B2D),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                  onPressed: _done ? _continue : null,
+                  icon: const Icon(Icons.arrow_forward, size: 20),
+                  label: const Text('НАЧАТЬ ЗАМЕРЫ',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8)),
+                ),
               ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: _done ? _continue : null,
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Начать замеры'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
