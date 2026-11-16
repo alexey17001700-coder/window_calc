@@ -2611,9 +2611,9 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
   final it = _items[index];
   final price = it.calcPrice(widget.price);
   return Card(
-    margin: const EdgeInsets.only(bottom: 12),
+    margin: const EdgeInsets.only(bottom: 16),
     child: Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
