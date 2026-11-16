@@ -217,9 +217,9 @@ const _silverDark = Color(0xFF8E97A3);
 const _darkMetal = Color(0xFF39414B);
 const _sillCol = Color(0xFFE8ECF1);
 
-const _toolCyan = Color(0xFF5FE3FF);
-const _toolGreen = Color(0xFF7CFFB2);
-const _toolAmber = Color(0xFFFFD166);
+// Инструменты рисуются сплошными объёмами в реальных цветах
+// (жёлтая рулетка, алюминиевый уровень, жёлтый карандаш) — палитра
+// задаётся локально в _buildTools.
 
 // ═══════════════════════════ ОКНО ═══════════════════════════
 
