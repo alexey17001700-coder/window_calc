@@ -341,7 +341,7 @@ class WizardStep2Screen extends StatelessWidget {
                       width: 84,
                       height: 84,
                       decoration: BoxDecoration(
-                        color: AppColors.gold.withValues(alpha: 0.12),
+                        color: AppColors.gold.withOpacity(0.12),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.window_rounded,
