@@ -3643,34 +3643,88 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Card(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Расчётная цена:', style: TextStyle(fontSize: 15)),
-                      Text('${m.totalPrice.toStringAsFixed(0)} ₽',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    ],
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF16233C), Color(0xFF0A1120)],
+              ),
+              boxShadow: const [
+                BoxShadow(color: Color(0x33000000), blurRadius: 22, offset: Offset(0, 10)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'РАСЧЁТНАЯ ЦЕНА',
+                  style: TextStyle(
+                    color: Color(0xFF9FB0CC),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.8,
                   ),
-                  if (m.customClientPrice != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Цена для клиента:',
-                            style: TextStyle(fontSize: 15, color: Colors.green)),
-                        Text('${m.customClientPrice!.toStringAsFixed(0)} ₽',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
-                      ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      m.totalPrice.toStringAsFixed(0),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Text(
+                      '₽',
+                      style: TextStyle(color: AppTheme.goldLight, fontSize: 18, fontWeight: FontWeight.w700),
                     ),
                   ],
+                ),
+                if (m.customClientPrice != null) ...[
+                  const SizedBox(height: 16),
+                  Container(height: 1, color: const Color(0x26FFFFFF)),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'ЦЕНА ДЛЯ КЛИЕНТА',
+                    style: TextStyle(
+                      color: Color(0xFF9FB0CC),
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.8,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        m.customClientPrice!.toStringAsFixed(0),
+                        style: const TextStyle(
+                          color: Color(0xFF6EE7A8),
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      const Text(
+                        '₽',
+                        style: TextStyle(color: Color(0xFF6EE7A8), fontSize: 18, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
