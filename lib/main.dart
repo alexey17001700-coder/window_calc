@@ -3075,8 +3075,9 @@ class _ResultScreenState extends State<ResultScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(6),
+                                color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.35),
+                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: WindowScheme(
                                 columns: it.columns,
