@@ -316,17 +316,25 @@ class _SplashScreenState extends State<SplashScreen> {
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white70)),
                         const SizedBox(height: 6),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            _changelogText,
-                            style: const TextStyle(
-                                fontSize: 12.5, color: Colors.white70),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: clMaxHeight),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Scrollbar(
+                              thumbVisibility: true,
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  _changelogText,
+                                  style: const TextStyle(
+                                      fontSize: 12.5, color: Colors.white70),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ],
