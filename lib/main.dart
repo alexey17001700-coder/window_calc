@@ -2371,7 +2371,6 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Новый замер'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(icon: const Icon(Icons.check), onPressed: _save),
         ],
