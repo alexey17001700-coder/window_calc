@@ -125,7 +125,7 @@ class WizardHeader extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 gradient: done ? AppColors.goldGradient : null,
-                color: done ? null : Colors.white.withValues(alpha: 0.14),
+                color: done ? null : Colors.white.withOpacity(0.14),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
