@@ -953,6 +953,37 @@ class _WindowSchemePainter extends CustomPainter {
     }
   }
 
+  /// Значок «⇄» — створка зеркалирована (петли перевёрнуты).
+  void _paintMirrorBadges(Canvas canvas, _SchemeLayout L) {
+    for (final c in L.cols) {
+      final col = columns[c.index];
+      if (col.sections.isEmpty) continue;
+      if (!col.sections.any((s) => s.mirrorHinges)) continue;
+      final r = c.glass;
+      if (r.width < 20 || r.height < 20) continue;
+
+      final tp = TextPainter(
+        text: const TextSpan(
+          text: '⇄',
+          style: TextStyle(
+            color: _accent,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      final x = r.right - tp.width - 3.5;
+      final y = r.top + 3.0;
+      canvas.drawRect(
+        Rect.fromLTWH(x - 2, y - 1.5, tp.width + 4, tp.height + 3),
+        Paint()..color = Colors.white.withOpacity(0.78),
+      );
+      tp.paint(canvas, Offset(x, y));
+    }
+  }
+
   String _shortType(String type) {
     switch (type) {
       case 'Поворотная':
