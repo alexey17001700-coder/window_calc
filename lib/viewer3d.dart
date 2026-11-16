@@ -688,34 +688,25 @@ class _Viewer3DState extends State<Viewer3D>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onPanUpdate: (d) {
-        setState(() {
-          _dragYaw += d.delta.dx * 0.010;
-          _dragPitch = (_dragPitch - d.delta.dy * 0.007).clamp(-0.70, 0.70);
-        });
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (_, __) {
+        final t = _c.value * math.pi * 2;
+        final prims = <_Prim>[];
+        final win = <_Prim>[];
+        _buildWindow(win);
+        _scalePrims(win, _winScale);
+        prims.addAll(win);
+        _buildTools(prims, t);
+        return CustomPaint(
+          painter: _ScenePainter(
+            t * 0.55 + math.sin(t * 1.7) * 0.18,
+            0.17 + math.sin(t * 0.9) * 0.05,
+            prims,
+          ),
+          size: Size.infinite,
+        );
       },
-      child: AnimatedBuilder(
-        animation: _c,
-        builder: (_, __) {
-          final t = _c.value * math.pi * 2;
-          final prims = <_Prim>[];
-          final win = <_Prim>[];
-          _buildWindow(win);
-          _scalePrims(win, _winScale);
-          prims.addAll(win);
-          _buildTools(prims, t);
-          return CustomPaint(
-            painter: _ScenePainter(
-              -0.42 + _dragYaw + math.sin(t) * 0.62,
-              0.17 + _dragPitch,
-              prims,
-            ),
-            size: Size.infinite,
-          );
-        },
-      ),
     );
   }
 }
