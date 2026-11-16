@@ -495,6 +495,9 @@ class _WindowSchemePainter extends CustomPainter {
     // 4в. Подписи секций (П / О / ПО / Гл / СП)
     _paintSectionLabels(canvas, L);
 
+    // 4г. Значок зеркалирования петель (⇄)
+    _paintMirrorBadges(canvas, L);
+
     // 5. Вспышка отклика на тап
     _paintFlash(canvas);
 
