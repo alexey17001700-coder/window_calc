@@ -317,7 +317,12 @@ _SchemeLayout schemeLayout(
     final glass = colRect.deflate(frameW);
     final secs = col.sections.isEmpty ? <Section>[Section()] : col.sections;
     final secRects = _sectionRects(glass, secs, ratio, heightMm);
-    final hingeLeft = i <= (n - 1) / 2;
+    // Сторона петель: по умолчанию левая половина — петли слева.
+    // Флаг mirrorHinges в Section переворачивает сторону (нужно для
+    // центральной створки трёхстворчатого окна).
+    final baseHingeLeft = i <= (n - 1) / 2;
+    final mirrored = secs.any((s) => s.mirrorHinges);
+    final hingeLeft = mirrored ? !baseHingeLeft : baseHingeLeft;
     cols.add(_ColBox(i, colRect, glass, secRects, hingeLeft));
     for (var s = 0; s < secRects.length; s++) {
       sashes.add(_SashBox(i, s, secRects[s]));
