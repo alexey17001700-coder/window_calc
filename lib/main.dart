@@ -222,6 +222,28 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
           ),
+          Positioned(
+            right: 12,
+            bottom: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A1220).withOpacity(0.72),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFF1B2C44)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.swipe_rounded,
+                      size: 12, color: Color(0xFF7E93AC)),
+                  const SizedBox(width: 6),
+                  AppUi.label('ПОТЯНИ — ПОВЕРНУТЬ',
+                      color: const Color(0xFF7E93AC), size: 9),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
