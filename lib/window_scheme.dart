@@ -3,45 +3,26 @@ import 'templates.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
 ///  ЗАМЕРНЫЙ ЛИСТ — схема изделия «в лоб»
-///  Полностью переписано с нуля (v1.7.0).
+///  ВИЗУАЛ ПЕРЕПИСАН С НУЛЯ (v1.7.0) в стиле заводского чертежа.
 ///
-///  ПРАВИЛА ОТРИСОВКИ (ГОСТ 21.501, ГОСТ 2.306 + практика завода)
-///  ─────────────────────────────────────────────────────────────────
-///  1. ПРОПОРЦИИ. Изделие вписывается в отведённую область строго по
-///     соотношению widthMm / heightMm. Окно 1300×1400 и балконный блок
-///     1300×2100 рисуются с разными пропорциями, а не «по коробке».
+///  СТИЛЬ (ГОСТ 2.303 — линии, ГОСТ 2.306 — штриховка):
+///   • белый лист, тонкие тёмные линии, никаких «глянцевых» градиентов;
+///   • профиль — двойной контур (наружный + внутренний);
+///   • стеклопакет — светлая голубая заливка + тонкий контур;
+///   • сэндвич-панель — диагональная штриховка 45°;
+///   • простенок (стена) — штриховка 45° в другую сторону;
+///   • размеры — размерные линии с засечками, числа в мм.
 ///
-///  2. ШИРИНЫ КОЛОНОК — по widthMm. Если мм нет у части колонок,
-///     недостающие получают среднее известных, сумма всегда равна
-///     ширине изделия (раньше раскладка вылезала за раму).
+///  ГЕОМЕТРИЯ:
+///   1. Пропорции изделия — строго по widthMm / heightMm.
+///   2. Ширины колонок — по widthMm (недостающие = среднее известных).
+///   3. Высоты колонок — по heightRatio, нормированные.
+///   4. Сэндвич-панель — всегда внизу створки, ≈700 мм.
+///   5. Простенок — под короткой колонкой балконного блока.
 ///
-///  3. ВЫСОТЫ КОЛОНОК — по heightRatio, нормированные: самая высокая
-///     колонка заполняет высоту изделия целиком.
-///
-///  4. БАЛКОННЫЙ БЛОК. Под короткой колонкой (окно) рисуется ПРОСТЕНОК —
-///     стена со штриховкой, а не «пустота» и не элемент изделия.
-///     Сэндвич-панель ВСЕГДА внизу створки-полотна, высота ≈700 мм
-///     (или 30 % высоты колонки) — как в реальной двери.
-///
-///  5. СИМВОЛ ОТКРЫВАНИЯ — треугольник:
-///       • вершина (острие) смотрит на РУЧКУ,
-///       • основание (два угла) — на ПЕТЛИ,
-///       • у створки-полотна двери символ рисуется ОДИН раз на ВСЮ
-///         высоту створки: от верха стеклопакета до низа сэндвич-панели.
-///
-///  6. ПЕТЛИ рисуются явно — 3 метки по высоте створки на стороне
-///     петель. РУЧКА — с противоположной стороны, по центру створки.
-///
-///  7. ИМПОСТЫ — сплошной профиль: вертикальные между колонками (на
-///     высоте более короткой колонки), горизонтальные между секциями.
-///
-///  8. РАЗМЕРНЫЕ ЦЕПОЧКИ: сверху — ширины колонок, слева — высоты
-///     секций, снизу — общая ширина, справа — общая высота.
-///
-///  ИНТЕРАКТИВ. Тап по створке меняет тип открывания по кругу
+///  ИНТЕРАКТИВ: тап по створке меняет тип открывания по кругу
 ///  Поворотная → Откидная → Поворотно-откидная → Глухая → Поворотная
-///  и меняет РЕАЛЬНУЮ модель данных (Section.type), после чего
-///  вызывается [onChanged] — родитель пересчитывает цену.
+///  и меняет РЕАЛЬНУЮ модель (Section.type), затем [onChanged].
 /// ═══════════════════════════════════════════════════════════════════
 
 class WindowScheme extends StatefulWidget {
@@ -121,7 +102,6 @@ class _WindowSchemeState extends State<WindowScheme>
     );
     final p = d.localPosition;
 
-    // Ищем створку под пальцем (последняя нарисованная важнее)
     _SashBox? hit;
     for (final s in layout.sashes) {
       if (s.rect.contains(p)) hit = s;
@@ -132,22 +112,18 @@ class _WindowSchemeState extends State<WindowScheme>
     if (hit.sec >= col.sections.length) return;
     final sec = col.sections[hit.sec];
 
-    // Сэндвич-панель — не створка, не трогаем
     if (sec.type == 'Сэндвич') return;
 
     final before = sec.type;
     final after = nextOpenType(before);
     if (after == before) return;
 
-    // ── Меняем РЕАЛЬНУЮ модель данных
     sec.type = after;
 
-    // ── Визуальный отклик
     _flashRect = hit.rect;
     _flashLabel = after;
     _flash.forward(from: 0);
 
-    // ── Сообщаем родителю (пересчёт цены / перерисовка)
     widget.onChanged?.call();
     setState(() {});
   }
@@ -224,7 +200,7 @@ class _ColBox {
   /// Прямоугольники секций, индекс = индекс в col.sections.
   final List<Rect> secRects;
 
-  /// Петли слева? (иначе справа) — от этого зависит символ и ручка.
+  /// Петли слева? (иначе справа).
   final bool hingeLeft;
 
   const _ColBox(
@@ -248,8 +224,7 @@ class _SchemeLayout {
   static const empty = _SchemeLayout(Rect.zero, [], [], 0);
 }
 
-/// Единая раскладка: используется и художником, и обработчиком тапа —
-/// попадание пальца всегда совпадает с картинкой.
+/// Единая раскладка: используется и художником, и обработчиком тапа.
 _SchemeLayout schemeLayout(
   Size size,
   List<SchemeColumn> columns,
@@ -263,10 +238,10 @@ _SchemeLayout schemeLayout(
   final multiSec = columns.any((c) => c.sections.length > 1);
 
   // ── Поля под размерные цепочки
-  final mTop = showDimensions && multiCol ? 26.0 : 10.0;
-  final mBottom = showDimensions ? 26.0 : 10.0;
-  final mLeft = showDimensions && multiSec ? 26.0 : 10.0;
-  final mRight = showDimensions ? 26.0 : 10.0;
+  final mTop = showDimensions && multiCol ? 30.0 : 12.0;
+  final mBottom = showDimensions ? 30.0 : 12.0;
+  final mLeft = showDimensions && multiSec ? 30.0 : 12.0;
+  final mRight = showDimensions ? 30.0 : 12.0;
 
   final availW = size.width - mLeft - mRight;
   final availH = size.height - mTop - mBottom;
@@ -290,7 +265,7 @@ _SchemeLayout schemeLayout(
     ph,
   );
 
-  final frameW = ((pw < ph ? pw : ph) * 0.048).clamp(3.0, 15.0);
+  final frameW = ((pw < ph ? pw : ph) * 0.045).clamp(3.0, 14.0);
   if (columns.isEmpty) {
     return _SchemeLayout(product, const [], const [], frameW);
   }
@@ -363,7 +338,6 @@ List<Rect> _sectionRects(
   final rects = List<Rect>.filled(n, Rect.zero);
   if (n == 0 || glass.height <= 1) return rects;
 
-  // порядок: обычные секции сверху, сэндвич — внизу (индексы сохраняем)
   final order = <int>[];
   for (var i = 0; i < n; i++) {
     if (secs[i].type != 'Сэндвич') order.add(i);
@@ -399,7 +373,7 @@ List<Rect> _sectionRects(
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  ХУДОЖНИК
+//  ХУДОЖНИК — заводской чертёж
 // ═══════════════════════════════════════════════════════════════════
 
 class _WindowSchemePainter extends CustomPainter {
@@ -423,22 +397,22 @@ class _WindowSchemePainter extends CustomPainter {
     this.flashT = 1.0,
   });
 
-  // ── Палитра
-  static const _frameLight = Color(0xFFFCFDFF);
-  static const _frameMid = Color(0xFFE6ECF3);
-  static const _frameDark = Color(0xFFAEBAC8);
-  static const _outline = Color(0xFF5A6B7C);
-  static const _line = Color(0xFF22303C);
-  static const _dimColor = Color(0xFF6B7A8C);
-  static const _wall = Color(0xFFEEF2F6);
-  static const _wallHatch = Color(0xFFC6CFD8);
-  static const _panel = Color(0xFFD3DAE2);
-  static const _panelHatch = Color(0xFFAFB9C4);
+  // ── Палитра чертежа
+  static const _ink = Color(0xFF1B2733); // основные линии
+  static const _inkSoft = Color(0xFF6B7A8C); // размеры
+  static const _profile = Color(0xFFF5F8FB); // тело профиля
+  static const _profileLine = Color(0xFF8C9BAA); // внутренний контур
+  static const _glassA = Color(0xFFEAF6FF);
+  static const _glassB = Color(0xFFD2E8FA);
+  static const _glassLine = Color(0xFF9CC2DE);
+  static const _wall = Color(0xFFF8FAFC);
+  static const _wallHatch = Color(0xFFC2CDD9);
+  static const _panel = Color(0xFFEFF3F7);
+  static const _panelHatch = Color(0xFFA9B6C4);
   static const _net = Color(0xFF2E7D32);
   static const _accent = Color(0xFF1E88E5);
-  static const _hinge = Color(0xFF546E7A);
-  static const _hingeDark = Color(0xFF263238);
-  static const _handle = Color(0xFF37474F);
+  static const _hinge = Color(0xFF37474F);
+  static const _handle = Color(0xFF263238);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -453,19 +427,19 @@ class _WindowSchemePainter extends CustomPainter {
     if (product.width <= 4 || product.height <= 4) return;
 
     final frameW = L.frameW;
-    final sashW = frameW * 0.52;
-    final mullW = frameW * 0.9;
+    final sashW = frameW * 0.5;
+    final mullW = frameW * 0.85;
 
-    // 1. Простенок (стена) под короткими колонками балконного блока
+    // 1. Простенок (стена) под короткими колонками
     _paintWallBelow(canvas, L);
 
-    // 2. Корпус изделия: рама + стекло
+    // 2. Корпус: профиль + стекло
     _paintBody(canvas, L, frameW);
 
     // 3. Импосты
     _paintImposts(canvas, L, mullW);
 
-    // 4. Секции (створки, глухие, сэндвич) + символы, петли, ручки
+    // 4. Секции
     _paintSections(canvas, L, sashW);
 
     // 5. Вспышка отклика на тап
@@ -488,70 +462,91 @@ class _WindowSchemePainter extends CustomPainter {
       );
       if (below.height <= 0.5) continue;
       canvas.drawRect(below, Paint()..color = _wall);
-      canvas.save();
-      canvas.clipRect(below);
-      final p = Paint()
-        ..color = _wallHatch
-        ..strokeWidth = 0.9;
-      for (var x = below.left - below.height; x < below.right; x += 8) {
-        canvas.drawLine(
-          Offset(x, below.bottom),
-          Offset(x + below.height, below.top),
-          p,
-        );
-      }
-      canvas.restore();
+      _hatch(canvas, below, _wallHatch, 8, false);
       canvas.drawRect(
         below,
         Paint()
-          ..color = _frameDark
+          ..color = _profileLine
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0,
+          ..strokeWidth = 0.9,
       );
     }
   }
 
+  /// Штриховка 45°. [down] — направление наклона.
+  void _hatch(
+    Canvas canvas,
+    Rect rect,
+    Color color,
+    double step,
+    bool down,
+  ) {
+    if (rect.width <= 1 || rect.height <= 1) return;
+    canvas.save();
+    canvas.clipRect(rect);
+    final p = Paint()
+      ..color = color
+      ..strokeWidth = 0.9;
+    final span = rect.width + rect.height;
+    for (var i = -rect.height; i < span; i += step) {
+      if (down) {
+        canvas.drawLine(
+          Offset(rect.left + i, rect.top),
+          Offset(rect.left + i + rect.height, rect.bottom),
+          p,
+        );
+      } else {
+        canvas.drawLine(
+          Offset(rect.left + i, rect.bottom),
+          Offset(rect.left + i + rect.height, rect.top),
+          p,
+        );
+      }
+    }
+    canvas.restore();
+  }
+
   // ─────────────────────────────────────────────────────────────────
-  // 2. Корпус: силуэт рамы + стекло по колонкам
+  // 2. Корпус: силуэт профиля + стекло по колонкам
   // ─────────────────────────────────────────────────────────────────
   void _paintBody(Canvas canvas, _SchemeLayout L, double frameW) {
     final product = L.product;
-    final frameGrad = const LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [_frameLight, _frameMid, _frameDark],
-      stops: [0.0, 0.62, 1.0],
-    ).createShader(product);
 
     if (L.cols.isEmpty) {
-      final rr = RRect.fromRectAndRadius(product, Radius.circular(frameW * 0.6));
-      canvas.drawRRect(rr, Paint()..shader = frameGrad);
-      canvas.drawRRect(
-        rr,
+      canvas.drawRect(product, Paint()..color = _profile);
+      canvas.drawRect(
+        product,
         Paint()
-          ..color = _outline
+          ..color = _ink
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.2,
+          ..strokeWidth = 1.4,
       );
       _paintGlass(canvas, product.deflate(frameW));
       return;
     }
 
+    // Тело профиля — объединение колонок
     final silhouette = _silhouettePath(L);
-    canvas.drawPath(silhouette, Paint()..shader = frameGrad);
+    canvas.drawPath(silhouette, Paint()..color = _profile);
     canvas.drawPath(
       silhouette,
       Paint()
-        ..color = _outline
+        ..color = _ink
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2,
+        ..strokeWidth = 1.4,
     );
 
-    // Стекло по колонкам — база, чтобы не было разрывов
+    // Проёмы (стекло) + внутренний контур профиля
     for (final c in L.cols) {
-      if (c.glass.width > 1 && c.glass.height > 1) {
-        _paintGlass(canvas, c.glass);
-      }
+      if (c.glass.width <= 1 || c.glass.height <= 1) continue;
+      _paintGlass(canvas, c.glass);
+      canvas.drawRect(
+        c.glass,
+        Paint()
+          ..color = _profileLine
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.9,
+      );
     }
   }
 
@@ -572,35 +567,33 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // 3. Импосты — сплошной профиль
+  // 3. Импосты — сплошной профиль (двойная линия)
   // ─────────────────────────────────────────────────────────────────
   void _paintImposts(Canvas canvas, _SchemeLayout L, double mullW) {
     final product = L.product;
 
-    // Вертикальные — между колонками, на высоте более короткой
     for (var i = 0; i < L.cols.length - 1; i++) {
       final a = L.cols[i];
       final b = L.cols[i + 1];
       final bot = product.top +
           (a.rect.height < b.rect.height ? a.rect.height : b.rect.height);
-      _paintMullionV(canvas, a.rect.right, product.top, bot, mullW);
+      _mullionV(canvas, a.rect.right, product.top, bot, mullW);
     }
 
-    // Горизонтальные — между секциями внутри колонки
     for (final c in L.cols) {
       for (var s = 0; s < c.secRects.length - 1; s++) {
-        _paintMullionH(
+        _mullionH(
           canvas,
           c.glass.left,
           c.glass.right,
           c.secRects[s].bottom,
-          mullW * 0.92,
+          mullW * 0.9,
         );
       }
     }
   }
 
-  void _paintMullionV(
+  void _mullionV(
     Canvas canvas,
     double x,
     double top,
@@ -609,15 +602,15 @@ class _WindowSchemePainter extends CustomPainter {
   ) {
     if (bottom - top <= 2 || w <= 0.5) return;
     final r = Rect.fromLTRB(x - w / 2, top, x + w / 2, bottom);
-    canvas.drawRect(r, Paint()..color = _frameMid);
+    canvas.drawRect(r, Paint()..color = _profile);
     final p = Paint()
-      ..color = _outline
-      ..strokeWidth = 0.7;
+      ..color = _profileLine
+      ..strokeWidth = 0.8;
     canvas.drawLine(Offset(r.left, top), Offset(r.left, bottom), p);
     canvas.drawLine(Offset(r.right, top), Offset(r.right, bottom), p);
   }
 
-  void _paintMullionH(
+  void _mullionH(
     Canvas canvas,
     double left,
     double right,
@@ -626,25 +619,22 @@ class _WindowSchemePainter extends CustomPainter {
   ) {
     if (right - left <= 2 || w <= 0.5) return;
     final r = Rect.fromLTRB(left, y - w / 2, right, y + w / 2);
-    canvas.drawRect(r, Paint()..color = _frameMid);
+    canvas.drawRect(r, Paint()..color = _profile);
     final p = Paint()
-      ..color = _outline
-      ..strokeWidth = 0.7;
+      ..color = _profileLine
+      ..strokeWidth = 0.8;
     canvas.drawLine(Offset(left, r.top), Offset(right, r.top), p);
     canvas.drawLine(Offset(left, r.bottom), Offset(right, r.bottom), p);
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // 4. Секции
+  // 4. Секции (ШАГ 1: рама створки, стекло, сэндвич)
+  //    Символы открывания, петли и ручки — ШАГ 2.
   // ─────────────────────────────────────────────────────────────────
   void _paintSections(Canvas canvas, _SchemeLayout L, double sashW) {
     for (final c in L.cols) {
       final col = columns[c.index];
       final secs = col.sections.isEmpty ? <Section>[Section()] : col.sections;
-
-      // Створка-полотно балконной двери (стеклопакет + сэндвич):
-      // рисуется как ЕДИНАЯ створка, символ/ручка/петли — один раз
-      // на всю высоту.
       final isLeaf = secs.any((s) => s.type == 'Сэндвич');
 
       if (isLeaf) {
@@ -654,28 +644,18 @@ class _WindowSchemePainter extends CustomPainter {
 
       for (var s = 0; s < c.secRects.length; s++) {
         final sec = s < secs.length ? secs[s] : null;
-        _paintSection(canvas, c.secRects[s], sec, sashW, c.hingeLeft);
+        _paintSection(canvas, c.secRects[s], sec, sashW);
       }
     }
   }
 
-  void _paintSection(
-    Canvas canvas,
-    Rect rect,
-    Section? sec,
-    double sashW,
-    bool hingeLeft,
-  ) {
+  void _paintSection(Canvas canvas, Rect rect, Section? sec, double sashW) {
     final type = sec?.type ?? 'Глухая';
     final r = rect.deflate(0.6);
     if (r.width <= 3 || r.height <= 3) return;
 
-    // ── Сэндвич-панель
     if (type == 'Сэндвич') {
       _paintPanel(canvas, r);
-      if (r.width > 16 && r.height > 12) {
-        _paintLabel(canvas, 'S', r.center, 12, _line);
-      }
       if (sec?.hasMosquito == true) _paintNet(canvas, r);
       return;
     }
@@ -685,30 +665,33 @@ class _WindowSchemePainter extends CustomPainter {
         type == 'Поворотно-откидная';
 
     if (openable) {
-      // Рамка створки
-      final rr = RRect.fromRectAndRadius(r, Radius.circular(sashW * 0.8));
-      canvas.drawRRect(rr, Paint()..color = _frameLight);
-      canvas.drawRRect(
-        rr,
+      // Рамка створки — двойной контур
+      canvas.drawRect(r, Paint()..color = _profile);
+      canvas.drawRect(
+        r,
         Paint()
-          ..color = _outline
+          ..color = _ink
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.9,
+          ..strokeWidth = 1.0,
       );
       final inner = r.deflate(sashW);
       _paintGlass(canvas, inner);
-      _paintSymbol(canvas, inner, type, hingeLeft);
-      _paintHinges(canvas, inner, hingeLeft);
-      _paintHandle(canvas, inner, type, hingeLeft);
+      canvas.drawRect(
+        inner,
+        Paint()
+          ..color = _profileLine
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.8,
+      );
       if (sec?.hasMosquito == true) _paintNet(canvas, inner);
     } else {
-      // Глухая — только штапик по краю стекла
+      // Глухая — стекло + штапик
       final inner = r.deflate(sashW * 0.5);
       _paintGlass(canvas, inner);
       canvas.drawRect(
         inner,
         Paint()
-          ..color = _frameDark
+          ..color = _profileLine
           ..style = PaintingStyle.stroke
           ..strokeWidth = 0.9,
       );
@@ -717,8 +700,7 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   /// Створка-полотно балконной двери: рамка на всю высоту,
-  /// внутри — стеклопакет сверху и сэндвич-панель снизу,
-  /// символ открывания / петли / ручка — ОДИН раз на всю створку.
+  /// внутри — стеклопакет сверху и сэндвич-панель снизу.
   void _paintLeaf(
     Canvas canvas,
     _ColBox c,
@@ -728,186 +710,37 @@ class _WindowSchemePainter extends CustomPainter {
     final leafRect = c.glass.deflate(0.6);
     if (leafRect.width <= 6 || leafRect.height <= 6) return;
 
-    // Рамка створки на всю высоту
-    final rr = RRect.fromRectAndRadius(
+    canvas.drawRect(leafRect, Paint()..color = _profile);
+    canvas.drawRect(
       leafRect,
-      Radius.circular(sashW * 0.8),
-    );
-    canvas.drawRRect(rr, Paint()..color = _frameLight);
-    canvas.drawRRect(
-      rr,
       Paint()
-        ..color = _outline
+        ..color = _ink
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.9,
+        ..strokeWidth = 1.0,
     );
 
-    // Содержимое секций внутри створки
     for (var s = 0; s < c.secRects.length; s++) {
       final sec = s < secs.length ? secs[s] : null;
       final inner = c.secRects[s].deflate(sashW);
       if (inner.width <= 2 || inner.height <= 2) continue;
       if (sec?.type == 'Сэндвич') {
         _paintPanel(canvas, inner);
-        if (inner.width > 16 && inner.height > 12) {
-          _paintLabel(canvas, 'S', inner.center, 12, _line);
-        }
       } else {
         _paintGlass(canvas, inner);
+        canvas.drawRect(
+          inner,
+          Paint()
+            ..color = _profileLine
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 0.8,
+        );
       }
       if (sec?.hasMosquito == true) _paintNet(canvas, inner);
     }
-
-    // Символ открывания — по типу первой не-сэндвич секции
-    String? type;
-    for (final s in secs) {
-      if (s.type != 'Сэндвич') {
-        type = s.type;
-        break;
-      }
-    }
-    if (type == null || type == 'Глухая') return;
-
-    final symbolRect = leafRect.deflate(sashW);
-    if (symbolRect.width <= 10 || symbolRect.height <= 24) return;
-
-    _paintSymbol(canvas, symbolRect, type, c.hingeLeft);
-    _paintHinges(canvas, symbolRect, c.hingeLeft);
-    _paintHandle(canvas, symbolRect, type, c.hingeLeft);
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Символы открывания
-  //   вершина (острие) → РУЧКА
-  //   основание (два угла) → ПЕТЛИ
-  // ─────────────────────────────────────────────────────────────────
-  void _paintSymbol(Canvas canvas, Rect rect, String type, bool hingeLeft) {
-    if (rect.width <= 8 || rect.height <= 8) return;
-
-    final t = rect.top + rect.height * 0.10;
-    final b = rect.bottom - rect.height * 0.10;
-    final cx = rect.center.dx;
-    final cy = rect.center.dy;
-    final inset = rect.width * 0.17;
-    final l = rect.left + inset;
-    final r = rect.right - inset;
-
-    switch (type) {
-      case 'Поворотная':
-        // Острие → ручка, основание → петли
-        if (hingeLeft) {
-          // петли слева, ручка справа → острие вправо
-          _triangle(canvas, Offset(r, cy), Offset(l, t), Offset(l, b));
-        } else {
-          // петли справа, ручка слева → острие влево
-          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
-        }
-        break;
-
-      case 'Откидная':
-        // Острие вверх, основание вниз
-        _triangle(canvas, Offset(cx, t), Offset(l, b), Offset(r, b));
-        break;
-
-      case 'Поворотно-откидная':
-        // Поворотная часть — на всю высоту
-        if (hingeLeft) {
-          _triangle(canvas, Offset(r, cy), Offset(l, t), Offset(l, b));
-        } else {
-          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
-        }
-        // Откидная часть — верхняя половина
-        final tt = rect.top + rect.height * 0.05;
-        final tb = rect.top + rect.height * 0.45;
-        _triangle(canvas, Offset(cx, tt), Offset(l, tb), Offset(r, tb));
-        break;
-
-      default:
-        break;
-    }
-  }
-
-  void _triangle(Canvas canvas, Offset a, Offset b, Offset c) {
-    final path = Path()
-      ..moveTo(a.dx, a.dy)
-      ..lineTo(b.dx, b.dy)
-      ..lineTo(c.dx, c.dy)
-      ..close();
-    canvas.drawPath(path, Paint()..color = _line.withOpacity(0.10));
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = _line
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.3,
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────
-  // Петли — явные метки на стороне петель (3 шт. по высоте створки)
-  // ─────────────────────────────────────────────────────────────────
-  void _paintHinges(Canvas canvas, Rect inner, bool hingeLeft) {
-    if (inner.width < 14 || inner.height < 34) return;
-    final hw = (inner.width * 0.05).clamp(2.0, 4.5);
-    final hh = (inner.height * 0.05).clamp(4.0, 11.0);
-    final x = hingeLeft ? inner.left : inner.right;
-    final ys = <double>[
-      inner.top + inner.height * 0.13,
-      inner.center.dy,
-      inner.bottom - inner.height * 0.13,
-    ];
-    final fill = Paint()..color = _hinge;
-    final stroke = Paint()
-      ..color = _hingeDark
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.7;
-    for (final y in ys) {
-      final rr = RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(x, y), width: hw * 2, height: hh),
-        Radius.circular(hw * 0.4),
-      );
-      canvas.drawRRect(rr, fill);
-      canvas.drawRRect(rr, stroke);
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────────────
-  // Ручка — с противоположной от петель стороны
-  // ─────────────────────────────────────────────────────────────────
-  void _paintHandle(Canvas canvas, Rect inner, String type, bool hingeLeft) {
-    if (!showHandles) return;
-    if (type == 'Глухая' || type == 'Сэндвич') return;
-    if (inner.width <= 10 || inner.height <= 16) return;
-
-    final hw = (inner.width * 0.075).clamp(3.0, 7.0);
-    final hh = (inner.height * 0.12).clamp(10.0, 24.0);
-
-    double cx;
-    double cy;
-    if (type == 'Откидная') {
-      cx = inner.center.dx;
-      cy = inner.bottom - hh * 0.6;
-    } else {
-      cx = hingeLeft ? inner.right - hw * 1.2 : inner.left + hw * 1.2;
-      cy = inner.center.dy;
-    }
-
-    final rr = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(cx, cy), width: hw, height: hh),
-      Radius.circular(hw * 0.45),
-    );
-    canvas.drawRRect(rr, Paint()..color = _handle);
-    canvas.drawRRect(
-      rr,
-      Paint()
-        ..color = const Color(0xFF90A4AE)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.7,
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────
-  // Стекло
+  // Стеклопакет
   // ─────────────────────────────────────────────────────────────────
   void _paintGlass(Canvas canvas, Rect rect) {
     if (rect.width <= 1 || rect.height <= 1) return;
@@ -915,56 +748,33 @@ class _WindowSchemePainter extends CustomPainter {
       rect,
       Paint()
         ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFB4DAF5), Color(0xFFEAF6FF), Color(0xFF9AC2E2)],
-          stops: [0.0, 0.5, 1.0],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [_glassA, _glassB],
         ).createShader(rect),
     );
-
-    // Диагональный блик
-    final hl = Path()
-      ..moveTo(rect.left + rect.width * 0.04, rect.bottom)
-      ..lineTo(rect.left + rect.width * 0.44, rect.top)
-      ..lineTo(rect.left + rect.width * 0.60, rect.top)
-      ..lineTo(rect.left + rect.width * 0.20, rect.bottom)
-      ..close();
-    canvas.drawPath(hl, Paint()..color = Colors.white.withOpacity(0.38));
-
     canvas.drawRect(
       rect,
       Paint()
-        ..color = const Color(0xFF7FA3C0)
+        ..color = _glassLine
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.8,
     );
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Сэндвич-панель
+  // Сэндвич-панель — штриховка 45°
   // ─────────────────────────────────────────────────────────────────
   void _paintPanel(Canvas canvas, Rect rect) {
     if (rect.width <= 1 || rect.height <= 1) return;
     canvas.drawRect(rect, Paint()..color = _panel);
-    canvas.save();
-    canvas.clipRect(rect);
-    final p = Paint()
-      ..color = _panelHatch
-      ..strokeWidth = 1.0;
-    for (var x = rect.left - rect.height; x < rect.right; x += 7) {
-      canvas.drawLine(
-        Offset(x, rect.bottom),
-        Offset(x + rect.height, rect.top),
-        p,
-      );
-    }
-    canvas.restore();
+    _hatch(canvas, rect, _panelHatch, 7, true);
     canvas.drawRect(
       rect,
       Paint()
-        ..color = _frameDark
+        ..color = _profileLine
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
+        ..strokeWidth = 0.9,
     );
   }
 
@@ -976,8 +786,8 @@ class _WindowSchemePainter extends CustomPainter {
     canvas.save();
     canvas.clipRect(rect);
     final p = Paint()
-      ..color = _net.withOpacity(0.45)
-      ..strokeWidth = 0.9;
+      ..color = _net.withOpacity(0.4)
+      ..strokeWidth = 0.8;
     for (var x = rect.left - rect.height; x < rect.right; x += 6) {
       canvas.drawLine(
         Offset(x, rect.bottom),
@@ -991,12 +801,12 @@ class _WindowSchemePainter extends CustomPainter {
       Paint()
         ..color = _net
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2,
+        ..strokeWidth = 1.1,
     );
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Вспышка (визуальный отклик на тап)
+  // Вспышка (отклик на тап)
   // ─────────────────────────────────────────────────────────────────
   void _paintFlash(Canvas canvas) {
     final r = flashRect;
@@ -1005,110 +815,61 @@ class _WindowSchemePainter extends CustomPainter {
     if (t >= 1.0) return;
     final k = 1.0 - t;
 
-    final rr = RRect.fromRectAndRadius(r.deflate(1.5), const Radius.circular(4));
-
-    canvas.drawRRect(rr, Paint()..color = _accent.withOpacity(0.22 * k));
-    canvas.drawRRect(
-      rr,
+    canvas.drawRect(r.deflate(1.5), Paint()..color = _accent.withOpacity(0.20 * k));
+    canvas.drawRect(
+      r.deflate(1.5),
       Paint()
         ..color = _accent.withOpacity(0.95 * k)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.6,
+        ..strokeWidth = 2.4,
     );
 
     final label = flashLabel;
     if (label != null && r.width > 40 && r.height > 24) {
-      _paintLabel(
-        canvas,
-        label,
-        r.center,
-        10.5,
-        _accent.withOpacity(0.95 * k),
-      );
+      _label(canvas, label, r.center, 10.5, _accent.withOpacity(0.95 * k));
     }
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Размерные цепочки
+  // Размерные цепочки (засечки + числа в мм)
   // ─────────────────────────────────────────────────────────────────
   void _paintDimensions(Canvas canvas, _SchemeLayout L) {
     if (!showDimensions) return;
     final product = L.product;
-    final p = Paint()
-      ..color = _dimColor
-      ..strokeWidth = 1.0;
 
     final sumMm = columns.fold<double>(0, (s, c) => s + c.widthMm);
     final wVal = widthMm ?? (sumMm > 0 ? sumMm : null);
 
     // ── Общая ширина (снизу)
-    final yb = product.bottom + 10;
-    canvas.drawLine(Offset(product.left, yb), Offset(product.right, yb), p);
-    canvas.drawLine(
-      Offset(product.left, yb - 4),
-      Offset(product.left, yb + 4),
-      p,
-    );
-    canvas.drawLine(
-      Offset(product.right, yb - 4),
-      Offset(product.right, yb + 4),
-      p,
-    );
+    final yb = product.bottom + 12;
+    _dimLine(canvas, Offset(product.left, yb), Offset(product.right, yb));
     if (wVal != null && wVal > 0) {
-      _paintLabel(
-        canvas,
-        '${wVal.toInt()}',
-        Offset(product.center.dx, yb + 8),
-        10,
-      );
+      _label(canvas, '${wVal.toInt()}', Offset(product.center.dx, yb + 9), 10);
     }
 
     // ── Общая высота (справа)
     if (heightMm != null && heightMm! > 0) {
-      final xr = product.right + 10;
-      canvas.drawLine(Offset(xr, product.top), Offset(xr, product.bottom), p);
-      canvas.drawLine(
-        Offset(xr - 4, product.top),
-        Offset(xr + 4, product.top),
-        p,
-      );
-      canvas.drawLine(
-        Offset(xr - 4, product.bottom),
-        Offset(xr + 4, product.bottom),
-        p,
-      );
+      final xr = product.right + 12;
+      _dimLine(canvas, Offset(xr, product.top), Offset(xr, product.bottom));
       canvas.save();
-      canvas.translate(xr + 8, product.center.dy);
+      canvas.translate(xr + 9, product.center.dy);
       canvas.rotate(-1.5707963);
-      _paintLabel(canvas, '${heightMm!.toInt()}', Offset.zero, 10);
+      _label(canvas, '${heightMm!.toInt()}', Offset.zero, 10);
       canvas.restore();
     }
 
     // ── Цепочка ширин колонок (сверху)
     if (L.cols.length > 1) {
-      final yt = product.top - 10;
-      canvas.drawLine(Offset(product.left, yt), Offset(product.right, yt), p);
+      final yt = product.top - 12;
+      _dimLine(canvas, Offset(product.left, yt), Offset(product.right, yt));
       for (final c in L.cols) {
-        canvas.drawLine(
-          Offset(c.rect.left, yt - 4),
-          Offset(c.rect.left, yt + 4),
-          p,
-        );
+        _tick(canvas, Offset(c.rect.left, yt));
         final mm = _colMm(c.index, wVal);
         if (mm != null && mm > 0 && c.rect.width > 26) {
-          _paintLabel(
-            canvas,
-            '${mm.toInt()}',
-            Offset(c.rect.center.dx, yt - 8),
-            9,
-          );
+          _label(canvas, '${mm.toInt()}', Offset(c.rect.center.dx, yt - 9), 9);
         }
       }
-      canvas.drawLine(
-        Offset(product.right, yt - 4),
-        Offset(product.right, yt + 4),
-        p,
-      );
+      _tick(canvas, Offset(product.right, yt));
     }
 
     // ── Цепочка высот секций (слева, по самой высокой колонке)
@@ -1118,26 +879,44 @@ class _WindowSchemePainter extends CustomPainter {
         if (tall == null || c.rect.height > tall.rect.height) tall = c;
       }
       if (tall != null && tall.secRects.length > 1) {
-        final xl = product.left - 10;
-        canvas.drawLine(Offset(xl, product.top), Offset(xl, product.bottom), p);
+        final xl = product.left - 12;
+        _dimLine(canvas, Offset(xl, product.top), Offset(xl, product.bottom));
         for (final s in tall.secRects) {
-          canvas.drawLine(Offset(xl - 4, s.top), Offset(xl + 4, s.top), p);
+          _tick(canvas, Offset(xl, s.top));
           if (s.height > 22) {
             final mm = heightMm! * (s.height / product.height);
             canvas.save();
-            canvas.translate(xl - 8, s.center.dy);
+            canvas.translate(xl - 9, s.center.dy);
             canvas.rotate(-1.5707963);
-            _paintLabel(canvas, '${mm.toInt()}', Offset.zero, 9);
+            _label(canvas, '${mm.toInt()}', Offset.zero, 9);
             canvas.restore();
           }
         }
-        canvas.drawLine(
-          Offset(xl - 4, product.bottom),
-          Offset(xl + 4, product.bottom),
-          p,
-        );
+        _tick(canvas, Offset(xl, product.bottom));
       }
     }
+  }
+
+  /// Размерная линия с засечками на концах.
+  void _dimLine(Canvas canvas, Offset a, Offset b) {
+    final p = Paint()
+      ..color = _inkSoft
+      ..strokeWidth = 0.9;
+    canvas.drawLine(a, b, p);
+    _tick(canvas, a);
+    _tick(canvas, b);
+  }
+
+  /// Засечка (ГОСТ 2.307) — короткий штрих под 45°.
+  void _tick(Canvas canvas, Offset c) {
+    final p = Paint()
+      ..color = _inkSoft
+      ..strokeWidth = 1.1;
+    canvas.drawLine(
+      Offset(c.dx - 3.5, c.dy + 3.5),
+      Offset(c.dx + 3.5, c.dy - 3.5),
+      p,
+    );
   }
 
   /// Ширина колонки в мм (с учётом колонок без мм).
@@ -1157,12 +936,12 @@ class _WindowSchemePainter extends CustomPainter {
     return total / columns.length;
   }
 
-  void _paintLabel(
+  void _label(
     Canvas canvas,
     String text,
     Offset center,
     double fontSize, [
-    Color color = _dimColor,
+    Color color = _inkSoft,
   ]) {
     final tp = TextPainter(
       text: TextSpan(
