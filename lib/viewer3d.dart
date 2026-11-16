@@ -217,94 +217,155 @@ const _H = 1.40; // полувысота
 const _D = 0.075; // глубина профиля (тонкий ПВХ)
 
 void _buildWindow(List<_Prim> out) {
-  const fw = 0.075; // толщина профиля рамы
-  const st = 0.045; // толщина обвязки створки
-  const sd = 0.052; // глубина створки
+  // ВАЖНО: «лицо» окна смотрит в −Z (к камере). Все выступающие детали —
+  // ручка, петли, штапик, отлив — идут в минус по Z, иначе они уходят
+  // за стекло и окно выглядит плоским.
+  const fw = 0.078; // толщина профиля рамы
+  const st = 0.048; // обвязка створки
+  const sd = 0.058; // глубина створки
+  const bead = 0.017; // штапик
+  const fz = -_D / 2; // передняя плоскость профиля
 
-  // ── Рама: 4 тонких бруса ──────────────────────────────────────────
+  // ── Рама: наружные стенки профиля ────────────────────────────────
   _box(out, const _V3(-_W + fw / 2, 0, 0), const _V3(fw, _H * 2, _D), _pvc);
   _box(out, const _V3(_W - fw / 2, 0, 0), const _V3(fw, _H * 2, _D), _pvc);
   _box(out, const _V3(0, _H - fw / 2, 0), const _V3(_W * 2 - fw * 2, fw, _D), _pvc);
   _box(out, const _V3(0, -_H + fw / 2, 0), const _V3(_W * 2 - fw * 2, fw, _D), _pvc);
 
-  // ── Фаска: внутренний светлый контур (объём профиля) ─────────────
-  const lip = 0.022;
-  const lipD = _D + 0.006;
-  _box(out, const _V3(-_W + fw + lip / 2, 0, 0.006),
-      const _V3(lip, _H * 2 - fw * 2, lipD), _pvcInner);
-  _box(out, const _V3(_W - fw - lip / 2, 0, 0.006),
-      const _V3(lip, _H * 2 - fw * 2, lipD), _pvcInner);
-  _box(out, const _V3(0, _H - fw - lip / 2, 0.006),
-      const _V3(_W * 2 - fw * 2, lip, lipD), _pvcInner);
-  _box(out, const _V3(0, -_H + fw + lip / 2, 0.006),
-      const _V3(_W * 2 - fw * 2, lip, lipD), _pvcInner);
+  // ── Внутренняя стенка профиля (уходит вглубь, даёт объём) ────────
+  const iw = 0.020;
+  const iz = _D / 2 + 0.004;
+  _box(out, const _V3(-_W + fw + iw / 2, 0, iz),
+      const _V3(iw, _H * 2 - fw * 2, 0.030), _pvcShade);
+  _box(out, const _V3(_W - fw - iw / 2, 0, iz),
+      const _V3(iw, _H * 2 - fw * 2, 0.030), _pvcShade);
+  _box(out, const _V3(0, _H - fw - iw / 2, iz),
+      const _V3(_W * 2 - fw * 2, iw, 0.030), _pvcShade);
+  _box(out, const _V3(0, -_H + fw + iw / 2, iz),
+      const _V3(_W * 2 - fw * 2, iw, 0.030), _pvcShade);
 
-  // ── Импост по центру ──────────────────────────────────────────────
-  _box(out, const _V3(0, 0, 0), const _V3(0.062, _H * 2 - fw * 2, _D), _pvcShade);
-  _box(out, const _V3(0, 0, 0.008), const _V3(0.018, _H * 2 - fw * 2, _D + 0.006),
-      _pvcInner);
+  // ── Фаска по передней кромке профиля ─────────────────────────────
+  const lip = 0.020;
+  const lipZ = fz - 0.004;
+  _box(out, const _V3(-_W + fw - lip / 2, 0, lipZ),
+      const _V3(lip, _H * 2 - fw * 2, 0.010), _pvcInner);
+  _box(out, const _V3(_W - fw + lip / 2, 0, lipZ),
+      const _V3(lip, _H * 2 - fw * 2, 0.010), _pvcInner);
+  _box(out, const _V3(0, _H - fw + lip / 2, lipZ),
+      const _V3(_W * 2 - fw * 2, lip, 0.010), _pvcInner);
+  _box(out, const _V3(0, -_H + fw - lip / 2, lipZ),
+      const _V3(_W * 2 - fw * 2, lip, 0.010), _pvcInner);
 
-  // ── Створки ───────────────────────────────────────────────────────
-  final lx0 = -_W + fw, lx1 = -0.031;
-  final rx0 = 0.031, rx1 = _W - fw;
+  // ── Воздушная камера профиля (тёмная канавка по центру бруса) ────
+  const chW = 0.013;
+  _box(out, const _V3(-_W + fw * 0.5, 0, lipZ),
+      const _V3(chW, _H * 2 - fw * 2, 0.006), _pvcGroove);
+  _box(out, const _V3(_W - fw * 0.5, 0, lipZ),
+      const _V3(chW, _H * 2 - fw * 2, 0.006), _pvcGroove);
+  _box(out, const _V3(0, _H - fw * 0.5, lipZ),
+      const _V3(_W * 2 - fw * 2, chW, 0.006), _pvcGroove);
+  _box(out, const _V3(0, -_H + fw * 0.5, lipZ),
+      const _V3(_W * 2 - fw * 2, chW, 0.006), _pvcGroove);
 
-  void sash(double x0, double x1, {required bool handle, required bool hinges}) {
+  // ── Импост по центру ─────────────────────────────────────────────
+  _box(out, const _V3(0, 0, 0), const _V3(0.064, _H * 2 - fw * 2, _D), _pvc);
+  _box(out, const _V3(0, 0, lipZ), const _V3(0.015, _H * 2 - fw * 2, 0.008),
+      _pvcGroove);
+
+  // ── Створки ──────────────────────────────────────────────────────
+  final lx0 = -_W + fw, lx1 = -0.032;
+  final rx0 = 0.032, rx1 = _W - fw;
+
+  void sash(double x0, double x1, {required bool handle}) {
     final cx = (x0 + x1) / 2;
     final wdt = x1 - x0;
-    // обвязки
-    _box(out, _V3(cx, _H - fw - st / 2, 0.012), _V3(wdt, st, sd), _pvc);
-    _box(out, _V3(cx, -_H + fw + st / 2, 0.012), _V3(wdt, st, sd), _pvc);
-    _box(out, _V3(x0 + st / 2, 0, 0.012), _V3(st, _H * 2 - fw * 2, sd), _pvc);
-    _box(out, _V3(x1 - st / 2, 0, 0.012), _V3(st, _H * 2 - fw * 2, sd), _pvc);
-
-    // стеклопакет
     final gx0 = x0 + st, gx1 = x1 - st;
     final gy0 = -_H + fw + st, gy1 = _H - fw - st;
-    out.add(_Prim([
-      _V3(gx0, gy0, 0.020),
-      _V3(gx1, gy0, 0.020),
-      _V3(gx1, gy1, 0.020),
-      _V3(gx0, gy1, 0.020),
-    ], _glassCol, alpha: 0.34, glass: true));
-
-    // блик на стекле
     final gw = gx1 - gx0, gh = gy1 - gy0;
+
+    // обвязки створки
+    _box(out, _V3(cx, _H - fw - st / 2, -0.014), _V3(wdt, st, sd), _pvc);
+    _box(out, _V3(cx, -_H + fw + st / 2, -0.014), _V3(wdt, st, sd), _pvc);
+    _box(out, _V3(x0 + st / 2, 0, -0.014), _V3(st, _H * 2 - fw * 2, sd), _pvc);
+    _box(out, _V3(x1 - st / 2, 0, -0.014), _V3(st, _H * 2 - fw * 2, sd), _pvc);
+
+    // штапик вокруг стеклопакета
+    _box(out, _V3(cx, gy1 + bead / 2, -0.030),
+        _V3(gw + bead * 2, bead, 0.020), _pvcInner);
+    _box(out, _V3(cx, gy0 - bead / 2, -0.030),
+        _V3(gw + bead * 2, bead, 0.020), _pvcInner);
+    _box(out, _V3(gx0 - bead / 2, 0, -0.030),
+        _V3(bead, gh, 0.020), _pvcInner);
+    _box(out, _V3(gx1 + bead / 2, 0, -0.030),
+        _V3(bead, gh, 0.020), _pvcInner);
+
+    // стеклопакет — основа
+    out.add(_Prim([
+      _V3(gx0, gy0, -0.022),
+      _V3(gx1, gy0, -0.022),
+      _V3(gx1, gy1, -0.022),
+      _V3(gx0, gy1, -0.022),
+    ], _glassCol, alpha: 0.30, glass: true));
+
+    // градиент неба: сверху плотнее, снизу прозрачнее
+    const rows = 5;
+    for (var i = 0; i < rows; i++) {
+      final y0 = gy0 + gh * i / rows;
+      final y1 = gy0 + gh * (i + 1) / rows;
+      out.add(_Prim([
+        _V3(gx0, y0, -0.023),
+        _V3(gx1, y0, -0.023),
+        _V3(gx1, y1, -0.023),
+        _V3(gx0, y1, -0.023),
+      ], const Color(0xFFB9E4FA), alpha: 0.22 - 0.035 * i));
+    }
+
+    // двойной блик
     if (gw > 0.2 && gh > 0.2) {
       out.add(_Prim([
-        _V3(gx0 + gw * 0.16, gy0 + gh * 0.08, 0.030),
-        _V3(gx0 + gw * 0.34, gy0 + gh * 0.08, 0.030),
-        _V3(gx0 + gw * 0.62, gy1 - gh * 0.08, 0.030),
-        _V3(gx0 + gw * 0.44, gy1 - gh * 0.08, 0.030),
-      ], const Color(0xFFFFFFFF), alpha: 0.17));
+        _V3(gx0 + gw * 0.14, gy0 + gh * 0.06, -0.032),
+        _V3(gx0 + gw * 0.30, gy0 + gh * 0.06, -0.032),
+        _V3(gx0 + gw * 0.56, gy1 - gh * 0.06, -0.032),
+        _V3(gx0 + gw * 0.40, gy1 - gh * 0.06, -0.032),
+      ], const Color(0xFFFFFFFF), alpha: 0.20));
+      out.add(_Prim([
+        _V3(gx0 + gw * 0.62, gy0 + gh * 0.06, -0.032),
+        _V3(gx0 + gw * 0.70, gy0 + gh * 0.06, -0.032),
+        _V3(gx0 + gw * 0.92, gy1 - gh * 0.06, -0.032),
+        _V3(gx0 + gw * 0.84, gy1 - gh * 0.06, -0.032),
+      ], const Color(0xFFFFFFFF), alpha: 0.10));
     }
 
-    // петли — тёмный металл, две на створку
-    if (hinges) {
-      final hx = x0 + st / 2;
-      for (final k in const [0.10, 0.90]) {
-        final hy = gy0 + (gy1 - gy0) * k;
-        _box(out, _V3(hx, hy, 0.030), const _V3(0.030, 0.115, 0.030), _darkMetal);
-        _box(out, _V3(hx, hy, 0.048), const _V3(0.020, 0.075, 0.020), _silverDark);
-      }
+    // петли — тёмный металл с серебристой осью, две на створку
+    final hx = x0 + st / 2;
+    for (final k in const [0.10, 0.90]) {
+      final hy = gy0 + gh * k;
+      _box(out, _V3(hx, hy, -0.034), const _V3(0.034, 0.125, 0.036), _darkMetal);
+      _box(out, _V3(hx, hy, -0.054), const _V3(0.022, 0.080, 0.022), _silverDark);
     }
 
-    // ручка — серебристая, на противоположной от петель стороне
+    // ручка — серебристая, с противоположной от петель стороны
     if (handle) {
       final mx = x1 - st / 2;
-      _box(out, _V3(mx, -0.02, 0.036), const _V3(0.026, 0.135, 0.020), _silverDark);
-      _box(out, _V3(mx - 0.012, -0.02, 0.072), const _V3(0.020, 0.048, 0.062), _silver);
-      _box(out, _V3(mx - 0.012, -0.075, 0.072), const _V3(0.018, 0.030, 0.050), _silver);
+      _box(out, _V3(mx, -0.02, -0.040), const _V3(0.030, 0.150, 0.022),
+          _silverDark);
+      _box(out, _V3(mx - 0.016, -0.02, -0.082), const _V3(0.024, 0.056, 0.072),
+          _silver);
+      _box(out, _V3(mx - 0.016, -0.082, -0.082), const _V3(0.022, 0.036, 0.058),
+          _silver);
     }
   }
 
-  sash(lx0, lx1, handle: false, hinges: true);
-  sash(rx0, rx1, handle: true, hinges: true);
+  sash(lx0, lx1, handle: false);
+  sash(rx0, rx1, handle: true);
 
-  // ── Подоконник с отливом ──────────────────────────────────────────
-  _box(out, const _V3(0, -_H - 0.035, 0.055),
-      const _V3(_W * 2 + 0.30, 0.070, _D + 0.16), _sillCol);
-  _box(out, const _V3(0, -_H - 0.088, _D / 2 + 0.075),
-      const _V3(_W * 2 + 0.26, 0.036, 0.055), _pvcShade);
+  // ── Подоконник с отливом (выступает к камере) ────────────────────
+  _box(out, const _V3(0, -_H - 0.036, -0.058),
+      const _V3(_W * 2 + 0.30, 0.072, _D + 0.20), _sillCol);
+  _box(out, const _V3(0, -_H - 0.092, -(_D / 2 + 0.085)),
+      const _V3(_W * 2 + 0.26, 0.040, 0.060), _pvcShade);
+  _box(out, const _V3(0, -_H - 0.006, -(_D / 2 + 0.070)),
+      const _V3(_W * 2 + 0.30, 0.014, 0.040), _pvcInner);
 }
 
 // ═══════════════════════════ ИНСТРУМЕНТЫ ═══════════════════════════
