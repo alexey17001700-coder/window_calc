@@ -816,7 +816,7 @@ class _WindowSchemePainter extends CustomPainter {
         final type = _leafOpenType(secs);
         if (type == null) continue;
         _paintTurnSymbol(canvas, c.glass, type, c.hingeLeft);
-        _paintFittings(canvas, c.glass, type, c.hingeLeft);
+        _paintFittings(canvas, c.glass, type, c.hingeLeft, isLeaf: true);
         continue;
       }
 
