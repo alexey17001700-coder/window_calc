@@ -2879,8 +2879,9 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
