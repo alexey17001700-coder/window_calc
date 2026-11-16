@@ -2431,30 +2431,96 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
 
   Widget _category(String title, IconData icon, List<Widget> children) {
     final isOpen = _expanded.contains(title);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(icon, color: AppTheme.bronze),
-            title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            trailing: Icon(isOpen ? Icons.expand_less : Icons.expand_more),
-            onTap: () {
-              setState(() {
-                if (isOpen) {
-                  _expanded.remove(title);
-                } else {
-                  _expanded.add(title);
-                }
-              });
-            },
-          ),
-          if (isOpen)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Column(children: children),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
             ),
-        ],
+            boxShadow: isDark
+                ? null
+                : const [
+                    BoxShadow(color: Color(0x121B2A4A), blurRadius: 16, offset: Offset(0, 7)),
+                  ],
+          ),
+          child: Column(
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  setState(() {
+                    if (isOpen) {
+                      _expanded.remove(title);
+                    } else {
+                      _expanded.add(title);
+                    }
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppTheme.gold.withOpacity(isDark ? 0.34 : 0.18),
+                              AppTheme.gold.withOpacity(isDark ? 0.10 : 0.05),
+                            ],
+                          ),
+                          border: Border.all(color: AppTheme.gold.withOpacity(0.38)),
+                        ),
+                        child: Icon(icon, color: AppTheme.bronze, size: 20),
+                      ),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ),
+                      AnimatedRotation(
+                        turns: isOpen ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 240),
+                        child: Icon(
+                          Icons.expand_more_rounded,
+                          color: onSurface.withOpacity(0.45),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              AnimatedCrossFade(
+                firstChild: const SizedBox(width: double.infinity),
+                secondChild: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                  child: Column(children: children),
+                ),
+                crossFadeState:
+                    isOpen ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 220),
+                sizeCurve: Curves.easeOutCubic,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
