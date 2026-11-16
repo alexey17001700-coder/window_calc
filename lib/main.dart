@@ -9,6 +9,7 @@ import 'splash_screen.dart';
 import 'service_screen.dart';
 import 'window_scheme.dart';
 import 'templates.dart';
+import 'wizard_screen.dart';
 
 void main() => runApp(const WindowCalcApp());
 
