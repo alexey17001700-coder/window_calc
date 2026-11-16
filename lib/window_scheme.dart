@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 import 'templates.dart';
 
-/// Схема окна «в лоб»: рама с объёмом, стеклопакеты с бликом,
-/// створки с символами открывания, москитные сетки, сэндвич-панели,
-/// ручки и размеры в мм.
+/// Схема окна «в лоб» — замерный лист.
+///
+/// ПРАВИЛА ОТРИСОВКИ (v1.6.3):
+///  • пропорции изделия строго по мм (widthMm × heightMm) с сохранением
+///    соотношения сторон внутри отведённой области;
+///  • ширины колонок — по widthMm; если часть колонок без мм, недостающие
+///    получают среднее известных (раньше раскладка ломалась и вылезала);
+///  • высоты колонок — по heightRatio, самая высокая заполняет изделие;
+///  • сэндвич-панель ВСЕГДА внизу колонки, высота ≈ 700 мм (или 30%);
+///  • ниже короткой колонки балконного блока рисуется ПРОСТЕНОК (стена);
+///  • символ открывания: вершина треугольника смотрит на петли,
+///    ручка — с противоположной стороны; сторона петель зависит от колонки;
+///  • размерные цепочки: сверху — ширины колонок, слева — высоты секций,
+///    снизу — общая ширина, справа — общая высота.
 ///
 /// ИНТЕРАКТИВ: тап по створке меняет тип открывания по кругу
 /// Поворотная → Откидная → Поворотно-откидная → Глухая → Поворотная
@@ -77,8 +88,13 @@ class _WindowSchemeState extends State<WindowScheme>
   }
 
   void _handleTap(TapUpDetails d) {
-    final size = Size(widget.width, widget.height);
-    final layout = schemeLayout(size, widget.columns, widget.showDimensions);
+    final layout = schemeLayout(
+      Size(widget.width, widget.height),
+      widget.columns,
+      widget.showDimensions,
+      widthMm: widget.widthMm,
+      heightMm: widget.heightMm,
+    );
     final p = d.localPosition;
 
     // Ищем створку под пальцем (сверху вниз — последняя нарисованная важнее)
@@ -172,66 +188,185 @@ class _SashBox {
   const _SashBox(this.col, this.sec, this.rect);
 }
 
-class _SchemeLayout {
+class _ColBox {
+  final int index;
+
+  /// Полный прямоугольник колонки (выровнена по верху изделия).
+  final Rect rect;
+
+  /// Стекло внутри рамы колонки.
   final Rect glass;
-  final List<double> colWidths;
-  final List<_SashBox> sashes;
-  const _SchemeLayout(this.glass, this.colWidths, this.sashes);
+
+  /// Прямоугольники секций, индекс = индекс в col.sections.
+  final List<Rect> secRects;
+
+  /// Петли слева? (иначе справа) — от этого зависит символ и ручка.
+  final bool hingeLeft;
+
+  const _ColBox(this.index, this.rect, this.glass, this.secRects, this.hingeLeft);
 }
 
+class _SchemeLayout {
+  /// Силуэт изделия (объединение колонок).
+  final Rect product;
+  final List<_ColBox> cols;
+  final List<_SashBox> sashes;
+  final double frameW;
+
+  const _SchemeLayout(this.product, this.cols, this.sashes, this.frameW);
+
+  static const empty = _SchemeLayout(Rect.zero, [], [], 0);
+}
+
+/// Единая раскладка: используется и художником, и обработчиком тапа —
+/// попадание пальца всегда совпадает с картинкой.
 _SchemeLayout schemeLayout(
   Size size,
   List<SchemeColumn> columns,
-  bool showDimensions,
-) {
-  final left = 6.0;
-  final top = 6.0;
-  final right = size.width - 6.0 - (showDimensions ? 20.0 : 0.0);
-  final bottom = size.height - 6.0 - (showDimensions ? 20.0 : 0.0);
-  final w = right - left;
-  final h = bottom - top;
-  final empty = _SchemeLayout(Rect.zero, const [], const []);
-  if (w <= 6 || h <= 6) return empty;
+  bool showDimensions, {
+  double? widthMm,
+  double? heightMm,
+}) {
+  if (size.width <= 8 || size.height <= 8) return _SchemeLayout.empty;
 
-  final frameW = (w < h ? w : h) * 0.055;
-  final glassRect = Rect.fromLTWH(left, top, w, h).deflate(frameW);
-  if (columns.isEmpty) return _SchemeLayout(glassRect, const [], const []);
+  final multiCol = columns.length > 1;
+  final multiSec = columns.any((c) => c.sections.length > 1);
 
-  final totalMm = columns.fold<double>(
-    0,
-    (s, c) => s + (c.widthMm > 0 ? c.widthMm : 0),
+  // ── Поля под размерные цепочки
+  final mTop = showDimensions && multiCol ? 24.0 : 8.0;
+  final mBottom = showDimensions ? 24.0 : 8.0;
+  final mLeft = showDimensions && multiSec ? 24.0 : 8.0;
+  final mRight = showDimensions ? 24.0 : 8.0;
+
+  final availW = size.width - mLeft - mRight;
+  final availH = size.height - mTop - mBottom;
+  if (availW <= 8 || availH <= 8) return _SchemeLayout.empty;
+
+  // ── Соотношение сторон изделия по мм
+  var aspect = availW / availH;
+  if (widthMm != null && heightMm != null && widthMm > 0 && heightMm > 0) {
+    aspect = widthMm / heightMm;
+  }
+  var pw = availW;
+  var ph = pw / aspect;
+  if (ph > availH) {
+    ph = availH;
+    pw = ph * aspect;
+  }
+  final product = Rect.fromLTWH(
+    mLeft + (availW - pw) / 2,
+    mTop + (availH - ph) / 2,
+    pw,
+    ph,
   );
-  final useMm = totalMm > 0;
-  final colWidths = <double>[];
-  for (final c in columns) {
-    if (useMm && c.widthMm > 0) {
-      colWidths.add(glassRect.width * (c.widthMm / totalMm));
-    } else {
-      colWidths.add(glassRect.width / columns.length);
+
+  final frameW = ((pw < ph ? pw : ph) * 0.05).clamp(2.5, 16.0);
+  if (columns.isEmpty) {
+    return _SchemeLayout(product, const [], const [], frameW);
+  }
+
+  // ── Ширины колонок (строго по мм)
+  final n = columns.length;
+  final known = columns.where((c) => c.widthMm > 0).toList();
+  final widths = <double>[];
+  if (known.length == n) {
+    final total = known.fold<double>(0, (s, c) => s + c.widthMm);
+    for (final c in columns) {
+      widths.add(product.width * (c.widthMm / total));
+    }
+  } else if (known.isNotEmpty) {
+    // Часть колонок без мм → берём среднее известных (раньше ломалось)
+    final avg = known.fold<double>(0, (s, c) => s + c.widthMm) / known.length;
+    final total = columns.fold<double>(
+      0,
+      (s, c) => s + (c.widthMm > 0 ? c.widthMm : avg),
+    );
+    for (final c in columns) {
+      final v = c.widthMm > 0 ? c.widthMm : avg;
+      widths.add(product.width * (v / total));
+    }
+  } else {
+    for (var i = 0; i < n; i++) {
+      widths.add(product.width / n);
     }
   }
 
-  final sashes = <_SashBox>[];
-  var x = glassRect.left;
-  for (var i = 0; i < columns.length; i++) {
-    final col = columns[i];
-    final cw = colWidths[i];
-    var ratio = col.heightRatio;
-    if (ratio <= 0) ratio = 1.0;
-    if (ratio > 1.0) ratio = 1.0;
-    final colH = glassRect.height * ratio;
+  // ── Высоты колонок (по heightRatio, самая высокая = высота изделия)
+  var maxRatio = 0.0;
+  for (final c in columns) {
+    final r = c.heightRatio > 0 ? c.heightRatio : 1.0;
+    if (r > maxRatio) maxRatio = r;
+  }
+  if (maxRatio <= 0) maxRatio = 1.0;
 
-    final n = col.sections.isEmpty ? 1 : col.sections.length;
-    final secH = colH / n;
-    for (var s = 0; s < n; s++) {
-      sashes.add(
-        _SashBox(i, s, Rect.fromLTWH(x, glassRect.top + secH * s, cw, secH)),
-      );
+  final cols = <_ColBox>[];
+  final sashes = <_SashBox>[];
+  var x = product.left;
+  for (var i = 0; i < n; i++) {
+    final col = columns[i];
+    final cw = widths[i];
+    final ratio = (col.heightRatio > 0 ? col.heightRatio : 1.0) / maxRatio;
+    final ch = product.height * ratio;
+    final colRect = Rect.fromLTWH(x, product.top, cw, ch);
+    final glass = colRect.deflate(frameW);
+    final secs = col.sections.isEmpty ? <Section>[Section()] : col.sections;
+    final secRects = _sectionRects(glass, secs, ratio, heightMm);
+    final hingeLeft = i <= (n - 1) / 2;
+    cols.add(_ColBox(i, colRect, glass, secRects, hingeLeft));
+    for (var s = 0; s < secRects.length; s++) {
+      sashes.add(_SashBox(i, s, secRects[s]));
     }
     x += cw;
   }
 
-  return _SchemeLayout(glassRect, colWidths, sashes);
+  return _SchemeLayout(product, cols, sashes, frameW);
+}
+
+/// Раскладка секций внутри колонки.
+/// Сэндвич-панель всегда уходит вниз и получает реалистичную высоту.
+List<Rect> _sectionRects(
+  Rect glass,
+  List<Section> secs,
+  double ratio,
+  double? heightMm,
+) {
+  final n = secs.length;
+  final rects = List<Rect>.filled(n, Rect.zero);
+  if (n == 0 || glass.height <= 1) return rects;
+
+  // порядок: обычные секции сверху, сэндвич — внизу (индексы сохраняем)
+  final order = <int>[];
+  for (var i = 0; i < n; i++) {
+    if (secs[i].type != 'Сэндвич') order.add(i);
+  }
+  for (var i = 0; i < n; i++) {
+    if (secs[i].type == 'Сэндвич') order.add(i);
+  }
+
+  var swCount = 0;
+  for (final s in secs) {
+    if (s.type == 'Сэндвич') swCount++;
+  }
+  final glassCount = n - swCount;
+
+  var swFrac = 0.0;
+  if (swCount > 0) {
+    swFrac = 0.30;
+    if (heightMm != null && heightMm > 0 && ratio > 0) {
+      final colMm = heightMm * ratio;
+      if (colMm > 0) swFrac = (700.0 / colMm).clamp(0.15, 0.45);
+    }
+  }
+  final swH = glass.height * swFrac;
+  final eachH = glassCount > 0 ? (glass.height - swH) / glassCount : 0.0;
+
+  var y = glass.top;
+  for (final i in order) {
+    final h = secs[i].type == 'Сэндвич' ? swH : eachH;
+    rects[i] = Rect.fromLTWH(glass.left, y, glass.width, h);
+    y += h;
+  }
+  return rects;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -266,7 +401,8 @@ class _WindowSchemePainter extends CustomPainter {
   static const _outline = Color(0xFF5A6B7C);
   static const _line = Color(0xFF2C3E50);
   static const _dimColor = Color(0xFF6B7A8C);
-  static const _wall = Color(0xFFE9EDF2);
+  static const _wall = Color(0xFFEDF1F5);
+  static const _wallHatch = Color(0xFFC9D2DB);
   static const _panel = Color(0xFFD5DBE2);
   static const _panelHatch = Color(0xFFB4BDC7);
   static const _net = Color(0xFF2E7D32);
@@ -274,111 +410,188 @@ class _WindowSchemePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final layout = schemeLayout(size, columns, showDimensions);
-    final left = 6.0;
-    final top = 6.0;
-    final right = size.width - 6.0 - (showDimensions ? 20.0 : 0.0);
-    final bottom = size.height - 6.0 - (showDimensions ? 20.0 : 0.0);
-    final w = right - left;
-    final h = bottom - top;
-    if (w <= 6 || h <= 6) return;
-
-    final frameW = (w < h ? w : h) * 0.055;
-    final sashW = frameW * 0.8;
-
-    // ── Проём в стене
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(left - 3, top - 3, w + 6, h + 6),
-        const Radius.circular(3),
-      ),
-      Paint()..color = _wall,
+    final layout = schemeLayout(
+      size,
+      columns,
+      showDimensions,
+      widthMm: widthMm,
+      heightMm: heightMm,
     );
+    final product = layout.product;
+    if (product.width <= 4 || product.height <= 4) return;
 
-    // ── Рама (объёмный градиент)
-    final frameRect = Rect.fromLTWH(left, top, w, h);
-    final frameRRect = RRect.fromRectAndRadius(
-      frameRect,
-      Radius.circular(frameW * 0.6),
-    );
-    canvas.drawRRect(
-      frameRRect,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_frameLight, _frameMid, _frameDark],
-          stops: [0.0, 0.62, 1.0],
-        ).createShader(frameRect),
-    );
-    canvas.drawRRect(
-      frameRRect,
+    final frameW = layout.frameW;
+    final sashW = frameW * 0.55;
+    final mullW = frameW * 0.85;
+
+    final frameGrad = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [_frameLight, _frameMid, _frameDark],
+      stops: [0.0, 0.62, 1.0],
+    ).createShader(product);
+
+    // ── Простенок под короткими колонками (балконный блок)
+    for (final c in layout.cols) {
+      final below = Rect.fromLTWH(
+        c.rect.left,
+        c.rect.bottom,
+        c.rect.width,
+        product.bottom - c.rect.bottom,
+      );
+      if (below.height > 0.5) _paintWall(canvas, below);
+    }
+
+    // ── Силуэт изделия
+    if (layout.cols.isEmpty) {
+      final rr = RRect.fromRectAndRadius(product, Radius.circular(frameW * 0.6));
+      canvas.drawRRect(rr, Paint()..shader = frameGrad);
+      canvas.drawRRect(
+        rr,
+        Paint()
+          ..color = _outline
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+      _paintGlass(canvas, product.deflate(frameW));
+      _paintDimensions(canvas, layout);
+      return;
+    }
+
+    final silhouette = _silhouettePath(layout);
+    canvas.drawPath(silhouette, Paint()..shader = frameGrad);
+    canvas.drawPath(
+      silhouette,
       Paint()
         ..color = _outline
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2,
     );
 
-    // ── Стекло по всему проёму
-    final glassRect = layout.glass;
-    if (glassRect.width > 1 && glassRect.height > 1) {
-      _paintGlass(canvas, glassRect);
+    // ── Стекло по колонкам (база, чтобы не было разрывов)
+    for (final c in layout.cols) {
+      if (c.glass.width > 1 && c.glass.height > 1) _paintGlass(canvas, c.glass);
     }
 
-    if (columns.isEmpty) {
-      _paintDimensions(canvas, left, top, w, h);
-      return;
+    // ── Импосты между колонками (только на общей высоте)
+    for (var i = 0; i < layout.cols.length - 1; i++) {
+      final a = layout.cols[i];
+      final b = layout.cols[i + 1];
+      final bot = product.top +
+          (a.rect.height < b.rect.height ? a.rect.height : b.rect.height);
+      _paintMullionV(canvas, a.rect.right, product.top, bot, mullW);
     }
 
-    // ── Панели под короткими колонками + импосты
-    var x = glassRect.left;
-    for (var i = 0; i < columns.length; i++) {
-      final col = columns[i];
-      final cw = layout.colWidths[i];
-      var ratio = col.heightRatio;
-      if (ratio <= 0) ratio = 1.0;
-      if (ratio > 1.0) ratio = 1.0;
-      final colH = glassRect.height * ratio;
-
-      if (colH < glassRect.height - 0.5) {
-        _paintPanel(
+    // ── Импосты между секциями внутри колонки
+    for (final c in layout.cols) {
+      for (var s = 0; s < c.secRects.length - 1; s++) {
+        _paintMullionH(
           canvas,
-          Rect.fromLTWH(x, glassRect.top + colH, cw, glassRect.height - colH),
+          c.glass.left,
+          c.glass.right,
+          c.secRects[s].bottom,
+          mullW * 0.9,
         );
       }
-
-      if (i < columns.length - 1) {
-        final ix = x + cw;
-        canvas.drawLine(
-          Offset(ix, glassRect.top),
-          Offset(ix, glassRect.bottom),
-          Paint()
-            ..color = _frameMid
-            ..strokeWidth = frameW * 0.9,
-        );
-        canvas.drawLine(
-          Offset(ix, glassRect.top),
-          Offset(ix, glassRect.bottom),
-          Paint()
-            ..color = _outline
-            ..strokeWidth = 0.7,
-        );
-      }
-
-      x += cw;
     }
 
-    // ── Створки
-    for (final s in layout.sashes) {
-      final col = columns[s.col];
-      final sec = s.sec < col.sections.length ? col.sections[s.sec] : null;
-      _paintSash(canvas, s.rect, sec, sashW);
+    // ── Секции
+    for (final c in layout.cols) {
+      final col = columns[c.index];
+      final secs = col.sections.isEmpty ? <Section>[Section()] : col.sections;
+      for (var s = 0; s < c.secRects.length; s++) {
+        final sec = s < secs.length ? secs[s] : null;
+        _paintSection(canvas, c.secRects[s], sec, sashW, c.hingeLeft);
+      }
     }
 
     // ── Вспышка отклика на тап
     _paintFlash(canvas);
 
-    _paintDimensions(canvas, left, top, w, h);
+    _paintDimensions(canvas, layout);
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Силуэт изделия (объединение колонок разной высоты)
+  // ─────────────────────────────────────────────────────────
+  Path _silhouettePath(_SchemeLayout layout) {
+    final path = Path();
+    final cols = layout.cols;
+    if (cols.isEmpty) return path;
+    final top = layout.product.top;
+    path.moveTo(cols.first.rect.left, top);
+    path.lineTo(cols.last.rect.right, top);
+    for (var i = cols.length - 1; i >= 0; i--) {
+      path.lineTo(cols[i].rect.right, cols[i].rect.bottom);
+      path.lineTo(cols[i].rect.left, cols[i].rect.bottom);
+    }
+    path.close();
+    return path;
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Простенок (стена под короткой колонкой балконного блока)
+  // ─────────────────────────────────────────────────────────
+  void _paintWall(Canvas canvas, Rect rect) {
+    if (rect.width <= 1 || rect.height <= 1) return;
+    canvas.drawRect(rect, Paint()..color = _wall);
+    canvas.save();
+    canvas.clipRect(rect);
+    final p = Paint()
+      ..color = _wallHatch
+      ..strokeWidth = 0.9;
+    for (var x = rect.left - rect.height; x < rect.right; x += 8) {
+      canvas.drawLine(
+        Offset(x, rect.bottom),
+        Offset(x + rect.height, rect.top),
+        p,
+      );
+    }
+    canvas.restore();
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..color = _frameDark
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Импосты
+  // ─────────────────────────────────────────────────────────
+  void _paintMullionV(
+    Canvas canvas,
+    double x,
+    double top,
+    double bottom,
+    double w,
+  ) {
+    if (bottom - top <= 2 || w <= 0.5) return;
+    final r = Rect.fromLTRB(x - w / 2, top, x + w / 2, bottom);
+    canvas.drawRect(r, Paint()..color = _frameMid);
+    final p = Paint()
+      ..color = _outline
+      ..strokeWidth = 0.7;
+    canvas.drawLine(Offset(r.left, top), Offset(r.left, bottom), p);
+    canvas.drawLine(Offset(r.right, top), Offset(r.right, bottom), p);
+  }
+
+  void _paintMullionH(
+    Canvas canvas,
+    double left,
+    double right,
+    double y,
+    double w,
+  ) {
+    if (right - left <= 2 || w <= 0.5) return;
+    final r = Rect.fromLTRB(left, y - w / 2, right, y + w / 2);
+    canvas.drawRect(r, Paint()..color = _frameMid);
+    final p = Paint()
+      ..color = _outline
+      ..strokeWidth = 0.7;
+    canvas.drawLine(Offset(left, r.top), Offset(right, r.top), p);
+    canvas.drawLine(Offset(left, r.bottom), Offset(right, r.bottom), p);
   }
 
   // ─────────────────────────────────────────────────────────
@@ -393,9 +606,7 @@ class _WindowSchemePainter extends CustomPainter {
 
     final rr = RRect.fromRectAndRadius(r.deflate(1.5), const Radius.circular(4));
 
-    // Подсветка заливкой
     canvas.drawRRect(rr, Paint()..color = _accent.withOpacity(0.22 * k));
-    // Контур
     canvas.drawRRect(
       rr,
       Paint()
@@ -404,7 +615,6 @@ class _WindowSchemePainter extends CustomPainter {
         ..strokeWidth = 2.6,
     );
 
-    // Подпись нового состояния
     final label = flashLabel;
     if (label != null && r.width > 40 && r.height > 24) {
       _paintLabel(
@@ -452,73 +662,99 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────
-  // Створка / секция
+  // Секция (створка / глухая / сэндвич)
   // ─────────────────────────────────────────────────────────
-  void _paintSash(Canvas canvas, Rect rect, Section? sec, double sashW) {
+  void _paintSection(
+    Canvas canvas,
+    Rect rect,
+    Section? sec,
+    double sashW,
+    bool hingeLeft,
+  ) {
     final type = sec?.type ?? 'Глухая';
-    final r = rect.deflate(1.2);
+    final r = rect.deflate(0.6);
     if (r.width <= 3 || r.height <= 3) return;
 
-    // Сэндвич-панель (глухая часть балконного блока)
+    // ── Сэндвич-панель (нижняя глухая часть балконной двери)
     if (type == 'Сэндвич') {
       _paintPanel(canvas, r);
-      _paintLabel(canvas, 'S', r.center, 13, _line);
+      if (r.width > 16 && r.height > 12) {
+        _paintLabel(canvas, 'S', r.center, 12, _line);
+      }
       if (sec?.hasMosquito == true) _paintNet(canvas, r);
       return;
     }
 
-    // Рамка створки
-    final sashRRect = RRect.fromRectAndRadius(
-      r.deflate(sashW * 0.5),
-      Radius.circular(sashW * 0.7),
-    );
-    canvas.drawRRect(sashRRect, Paint()..color = _frameLight);
-    canvas.drawRRect(
-      sashRRect,
-      Paint()
-        ..color = _outline
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.9,
-    );
+    final openable = type == 'Поворотная' ||
+        type == 'Откидная' ||
+        type == 'Поворотно-откидная';
 
-    // Стеклопакет
-    final inner = r.deflate(sashW);
-    _paintGlass(canvas, inner);
-
-    // Символ открывания
-    _paintSymbol(canvas, inner, type);
-
-    // Ручка
-    _paintHandle(canvas, inner, type);
-
-    // Москитная сетка
-    if (sec?.hasMosquito == true) _paintNet(canvas, inner);
+    if (openable) {
+      // Рамка створки
+      final rr = RRect.fromRectAndRadius(r, Radius.circular(sashW * 0.8));
+      canvas.drawRRect(rr, Paint()..color = _frameLight);
+      canvas.drawRRect(
+        rr,
+        Paint()
+          ..color = _outline
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.9,
+      );
+      final inner = r.deflate(sashW);
+      _paintGlass(canvas, inner);
+      _paintSymbol(canvas, inner, type, hingeLeft);
+      _paintHandle(canvas, inner, type, hingeLeft);
+      if (sec?.hasMosquito == true) _paintNet(canvas, inner);
+    } else {
+      // Глухая — только штапик по краю стекла
+      final inner = r.deflate(sashW * 0.5);
+      _paintGlass(canvas, inner);
+      canvas.drawRect(
+        inner,
+        Paint()
+          ..color = _frameDark
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.9,
+      );
+      if (sec?.hasMosquito == true) _paintNet(canvas, inner);
+    }
   }
 
   // ─────────────────────────────────────────────────────────
-  // Символы открывания (по ГОСТ-логике: вершина — сторона петель)
+  // Символы открывания
+  // Вершина треугольника смотрит на ПЕТЛИ (hingeLeft),
+  // ручка — с противоположной стороны.
   // ─────────────────────────────────────────────────────────
-  void _paintSymbol(Canvas canvas, Rect rect, String type) {
-    if (rect.width <= 6 || rect.height <= 6) return;
-    final l = rect.left + rect.width * 0.14;
-    final r = rect.right - rect.width * 0.14;
-    final t = rect.top + rect.height * 0.10;
-    final b = rect.bottom - rect.height * 0.10;
+  void _paintSymbol(Canvas canvas, Rect rect, String type, bool hingeLeft) {
+    if (rect.width <= 8 || rect.height <= 8) return;
+    final t = rect.top + rect.height * 0.12;
+    final b = rect.bottom - rect.height * 0.12;
     final cx = rect.center.dx;
     final cy = rect.center.dy;
+    final inset = rect.width * 0.16;
+    final l = rect.left + inset;
+    final r = rect.right - inset;
 
     switch (type) {
       case 'Глухая':
         // фиксированное остекление — символа нет
         break;
       case 'Поворотная':
-        _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
+        if (hingeLeft) {
+          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
+        } else {
+          _triangle(canvas, Offset(r, cy), Offset(l, t), Offset(l, b));
+        }
         break;
       case 'Откидная':
         _triangle(canvas, Offset(cx, t), Offset(l, b), Offset(r, b));
         break;
       case 'Поворотно-откидная':
-        _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
+        if (hingeLeft) {
+          _triangle(canvas, Offset(l, cy), Offset(r, t), Offset(r, b));
+        } else {
+          _triangle(canvas, Offset(r, cy), Offset(l, t), Offset(l, b));
+        }
         _triangle(canvas, Offset(cx, t), Offset(l, b), Offset(r, b));
         break;
       default:
@@ -543,23 +779,28 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────
-  // Ручка
+  // Ручка — с противоположной от петель стороны
   // ─────────────────────────────────────────────────────────
-  void _paintHandle(Canvas canvas, Rect inner, String type) {
+  void _paintHandle(
+    Canvas canvas,
+    Rect inner,
+    String type,
+    bool hingeLeft,
+  ) {
     if (!showHandles) return;
     if (type == 'Глухая' || type == 'Сэндвич') return;
-    if (inner.width <= 8 || inner.height <= 12) return;
+    if (inner.width <= 10 || inner.height <= 16) return;
 
-    final hw = (inner.width * 0.07).clamp(3.0, 7.0);
-    final hh = (inner.height * 0.11).clamp(9.0, 22.0);
+    final hw = (inner.width * 0.075).clamp(3.0, 7.0);
+    final hh = (inner.height * 0.12).clamp(10.0, 24.0);
 
     double cx;
     double cy;
     if (type == 'Откидная') {
       cx = inner.center.dx;
-      cy = inner.bottom - hh * 0.55;
+      cy = inner.bottom - hh * 0.6;
     } else {
-      cx = inner.right - hw * 1.1;
+      cx = hingeLeft ? inner.right - hw * 1.2 : inner.left + hw * 1.2;
       cy = inner.center.dy;
     }
 
@@ -581,6 +822,7 @@ class _WindowSchemePainter extends CustomPainter {
   // Москитная сетка
   // ─────────────────────────────────────────────────────────
   void _paintNet(Canvas canvas, Rect rect) {
+    if (rect.width <= 2 || rect.height <= 2) return;
     canvas.save();
     canvas.clipRect(rect);
     final p = Paint()
@@ -604,7 +846,7 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────
-  // Панель (пустота / сэндвич)
+  // Панель (сэндвич)
   // ─────────────────────────────────────────────────────────
   void _paintPanel(Canvas canvas, Rect rect) {
     if (rect.width <= 1 || rect.height <= 1) return;
@@ -632,44 +874,116 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────
-  // Размеры
+  // Размеры: снизу — общая ширина, справа — общая высота,
+  // сверху — ширины колонок, слева — высоты секций
   // ─────────────────────────────────────────────────────────
-  void _paintDimensions(
-    Canvas canvas,
-    double left,
-    double top,
-    double w,
-    double h,
-  ) {
+  void _paintDimensions(Canvas canvas, _SchemeLayout layout) {
     if (!showDimensions) return;
+    final product = layout.product;
     final p = Paint()
       ..color = _dimColor
       ..strokeWidth = 1.0;
 
-    // Ширина — снизу
-    final y = top + h + 10;
-    canvas.drawLine(Offset(left, y), Offset(left + w, y), p);
-    canvas.drawLine(Offset(left, y - 4), Offset(left, y + 4), p);
-    canvas.drawLine(Offset(left + w, y - 4), Offset(left + w, y + 4), p);
-
     final sumMm = columns.fold<double>(0, (s, c) => s + c.widthMm);
-    final wValue = widthMm ?? (sumMm > 0 ? sumMm : null);
-    if (wValue != null && wValue > 0) {
-      _paintLabel(canvas, '${wValue.toInt()} мм', Offset(left + w / 2, y + 9), 10);
+    final wVal = widthMm ?? (sumMm > 0 ? sumMm : null);
+
+    // ── Общая ширина (снизу)
+    final yb = product.bottom + 9;
+    canvas.drawLine(Offset(product.left, yb), Offset(product.right, yb), p);
+    canvas.drawLine(Offset(product.left, yb - 4), Offset(product.left, yb + 4), p);
+    canvas.drawLine(
+      Offset(product.right, yb - 4),
+      Offset(product.right, yb + 4),
+      p,
+    );
+    if (wVal != null && wVal > 0) {
+      _paintLabel(
+        canvas,
+        '${wVal.toInt()}',
+        Offset(product.center.dx, yb + 8),
+        10,
+      );
     }
 
-    // Высота — справа (повёрнуто)
+    // ── Общая высота (справа)
     if (heightMm != null && heightMm! > 0) {
-      final x = left + w + 10;
-      canvas.drawLine(Offset(x, top), Offset(x, top + h), p);
-      canvas.drawLine(Offset(x - 4, top), Offset(x + 4, top), p);
-      canvas.drawLine(Offset(x - 4, top + h), Offset(x + 4, top + h), p);
+      final xr = product.right + 9;
+      canvas.drawLine(Offset(xr, product.top), Offset(xr, product.bottom), p);
+      canvas.drawLine(Offset(xr - 4, product.top), Offset(xr + 4, product.top), p);
+      canvas.drawLine(
+        Offset(xr - 4, product.bottom),
+        Offset(xr + 4, product.bottom),
+        p,
+      );
       canvas.save();
-      canvas.translate(x, top + h / 2);
+      canvas.translate(xr + 8, product.center.dy);
       canvas.rotate(-1.5707963);
       _paintLabel(canvas, '${heightMm!.toInt()}', Offset.zero, 10);
       canvas.restore();
     }
+
+    // ── Цепочка ширин колонок (сверху)
+    if (layout.cols.length > 1) {
+      final yt = product.top - 9;
+      canvas.drawLine(Offset(product.left, yt), Offset(product.right, yt), p);
+      for (final c in layout.cols) {
+        canvas.drawLine(Offset(c.rect.left, yt - 4), Offset(c.rect.left, yt + 4), p);
+        final mm = _colMm(c.index, wVal);
+        if (mm != null && mm > 0 && c.rect.width > 26) {
+          _paintLabel(canvas, '${mm.toInt()}', Offset(c.rect.center.dx, yt - 8), 9);
+        }
+      }
+      canvas.drawLine(
+        Offset(product.right, yt - 4),
+        Offset(product.right, yt + 4),
+        p,
+      );
+    }
+
+    // ── Цепочка высот секций (слева, по самой высокой колонке)
+    if (heightMm != null && heightMm! > 0 && layout.cols.isNotEmpty) {
+      _ColBox? tall;
+      for (final c in layout.cols) {
+        if (tall == null || c.rect.height > tall.rect.height) tall = c;
+      }
+      if (tall != null && tall.secRects.length > 1) {
+        final xl = product.left - 9;
+        canvas.drawLine(Offset(xl, product.top), Offset(xl, product.bottom), p);
+        for (final s in tall.secRects) {
+          canvas.drawLine(Offset(xl - 4, s.top), Offset(xl + 4, s.top), p);
+          if (s.height > 22) {
+            final mm = heightMm! * (s.height / product.height);
+            canvas.save();
+            canvas.translate(xl - 8, s.center.dy);
+            canvas.rotate(-1.5707963);
+            _paintLabel(canvas, '${mm.toInt()}', Offset.zero, 9);
+            canvas.restore();
+          }
+        }
+        canvas.drawLine(
+          Offset(xl - 4, product.bottom),
+          Offset(xl + 4, product.bottom),
+          p,
+        );
+      }
+    }
+  }
+
+  /// Ширина колонки в мм (с учётом колонок без мм).
+  double? _colMm(int i, double? total) {
+    if (total == null || total <= 0) return null;
+    final known = columns.where((c) => c.widthMm > 0).toList();
+    if (known.length == columns.length) return columns[i].widthMm;
+    if (known.isNotEmpty) {
+      final avg = known.fold<double>(0, (s, c) => s + c.widthMm) / known.length;
+      final t = columns.fold<double>(
+        0,
+        (s, c) => s + (c.widthMm > 0 ? c.widthMm : avg),
+      );
+      final v = columns[i].widthMm > 0 ? columns[i].widthMm : avg;
+      return total * (v / t);
+    }
+    return total / columns.length;
   }
 
   void _paintLabel(
