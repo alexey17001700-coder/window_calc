@@ -3062,7 +3062,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               child: TextFormField(initialValue: it.otmazkaLengthMm.toStringAsFixed(0), decoration: const InputDecoration(labelText: 'Длина, мм'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.otmazkaLengthMm = double.tryParse(v) ?? 0)),
             ),
             const Divider(),
-            const Text('Сетки', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.bronze, letterSpacing: 0.2)),
+            const Text('СЕТКИ', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppTheme.bronze, letterSpacing: 1.6)),
             CheckboxListTile(value: it.hasMosquito, onChanged: (v) => setState(() => it.hasMosquito = v!), title: const Text('Москитная'), dense: true),
             CheckboxListTile(value: it.hasAnticat, onChanged: (v) => setState(() => it.hasAnticat = v!), title: const Text('Антикошка'), dense: true),
             CheckboxListTile(value: it.hasAntidust, onChanged: (v) => setState(() => it.hasAntidust = v!), title: const Text('Антипыль'), dense: true),
