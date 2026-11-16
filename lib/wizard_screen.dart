@@ -48,7 +48,7 @@ class WizardHeader extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: Colors.white.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.arrow_back_rounded,
