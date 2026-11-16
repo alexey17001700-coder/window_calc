@@ -169,40 +169,111 @@ class _SplashScreenState extends State<SplashScreen> {
     final showUpdateCard = _hasUpdate && !_updateDismissed;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Запуск'),
-        actions: [
-          if (_done)
-            IconButton(
-              icon: const Icon(Icons.description),
-              tooltip: 'Отчёт',
-              onPressed: _showReport,
-            ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (!_done)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 16),
-                child: LinearProgressIndicator(),
+      backgroundColor: const Color(0xFF0F1B2D),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFFC9A227), Color(0xFFE0C25A)]),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                            color: const Color(0xFFC9A227).withOpacity(0.35),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8)),
+                      ],
+                    ),
+                    child: const Icon(Icons.window_rounded,
+                        color: Color(0xFF0F1B2D), size: 26),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ЗАМЕРЩИК ОКОН',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.2,
+                                color: Colors.white)),
+                        SizedBox(height: 3),
+                        Text('ALMAS · ПОДГОТОВКА К РАБОТЕ',
+                            style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.4,
+                                color: Color(0xFFC9A227))),
+                      ],
+                    ),
+                  ),
+                  if (_done)
+                    IconButton(
+                      icon: const Icon(Icons.description_outlined,
+                          color: Colors.white54, size: 20),
+                      tooltip: 'Отчёт',
+                      onPressed: _showReport,
+                    ),
+                ],
               ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _log.length,
-                itemBuilder: (_, i) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    _log[i],
-                    style: const TextStyle(
-                        fontFamily: 'monospace', fontSize: 13),
+              const SizedBox(height: 22),
+              if (!_done)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: const LinearProgressIndicator(
+                      minHeight: 4,
+                      backgroundColor: Colors.white12,
+                      valueColor:
+                          AlwaysStoppedAnimation(Color(0xFFC9A227))),
+                )
+              else
+                Row(children: [
+                  const Icon(Icons.check_circle,
+                      color: Color(0xFF4ADE80), size: 16),
+                  const SizedBox(width: 6),
+                  const Text('СИСТЕМА ГОТОВА',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.4,
+                          color: Color(0xFF4ADE80))),
+                ]),
+              const SizedBox(height: 18),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: ListView.builder(
+                    itemCount: _log.length,
+                    itemBuilder: (_, i) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3),
+                      child: Text(
+                        _log[i],
+                        style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            color: Colors.white60),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
             if (showUpdateCard)
               Card(
                 color: Colors.green.shade50,
