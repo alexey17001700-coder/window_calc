@@ -672,8 +672,6 @@ class Viewer3D extends StatefulWidget {
 class _Viewer3DState extends State<Viewer3D>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
-  double _dragYaw = 0;
-  double _dragPitch = 0;
 
   @override
   void initState() {
