@@ -750,20 +750,30 @@ class _PremiumFieldState extends State<_PremiumField> {
             controller: widget.controller,
             focusNode: _fn,
             keyboardType: widget.kb,
+            cursorColor: AppColors.gold,
+            cursorWidth: 1.6,
             style: const TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
             decoration: InputDecoration(
+              // ВАЖНО: гасим глобальную заливку темы (в светлой теме она белая
+              // и «съедала» белый текст). Фон даёт сам контейнер — тёмный.
+              filled: false,
+              fillColor: Colors.transparent,
               hintText: widget.hint,
               hintStyle: const TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF44586F),
+                color: Color(0xFF7E93AC),
               ),
               prefixIcon: Icon(widget.icon, size: 17, color: AppColors.gold),
               border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(vertical: 15),
             ),
