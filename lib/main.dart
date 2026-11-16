@@ -1916,7 +1916,6 @@ class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Сохранённые замеры'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
             icon: Icon(_sortDesc ? Icons.arrow_downward : Icons.arrow_upward),
