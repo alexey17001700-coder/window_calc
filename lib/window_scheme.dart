@@ -740,6 +740,139 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────────────
+  // 4б. СИМВОЛЫ ОТКРЫВАНИЯ, ПЕТЛИ И РУЧКИ
+  //     • вершина (острие) треугольника смотрит НА РУЧКУ;
+  //     • основание (два угла) — В СТОРОНУ ПЕТЕЛЬ;
+  //     • у створки-полотна (дверь балконного блока) символ идёт
+  //       на ВСЮ ВЫСОТУ: от верха стеклопакета до низа сэндвича;
+  //     • петли показаны явно (3 метки по высоте).
+  // ─────────────────────────────────────────────────────────────────
+  void _paintOpenSymbols(Canvas canvas, _SchemeLayout L) {
+    for (final c in L.cols) {
+      final col = columns[c.index];
+      final secs = col.sections.isEmpty ? <Section>[Section()] : col.sections;
+      final isLeaf = secs.any((s) => s.type == 'Сэндвич');
+
+      if (isLeaf) {
+        final type = _leafOpenType(secs);
+        if (type == null) continue;
+        _paintTurnSymbol(canvas, c.glass, type, c.hingeLeft);
+        _paintFittings(canvas, c.glass, type, c.hingeLeft);
+        continue;
+      }
+
+      for (var s = 0; s < c.secRects.length; s++) {
+        final sec = s < secs.length ? secs[s] : null;
+        final type = sec?.type ?? 'Глухая';
+        if (type == 'Сэндвич' || type == 'Глухая') continue;
+        _paintTurnSymbol(canvas, c.secRects[s], type, c.hingeLeft);
+        _paintFittings(canvas, c.secRects[s], type, c.hingeLeft);
+      }
+    }
+  }
+
+  /// Тип открывания створки-полотна (двери): первая не-сэндвич секция.
+  String? _leafOpenType(List<Section> secs) {
+    for (final s in secs) {
+      if (s.type != 'Сэндвич') return s.type;
+    }
+    return null;
+  }
+
+  /// Треугольник(и) открывания внутри [rect].
+  void _paintTurnSymbol(
+    Canvas canvas,
+    Rect rect,
+    String type,
+    bool hingeLeft,
+  ) {
+    final r = rect.deflate(2.0);
+    if (r.width < 14 || r.height < 14) return;
+
+    final hingeX = hingeLeft ? r.left : r.right;
+    final handleX = hingeLeft ? r.right : r.left;
+
+    if (type == 'Поворотная') {
+      _triangle(
+        canvas,
+        Offset(handleX, r.center.dy),
+        Offset(hingeX, r.top + 2),
+        Offset(hingeX, r.bottom - 2),
+      );
+    } else if (type == 'Откидная') {
+      _triangle(
+        canvas,
+        Offset(r.center.dx, r.top + 2),
+        Offset(r.left + 2, r.bottom - 2),
+        Offset(r.right - 2, r.bottom - 2),
+      );
+    } else if (type == 'Поворотно-откидная') {
+      _triangle(
+        canvas,
+        Offset(handleX, r.center.dy),
+        Offset(hingeX, r.top + 2),
+        Offset(hingeX, r.bottom - 2),
+      );
+      final top = Rect.fromLTRB(r.left, r.top, r.right, r.center.dy - 2);
+      _triangle(
+        canvas,
+        Offset(top.center.dx, top.top + 2),
+        Offset(top.left + 2, top.bottom - 2),
+        Offset(top.right - 2, top.bottom - 2),
+      );
+    }
+  }
+
+  /// Треугольник открывания: тонкий контур + лёгкая заливка.
+  void _triangle(Canvas canvas, Offset a, Offset b, Offset c) {
+    final path = Path()
+      ..moveTo(a.dx, a.dy)
+      ..lineTo(b.dx, b.dy)
+      ..lineTo(c.dx, c.dy)
+      ..close();
+    canvas.drawPath(path, Paint()..color = _accent.withOpacity(0.07));
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = _accent.withOpacity(0.85)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+  }
+
+  /// Петли (на стороне петель) и ручка (на противоположной стороне).
+  void _paintFittings(
+    Canvas canvas,
+    Rect rect,
+    String type,
+    bool hingeLeft,
+  ) {
+    final r = rect.deflate(1.5);
+    if (r.width < 10 || r.height < 20) return;
+
+    // ── Петли: 3 метки по высоте
+    final hx = hingeLeft ? r.left + 1.6 : r.right - 1.6;
+    for (final f in const [0.13, 0.50, 0.87]) {
+      final y = r.top + r.height * f;
+      final hr = Rect.fromCenter(center: Offset(hx, y), width: 3.2, height: 7.0);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(hr, const Radius.circular(1.2)),
+        Paint()..color = _hinge,
+      );
+    }
+
+    // ── Ручка: с противоположной стороны от петель
+    if (!showHandles) return;
+    final wx = hingeLeft ? r.right - 2.6 : r.left + 2.6;
+    final wy = type == 'Откидная' ? r.bottom - 7.0 : r.center.dy;
+    final wr = Rect.fromCenter(center: Offset(wx, wy), width: 3.4, height: 11.0);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(wr, const Radius.circular(1.6)),
+      Paint()..color = _handle,
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
   // Стеклопакет
   // ─────────────────────────────────────────────────────────────────
   void _paintGlass(Canvas canvas, Rect rect) {
