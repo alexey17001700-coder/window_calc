@@ -2828,7 +2828,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             ..._columnFields(index),
 
             const Divider(),
-            const Text('Отделка', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.bronze, letterSpacing: 0.2)),
+            const Text('ОТДЕЛКА', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppTheme.bronze, letterSpacing: 1.6)),
             const SizedBox(height: 8),
 
             CheckboxListTile(value: it.hasSlopes, onChanged: (v) => setState(() => it.hasSlopes = v!), title: const Text('Откосы'), dense: true),
