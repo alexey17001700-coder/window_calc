@@ -2664,8 +2664,10 @@ class _ResultScreenState extends State<ResultScreen> {
                               ),
                               child: WindowScheme(
                                 columns: it.columns,
-                                width: 180,
-                                height: 210,
+                                width: 190,
+                                height: 220,
+                                widthMm: it.widthMm,
+                                heightMm: it.heightMm,
                               ),
                             ),
                           ),
