@@ -599,13 +599,13 @@ class _ScenePainter extends CustomPainter {
         canvas.drawPath(
           path,
           Paint()
-            ..color = _shade(pr.color, it.k).withOpacity(pr.alpha)
+            ..color = _shade(pr.color, it.k).withOpacity(pr.alpha * it.fog)
             ..style = PaintingStyle.fill,
         );
         canvas.drawPath(
           path,
           Paint()
-            ..color = const Color(0xFFCFEBFA).withOpacity(0.55)
+            ..color = const Color(0xFFCFEBFA).withOpacity(0.55 * it.fog)
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.0,
         );
@@ -613,7 +613,7 @@ class _ScenePainter extends CustomPainter {
         canvas.drawPath(
           path,
           Paint()
-            ..color = _shade(pr.color, it.k).withOpacity(pr.alpha)
+            ..color = _shade(pr.color, it.k).withOpacity(pr.alpha * it.fog)
             ..style = PaintingStyle.fill,
         );
       } else {
