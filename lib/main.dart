@@ -3006,17 +3006,29 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               CheckboxListTile(value: it.separateDemontage, onChanged: (v) => setState(() => it.separateDemontage = v!), title: const Text('Демонтаж отдельно'), dense: true),
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.55),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                color: AppTheme.navy.withOpacity(0.05),
+                border: Border.all(color: AppTheme.gold.withOpacity(0.28)),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Стоимость:', style: TextStyle(fontWeight: FontWeight.w500)),
-                  Text('${price.toStringAsFixed(0)} ₽', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Icon(Icons.payments_outlined, size: 18, color: AppTheme.bronze),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Стоимость изделия',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${price.toStringAsFixed(0)} ₽',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17, letterSpacing: -0.3),
+                  ),
                 ],
               ),
             ),
