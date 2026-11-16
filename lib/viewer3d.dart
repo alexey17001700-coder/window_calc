@@ -554,7 +554,9 @@ class _ScenePainter extends CustomPainter {
         final n = _V3.cross(rp[1] - rp[0], rp[2] - rp[0]).unit;
         k = 0.46 + 0.54 * _V3.dot(n, light).abs();
       }
-      items.add(_Draw(rp.map(proj).toList(), pr, depth, k));
+      // воздушная перспектива: дальние объекты приглушаются
+      final fog = (1.0 - (depth - 3.6) * 0.085).clamp(0.42, 1.0);
+      items.add(_Draw(rp.map(proj).toList(), pr, depth, k, fog));
     }
 
     // дальние — первыми: инструмент за окном уходит за раму
