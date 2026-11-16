@@ -2669,6 +2669,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                 height: 220,
                                 widthMm: it.widthMm,
                                 heightMm: it.heightMm,
+                                onChanged: () => setState(() {}),
                               ),
                             ),
                           ),
