@@ -1543,6 +1543,7 @@ class MainMenuScreen extends StatelessWidget {
                   context,
                   icon: Icons.system_update_alt_rounded,
                   accent: const Color(0xFF7A6BD6),
+                  index: 4,
                   title: 'Проверить обновление',
                   subtitle: 'Диагностика и установка новой версии',
                   onTap: () => _showUpdateReport(context),
