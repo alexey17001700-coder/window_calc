@@ -367,6 +367,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: screenH * 0.50),
           child: Container(
+            key: _cardKey,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
