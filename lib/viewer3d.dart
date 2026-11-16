@@ -690,19 +690,19 @@ class _Viewer3DState extends State<Viewer3D>
       animation: _c,
       builder: (_, __) {
         final t = _c.value * math.pi * 2;
-        final prims = <_Prim>[];
-        final win = <_Prim>[];
-        _buildWindow(win);
-        _scalePrims(win, _winScale);
-        prims.addAll(win);
+        // Копируем ссылки на готовые примитивы окна (дёшево) и достраиваем
+        // только движущиеся инструменты.
+        final prims = List<_Prim>.of(_windowPrims);
         _buildTools(prims, t);
-        return CustomPaint(
-          painter: _ScenePainter(
-            t * 0.55 + math.sin(t * 1.7) * 0.18,
-            0.17 + math.sin(t * 0.9) * 0.05,
-            prims,
+        return RepaintBoundary(
+          child: CustomPaint(
+            painter: _ScenePainter(
+              t * 0.55 + math.sin(t * 1.7) * 0.18,
+              0.17 + math.sin(t * 0.9) * 0.05,
+              prims,
+            ),
+            size: Size.infinite,
           ),
-          size: Size.infinite,
         );
       },
     );
