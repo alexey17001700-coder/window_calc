@@ -1063,6 +1063,175 @@ class ServiceStorage {
   }
 }
 // ═══════════════════════════════════════════════════════════
+// ПРЕМИАЛЬНАЯ ТЕМА
+// ═══════════════════════════════════════════════════════════
+
+class AppTheme {
+  static const gold = Color(0xFFC9A227);
+  static const goldLight = Color(0xFFE8C766);
+  static const bronze = Color(0xFF9C7A3C);
+  static const navy = Color(0xFF0E1626);
+  static const surfaceDark = Color(0xFF141A26);
+  static const ink = Color(0xFF1A1F2B);
+
+  static ThemeData light() {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: navy,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: navy,
+      onPrimary: Colors.white,
+      secondary: gold,
+      onSecondary: const Color(0xFF20180A),
+      tertiary: bronze,
+      surface: Colors.white,
+      onSurface: ink,
+      surfaceContainerHighest: const Color(0xFFEDF0F6),
+      outlineVariant: const Color(0xFFDCE1EA),
+    );
+    return _base(scheme, Brightness.light);
+  }
+
+  static ThemeData dark() {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: navy,
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: goldLight,
+      onPrimary: const Color(0xFF20180A),
+      secondary: gold,
+      onSecondary: const Color(0xFF20180A),
+      tertiary: bronze,
+      surface: surfaceDark,
+      onSurface: const Color(0xFFE8ECF4),
+      surfaceContainerHighest: const Color(0xFF1E2637),
+      outlineVariant: const Color(0xFF2A3346),
+    );
+    return _base(scheme, Brightness.dark);
+  }
+
+  static ThemeData _base(ColorScheme scheme, Brightness b) {
+    final isDark = b == Brightness.dark;
+    final onSurface = scheme.onSurface;
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      scaffoldBackgroundColor:
+          isDark ? const Color(0xFF0B1019) : const Color(0xFFF2F4F9),
+      fontFamily: 'Roboto',
+      textTheme: TextTheme(
+        displaySmall: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.6, color: onSurface),
+        headlineSmall: TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.4, color: onSurface),
+        titleLarge: TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.2, color: onSurface),
+        titleMedium: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.1, color: onSurface),
+        bodyLarge: TextStyle(fontWeight: FontWeight.w400, height: 1.35, color: onSurface),
+        bodyMedium: TextStyle(fontWeight: FontWeight.w400, height: 1.35, color: onSurface),
+        labelLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.3, color: onSurface),
+      ),
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        backgroundColor: isDark ? navy : Colors.white,
+        foregroundColor: isDark ? const Color(0xFFE8ECF4) : ink,
+        titleTextStyle: TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 19,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.1,
+          color: isDark ? const Color(0xFFE8ECF4) : ink,
+        ),
+        iconTheme: IconThemeData(color: isDark ? goldLight : navy),
+      ),
+      cardTheme: CardTheme(
+        elevation: isDark ? 0 : 5,
+        shadowColor: isDark ? Colors.black54 : const Color(0x141B2A4A),
+        color: isDark ? surfaceDark : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
+          ),
+        ),
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: isDark ? surfaceDark : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titleTextStyle: TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 19,
+          fontWeight: FontWeight.w700,
+          color: onSurface,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark ? const Color(0xFF1A2130) : const Color(0xFFF6F8FC),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: isDark ? const Color(0xFF2A3346) : const Color(0xFFDCE1EA)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: isDark ? const Color(0xFF2A3346) : const Color(0xFFDCE1EA)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: isDark ? goldLight : navy, width: 1.6),
+        ),
+        labelStyle: TextStyle(color: onSurface.withOpacity(0.6)),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(0, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.3),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 50),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          side: BorderSide(color: isDark ? const Color(0xFF2A3346) : const Color(0xFFDCE1EA)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      listTileTheme: const ListTileThemeData(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      ),
+      dividerTheme: DividerThemeData(
+        color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
+        thickness: 1,
+        space: 1,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: isDark ? const Color(0xFF1E2637) : navy,
+        contentTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: isDark ? goldLight : navy,
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // ГЛАВНОЕ ПРИЛОЖЕНИЕ
 // ═══════════════════════════════════════════════════════════
 
