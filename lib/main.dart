@@ -238,7 +238,7 @@ class _SplashScreenState extends State<SplashScreen>
                   const Icon(Icons.swipe_rounded,
                       size: 12, color: Color(0xFF7E93AC)),
                   const SizedBox(width: 6),
-                  AppUi.label('ПОТЯНИ — ПОВЕРНУТЬ',
+                  AppUi.label('ОКНО 1300 × 1400 ММ',
                       color: const Color(0xFF7E93AC), size: 9),
                 ],
               ),
