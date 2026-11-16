@@ -169,7 +169,7 @@ class _WindowSchemeState extends State<WindowScheme>
             Icon(Icons.touch_app, size: 13, color: Color(0xFF6B7A8C)),
             SizedBox(width: 4),
             Text(
-              'Тапни створку — сменить открывание',
+              'Тап — открывание · Удержание — зеркалить петли',
               style: TextStyle(fontSize: 11, color: Color(0xFF6B7A8C)),
             ),
           ],
