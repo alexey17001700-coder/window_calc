@@ -2564,6 +2564,61 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 18),
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF16233C), Color(0xFF0A1120)],
+              ),
+              boxShadow: const [
+                BoxShadow(color: Color(0x33000000), blurRadius: 22, offset: Offset(0, 10)),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppTheme.goldLight, AppTheme.bronze],
+                    ),
+                  ),
+                  child: const Icon(Icons.tune_rounded, color: Color(0xFF1A1305), size: 22),
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ПРАЙС-ЛИСТ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Цены и коэффициенты расчёта',
+                        style: TextStyle(color: Color(0xFF9FB0CC), fontSize: 12.5),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.edit_note_rounded, color: AppTheme.goldLight, size: 26),
+              ],
+            ),
+          ),
           _category('Окна', Icons.window, [
             _subtitle('Базовые цены (для профиля Novoline)'),
             _row('Одностворчатое', 'window1'),
