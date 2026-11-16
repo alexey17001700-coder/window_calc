@@ -572,15 +572,19 @@ class _ScenePainter extends CustomPainter {
       if (!pr.fill) {
         final a = it.pts;
         if (a.length < 2) continue;
-        canvas.drawLine(
-          a[0],
-          a[1],
-          Paint()
-            ..color = pr.color.withOpacity(pr.alpha * 0.20 * it.fog)
-            ..strokeWidth = pr.stroke * 3.4
-            ..strokeCap = StrokeCap.round
-            ..blendMode = BlendMode.plus,
-        );
+        // Ореол рисуем только у светящихся линий — вдвое меньше draw-вызовов
+        // на контурах окна (фаска, штапик, канавки профиля).
+        if (pr.glow) {
+          canvas.drawLine(
+            a[0],
+            a[1],
+            Paint()
+              ..color = pr.color.withOpacity(pr.alpha * 0.20 * it.fog)
+              ..strokeWidth = pr.stroke * 3.4
+              ..strokeCap = StrokeCap.round
+              ..blendMode = BlendMode.plus,
+          );
+        }
         canvas.drawLine(
           a[0],
           a[1],
