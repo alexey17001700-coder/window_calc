@@ -412,79 +412,114 @@ _V3 _orbit(double r, double tx, double ty, double tz, double a) {
 }
 
 void _buildTools(List<_Prim> out, double t) {
-  // ── Рулетка: своя орбита (наклон X 0.55 · Z 0.25) ─────────────────
+  // ── РУЛЕТКА — жёлтый корпус, чёрная резина, серебристая лента ──────
+  // Орбита: наклон X 0.55 · Z 0.25
   {
     final a = t * 0.40;
     final pos = _orbit(1.16, 0.55, 0.00, 0.25, a);
     final pl = _Place(pos, rx: 0.42, ry: a * 1.7, rz: 0.30);
-    // корпус — шестигранный барабан
-    _prism(out, const _V3(0, 0, 0), 0.088, 0.170, 6, _toolCyan,
-        pl: pl, alpha: 0.95, stroke: 1.4, fill: true);
-    // внутреннее кольцо катушки
-    _prism(out, const _V3(0, 0, 0), 0.052, 0.178, 6, _toolCyan,
-        pl: pl, alpha: 0.55, stroke: 0.9, fill: false);
-    // ось-ступица
-    _prism(out, const _V3(0, 0, 0), 0.020, 0.198, 8, _toolCyan,
-        pl: pl, alpha: 0.9, stroke: 1.0, fill: true);
+
+    const bodyY = Color(0xFFF0BE2E); // жёлтый пластик корпуса
+    const rubber = Color(0xFF23262B); // чёрная резина
+    const tape = Color(0xFFE4E9EF); // серебристая лента
+    const mark = Color(0xFF2B3038); // деления
+
+    // корпус
+    _box(out, const _V3(0, 0, 0), const _V3(0.150, 0.160, 0.086), bodyY, pl: pl);
+    // нижняя резиновая накладка
+    _box(out, const _V3(0, -0.090, 0), const _V3(0.152, 0.028, 0.088), rubber,
+        pl: pl);
+    // верхняя чёрная кромка
+    _box(out, const _V3(0, 0.088, 0), const _V3(0.152, 0.020, 0.088), rubber,
+        pl: pl);
+    // барабан катушки (виден сбоку)
+    _prism(out, const _V3(0, 0, -0.047), 0.060, 0.018, 10, bodyY,
+        pl: pl, alpha: 1, stroke: 0.8, glow: false, fill: true);
+    // ось катушки
+    _prism(out, const _V3(0, 0, -0.058), 0.018, 0.014, 8, rubber,
+        pl: pl, alpha: 1, stroke: 0.8, glow: false, fill: true);
+    // клипса на пояс
+    _box(out, const _V3(-0.086, -0.018, 0), const _V3(0.018, 0.066, 0.024),
+        rubber, pl: pl);
     // выдвинутая лента
-    _box(out, const _V3(0.150, 0, 0), const _V3(0.150, 0.030, 0.062), _toolCyan,
-        pl: pl, wire: true, stroke: 1.1, glow: true, alpha: 0.85);
+    _box(out, const _V3(0.140, -0.028, 0), const _V3(0.130, 0.024, 0.056),
+        tape, pl: pl);
+    // деления на ленте
+    for (var i = 0; i < 5; i++) {
+      _box(out, _V3(0.092 + i * 0.025, -0.028, -0.030),
+          const _V3(0.004, 0.022, 0.004), mark, pl: pl);
+    }
     // крючок на конце ленты
-    _box(out, const _V3(0.238, 0, 0), const _V3(0.024, 0.054, 0.054), _toolCyan,
-        pl: pl, wire: true, stroke: 1.0, glow: true, alpha: 0.8);
-    // клипса на поясе
-    _box(out, const _V3(-0.100, -0.072, 0), const _V3(0.072, 0.020, 0.030),
-        _toolCyan, pl: pl, wire: true, stroke: 0.9, glow: true, alpha: 0.7);
+    _box(out, const _V3(0.210, -0.028, 0), const _V3(0.014, 0.048, 0.050),
+        tape, pl: pl);
+    _box(out, const _V3(0.210, -0.052, 0), const _V3(0.014, 0.012, 0.050),
+        tape, pl: pl);
   }
 
-  // ── Уровень: своя орбита (наклон X −0.45 · Y 0.90 · Z 0.75) ───────
+  // ── УРОВЕНЬ — алюминиевый брус, жёлтые заглушки, зелёные ампулы ────
+  // Орбита: наклон X −0.45 · Y 0.90 · Z 0.75
   {
     final a = -t * 0.29 + 2.1;
     final pos = _orbit(1.34, -0.45, 0.90, 0.75, a);
     final pl = _Place(pos, rx: 0.15, ry: a * 1.2, rz: 0.55);
-    // корпус — длинная каркасная коробка
-    _box(out, const _V3(0, 0, 0), const _V3(0.60, 0.074, 0.060), _toolGreen,
-        pl: pl, wire: true, stroke: 1.4, glow: true, alpha: 0.95);
-    // рёбра жёсткости
-    for (final x in const [-0.20, 0.20]) {
-      _box(out, _V3(x, 0, 0), const _V3(0.010, 0.082, 0.068), _toolGreen,
-          pl: pl, wire: true, stroke: 0.9, glow: true, alpha: 0.6);
-    }
-    // три глазка-ампулы (4 грани вместо 6 — визуально не отличить)
-    for (final x in const [-0.17, 0.0, 0.17]) {
-      _prism(out, _V3(x, 0.030, 0), 0.024, 0.075, 4, _toolGreen,
-          pl: pl, alpha: 0.9, stroke: 1.0, fill: true);
-    }
+
+    const alum = Color(0xFFC4CAD2); // алюминий
+    const alumDark = Color(0xFF868E98); // тёмная грань
+    const capY = Color(0xFFE0AE28); // жёлтые заглушки
+    const vialGlass = Color(0xFFD8E4EE); // стекло ампулы
+    const vialLiq = Color(0xFF3FD46A); // зелёная жидкость
+
+    // корпус
+    _box(out, const _V3(0, 0, 0), const _V3(0.620, 0.060, 0.050), alum, pl: pl);
+    // нижняя тёмная грань
+    _box(out, const _V3(0, -0.033, 0), const _V3(0.620, 0.010, 0.052),
+        alumDark, pl: pl);
     // торцевые заглушки
-    for (final x in const [-0.30, 0.30]) {
-      _box(out, _V3(x, 0, 0), const _V3(0.026, 0.086, 0.072), _toolGreen,
-          pl: pl, wire: true, stroke: 1.0, glow: true, alpha: 0.8);
+    for (final x in const [-0.318, 0.318]) {
+      _box(out, _V3(x, 0, 0), const _V3(0.020, 0.064, 0.054), capY, pl: pl);
+    }
+    // центральная горизонтальная ампула
+    _box(out, const _V3(0, 0.019, -0.027), const _V3(0.150, 0.026, 0.008),
+        vialGlass, pl: pl);
+    _box(out, const _V3(0, 0.019, -0.031), const _V3(0.068, 0.015, 0.004),
+        vialLiq, pl: pl);
+    // две вертикальные ампулы по краям
+    for (final x in const [-0.215, 0.215]) {
+      _box(out, _V3(x, 0.019, -0.027), const _V3(0.026, 0.058, 0.008),
+          vialGlass, pl: pl);
+      _box(out, _V3(x, 0.019, -0.031), const _V3(0.015, 0.026, 0.004),
+          vialLiq, pl: pl);
     }
   }
 
-  // ── Карандаш: своя орбита (наклон X 0.85 · Y −0.70 · Z −0.35) ─────
+  // ── КАРАНДАШ — жёлтый шестигранник, дерево, графит, ластик ─────────
+  // Орбита: наклон X 0.85 · Y −0.70 · Z −0.35
   {
     final a = t * 0.24 + 4.0;
     final pos = _orbit(1.46, 0.85, -0.70, -0.35, a);
     final pl = _Place(pos, rx: 0.30, ry: a * 1.4, rz: -0.35);
+
+    const wood = Color(0xFFF0C43A); // жёлтый корпус
+    const cedar = Color(0xFFE3C08D); // дерево на срезе
+    const graphite = Color(0xFF2A2E34); // графит
+    const ferrule = Color(0xFFBCC3CC); // металлическое кольцо
+    const eraser = Color(0xFFE4889A); // ластик
+
     // корпус — шестигранник
-    _prism(out, const _V3(-0.04, 0, 0), 0.030, 0.320, 6, _toolAmber,
-        pl: pl, alpha: 0.95, stroke: 1.3, fill: true);
-    // продольная грань-полоса
-    _prism(out, const _V3(-0.04, 0, 0), 0.018, 0.326, 6, _toolAmber,
-        pl: pl, alpha: 0.5, stroke: 0.8, fill: false);
-    // конус-острие
-    _cone(out, const _V3(0.205, 0, 0), 0.030, 0.100, 6, _toolAmber,
-        pl: pl, alpha: 0.95, stroke: 1.3);
+    _prism(out, const _V3(-0.030, 0, 0), 0.032, 0.300, 6, wood,
+        pl: pl, alpha: 1, stroke: 0.9, glow: false, fill: true);
+    // деревянный срез
+    _cone(out, const _V3(0.170, 0, 0), 0.032, 0.090, 6, cedar,
+        pl: pl, alpha: 1, stroke: 0.9, glow: false, fill: true);
     // графитовый наконечник
-    _cone(out, const _V3(0.268, 0, 0), 0.014, 0.036, 6, _toolAmber,
-        pl: pl, alpha: 0.9, stroke: 1.0);
+    _cone(out, const _V3(0.228, 0, 0), 0.013, 0.036, 6, graphite,
+        pl: pl, alpha: 1, stroke: 0.9, glow: false, fill: true);
     // обжимное кольцо
-    _prism(out, const _V3(-0.205, 0, 0), 0.034, 0.030, 6, _toolAmber,
-        pl: pl, alpha: 0.9, stroke: 1.1, fill: true);
+    _prism(out, const _V3(-0.190, 0, 0), 0.034, 0.026, 6, ferrule,
+        pl: pl, alpha: 1, stroke: 0.9, glow: false, fill: true);
     // ластик
-    _box(out, const _V3(-0.248, 0, 0), const _V3(0.050, 0.052, 0.052),
-        _toolAmber, pl: pl, wire: true, stroke: 1.1, glow: true, alpha: 0.85);
+    _prism(out, const _V3(-0.222, 0, 0), 0.030, 0.040, 6, eraser,
+        pl: pl, alpha: 1, stroke: 0.9, glow: false, fill: true);
   }
 }
 
