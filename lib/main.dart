@@ -2117,6 +2117,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
                 height: 290,
                 widthMm: it.widthMm,
                 heightMm: it.heightMm,
+                onChanged: () => setState(() {}),
               ),
             ),
           ),
