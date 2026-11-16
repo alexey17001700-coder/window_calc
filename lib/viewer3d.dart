@@ -158,8 +158,14 @@ void _prism(
         alpha: alpha, fill: false, stroke: stroke, glow: glow));
     out.add(_Prim([w(a0[i]), w(a1[i])], col,
         alpha: alpha * 0.65, fill: false, stroke: stroke * 0.75, glow: glow));
-    // Заливка граней призмы убрана: при alpha 0.10 она почти не видна,
-    // но давала по 1 лишнему полигону на каждую грань каждого инструмента.
+    // Сплошная заливка боковой грани — нужна для реалистичных инструментов.
+    if (fill) {
+      out.add(_Prim([w(a0[i]), w(a0[j]), w(a1[j]), w(a1[i])], col, alpha: alpha));
+    }
+  }
+  if (fill) {
+    out.add(_Prim(a0.map(w).toList(), col, alpha: alpha));
+    out.add(_Prim(a1.map(w).toList(), col, alpha: alpha));
   }
 }
 
