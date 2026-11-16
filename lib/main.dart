@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:model_viewer_plus/model_viewer_plus.dart';
-
 import 'theme.dart';
+import 'viewer3d.dart';
 import 'update_checker.dart';
 import 'wizard_screen.dart';
 
