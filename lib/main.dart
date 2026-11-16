@@ -3717,6 +3717,121 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
+  Widget _positionCard(BuildContext context, int index, ProductItem it) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final opts = <String>[];
+    if (it.hasSlopes) opts.add('Откосы: ${it.slopeCategory} (${it.houseType})');
+    if (it.hasSill && it.sills.isNotEmpty) opts.add('Подоконники: ${it.sills.length} шт');
+    if (it.hasDrip) opts.add('Отлив: ${it.dripColor}');
+    if (it.hasFUgol) opts.add('F-угол: ${it.fUgolType} × ${it.fUgolCount}');
+    if (it.hasMosquito) opts.add('Москитная сетка');
+    if (it.hasPlisse) opts.add('Плиссе');
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: AppTheme.navy.withOpacity(isDark ? 0.22 : 0.035),
+        border: Border.all(
+          color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 26,
+                height: 26,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(9),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppTheme.goldLight, AppTheme.bronze],
+                  ),
+                ),
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
+                    color: Color(0xFF1A1305),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  it.type,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, letterSpacing: -0.2),
+                ),
+              ),
+              Text(
+                '${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽',
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, letterSpacing: -0.3),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${it.widthMm.toInt()} × ${it.heightMm.toInt()} мм · ${it.count} шт · ${it.profile} · ${it.furniture} · ${it.sashes} ств. · стекло ${it.glassThickness.toInt()} мм',
+            style: TextStyle(fontSize: 11.5, height: 1.35, color: onSurface.withOpacity(0.55)),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0E1626) : Colors.white,
+                border: Border.all(
+                  color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: WindowScheme(
+                columns: it.columns,
+                width: 190,
+                height: 220,
+                widthMm: it.widthMm,
+                heightMm: it.heightMm,
+                onChanged: () => setState(() {}),
+              ),
+            ),
+          ),
+          if (opts.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            ...opts.map((o) => Padding(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 4,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppTheme.gold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          o,
+                          style: TextStyle(fontSize: 12, color: onSurface.withOpacity(0.7)),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _infoRow(BuildContext context, IconData icon, String text) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     return Padding(
