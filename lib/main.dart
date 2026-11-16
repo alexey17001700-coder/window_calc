@@ -2518,31 +2518,89 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             dense: true,
           ),
           const SizedBox(height: 20),
-          Card(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('ИТОГО:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text('${_total.toStringAsFixed(0)} ₽', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                ],
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF16233C), Color(0xFF0A1120)],
               ),
+              boxShadow: const [
+                BoxShadow(color: Color(0x33000000), blurRadius: 22, offset: Offset(0, 10)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'ИТОГО ПО ЗАМЕРУ',
+                  style: TextStyle(
+                    color: Color(0xFF9FB0CC),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.8,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      _total.toStringAsFixed(0),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      '₽',
+                      style: TextStyle(
+                        color: AppTheme.goldLight,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Изделия ${_itemsTotal.toStringAsFixed(0)} ₽ · Услуги ${_servicesTotal.toStringAsFixed(0)} ₽',
+                  style: const TextStyle(color: Color(0xFF8C9CB8), fontSize: 12),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 26),
           const _SectionTitle('Примечание'),
           TextField(
             controller: _notesCtrl,
             maxLines: 3,
-            decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Например: монтаж в субботу'),
+            decoration: const InputDecoration(
+              hintText: 'Например: монтаж в субботу',
+              prefixIcon: Icon(Icons.sticky_note_2_outlined),
+            ),
           ),
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: _save,
-            icon: const Icon(Icons.save),
-            label: const Text('Сохранить замер'),
+          const SizedBox(height: 26),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _save,
+              icon: const Icon(Icons.check_rounded, size: 20),
+              label: const Text('СОХРАНИТЬ ЗАМЕР'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 56),
+                backgroundColor: AppTheme.navy,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.8, fontSize: 14),
+              ),
+            ),
           ),
           const SizedBox(height: 40),
         ],
