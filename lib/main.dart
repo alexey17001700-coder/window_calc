@@ -2175,7 +2175,6 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Настройки прайса'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(icon: const Icon(Icons.check), onPressed: _apply),
         ],
