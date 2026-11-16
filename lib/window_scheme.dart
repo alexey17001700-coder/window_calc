@@ -4,7 +4,12 @@ import 'templates.dart';
 /// Схема окна «в лоб»: рама с объёмом, стеклопакеты с бликом,
 /// створки с символами открывания, москитные сетки, сэндвич-панели,
 /// ручки и размеры в мм.
-class WindowScheme extends StatelessWidget {
+///
+/// ИНТЕРАКТИВ: тап по створке меняет тип открывания по кругу
+/// Поворотная → Откидная → Поворотно-откидная → Глухая → Поворотная
+/// и меняет реальную модель данных (Section.type), после чего
+/// вызывается [onChanged] — родитель пересчитывает цену.
+class WindowScheme extends StatefulWidget {
   final List<SchemeColumn> columns;
   final double width;
   final double height;
@@ -12,6 +17,12 @@ class WindowScheme extends StatelessWidget {
   final bool showHandles;
   final double? widthMm;
   final double? heightMm;
+
+  /// Тап по створке изменил модель — просим родителя обновиться.
+  final VoidCallback? onChanged;
+
+  /// Показывать подсказку под чертежом.
+  final bool showHint;
 
   const WindowScheme({
     super.key,
@@ -22,22 +33,210 @@ class WindowScheme extends StatelessWidget {
     this.showHandles = true,
     this.widthMm,
     this.heightMm,
+    this.onChanged,
+    this.showHint = true,
   });
 
   @override
+  State<WindowScheme> createState() => _WindowSchemeState();
+}
+
+/// Порядок переключения типов открывания по тапу.
+const List<String> kOpenCycle = [
+  'Поворотная',
+  'Откидная',
+  'Поворотно-откидная',
+  'Глухая',
+];
+
+String nextOpenType(String current) {
+  final i = kOpenCycle.indexOf(current);
+  if (i < 0) return kOpenCycle.first; // Сэндвич/неизвестное → Поворотная
+  return kOpenCycle[(i + 1) % kOpenCycle.length];
+}
+
+class _WindowSchemeState extends State<WindowScheme>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _flash;
+  Rect? _flashRect;
+  String? _flashLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    _flash = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+  }
+
+  @override
+  void dispose() {
+    _flash.dispose();
+    super.dispose();
+  }
+
+  void _handleTap(TapUpDetails d) {
+    final size = Size(widget.width, widget.height);
+    final layout = schemeLayout(size, widget.columns, widget.showDimensions);
+    final p = d.localPosition;
+
+    // Ищем створку под пальцем (сверху вниз — последняя нарисованная важнее)
+    _SashBox? hit;
+    for (final s in layout.sashes) {
+      if (s.rect.contains(p)) hit = s;
+    }
+    if (hit == null) return;
+
+    final col = widget.columns[hit.col];
+    if (hit.sec >= col.sections.length) return;
+    final sec = col.sections[hit.sec];
+
+    // Сэндвич-панель не створка — не трогаем
+    if (sec.type == 'Сэндвич') return;
+
+    final before = sec.type;
+    final after = nextOpenType(before);
+    if (after == before) return;
+
+    // ── Меняем РЕАЛЬНУЮ модель данных
+    sec.type = after;
+
+    // ── Визуальный отклик
+    _flashRect = hit.rect;
+    _flashLabel = after;
+    _flash.forward(from: 0);
+
+    // ── Сообщаем родителю (пересчёт цены / перерисовка)
+    widget.onChanged?.call();
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(width, height),
-      painter: _WindowSchemePainter(
-        columns: columns,
-        showDimensions: showDimensions,
-        showHandles: showHandles,
-        widthMm: widthMm,
-        heightMm: heightMm,
+    final scheme = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: _handleTap,
+      child: AnimatedBuilder(
+        animation: _flash,
+        builder: (context, _) {
+          final t = _flash.isAnimating ? _flash.value : 1.0;
+          return CustomPaint(
+            size: Size(widget.width, widget.height),
+            painter: _WindowSchemePainter(
+              columns: widget.columns,
+              showDimensions: widget.showDimensions,
+              showHandles: widget.showHandles,
+              widthMm: widget.widthMm,
+              heightMm: widget.heightMm,
+              flashRect: _flashRect,
+              flashLabel: _flashLabel,
+              flashT: t,
+            ),
+          );
+        },
       ),
+    );
+
+    if (!widget.showHint) return scheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        scheme,
+        const SizedBox(height: 4),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.touch_app, size: 13, color: Color(0xFF6B7A8C)),
+            SizedBox(width: 4),
+            Text(
+              'Тапни створку — сменить открывание',
+              style: TextStyle(fontSize: 11, color: Color(0xFF6B7A8C)),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// ГЕОМЕТРИЯ (общая для отрисовки и hit-test)
+// ═══════════════════════════════════════════════════════════
+
+class _SashBox {
+  final int col;
+  final int sec;
+  final Rect rect;
+  const _SashBox(this.col, this.sec, this.rect);
+}
+
+class _SchemeLayout {
+  final Rect glass;
+  final List<double> colWidths;
+  final List<_SashBox> sashes;
+  const _SchemeLayout(this.glass, this.colWidths, this.sashes);
+}
+
+_SchemeLayout schemeLayout(
+  Size size,
+  List<SchemeColumn> columns,
+  bool showDimensions,
+) {
+  final left = 6.0;
+  final top = 6.0;
+  final right = size.width - 6.0 - (showDimensions ? 20.0 : 0.0);
+  final bottom = size.height - 6.0 - (showDimensions ? 20.0 : 0.0);
+  final w = right - left;
+  final h = bottom - top;
+  final empty = _SchemeLayout(Rect.zero, const [], const []);
+  if (w <= 6 || h <= 6) return empty;
+
+  final frameW = (w < h ? w : h) * 0.055;
+  final glassRect = Rect.fromLTWH(left, top, w, h).deflate(frameW);
+  if (columns.isEmpty) return _SchemeLayout(glassRect, const [], const []);
+
+  final totalMm = columns.fold<double>(
+    0,
+    (s, c) => s + (c.widthMm > 0 ? c.widthMm : 0),
+  );
+  final useMm = totalMm > 0;
+  final colWidths = <double>[];
+  for (final c in columns) {
+    if (useMm && c.widthMm > 0) {
+      colWidths.add(glassRect.width * (c.widthMm / totalMm));
+    } else {
+      colWidths.add(glassRect.width / columns.length);
+    }
+  }
+
+  final sashes = <_SashBox>[];
+  var x = glassRect.left;
+  for (var i = 0; i < columns.length; i++) {
+    final col = columns[i];
+    final cw = colWidths[i];
+    var ratio = col.heightRatio;
+    if (ratio <= 0) ratio = 1.0;
+    if (ratio > 1.0) ratio = 1.0;
+    final colH = glassRect.height * ratio;
+
+    final n = col.sections.isEmpty ? 1 : col.sections.length;
+    final secH = colH / n;
+    for (var s = 0; s < n; s++) {
+      sashes.add(
+        _SashBox(i, s, Rect.fromLTWH(x, glassRect.top + secH * s, cw, secH)),
+      );
+    }
+    x += cw;
+  }
+
+  return _SchemeLayout(glassRect, colWidths, sashes);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ХУДОЖНИК
+// ═══════════════════════════════════════════════════════════
 
 class _WindowSchemePainter extends CustomPainter {
   final List<SchemeColumn> columns;
@@ -45,6 +244,9 @@ class _WindowSchemePainter extends CustomPainter {
   final bool showHandles;
   final double? widthMm;
   final double? heightMm;
+  final Rect? flashRect;
+  final String? flashLabel;
+  final double flashT;
 
   _WindowSchemePainter({
     required this.columns,
@@ -52,6 +254,9 @@ class _WindowSchemePainter extends CustomPainter {
     required this.showHandles,
     this.widthMm,
     this.heightMm,
+    this.flashRect,
+    this.flashLabel,
+    this.flashT = 1.0,
   });
 
   // ── Палитра
@@ -65,10 +270,11 @@ class _WindowSchemePainter extends CustomPainter {
   static const _panel = Color(0xFFD5DBE2);
   static const _panelHatch = Color(0xFFB4BDC7);
   static const _net = Color(0xFF2E7D32);
+  static const _accent = Color(0xFF1E88E5);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final dimSpace = showDimensions ? 20.0 : 6.0;
+    final layout = schemeLayout(size, columns, showDimensions);
     final left = 6.0;
     final top = 6.0;
     final right = size.width - 6.0 - (showDimensions ? 20.0 : 0.0);
@@ -114,40 +320,26 @@ class _WindowSchemePainter extends CustomPainter {
     );
 
     // ── Стекло по всему проёму
-    final glassRect = frameRect.deflate(frameW);
-    _paintGlass(canvas, glassRect);
+    final glassRect = layout.glass;
+    if (glassRect.width > 1 && glassRect.height > 1) {
+      _paintGlass(canvas, glassRect);
+    }
 
     if (columns.isEmpty) {
       _paintDimensions(canvas, left, top, w, h);
       return;
     }
 
-    // ── Пропорции колонок
-    final totalMm = columns.fold<double>(
-      0,
-      (s, c) => s + (c.widthMm > 0 ? c.widthMm : 0),
-    );
-    final useMm = totalMm > 0;
-    final colWidths = <double>[];
-    for (final c in columns) {
-      if (useMm && c.widthMm > 0) {
-        colWidths.add(glassRect.width * (c.widthMm / totalMm));
-      } else {
-        colWidths.add(glassRect.width / columns.length);
-      }
-    }
-
-    // ── Колонки и секции
+    // ── Панели под короткими колонками + импосты
     var x = glassRect.left;
     for (var i = 0; i < columns.length; i++) {
       final col = columns[i];
-      final cw = colWidths[i];
+      final cw = layout.colWidths[i];
       var ratio = col.heightRatio;
       if (ratio <= 0) ratio = 1.0;
       if (ratio > 1.0) ratio = 1.0;
       final colH = glassRect.height * ratio;
 
-      // Пустота под короткой колонкой — панель
       if (colH < glassRect.height - 0.5) {
         _paintPanel(
           canvas,
@@ -155,15 +347,6 @@ class _WindowSchemePainter extends CustomPainter {
         );
       }
 
-      final n = col.sections.isEmpty ? 1 : col.sections.length;
-      final secH = colH / n;
-      for (var s = 0; s < n; s++) {
-        final secRect = Rect.fromLTWH(x, glassRect.top + secH * s, cw, secH);
-        final sec = col.sections.isEmpty ? null : col.sections[s];
-        _paintSash(canvas, secRect, sec, sashW);
-      }
-
-      // Импост между колонками
       if (i < columns.length - 1) {
         final ix = x + cw;
         canvas.drawLine(
@@ -185,7 +368,53 @@ class _WindowSchemePainter extends CustomPainter {
       x += cw;
     }
 
+    // ── Створки
+    for (final s in layout.sashes) {
+      final col = columns[s.col];
+      final sec = s.sec < col.sections.length ? col.sections[s.sec] : null;
+      _paintSash(canvas, s.rect, sec, sashW);
+    }
+
+    // ── Вспышка отклика на тап
+    _paintFlash(canvas);
+
     _paintDimensions(canvas, left, top, w, h);
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Вспышка (визуальный отклик на тап)
+  // ─────────────────────────────────────────────────────────
+  void _paintFlash(Canvas canvas) {
+    final r = flashRect;
+    if (r == null) return;
+    final t = flashT.clamp(0.0, 1.0);
+    if (t >= 1.0) return;
+    final k = 1.0 - t; // 1 → 0
+
+    final rr = RRect.fromRectAndRadius(r.deflate(1.5), const Radius.circular(4));
+
+    // Подсветка заливкой
+    canvas.drawRRect(rr, Paint()..color = _accent.withOpacity(0.22 * k));
+    // Контур
+    canvas.drawRRect(
+      rr,
+      Paint()
+        ..color = _accent.withOpacity(0.95 * k)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.6,
+    );
+
+    // Подпись нового состояния
+    final label = flashLabel;
+    if (label != null && r.width > 40 && r.height > 24) {
+      _paintLabel(
+        canvas,
+        label,
+        r.center,
+        10.5,
+        _accent.withOpacity(0.95 * k),
+      );
+    }
   }
 
   // ─────────────────────────────────────────────────────────
@@ -405,7 +634,13 @@ class _WindowSchemePainter extends CustomPainter {
   // ─────────────────────────────────────────────────────────
   // Размеры
   // ─────────────────────────────────────────────────────────
-  void _paintDimensions(Canvas canvas, double left, double top, double w, double h) {
+  void _paintDimensions(
+    Canvas canvas,
+    double left,
+    double top,
+    double w,
+    double h,
+  ) {
     if (!showDimensions) return;
     final p = Paint()
       ..color = _dimColor
@@ -467,5 +702,8 @@ class _WindowSchemePainter extends CustomPainter {
       old.showDimensions != showDimensions ||
       old.showHandles != showHandles ||
       old.widthMm != widthMm ||
-      old.heightMm != heightMm;
+      old.heightMm != heightMm ||
+      old.flashRect != flashRect ||
+      old.flashLabel != flashLabel ||
+      old.flashT != flashT;
 }
