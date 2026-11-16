@@ -1,166 +1,359 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// Лёгкий программный 3D-рендерер премиального окна.
+/// Премиальный программный 3D-рендерер.
 ///
-/// Без WebView, WebGL и внешних пакетов — только математика и CustomPainter.
+/// Без WebView, WebGL и внешних пакетов — чистая математика + CustomPainter.
 /// Работает офлайн, не требует разрешений, сборка APK остаётся стабильной.
 ///
-/// Модель: рама с фаской, импост, створки с обвязками, стеклопакеты с бликом,
-/// петли, золотая ручка, подоконник с капельником.
-/// Поверх 3D — парящие инструменты и размерные линии (чертёжный слой).
+/// Сцена:
+///  • окно из ПВХ — тонкая белая рама, голубоватые стеклопакеты с бликами,
+///    серебристая ручка, тёмные петли, подоконник с отливом;
+///  • инструменты (рулетка, уровень, карандаш) — светящийся каркас,
+///    летают по СВОИМ наклонным орбитам вокруг окна;
+///  • единая сортировка по глубине: инструмент за окном скрывается за рамой,
+///    перед окном — рисуется поверх.
+
+// ═══════════════════════════ ВЕКТОР ═══════════════════════════
 
 class _V3 {
   final double x, y, z;
   const _V3(this.x, this.y, this.z);
+  _V3 operator +(_V3 o) => _V3(x + o.x, y + o.y, z + o.z);
   _V3 operator -(_V3 o) => _V3(x - o.x, y - o.y, z - o.z);
-  double dot(_V3 o) => x * o.x + y * o.y + z * o.z;
-  _V3 cross(_V3 o) => _V3(y * o.z - z * o.y, z * o.x - x * o.z, x * o.y - y * o.x);
+  _V3 operator *(double s) => _V3(x * s, y * s, z * s);
   double get len => math.sqrt(x * x + y * y + z * z);
   _V3 get unit {
     final l = len;
     return l == 0 ? const _V3(0, 0, 0) : _V3(x / l, y / l, z / l);
   }
+
+  static _V3 cross(_V3 a, _V3 b) =>
+      _V3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+  static double dot(_V3 a, _V3 b) => a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-class _Face {
+_V3 _rotX(_V3 p, double a) {
+  final c = math.cos(a), s = math.sin(a);
+  return _V3(p.x, p.y * c - p.z * s, p.y * s + p.z * c);
+}
+
+_V3 _rotY(_V3 p, double a) {
+  final c = math.cos(a), s = math.sin(a);
+  return _V3(p.x * c + p.z * s, p.y, -p.x * s + p.z * c);
+}
+
+_V3 _rotZ(_V3 p, double a) {
+  final c = math.cos(a), s = math.sin(a);
+  return _V3(p.x * c - p.y * s, p.x * s + p.y * c, p.z);
+}
+
+// ═══════════════════════════ ПРИМИТИВ ═══════════════════════════
+
+class _Prim {
   final List<_V3> pts;
   final Color color;
+  final double alpha;
+  final bool fill;
+  final double stroke;
+  final bool glow;
   final bool glass;
-  final bool glint;
-  _Face(this.pts, this.color, {this.glass = false, this.glint = false});
+  _Prim(
+    this.pts,
+    this.color, {
+    this.alpha = 1,
+    this.fill = true,
+    this.stroke = 1,
+    this.glow = false,
+    this.glass = false,
+  });
 }
 
-class _DrawFace {
-  final List<Offset> pts;
-  final Color color;
-  final double depth;
-  final bool glass;
-  final bool glint;
-  _DrawFace(this.pts, this.color, this.depth, this.glass, this.glint);
+/// Позиция + поворот для сборки деталей в локальных координатах.
+class _Place {
+  final _V3 t;
+  final double rx, ry, rz;
+  const _Place(this.t, {this.rx = 0, this.ry = 0, this.rz = 0});
+
+  _V3 apply(_V3 p) {
+    var q = p;
+    if (rz != 0) q = _rotZ(q, rz);
+    if (rx != 0) q = _rotX(q, rx);
+    if (ry != 0) q = _rotY(q, ry);
+    return q + t;
+  }
 }
 
-// ─── Палитра ────────────────────────────────────────────────────────────────
-const _gold = Color(0xFFC9A227);
-const _goldLight = Color(0xFFE3C55A);
-const _goldDeep = Color(0xFF8A6E14);
-const _goldSash = Color(0xFFB08D2A);
-const _metal = Color(0xFF2B3038);
-const _metalLight = Color(0xFF4A525E);
-const _glassCol = Color(0xFF7FC4E8);
+const _boxFaces = <List<int>>[
+  [0, 1, 3, 2],
+  [4, 5, 7, 6],
+  [0, 2, 6, 4],
+  [1, 3, 7, 5],
+  [0, 1, 5, 4],
+  [2, 3, 7, 6],
+];
 
-// ─── Габариты модели ────────────────────────────────────────────────────────
-const _W = 1.30; // полуширина окна
-const _H = 1.45; // полувысота окна
-const _FW = 0.15; // толщина профиля рамы
-const _FD = 0.36; // глубина рамы
-const _ST = 0.075; // толщина обвязки створки
-const _SD = 0.30; // глубина створки
+const _boxEdges = <List<int>>[
+  [0, 1], [1, 3], [3, 2], [2, 0],
+  [4, 5], [5, 7], [7, 6], [6, 4],
+  [0, 4], [1, 5], [2, 6], [3, 7],
+];
 
-List<_Face> _buildModel() {
-  final faces = <_Face>[];
-
-  void box(double cx, double cy, double cz, double sx, double sy, double sz, Color c) {
-    final x0 = cx - sx / 2, x1 = cx + sx / 2;
-    final y0 = cy - sy / 2, y1 = cy + sy / 2;
-    final z0 = cz - sz / 2, z1 = cz + sz / 2;
-    _V3 v(double x, double y, double z) => _V3(x, y, z);
-    faces.add(_Face([v(x0, y0, z1), v(x1, y0, z1), v(x1, y1, z1), v(x0, y1, z1)], c));
-    faces.add(_Face([v(x1, y0, z0), v(x0, y0, z0), v(x0, y1, z0), v(x1, y1, z0)], c));
-    faces.add(_Face([v(x0, y0, z0), v(x1, y0, z0), v(x1, y0, z1), v(x0, y0, z1)], c));
-    faces.add(_Face([v(x0, y1, z1), v(x1, y1, z1), v(x1, y1, z0), v(x0, y1, z0)], c));
-    faces.add(_Face([v(x0, y0, z0), v(x0, y0, z1), v(x0, y1, z1), v(x0, y1, z0)], c));
-    faces.add(_Face([v(x1, y0, z1), v(x1, y0, z0), v(x1, y1, z0), v(x1, y1, z1)], c));
+void _box(
+  List<_Prim> out,
+  _V3 c,
+  _V3 s,
+  Color col, {
+  double alpha = 1,
+  _Place? pl,
+  bool wire = false,
+  double stroke = 1,
+  bool glow = false,
+}) {
+  final hx = s.x / 2, hy = s.y / 2, hz = s.z / 2;
+  final local = <_V3>[
+    _V3(-hx, -hy, -hz), _V3(hx, -hy, -hz), _V3(-hx, hy, -hz), _V3(hx, hy, -hz),
+    _V3(-hx, -hy, hz), _V3(hx, -hy, hz), _V3(-hx, hy, hz), _V3(hx, hy, hz),
+  ];
+  final p = local.map((v) => (pl == null ? v : pl.apply(v)) + c).toList();
+  if (wire) {
+    for (final e in _boxEdges) {
+      out.add(_Prim([p[e[0]], p[e[1]]], col,
+          alpha: alpha, fill: false, stroke: stroke, glow: glow));
+    }
+  } else {
+    for (final f in _boxFaces) {
+      out.add(_Prim([p[f[0]], p[f[1]], p[f[2]], p[f[3]]], col, alpha: alpha));
+    }
   }
+}
 
-  void pane(double x0, double x1, double y0, double y1) {
-    const z = 0.02;
-    faces.add(_Face([
-      _V3(x0, y0, z),
-      _V3(x1, y0, z),
-      _V3(x1, y1, z),
-      _V3(x0, y1, z),
-    ], _glassCol, glass: true));
+/// Призма вдоль оси X — каркасный стиль.
+void _prism(
+  List<_Prim> out,
+  _V3 c,
+  double r,
+  double len,
+  int sides,
+  Color col, {
+  double alpha = 1,
+  _Place? pl,
+  double stroke = 1.2,
+  bool glow = true,
+  bool fill = false,
+}) {
+  final a0 = <_V3>[], a1 = <_V3>[];
+  for (var i = 0; i < sides; i++) {
+    final ang = i / sides * math.pi * 2;
+    final y = math.cos(ang) * r, z = math.sin(ang) * r;
+    a0.add(_V3(-len / 2, y, z));
+    a1.add(_V3(len / 2, y, z));
   }
-
-  /// Диагональный блик на стеклопакете.
-  void glint(double x0, double x1, double y0, double y1) {
-    final w = x1 - x0, h = y1 - y0;
-    if (w < 0.22 || h < 0.22) return;
-    const z = 0.035;
-    final xa = x0 + w * 0.14, xb = x0 + w * 0.34;
-    faces.add(_Face([
-      _V3(xa, y0 + h * 0.06, z),
-      _V3(xb, y0 + h * 0.06, z),
-      _V3(xb + w * 0.26, y1 - h * 0.06, z),
-      _V3(xa + w * 0.26, y1 - h * 0.06, z),
-    ], const Color(0xFFFFFFFF), glint: true));
+  _V3 w(_V3 v) => (pl == null ? v : pl.apply(v)) + c;
+  for (var i = 0; i < sides; i++) {
+    final j = (i + 1) % sides;
+    out.add(_Prim([w(a0[i]), w(a0[j])], col,
+        alpha: alpha, fill: false, stroke: stroke, glow: glow));
+    out.add(_Prim([w(a1[i]), w(a1[j])], col,
+        alpha: alpha, fill: false, stroke: stroke, glow: glow));
+    out.add(_Prim([w(a0[i]), w(a1[i])], col,
+        alpha: alpha * 0.65, fill: false, stroke: stroke * 0.75, glow: glow));
+    if (fill) {
+      out.add(_Prim([w(a0[i]), w(a0[j]), w(a1[j]), w(a1[i])], col,
+          alpha: alpha * 0.10));
+    }
   }
+}
 
-  // ── Рама ──────────────────────────────────────────────────────────────
-  box(-_W + _FW / 2, 0, 0, _FW, _H * 2, _FD, _gold);
-  box(_W - _FW / 2, 0, 0, _FW, _H * 2, _FD, _gold);
-  box(0, _H - _FW / 2, 0, _W * 2 - _FW * 2, _FW, _FD, _gold);
-  box(0, -_H + _FW / 2, 0, _W * 2 - _FW * 2, _FW, _FD, _gold);
+/// Конус (острие карандаша).
+void _cone(
+  List<_Prim> out,
+  _V3 c,
+  double r,
+  double len,
+  int sides,
+  Color col, {
+  double alpha = 1,
+  _Place? pl,
+  double stroke = 1.2,
+  bool glow = true,
+}) {
+  final ring = <_V3>[];
+  for (var i = 0; i < sides; i++) {
+    final ang = i / sides * math.pi * 2;
+    ring.add(_V3(-len / 2, math.cos(ang) * r, math.sin(ang) * r));
+  }
+  final apex = _V3(len / 2, 0, 0);
+  _V3 w(_V3 v) => (pl == null ? v : pl.apply(v)) + c;
+  for (var i = 0; i < sides; i++) {
+    final j = (i + 1) % sides;
+    out.add(_Prim([w(ring[i]), w(ring[j])], col,
+        alpha: alpha, fill: false, stroke: stroke, glow: glow));
+    out.add(_Prim([w(ring[i]), w(apex)], col,
+        alpha: alpha, fill: false, stroke: stroke, glow: glow));
+  }
+}
 
-  // ── Фаска (внутренний контур рамы) ────────────────────────────────────
-  const lip = 0.05;
-  const lipD = _FD - 0.12;
-  box(-_W + _FW + lip / 2, 0, 0.03, lip, _H * 2 - _FW * 2, lipD, _goldLight);
-  box(_W - _FW - lip / 2, 0, 0.03, lip, _H * 2 - _FW * 2, lipD, _goldLight);
-  box(0, _H - _FW - lip / 2, 0.03, _W * 2 - _FW * 2, lip, lipD, _goldLight);
-  box(0, -_H + _FW + lip / 2, 0.03, _W * 2 - _FW * 2, lip, lipD, _goldLight);
+// ═══════════════════════════ ПАЛИТРА ═══════════════════════════
 
-  // ── Импосты ───────────────────────────────────────────────────────────
-  box(0, 0.02, 0, 0.11, _H * 2 - _FW * 2, 0.32, _goldDeep);
-  box(0, 0.45, 0, _W * 2 - _FW * 2, 0.11, 0.32, _goldDeep);
+const _pvc = Color(0xFFF5F7FA);
+const _pvcShade = Color(0xFFDCE3EC);
+const _pvcInner = Color(0xFFE9EEF4);
+const _glassCol = Color(0xFF8FC8E8);
+const _silver = Color(0xFFC9CFD8);
+const _silverDark = Color(0xFF8E97A3);
+const _darkMetal = Color(0xFF39414B);
+const _sillCol = Color(0xFFE8ECF1);
 
-  // ── Створки ───────────────────────────────────────────────────────────
-  final lx0 = -_W + _FW, lx1 = -0.055;
-  final rx0 = 0.055, rx1 = _W - _FW;
-  final uy0 = 0.505, uy1 = _H - _FW;
-  final ly0 = -_H + _FW, ly1 = 0.395;
+const _toolCyan = Color(0xFF5FE3FF);
+const _toolGreen = Color(0xFF7CFFB2);
+const _toolAmber = Color(0xFFFFD166);
 
-  void sash(double x0, double x1, double y0, double y1, {bool handle = false}) {
-    // обвязки створки
-    box((x0 + x1) / 2, y1 - _ST / 2, 0.03, x1 - x0, _ST, _SD, _goldSash);
-    box((x0 + x1) / 2, y0 + _ST / 2, 0.03, x1 - x0, _ST, _SD, _goldSash);
-    box(x0 + _ST / 2, (y0 + y1) / 2, 0.03, _ST, y1 - y0, _SD, _goldSash);
-    box(x1 - _ST / 2, (y0 + y1) / 2, 0.03, _ST, y1 - y0, _SD, _goldSash);
+// ═══════════════════════════ ОКНО ═══════════════════════════
 
-    // стеклопакет + блик
-    pane(x0 + _ST, x1 - _ST, y0 + _ST, y1 - _ST);
-    glint(x0 + _ST, x1 - _ST, y0 + _ST, y1 - _ST);
+const _W = 1.30; // полуширина
+const _H = 1.40; // полувысота
+const _D = 0.075; // глубина профиля (тонкий ПВХ)
 
-    // петли (тёмный металл) — на левой стороне створки
-    final hx = x0 + _ST / 2;
-    for (final k in const [0.10, 0.90]) {
-      final hy = y0 + (y1 - y0) * k;
-      box(hx, hy, 0.20, 0.055, 0.20, 0.055, _metal);
-      box(hx, hy, 0.235, 0.03, 0.13, 0.03, _metalLight);
+void _buildWindow(List<_Prim> out) {
+  const fw = 0.075; // толщина профиля рамы
+  const st = 0.045; // толщина обвязки створки
+  const sd = 0.052; // глубина створки
+
+  // ── Рама: 4 тонких бруса ──────────────────────────────────────────
+  _box(out, const _V3(-_W + fw / 2, 0, 0), const _V3(fw, _H * 2, _D), _pvc);
+  _box(out, const _V3(_W - fw / 2, 0, 0), const _V3(fw, _H * 2, _D), _pvc);
+  _box(out, const _V3(0, _H - fw / 2, 0), const _V3(_W * 2 - fw * 2, fw, _D), _pvc);
+  _box(out, const _V3(0, -_H + fw / 2, 0), const _V3(_W * 2 - fw * 2, fw, _D), _pvc);
+
+  // ── Фаска: внутренний светлый контур (объём профиля) ─────────────
+  const lip = 0.022;
+  const lipD = _D + 0.006;
+  _box(out, const _V3(-_W + fw + lip / 2, 0, 0.006),
+      const _V3(lip, _H * 2 - fw * 2, lipD), _pvcInner);
+  _box(out, const _V3(_W - fw - lip / 2, 0, 0.006),
+      const _V3(lip, _H * 2 - fw * 2, lipD), _pvcInner);
+  _box(out, const _V3(0, _H - fw - lip / 2, 0.006),
+      const _V3(_W * 2 - fw * 2, lip, lipD), _pvcInner);
+  _box(out, const _V3(0, -_H + fw + lip / 2, 0.006),
+      const _V3(_W * 2 - fw * 2, lip, lipD), _pvcInner);
+
+  // ── Импост по центру ──────────────────────────────────────────────
+  _box(out, const _V3(0, 0, 0), const _V3(0.062, _H * 2 - fw * 2, _D), _pvcShade);
+  _box(out, const _V3(0, 0, 0.008), const _V3(0.018, _H * 2 - fw * 2, _D + 0.006),
+      _pvcInner);
+
+  // ── Створки ───────────────────────────────────────────────────────
+  final lx0 = -_W + fw, lx1 = -0.031;
+  final rx0 = 0.031, rx1 = _W - fw;
+
+  void sash(double x0, double x1, {required bool handle, required bool hinges}) {
+    final cx = (x0 + x1) / 2;
+    final wdt = x1 - x0;
+    // обвязки
+    _box(out, _V3(cx, _H - fw - st / 2, 0.012), _V3(wdt, st, sd), _pvc);
+    _box(out, _V3(cx, -_H + fw + st / 2, 0.012), _V3(wdt, st, sd), _pvc);
+    _box(out, _V3(x0 + st / 2, 0, 0.012), _V3(st, _H * 2 - fw * 2, sd), _pvc);
+    _box(out, _V3(x1 - st / 2, 0, 0.012), _V3(st, _H * 2 - fw * 2, sd), _pvc);
+
+    // стеклопакет
+    final gx0 = x0 + st, gx1 = x1 - st;
+    final gy0 = -_H + fw + st, gy1 = _H - fw - st;
+    out.add(_Prim([
+      _V3(gx0, gy0, 0.020),
+      _V3(gx1, gy0, 0.020),
+      _V3(gx1, gy1, 0.020),
+      _V3(gx0, gy1, 0.020),
+    ], _glassCol, alpha: 0.34, glass: true));
+
+    // блик на стекле
+    final gw = gx1 - gx0, gh = gy1 - gy0;
+    if (gw > 0.2 && gh > 0.2) {
+      out.add(_Prim([
+        _V3(gx0 + gw * 0.16, gy0 + gh * 0.08, 0.030),
+        _V3(gx0 + gw * 0.34, gy0 + gh * 0.08, 0.030),
+        _V3(gx0 + gw * 0.62, gy1 - gh * 0.08, 0.030),
+        _V3(gx0 + gw * 0.44, gy1 - gh * 0.08, 0.030),
+      ], const Color(0xFFFFFFFF), alpha: 0.17));
     }
 
-    // ручка (золото/бронза) — на правой стороне створки
+    // петли — тёмный металл, две на створку
+    if (hinges) {
+      final hx = x0 + st / 2;
+      for (final k in const [0.10, 0.90]) {
+        final hy = gy0 + (gy1 - gy0) * k;
+        _box(out, _V3(hx, hy, 0.030), const _V3(0.030, 0.115, 0.030), _darkMetal);
+        _box(out, _V3(hx, hy, 0.048), const _V3(0.020, 0.075, 0.020), _silverDark);
+      }
+    }
+
+    // ручка — серебристая, на противоположной от петель стороне
     if (handle) {
-      final mx = x1 - _ST / 2;
-      final my = (y0 + y1) / 2;
-      box(mx, my, 0.205, 0.075, 0.26, 0.05, _goldDeep); // площадка
-      box(mx, my, 0.30, 0.05, 0.07, 0.17, _gold); // рычаг
-      box(mx, my + 0.09, 0.30, 0.045, 0.05, 0.13, _goldLight); // упор
+      final mx = x1 - st / 2;
+      _box(out, _V3(mx, -0.02, 0.036), const _V3(0.026, 0.135, 0.020), _silverDark);
+      _box(out, _V3(mx - 0.012, -0.02, 0.072), const _V3(0.020, 0.048, 0.062), _silver);
+      _box(out, _V3(mx - 0.012, -0.075, 0.072), const _V3(0.018, 0.030, 0.050), _silver);
     }
   }
 
-  sash(lx0, lx1, uy0, uy1);
-  sash(lx0, lx1, ly0, ly1);
-  sash(rx0, rx1, uy0, uy1);
-  sash(rx0, rx1, ly0, ly1, handle: true);
+  sash(lx0, lx1, handle: false, hinges: true);
+  sash(rx0, rx1, handle: true, hinges: true);
 
-  // ── Подоконник ────────────────────────────────────────────────────────
-  box(0, -_H - 0.10, 0.10, _W * 2 + 0.34, 0.14, 0.74, _goldDeep);
-  box(0, -_H - 0.19, 0.34, _W * 2 + 0.28, 0.06, 0.22, _gold);
-
-  return faces;
+  // ── Подоконник с отливом ──────────────────────────────────────────
+  _box(out, const _V3(0, -_H - 0.035, 0.055),
+      const _V3(_W * 2 + 0.30, 0.070, _D + 0.16), _sillCol);
+  _box(out, const _V3(0, -_H - 0.088, _D / 2 + 0.075),
+      const _V3(_W * 2 + 0.26, 0.036, 0.055), _pvcShade);
 }
+
+// ═══════════════════════════ ИНСТРУМЕНТЫ ═══════════════════════════
+
+/// Точка на наклонной орбите.
+_V3 _orbit(double r, double tiltX, double tiltZ, double a) {
+  var p = _V3(math.cos(a) * r, 0, math.sin(a) * r);
+  p = _rotX(p, tiltX);
+  p = _rotZ(p, tiltZ);
+  return p;
+}
+
+void _buildTools(List<_Prim> out, double t) {
+  // ── Рулетка: своя орбита (наклон 0.55 / 0.25) ─────────────────────
+  {
+    final a = t * 0.40;
+    final pos = _orbit(1.16, 0.55, 0.25, a);
+    final pl = _Place(pos, rx: 0.42, ry: a * 1.7, rz: 0.30);
+    _prism(out, const _V3(0, 0, 0), 0.085, 0.165, 6, _toolCyan,
+        pl: pl, alpha: 0.95, stroke: 1.3, fill: true);
+    _box(out, const _V3(0.115, 0, 0), const _V3(0.055, 0.105, 0.105), _toolCyan,
+        pl: pl, wire: true, stroke: 1.2, glow: true, alpha: 0.9);
+  }
+
+  // ── Уровень: своя орбита (наклон −0.45 / 0.75) ────────────────────
+  {
+    final a = -t * 0.29 + 2.1;
+    final pos = _orbit(1.34, -0.45, 0.75, a);
+    final pl = _Place(pos, rx: 0.15, ry: a * 1.2, rz: 0.55);
+    _box(out, const _V3(0, 0, 0), const _V3(0.56, 0.070, 0.058), _toolGreen,
+        pl: pl, wire: true, stroke: 1.3, glow: true, alpha: 0.95);
+    _prism(out, const _V3(0, 0, 0), 0.026, 0.20, 6, _toolGreen,
+        pl: pl, alpha: 0.85, stroke: 1.0, fill: true);
+  }
+
+  // ── Карандаш: своя орбита (наклон 0.85 / −0.35) ───────────────────
+  {
+    final a = t * 0.24 + 4.0;
+    final pos = _orbit(1.46, 0.85, -0.35, a);
+    final pl = _Place(pos, rx: 0.30, ry: a * 1.4, rz: -0.35);
+    _prism(out, const _V3(-0.03, 0, 0), 0.028, 0.30, 5, _toolAmber,
+        pl: pl, alpha: 0.95, stroke: 1.2, fill: true);
+    _cone(out, const _V3(0.19, 0, 0), 0.028, 0.09, 5, _toolAmber,
+        pl: pl, alpha: 0.95, stroke: 1.2);
+    _box(out, const _V3(-0.20, 0, 0), const _V3(0.045, 0.048, 0.048), _toolAmber,
+        pl: pl, wire: true, stroke: 1.1, glow: true, alpha: 0.85);
+  }
+}
+
+// ═══════════════════════════ ОТРИСОВКА ═══════════════════════════
 
 Color _shade(Color c, double k) => Color.fromARGB(
       c.alpha,
@@ -169,20 +362,36 @@ Color _shade(Color c, double k) => Color.fromARGB(
       (c.blue * k).clamp(0, 255).round(),
     );
 
-// ─── 3D-слой ────────────────────────────────────────────────────────────────
-class _Scene3DPainter extends CustomPainter {
+class _Draw {
+  final List<Offset> pts;
+  final _Prim pr;
+  final double depth;
+  final double k;
+  _Draw(this.pts, this.pr, this.depth, this.k);
+}
+
+class _ScenePainter extends CustomPainter {
   final double yaw;
   final double pitch;
-  final List<_Face> faces;
-  _Scene3DPainter(this.yaw, this.pitch, this.faces);
+  final List<_Prim> prims;
+  _ScenePainter(this.yaw, this.pitch, this.prims);
 
   @override
   void paint(Canvas canvas, Size size) {
-    const camZ = -7.6;
-    final f = size.shortestSide * 1.02;
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final light = const _V3(0.45, 0.78, 0.44).unit;
+    // мягкое свечение позади сцены — «премиальная» подсветка
+    final bg = Paint()
+      ..shader = RadialGradient(
+        colors: const [Color(0x2A3E7BB8), Color(0x00000000)],
+      ).createShader(Rect.fromCircle(
+        center: Offset(size.width / 2, size.height / 2),
+        radius: size.shortestSide * 0.78,
+      ));
+    canvas.drawRect(Offset.zero & size, bg);
+
+    const camZ = -4.2;
+    final f = size.shortestSide * 1.15;
+    final cx = size.width / 2, cy = size.height / 2;
+    final light = const _V3(-0.35, 0.62, 0.70).unit;
 
     final cyw = math.cos(yaw), syw = math.sin(yaw);
     final cp = math.cos(pitch), sp = math.sin(pitch);
@@ -197,228 +406,111 @@ class _Scene3DPainter extends CustomPainter {
 
     Offset proj(_V3 p) {
       final d = p.z - camZ;
-      final s = f / (d <= 0.2 ? 0.2 : d);
+      final s = f / (d <= 0.25 ? 0.25 : d);
       return Offset(cx + p.x * s, cy - p.y * s);
     }
 
-    final items = <_DrawFace>[];
-    for (final fc in faces) {
-      final rp = fc.pts.map(rot).toList();
-      final c = _V3(
-        rp.fold<double>(0, (a, p) => a + p.x) / rp.length,
-        rp.fold<double>(0, (a, p) => a + p.y) / rp.length,
-        rp.fold<double>(0, (a, p) => a + p.z) / rp.length,
-      );
-      final n = (rp[1] - rp[0]).cross(rp[2] - rp[0]).unit;
-      final k = 0.34 + 0.66 * n.dot(light).abs();
-      items.add(_DrawFace(
-        rp.map(proj).toList(),
-        _shade(fc.color, fc.glint ? 1.0 : k),
-        c.z - camZ,
-        fc.glass,
-        fc.glint,
-      ));
+    final items = <_Draw>[];
+    for (final pr in prims) {
+      final rp = pr.pts.map(rot).toList();
+      var zs = 0.0;
+      for (final p in rp) {
+        zs += p.z;
+      }
+      final depth = zs / rp.length - camZ;
+      if (depth <= 0.35) continue;
+
+      var k = 1.0;
+      if (pr.fill && rp.length >= 3) {
+        final n = _V3.cross(rp[1] - rp[0], rp[2] - rp[0]).unit;
+        k = 0.46 + 0.54 * _V3.dot(n, light).abs();
+      }
+      items.add(_Draw(rp.map(proj).toList(), pr, depth, k));
     }
 
+    // дальние — первыми: инструмент за окном уходит за раму
     items.sort((a, b) => b.depth.compareTo(a.depth));
 
     for (final it in items) {
+      final pr = it.pr;
+
+      if (!pr.fill) {
+        final a = it.pts;
+        if (a.length < 2) continue;
+        canvas.drawLine(
+          a[0],
+          a[1],
+          Paint()
+            ..color = pr.color.withOpacity(pr.alpha * 0.20)
+            ..strokeWidth = pr.stroke * 3.4
+            ..strokeCap = StrokeCap.round
+            ..blendMode = BlendMode.plus,
+        );
+        canvas.drawLine(
+          a[0],
+          a[1],
+          Paint()
+            ..color = pr.color.withOpacity(pr.alpha)
+            ..strokeWidth = pr.stroke
+            ..strokeCap = StrokeCap.round
+            ..blendMode = pr.glow ? BlendMode.plus : BlendMode.srcOver,
+        );
+        continue;
+      }
+
       final path = Path()..moveTo(it.pts[0].dx, it.pts[0].dy);
       for (var i = 1; i < it.pts.length; i++) {
         path.lineTo(it.pts[i].dx, it.pts[i].dy);
       }
       path.close();
 
-      if (it.glint) {
+      if (pr.glass) {
         canvas.drawPath(
           path,
           Paint()
-            ..color = Colors.white.withOpacity(0.15)
-            ..style = PaintingStyle.fill,
-        );
-      } else if (it.glass) {
-        canvas.drawPath(
-          path,
-          Paint()
-            ..color = it.color.withOpacity(0.30)
+            ..color = _shade(pr.color, it.k).withOpacity(pr.alpha)
             ..style = PaintingStyle.fill,
         );
         canvas.drawPath(
           path,
           Paint()
-            ..color = const Color(0xFFBFE6FA).withOpacity(0.55)
+            ..color = const Color(0xFFCFEBFA).withOpacity(0.55)
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.1,
+            ..strokeWidth = 1.0,
+        );
+      } else if (pr.alpha < 1) {
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = _shade(pr.color, it.k).withOpacity(pr.alpha)
+            ..style = PaintingStyle.fill,
         );
       } else {
-        canvas.drawPath(path, Paint()..color = it.color..style = PaintingStyle.fill);
         canvas.drawPath(
           path,
           Paint()
-            ..color = const Color(0x33000000)
+            ..color = _shade(pr.color, it.k)
+            ..style = PaintingStyle.fill,
+        );
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = const Color(0x26000000)
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 0.9,
+            ..strokeWidth = 0.8,
         );
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _Scene3DPainter old) =>
+  bool shouldRepaint(covariant _ScenePainter old) =>
       old.yaw != yaw || old.pitch != pitch;
 }
 
-// ─── Чертёжный слой (парящие элементы) ──────────────────────────────────────
-class _OverlayPainter extends CustomPainter {
-  final double t;
-  _OverlayPainter(this.t);
+// ═══════════════════════════ ВИДЖЕТ ═══════════════════════════
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = (size.shortestSide / 320).clamp(0.55, 2.2);
-    final w = size.width, h = size.height;
-    final ph = t * math.pi * 2;
-
-    double lev(double phase, double amp) => math.sin(ph + phase) * h * amp;
-
-    // размерные линии, имитирующие чертёж
-    _dimH(canvas, w * 0.25, w * 0.75, h * 0.130 + lev(0.0, 0.012), '1300', s);
-    _dimV(canvas, w * 0.860, h * 0.300 + lev(1.7, 0.010),
-        h * 0.620 + lev(1.7, 0.010), '1400', s);
-
-    // парящие инструменты (асинхронная левитация)
-    _tape(canvas, Offset(w * 0.130, h * 0.300 + lev(0.6, 0.022)), s);
-    _pencil(canvas, Offset(w * 0.870, h * 0.760 + lev(2.4, 0.026)), s,
-        -0.55 + math.sin(ph + 2.4) * 0.10);
-    _level(canvas, Offset(w * 0.170, h * 0.760 + lev(4.1, 0.020)), s);
-  }
-
-  void _text(Canvas c, String s, Offset center, double size, Color color) {
-    final tp = TextPainter(
-      text: TextSpan(
-        text: s,
-        style: TextStyle(
-          color: color,
-          fontSize: size,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    tp.paint(c, center - Offset(tp.width / 2, tp.height / 2));
-  }
-
-  void _dimH(Canvas c, double x0, double x1, double y, String label, double s) {
-    final p = Paint()
-      ..color = _gold.withOpacity(0.55)
-      ..strokeWidth = 1.1 * s;
-    c.drawLine(Offset(x0, y), Offset(x1, y), p);
-    c.drawLine(Offset(x0, y - 5 * s), Offset(x0, y + 5 * s), p);
-    c.drawLine(Offset(x1, y - 5 * s), Offset(x1, y + 5 * s), p);
-    _text(c, label, Offset((x0 + x1) / 2, y - 14 * s), 13 * s, _goldLight);
-  }
-
-  void _dimV(Canvas c, double x, double y0, double y1, String label, double s) {
-    final p = Paint()
-      ..color = _gold.withOpacity(0.55)
-      ..strokeWidth = 1.1 * s;
-    c.drawLine(Offset(x, y0), Offset(x, y1), p);
-    c.drawLine(Offset(x - 5 * s, y0), Offset(x + 5 * s, y0), p);
-    c.drawLine(Offset(x - 5 * s, y1), Offset(x + 5 * s, y1), p);
-    _text(c, label, Offset(x + 26 * s, (y0 + y1) / 2), 13 * s, _goldLight);
-  }
-
-  /// Рулетка.
-  void _tape(Canvas c, Offset o, double s) {
-    final body = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: o, width: 48 * s, height: 36 * s),
-      Radius.circular(10 * s),
-    );
-    c.drawRRect(body, Paint()..color = const Color(0xFF16233A));
-    c.drawRRect(
-      body,
-      Paint()
-        ..color = _gold.withOpacity(0.85)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.6 * s,
-    );
-    c.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(o.dx - 5 * s, o.dy + 14 * s, 10 * s, 30 * s),
-        Radius.circular(3 * s),
-      ),
-      Paint()..color = _gold.withOpacity(0.45),
-    );
-    c.drawCircle(o, 10 * s, Paint()..color = _gold.withOpacity(0.22));
-    c.drawCircle(
-      o,
-      10 * s,
-      Paint()
-        ..color = _gold.withOpacity(0.9)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4 * s,
-    );
-    c.drawCircle(o, 3.4 * s, Paint()..color = _gold.withOpacity(0.75));
-  }
-
-  /// Карандаш.
-  void _pencil(Canvas c, Offset o, double s, double angle) {
-    c.save();
-    c.translate(o.dx, o.dy);
-    c.rotate(angle);
-    c.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset.zero, width: 78 * s, height: 12 * s),
-        Radius.circular(3 * s),
-      ),
-      Paint()..color = _gold.withOpacity(0.85),
-    );
-    final tip = Path()
-      ..moveTo(39 * s, -6 * s)
-      ..lineTo(52 * s, 0)
-      ..lineTo(39 * s, 6 * s)
-      ..close();
-    c.drawPath(tip, Paint()..color = const Color(0xFFE8E2D0));
-    c.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(-39 * s, -6 * s, 9 * s, 12 * s),
-        Radius.circular(2 * s),
-      ),
-      Paint()..color = const Color(0xFFB08D57),
-    );
-    c.restore();
-  }
-
-  /// Строительный уровень.
-  void _level(Canvas c, Offset o, double s) {
-    final body = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: o, width: 100 * s, height: 22 * s),
-      Radius.circular(6 * s),
-    );
-    c.drawRRect(body, Paint()..color = const Color(0xFF16233A));
-    c.drawRRect(
-      body,
-      Paint()
-        ..color = _gold.withOpacity(0.8)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.6 * s,
-    );
-    c.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: o, width: 36 * s, height: 10 * s),
-        Radius.circular(5 * s),
-      ),
-      Paint()..color = const Color(0xFF7FC4E8).withOpacity(0.30),
-    );
-    c.drawCircle(o, 3.6 * s, Paint()..color = const Color(0xFFBFE6FA).withOpacity(0.9));
-  }
-
-  @override
-  bool shouldRepaint(covariant _OverlayPainter old) => old.t != t;
-}
-
-/// Виджет 3D-просмотра окна: авто-вращение + поворот пальцем.
+/// 3D-просмотр окна: авто-вращение + поворот пальцем.
 class Viewer3D extends StatefulWidget {
   const Viewer3D({super.key});
 
@@ -426,17 +518,16 @@ class Viewer3D extends StatefulWidget {
   State<Viewer3D> createState() => _Viewer3DState();
 }
 
-class _Viewer3DState extends State<Viewer3D> with SingleTickerProviderStateMixin {
+class _Viewer3DState extends State<Viewer3D>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _c;
-  late final List<_Face> _faces;
   double _dragYaw = 0;
   double _dragPitch = 0;
 
   @override
   void initState() {
     super.initState();
-    _faces = _buildModel();
-    _c = AnimationController(vsync: this, duration: const Duration(seconds: 16))
+    _c = AnimationController(vsync: this, duration: const Duration(seconds: 24))
       ..repeat();
   }
 
@@ -452,29 +543,24 @@ class _Viewer3DState extends State<Viewer3D> with SingleTickerProviderStateMixin
       behavior: HitTestBehavior.opaque,
       onPanUpdate: (d) {
         setState(() {
-          _dragYaw += d.delta.dx * 0.011;
-          _dragPitch = (_dragPitch - d.delta.dy * 0.008).clamp(-0.75, 0.75);
+          _dragYaw += d.delta.dx * 0.010;
+          _dragPitch = (_dragPitch - d.delta.dy * 0.007).clamp(-0.70, 0.70);
         });
       },
       child: AnimatedBuilder(
         animation: _c,
         builder: (_, __) {
-          final auto = math.sin(_c.value * math.pi * 2) * 0.55;
-          return Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: _Scene3DPainter(
-                    -0.5 + _dragYaw + auto,
-                    0.20 + _dragPitch,
-                    _faces,
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: CustomPaint(painter: _OverlayPainter(_c.value)),
-              ),
-            ],
+          final t = _c.value * math.pi * 2;
+          final prims = <_Prim>[];
+          _buildWindow(prims);
+          _buildTools(prims, t);
+          return CustomPaint(
+            painter: _ScenePainter(
+              -0.42 + _dragYaw + math.sin(t) * 0.62,
+              0.17 + _dragPitch,
+              prims,
+            ),
+            size: Size.infinite,
           );
         },
       ),
