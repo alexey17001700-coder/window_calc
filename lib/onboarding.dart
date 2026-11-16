@@ -180,7 +180,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   // ─────────────────── СЦЕНА С 3D-РАЗВОРОТОМ ───────────────────
   Widget _flipStage(double h) {
     return AnimatedBuilder(
-      animation: _flip,
+      animation: Listenable.merge([_flip, _trail]),
       builder: (context, _) {
         final t = _flip.value;
 
@@ -194,18 +194,49 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         // Отдаление в начале разворота → приближение в конце.
         final scale = 1.0 - 0.16 * math.sin(t * math.pi);
 
-        return Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.0014)
-            ..rotateY(angle)
-            ..scale(scale),
-          child: Transform(
-            // Контрразворот: новая карточка читается «лицом», а не зеркалом.
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..rotateY(showTo ? math.pi * _dir : 0.0),
-            child: _cardWrap(h, _cardFor(idx)),
+        // Габариты карточки (layout не зависит от 3D-трансформации).
+        final box = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+        if (box != null && box.hasSize) _cardSize = box.size;
+
+        // Яркость шлейфа: во время разворота + лёгкий след при свайпе.
+        final dragI = (_drag.abs() / 0.55).clamp(0.0, 1.0) * 0.5;
+        final intensity = math.max(_trail.value, dragI);
+
+        return SizedBox.expand(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.0014)
+                    ..rotateY(angle)
+                    ..scale(scale),
+                  child: Transform(
+                    // Контрразворот: новая карточка читается «лицом», а не зеркалом.
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..rotateY(showTo ? math.pi * _dir : 0.0),
+                    child: _cardWrap(h, _cardFor(idx)),
+                  ),
+                ),
+              ),
+              // Серебристый шлейф от ближнего торца — поверх карточки.
+              if (intensity > 0.004)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _TrailPainter(
+                        t: t,
+                        dir: _dir,
+                        drag: _drag,
+                        intensity: intensity,
+                        cardSize: _cardSize,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         );
       },
