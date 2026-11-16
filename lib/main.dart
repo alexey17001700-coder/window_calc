@@ -1500,6 +1500,7 @@ class MainMenuScreen extends StatelessWidget {
                   context,
                   icon: Icons.tune_rounded,
                   accent: AppTheme.bronze,
+                  index: 2,
                   title: 'Настройки прайса',
                   subtitle: 'Цены и коэффициенты',
                   onTap: () async {
