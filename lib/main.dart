@@ -1467,14 +1467,13 @@ class MainMenuScreen extends StatelessWidget {
                   index: 0,
                   title: 'Создать замер',
                   subtitle: 'Новый замер клиента',
-                  onTap: () async {
-                    final result = await Navigator.push<Measurement>(
+                  onTap: () {
+                    Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => MeasurementEditorScreen(price: price),
+                        builder: (_) => const WizardStep1Screen(),
                       ),
                     );
-                    if (result != null) onMeasurementAdded(result);
                   },
                 ),
                 _menuCard(
