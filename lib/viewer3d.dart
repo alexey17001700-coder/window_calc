@@ -196,11 +196,12 @@ void _cone(
 
 // ═══════════════════════════ ПАЛИТРА ═══════════════════════════
 
-const _pvc = Color(0xFFF5F7FA);
-const _pvcShade = Color(0xFFDCE3EC);
-const _pvcInner = Color(0xFFE9EEF4);
-const _glassCol = Color(0xFF8FC8E8);
-const _silver = Color(0xFFC9CFD8);
+const _pvc = Color(0xFFF7F9FC);
+const _pvcShade = Color(0xFFD3DCE7);
+const _pvcInner = Color(0xFFEDF1F6);
+const _pvcGroove = Color(0xFFA9B6C6);
+const _glassCol = Color(0xFF7FC0E6);
+const _silver = Color(0xFFD8DDE5);
 const _silverDark = Color(0xFF8E97A3);
 const _darkMetal = Color(0xFF39414B);
 const _sillCol = Color(0xFFE8ECF1);
