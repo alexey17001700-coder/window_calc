@@ -495,7 +495,8 @@ class _Draw {
   final _Prim pr;
   final double depth;
   final double k;
-  _Draw(this.pts, this.pr, this.depth, this.k);
+  final double fog;
+  _Draw(this.pts, this.pr, this.depth, this.k, this.fog);
 }
 
 class _ScenePainter extends CustomPainter {
