@@ -3795,7 +3795,62 @@ class _ResultScreenState extends State<ResultScreen> {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Скопировано в буфер')));
             }
           }
-        },
+          },
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
+              ),
+              boxShadow: isDark
+                  ? null
+                  : const [
+                      BoxShadow(color: Color(0x121B2A4A), blurRadius: 16, offset: Offset(0, 7)),
+                    ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(13),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        color.withOpacity(isDark ? 0.34 : 0.18),
+                        color.withOpacity(isDark ? 0.10 : 0.05),
+                      ],
+                    ),
+                    border: Border.all(color: color.withOpacity(0.38)),
+                  ),
+                  child: Icon(icon, color: color, size: 21),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: -0.2),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        sub,
+                        style: TextStyle(fontSize: 12, height: 1.25, color: onSurface.withOpacity(0.55)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.arrow_forward_ios_rounded, size: 13, color: onSurface.withOpacity(0.34)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
