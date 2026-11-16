@@ -1801,21 +1801,28 @@ class MainMenuScreen extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 54,
-                  height: 54,
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(17),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        accent.withOpacity(isDark ? 0.30 : 0.16),
+                        accent.withOpacity(isDark ? 0.34 : 0.18),
                         accent.withOpacity(isDark ? 0.10 : 0.05),
                       ],
                     ),
-                    border: Border.all(color: accent.withOpacity(0.35)),
+                    border: Border.all(color: accent.withOpacity(0.38)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: accent.withOpacity(isDark ? 0.22 : 0.13),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
-                  child: Icon(icon, color: accent, size: 26),
+                  child: Icon(icon, color: accent, size: 27),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
