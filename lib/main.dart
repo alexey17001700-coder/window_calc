@@ -5,6 +5,7 @@ import 'theme.dart';
 import 'viewer3d.dart';
 import 'update_checker.dart';
 import 'wizard_screen.dart';
+import 'onboarding.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
