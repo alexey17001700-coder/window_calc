@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-///  ПРЕМИАЛЬНЫЙ СВАЙП-МАСТЕР  ·  v3.0
-///  Карточки переключаются свайпом влево/вправо.
+///  ПРЕМИАЛЬНЫЙ СВАЙП-МАСТЕР  ·  v3.1
+///  Карточки переворачиваются в 3D: отдаление → разворот → приближение.
+///  Свайп влево/вправо или кнопка «ДАЛЕЕ».
 ///  Каждая карточка занимает не более 50% высоты экрана.
 /// ═══════════════════════════════════════════════════════════════════
 class OnboardingScreen extends StatefulWidget {
@@ -20,13 +21,30 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
-  final PageController _pc = PageController(viewportFraction: 1.0);
   final TextEditingController _name = TextEditingController();
   final TextEditingController _addr = TextEditingController();
   final TextEditingController _flat = TextEditingController();
   final TextEditingController _floor = TextEditingController();
+
   late final AnimationController _shine;
+  late final AnimationController _flip;
+
+  /// Текущая (целевая) страница — шапка, прогресс и точки реагируют сразу.
   int _page = 0;
+
+  /// Страница, которая сейчас «лицом» на экране (до середины разворота).
+  int _from = 0;
+
+  /// Страница, которая покажется после разворота.
+  int _to = 0;
+
+  /// Направление разворота: 1 — вперёд, -1 — назад.
+  int _dir = 1;
+
+  bool _animating = false;
+
+  /// Доворот от пальца (радианы), пока идёт свайп.
+  double _drag = 0;
 
   static const _titles = ['ДАННЫЕ КЛИЕНТА', 'ИЗДЕЛИЕ', 'ИТОГ ЗАМЕРА'];
   static const _subs = ['Кому считаем окна', 'Что замеряем', 'Расчёт и отправка'];
@@ -42,12 +60,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _shine = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 4200))
       ..repeat();
+    _flip = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 660));
   }
 
   @override
   void dispose() {
-    _pc.dispose();
     _shine.dispose();
+    _flip.dispose();
     _name.dispose();
     _addr.dispose();
     _flat.dispose();
@@ -55,23 +75,62 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.dispose();
   }
 
+  // ─────────────────────── ПЕРЕВОРОТ КАРТОЧКИ ───────────────────────
+  void _flipTo(int target) {
+    if (_animating || target < 0 || target > 2 || target == _page) return;
+    setState(() {
+      _from = _page;
+      _to = target;
+      _dir = target > _page ? 1 : -1;
+      _page = target;
+      _animating = true;
+      _drag = 0;
+    });
+    _flip.forward(from: 0).whenComplete(() {
+      if (!mounted) return;
+      setState(() {
+        _animating = false;
+        _from = _to;
+        _flip.value = 0;
+      });
+    });
+  }
+
   void _next() {
     if (_page >= 2) {
       widget.onFinish();
       return;
     }
-    _pc.nextPage(
-      duration: const Duration(milliseconds: 430),
-      curve: Curves.easeOutCubic,
-    );
+    _flipTo(_page + 1);
   }
 
   void _prev() {
     if (_page <= 0) return;
-    _pc.previousPage(
-      duration: const Duration(milliseconds: 430),
-      curve: Curves.easeOutCubic,
-    );
+    _flipTo(_page - 1);
+  }
+
+  // ─────────────────────── СВАЙП ───────────────────────
+  void _onDragUpdate(DragUpdateDetails d) {
+    if (_animating) return;
+    final w = MediaQuery.of(context).size.width;
+    setState(() {
+      _drag = (_drag - d.delta.dx / w * 0.9).clamp(-0.55, 0.55);
+    });
+  }
+
+  void _onDragEnd(DragEndDetails d) {
+    if (_animating) {
+      setState(() => _drag = 0);
+      return;
+    }
+    final v = d.velocity.pixelsPerSecond.dx;
+    final dx = _drag;
+    setState(() => _drag = 0);
+    if ((dx > 0.16 || v < -260) && _page < 2) {
+      _flipTo(_page + 1);
+    } else if ((dx < -0.16 || v > 260) && _page > 0) {
+      _flipTo(_page - 1);
+    }
   }
 
   @override
@@ -88,14 +147,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 _header(),
                 _progress(),
                 Expanded(
-                  child: PageView(
-                    controller: _pc,
-                    onPageChanged: (i) => setState(() => _page = i),
-                    children: [
-                      _cardWrap(h, _cardClient()),
-                      _cardWrap(h, _cardProduct()),
-                      _cardWrap(h, _cardSummary()),
-                    ],
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onHorizontalDragUpdate: _onDragUpdate,
+                    onHorizontalDragEnd: _onDragEnd,
+                    child: _flipStage(h),
                   ),
                 ),
                 _dots(),
@@ -106,6 +162,52 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ],
       ),
     );
+  }
+
+  // ─────────────────── СЦЕНА С 3D-РАЗВОРОТОМ ───────────────────
+  Widget _flipStage(double h) {
+    return AnimatedBuilder(
+      animation: _flip,
+      builder: (context, _) {
+        final t = _flip.value;
+
+        // Кто показан: до середины — старая карточка, после — новая.
+        final showTo = t >= 0.5;
+        final idx = showTo ? _to : _from;
+
+        // Угол разворота + доворот от пальца.
+        final angle = t * math.pi * _dir + _drag;
+
+        // Отдаление в начале разворота → приближение в конце.
+        final scale = 1.0 - 0.16 * math.sin(t * math.pi);
+
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.0014)
+            ..rotateY(angle)
+            ..scale(scale),
+          child: Transform(
+            // Контрразворот: новая карточка читается «лицом», а не зеркалом.
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..rotateY(showTo ? math.pi * _dir : 0.0),
+            child: _cardWrap(h, _cardFor(idx)),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _cardFor(int i) {
+    switch (i) {
+      case 0:
+        return _cardClient();
+      case 1:
+        return _cardProduct();
+      default:
+        return _cardSummary();
+    }
   }
 
   // ─────────────────────────── ШАПКА ───────────────────────────
@@ -776,7 +878,7 @@ class _BgPainter extends CustomPainter {
           end: Alignment.bottomCenter,
           colors: [Color(0xFF0B1522), Color(0xFF060C16)],
         ).createShader(rect),
-      );
+    );
 
     // Три медленно плывущих орба
     _orb(canvas, size, 0.22, 0.18, 0.55, AppColors.gold, 0.16, 0.0);
