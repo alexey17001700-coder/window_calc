@@ -2,9 +2,185 @@ import 'package:flutter/material.dart';
 
 import 'theme.dart';
 
-/// Пошаговый мастер создания замера.
-/// ШАГ 1 — данные клиента. Шаги 2 и 3 — заготовки под наполнение.
+/// Модель клиента для мастера замера.
+class ClientData {
+  String name = '';
+  String phone = '';
+  String address = '';
+}
 
+// ═══════════════════════════════════════════════════════════════════
+//  ОБЩАЯ ШАПКА МАСТЕРА
+// ═══════════════════════════════════════════════════════════════════
+class WizardHeader extends StatelessWidget {
+  const WizardHeader({
+    super.key,
+    required this.step,
+    required this.total,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final int step;
+  final int total;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(
+          20, MediaQuery.of(context).padding.top + 14, 20, 22),
+      decoration: const BoxDecoration(
+        gradient: AppColors.navyGradient,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              InkWell(
+                onTap: () => Navigator.of(context).maybePop(),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.arrow_back_rounded,
+                      color: Colors.white, size: 20),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: AppColors.goldGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    '$step',
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.navy900,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'ШАГ $step ИЗ $total',
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.8,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          _progress(step, total),
+          const SizedBox(height: 18),
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.6,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF9FB0C6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _progress(int step, int total) {
+    return Row(
+      children: List.generate(total, (i) {
+        final done = i < step;
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: i == total - 1 ? 0 : 6),
+            child: Container(
+              height: 4,
+              decoration: BoxDecoration(
+                gradient: done ? AppColors.goldGradient : null,
+                color: done ? null : Colors.white.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+/// Поле ввода в премиальном стиле.
+class WizardField extends StatelessWidget {
+  const WizardField({
+    super.key,
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.icon,
+    this.keyboard,
+    this.maxLines = 1,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final IconData icon;
+  final TextInputType? keyboard;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppUi.label(label, size: 10.5),
+        const SizedBox(height: 7),
+        TextField(
+          controller: controller,
+          keyboardType: keyboard,
+          maxLines: maxLines,
+          style: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600),
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, size: 19, color: AppColors.bronze),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  ШАГ 1 — ДАННЫЕ КЛИЕНТА
+// ═══════════════════════════════════════════════════════════════════
 class WizardStep1Screen extends StatefulWidget {
   const WizardStep1Screen({super.key});
 
@@ -26,31 +202,26 @@ class _WizardStep1ScreenState extends State<WizardStep1Screen> {
   }
 
   void _next() {
-    final name = _name.text.trim();
-    if (name.isEmpty) {
+    if (_name.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Введите имя клиента')),
       );
       return;
     }
+    final client = ClientData()
+      ..name = _name.text.trim()
+      ..phone = _phone.text.trim()
+      ..address = _address.text.trim();
+
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => WizardStep2Screen(
-          clientName: name,
-          phone: _phone.text.trim(),
-          address: _address.text.trim(),
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => WizardStep2Screen(client: client)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Новый замер')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
+      body: Column(
         children: [
           const WizardHeader(
             step: 1,
@@ -58,276 +229,148 @@ class _WizardStep1ScreenState extends State<WizardStep1Screen> {
             title: 'Данные клиента',
             subtitle: 'Кому считаем окна',
           ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: dark ? AppColors.navy : AppColors.paperCard,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: dark
-                    ? Colors.white.withOpacity(0.07)
-                    : AppColors.ink.withOpacity(0.06),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.navyDeep.withOpacity(dark ? 0.30 : 0.08),
-                  blurRadius: 22,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 20, 18, 24),
               children: [
-                TextField(
-                  controller: _name,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Имя клиента',
-                    hintText: 'Например: Иванов Иван',
-                    prefixIcon: Icon(Icons.person_outline_rounded),
+                AppUi.sectionTitle(context, 'Клиент'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        WizardField(
+                          controller: _name,
+                          label: 'Имя',
+                          hint: 'Иван Петров',
+                          icon: Icons.person_rounded,
+                          keyboard: TextInputType.name,
+                        ),
+                        const SizedBox(height: 14),
+                        WizardField(
+                          controller: _phone,
+                          label: 'Телефон',
+                          hint: '+7 900 000-00-00',
+                          icon: Icons.phone_rounded,
+                          keyboard: TextInputType.phone,
+                        ),
+                        const SizedBox(height: 14),
+                        WizardField(
+                          controller: _address,
+                          label: 'Адрес',
+                          hint: 'Город, улица, дом, квартира',
+                          icon: Icons.location_on_rounded,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
-                TextField(
-                  controller: _phone,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Телефон',
-                    hintText: '+7 (___) ___-__-__',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: _address,
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Адрес объекта',
-                    hintText: 'Город, улица, дом, квартира',
-                    prefixIcon: Icon(Icons.location_on_outlined),
-                  ),
+                Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded,
+                        size: 15, color: AppColors.bronze),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Имя обязательно. Телефон и адрес можно уточнить позже.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Icon(Icons.info_outline_rounded,
-                  size: 15,
-                  color: dark ? Colors.white38 : AppColors.inkSoft),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Имя обязательно, телефон и адрес можно уточнить позже',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: dark ? Colors.white38 : AppColors.inkSoft,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 26),
-          FilledButton(
-            onPressed: _next,
-            child: const Text('ДАЛЕЕ'),
-          ),
+          _footer(),
         ],
+      ),
+    );
+  }
+
+  Widget _footer() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+          18, 14, 18, MediaQuery.of(context).padding.bottom + 14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).dividerTheme.color ?? AppColors.line,
+          ),
+        ),
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          onPressed: _next,
+          child: const Text('ДАЛЕЕ'),
+        ),
       ),
     );
   }
 }
 
-/// ШАГ 2 — заготовка (изделия, размеры, чертежи).
+// ═══════════════════════════════════════════════════════════════════
+//  ШАГ 2 — ЗАГЛУШКА
+// ═══════════════════════════════════════════════════════════════════
 class WizardStep2Screen extends StatelessWidget {
-  final String clientName;
-  final String phone;
-  final String address;
-  const WizardStep2Screen({
-    super.key,
-    required this.clientName,
-    this.phone = '',
-    this.address = '',
-  });
+  const WizardStep2Screen({super.key, required this.client});
+  final ClientData client;
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Новый замер')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
+      body: Column(
         children: [
           WizardHeader(
             step: 2,
             total: 3,
             title: 'Изделия',
-            subtitle: clientName,
+            subtitle: client.name.isEmpty ? 'Клиент' : client.name,
           ),
-          const SizedBox(height: 40),
-          Center(
-            child: Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                gradient: AppColors.goldGradient,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.gold.withOpacity(0.35),
-                    blurRadius: 26,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.grid_view_rounded,
-                  size: 44, color: AppColors.navyDeep),
-            ),
-          ),
-          const SizedBox(height: 26),
-          Text(
-            'ШАГ 2 В РАЗРАБОТКЕ',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Здесь появится выбор изделий, размеры, шаблоны и чертежи.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13.5,
-              height: 1.45,
-              fontWeight: FontWeight.w500,
-              color: dark ? Colors.white70 : AppColors.inkSoft,
-            ),
-          ),
-          const SizedBox(height: 30),
-          OutlinedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('НАЗАД'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Премиальная шапка шага мастера с полосой прогресса.
-class WizardHeader extends StatelessWidget {
-  final int step;
-  final int total;
-  final String title;
-  final String subtitle;
-  const WizardHeader({
-    super.key,
-    required this.step,
-    required this.total,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: AppColors.navyGradient,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.navyDeep.withOpacity(0.30),
-            blurRadius: 26,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: AppColors.goldGradient,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.gold.withOpacity(0.40),
-                      blurRadius: 18,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    '$step',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.navyDeep,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 13),
-              Expanded(
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'ШАГ $step ИЗ $total',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.6,
-                        color: AppColors.goldLight,
+                    Container(
+                      width: 84,
+                      height: 84,
+                      decoration: BoxDecoration(
+                        color: AppColors.gold.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
                       ),
+                      child: const Icon(Icons.window_rounded,
+                          size: 40, color: AppColors.gold),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 22),
+                    Text('ШАГ 2 В РАЗРАБОТКЕ',
+                        style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
                     Text(
-                      title.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
-                        color: Colors.white,
-                      ),
+                      'Здесь появится выбор изделий, размеры и чертежи.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.62),
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: List.generate(total, (i) {
-              final done = i < step;
-              return Expanded(
-                child: Container(
-                  height: 4,
-                  margin: EdgeInsets.only(right: i == total - 1 ? 0 : 6),
-                  decoration: BoxDecoration(
-                    gradient: done ? AppColors.goldGradient : null,
-                    color: done ? null : Colors.white.withOpacity(0.14),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              );
-            }),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                18, 0, 18, MediaQuery.of(context).padding.bottom + 14),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('НАЗАД'),
+              ),
+            ),
           ),
         ],
       ),
