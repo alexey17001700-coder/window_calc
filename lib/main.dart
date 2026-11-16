@@ -2631,7 +2631,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             ..._columnFields(index),
 
             const Divider(),
-            const Text('Отделка', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+            const Text('Отделка', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.bronze, letterSpacing: 0.2)),
             const SizedBox(height: 8),
 
             CheckboxListTile(value: it.hasSlopes, onChanged: (v) => setState(() => it.hasSlopes = v!), title: const Text('Откосы'), dense: true),
@@ -2848,7 +2848,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               ]),
             ),
             const Divider(),
-            const Text('Монтажные работы', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+            const Text('Монтажные работы', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.bronze, letterSpacing: 0.2)),
             CheckboxListTile(value: it.hasAbris, onChanged: (v) => setState(() => it.hasAbris = v!), title: const Text('Абрис'), dense: true),
             if (it.hasAbris) Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 8),
@@ -2865,7 +2865,7 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
               child: TextFormField(initialValue: it.otmazkaLengthMm.toStringAsFixed(0), decoration: const InputDecoration(labelText: 'Длина, мм'), keyboardType: TextInputType.number, onChanged: (v) => setState(() => it.otmazkaLengthMm = double.tryParse(v) ?? 0)),
             ),
             const Divider(),
-            const Text('Сетки', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+            const Text('Сетки', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.bronze, letterSpacing: 0.2)),
             CheckboxListTile(value: it.hasMosquito, onChanged: (v) => setState(() => it.hasMosquito = v!), title: const Text('Москитная'), dense: true),
             CheckboxListTile(value: it.hasAnticat, onChanged: (v) => setState(() => it.hasAnticat = v!), title: const Text('Антикошка'), dense: true),
             CheckboxListTile(value: it.hasAntidust, onChanged: (v) => setState(() => it.hasAntidust = v!), title: const Text('Антипыль'), dense: true),
