@@ -1,7 +1,7 @@
 name: window_calc
 description: Калькулятор окон для замерщика Almas
 publish_to: 'none'
-version: 2.0.1+39
+version: 2.1.0+40
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -16,6 +16,7 @@ dependencies:
   path_provider: ^2.1.1
   open_filex: ^4.3.4
   dio: ^5.4.0
+  model_viewer_plus: 1.7.2
 
 flutter:
   uses-material-design: true
