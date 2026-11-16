@@ -1522,6 +1522,7 @@ class MainMenuScreen extends StatelessWidget {
                   context,
                   icon: Icons.handyman_rounded,
                   accent: const Color(0xFF2E9E8F),
+                  index: 3,
                   title: 'Сервис и ремонт',
                   subtitle: '${serviceMeasurements.length} шт. в работе',
                   onTap: () {
