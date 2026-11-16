@@ -1849,16 +1849,25 @@ class MainMenuScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 15,
-                  color: onSurface.withOpacity(0.28),
+                const SizedBox(width: 10),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: onSurface.withOpacity(0.05),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 13,
+                    color: onSurface.withOpacity(0.34),
+                  ),
                 ),
               ],
             ),
           ),
         ),
+      ),
       ),
     );
   }
