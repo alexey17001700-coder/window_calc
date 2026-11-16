@@ -400,31 +400,7 @@ _V3 _orbit(double r, double tx, double ty, double tz, double a) {
   return p;
 }
 
-/// Призрачное кольцо-траектория: показывает, по какой орбите летит инструмент.
-void _orbitRing(
-  List<_Prim> out,
-  double r,
-  double tx,
-  double ty,
-  double tz,
-  Color col,
-) {
-  const n = 44;
-  var prev = _orbit(r, tx, ty, tz, 0);
-  for (var i = 1; i <= n; i++) {
-    final cur = _orbit(r, tx, ty, tz, i / n * math.pi * 2);
-    out.add(_Prim([prev, cur], col,
-        alpha: 0.15, fill: false, stroke: 0.9, glow: true));
-    prev = cur;
-  }
-}
-
 void _buildTools(List<_Prim> out, double t) {
-  // ── Призрачные траектории — видно, что у каждого инструмента своя ось ──
-  _orbitRing(out, 1.16, 0.55, 0.00, 0.25, _toolCyan);
-  _orbitRing(out, 1.34, -0.45, 0.90, 0.75, _toolGreen);
-  _orbitRing(out, 1.46, 0.85, -0.70, -0.35, _toolAmber);
-
   // ── Рулетка: своя орбита (наклон X 0.55 · Z 0.25) ─────────────────
   {
     final a = t * 0.40;
