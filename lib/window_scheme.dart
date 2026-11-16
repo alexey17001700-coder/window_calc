@@ -719,8 +719,11 @@ class _WindowSchemePainter extends CustomPainter {
       );
       final inner = r.deflate(sashW);
       _paintGlass(canvas, inner);
-      _paintSymbol(canvas, inner, type, hingeLeft);
-      _paintHandle(canvas, inner, type, hingeLeft);
+      if (drawSymbol) {
+        _paintSymbol(canvas, inner, type, hingeLeft);
+        _paintHinges(canvas, inner, hingeLeft);
+      }
+      if (drawHandle) _paintHandle(canvas, inner, type, hingeLeft);
       if (sec?.hasMosquito == true) _paintNet(canvas, inner);
     } else {
       // Глухая — только штапик по краю стекла
