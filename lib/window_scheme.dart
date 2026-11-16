@@ -806,6 +806,61 @@ class _WindowSchemePainter extends CustomPainter {
   }
 
   // ─────────────────────────────────────────────────────────
+  // Створка-полотно балконной двери: символ открывания, ручка и
+  // петли — ОДИН раз на всю высоту (стеклопакет + сэндвич-панель).
+  // ─────────────────────────────────────────────────────────
+  void _paintLeaf(
+    Canvas canvas,
+    _ColBox c,
+    List<Section> secs,
+    double sashW,
+  ) {
+    String? type;
+    for (final s in secs) {
+      if (s.type != 'Сэндвич') {
+        type = s.type;
+        break;
+      }
+    }
+    if (type == null || type == 'Глухая') return;
+
+    final rect = c.glass.deflate(sashW);
+    if (rect.width <= 10 || rect.height <= 24) return;
+
+    _paintSymbol(canvas, rect, type, c.hingeLeft);
+    _paintHandle(canvas, rect, type, c.hingeLeft);
+    _paintHinges(canvas, rect, c.hingeLeft);
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Петли — явные метки на стороне петель (3 шт. по высоте створки)
+  // ─────────────────────────────────────────────────────────
+  void _paintHinges(Canvas canvas, Rect inner, bool hingeLeft) {
+    if (inner.width < 14 || inner.height < 34) return;
+    final hw = (inner.width * 0.05).clamp(2.0, 4.5);
+    final hh = (inner.height * 0.05).clamp(4.0, 11.0);
+    final x = hingeLeft ? inner.left : inner.right;
+    final ys = <double>[
+      inner.top + inner.height * 0.13,
+      inner.center.dy,
+      inner.bottom - inner.height * 0.13,
+    ];
+    final fill = Paint()..color = const Color(0xFF546E7A);
+    final stroke = Paint()
+      ..color = const Color(0xFF263238)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.7;
+    for (final y in ys) {
+      final rr = RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(x, y), width: hw * 2, height: hh),
+        Radius.circular(hw * 0.4),
+      );
+      canvas.drawRRect(rr, fill);
+      canvas.drawRRect(rr, stroke);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
   // Ручка — с противоположной от петель стороны
   // ─────────────────────────────────────────────────────────
   void _paintHandle(
