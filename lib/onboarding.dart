@@ -837,6 +837,124 @@ class _GoldButtonState extends State<_GoldButton> {
 }
 
 /// ═══════════════════════════════════════════════════════════════════
+///  СЕРЕБРИСТЫЙ ШЛЕЙФ ОТ БЛИЖНЕГО ТОРЦА КАРТОЧКИ
+///  Торец «тлеет», из него тянется дымка. Только во время разворота.
+/// ═══════════════════════════════════════════════════════════════════
+class _TrailPainter extends CustomPainter {
+  _TrailPainter({
+    required this.t,
+    required this.dir,
+    required this.drag,
+    required this.intensity,
+    required this.cardSize,
+  });
+
+  final double t;
+  final int dir;
+  final double drag;
+  final double intensity;
+  final Size cardSize;
+
+  static const _silver = Color(0xFFDCE6F2);
+  static const _silverDim = Color(0xFF9FB4CC);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (intensity <= 0.004) return;
+
+    final angle = t * math.pi * dir + drag;
+    final scale = 1.0 - 0.16 * math.sin(t * math.pi);
+
+    final halfW = cardSize.width / 2;
+    final halfH = cardSize.height / 2;
+
+    // Ближний торец: тот, что при развороте идёт на зрителя.
+    final s = math.sin(angle) >= 0 ? 1.0 : -1.0;
+
+    // Проекция торца (та же математика, что в Matrix4 разворота).
+    final z = -s * halfW * math.sin(angle) * scale;
+    final w = 1.0 + 0.0014 * z;
+    final edgeX = size.width / 2 + (s * halfW * math.cos(angle) * scale) / w;
+    final halfHp = (halfH * scale) / w;
+    final top = size.height / 2 - halfHp;
+    final bot = size.height / 2 + halfHp;
+
+    // 1. Тлеющий торец — мягкое свечение по всей высоте.
+    canvas.drawRect(
+      Rect.fromLTRB(edgeX - 30, top, edgeX + 30, bot),
+      Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(edgeX - 30, 0),
+          Offset(edgeX + 30, 0),
+          [
+            _silver.withOpacity(0.0),
+            _silver.withOpacity(0.30 * intensity),
+            _silver.withOpacity(0.0),
+          ],
+          const [0.0, 0.5, 1.0],
+        ),
+    );
+
+    // 2. Дымка, тянущаяся наружу от торца.
+    final trailW = (14 + 34 * math.sin(t * math.pi)) * scale;
+    canvas.drawRect(
+      Rect.fromLTRB(
+        s > 0 ? edgeX : edgeX - trailW,
+        top,
+        s > 0 ? edgeX + trailW : edgeX,
+        bot,
+      ),
+      Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(edgeX, 0),
+          Offset(edgeX + s * trailW, 0),
+          [
+            _silver.withOpacity(0.22 * intensity),
+            _silver.withOpacity(0.0),
+          ],
+        ),
+    );
+
+    // 3. Раскалённая кромка торца.
+    canvas.drawLine(
+      Offset(edgeX, top),
+      Offset(edgeX, bot),
+      Paint()
+        ..color = _silver.withOpacity(0.55 * intensity)
+        ..strokeWidth = 1.6
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
+    );
+
+    // 4. Частицы дымки — расходятся от торца и растворяются.
+    final p = Paint();
+    for (var i = 0; i < 20; i++) {
+      final seed = i * 2.37;
+      final ph = (i % 7) / 7.0;
+      final prog = ((t * 1.4 + ph) % 1.0);
+      final dist = (8 + prog * 52) * scale;
+      final px = edgeX + s * dist;
+      final py = top +
+          (((i * 41) % 100) / 100.0) * (bot - top) +
+          math.sin(t * 5.2 + seed) * 8 * scale;
+      final a = intensity * (1.0 - prog) * 0.40;
+      final r = (1.4 + (1.0 - prog) * 3.0) * scale;
+
+      p.color = _silverDim.withOpacity(a * 0.5);
+      canvas.drawCircle(Offset(px, py), r * 2.1, p);
+      p.color = _silver.withOpacity(a);
+      canvas.drawCircle(Offset(px, py), r, p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TrailPainter old) =>
+      old.t != t ||
+      old.drag != drag ||
+      old.intensity != intensity ||
+      old.cardSize != cardSize;
+}
+
+/// ═══════════════════════════════════════════════════════════════════
 ///  ПРОБЕГАЮЩИЙ БЛИК ПО КАРТОЧКЕ
 /// ═══════════════════════════════════════════════════════════════════
 class _ShinePainter extends CustomPainter {
