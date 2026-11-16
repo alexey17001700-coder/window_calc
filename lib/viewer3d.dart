@@ -181,6 +181,7 @@ void _cone(
   _Place? pl,
   double stroke = 1.2,
   bool glow = true,
+  bool fill = false,
 }) {
   final ring = <_V3>[];
   for (var i = 0; i < sides; i++) {
@@ -195,6 +196,12 @@ void _cone(
         alpha: alpha, fill: false, stroke: stroke, glow: glow));
     out.add(_Prim([w(ring[i]), w(apex)], col,
         alpha: alpha, fill: false, stroke: stroke, glow: glow));
+    if (fill) {
+      out.add(_Prim([w(ring[i]), w(ring[j]), w(apex)], col, alpha: alpha));
+    }
+  }
+  if (fill) {
+    out.add(_Prim(ring.map(w).toList(), col, alpha: alpha));
   }
 }
 
