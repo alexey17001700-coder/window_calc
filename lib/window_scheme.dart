@@ -902,8 +902,8 @@ class _WindowSchemePainter extends CustomPainter {
   /// Петли (на стороне петель) и ручка (на противоположной стороне).
   ///
   /// [isLeaf] — створка-полотно (дверь балконного блока или обычная
-  /// дверь). У двери петли только ДВЕ: сверху и снизу, центральной
-  /// петли нет. У оконной створки — три (верх / центр / низ).
+  /// дверь). Петли у ВСЕХ створок (и оконных, и дверей) — только ДВЕ:
+  /// сверху и снизу. Центральной петли нет.
   void _paintFittings(
     Canvas canvas,
     Rect rect,
@@ -914,11 +914,9 @@ class _WindowSchemePainter extends CustomPainter {
     final r = rect.deflate(1.5);
     if (r.width < 10 || r.height < 20) return;
 
-    // ── Петли: у двери 2 (сверху и снизу), у окна 3
+    // ── Петли: всегда 2 — сверху и снизу, без центральной
     final hx = hingeLeft ? r.left + 1.6 : r.right - 1.6;
-    final hingePos = isLeaf
-        ? const [0.10, 0.90]
-        : const [0.13, 0.50, 0.87];
+    const hingePos = [0.10, 0.90];
     for (final f in hingePos) {
       final y = r.top + r.height * f;
       final hr = Rect.fromCenter(center: Offset(hx, y), width: 3.2, height: 7.0);
