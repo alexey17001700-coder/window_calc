@@ -133,11 +133,48 @@ class _WindowSchemeState extends State<WindowScheme>
     setState(() {});
   }
 
+  /// Удержание на створке — зеркалить сторону открывания (петли ↔).
+  /// Нужно для центральной створки трёхстворчатого окна.
+  void _handleLongPress(LongPressStartDetails d) {
+    final layout = schemeLayout(
+      Size(widget.width, widget.height),
+      widget.columns,
+      widget.showDimensions,
+      widthMm: widget.widthMm,
+      heightMm: widget.heightMm,
+    );
+    final p = d.localPosition;
+
+    _SashBox? hit;
+    for (final s in layout.sashes) {
+      if (s.rect.contains(p)) hit = s;
+    }
+    if (hit == null) return;
+
+    final col = widget.columns[hit.col];
+    if (col.sections.isEmpty) return;
+    if (col.sections.every((s) => s.type == 'Сэндвич')) return;
+
+    final now = !col.sections.first.mirrorHinges;
+    for (final s in col.sections) {
+      s.mirrorHinges = now;
+    }
+
+    final box = layout.cols[hit.col];
+    _flashRect = box.glass;
+    _flashLabel = now ? 'Петли справа' : 'Петли слева';
+    _flash.forward(from: 0);
+
+    widget.onChanged?.call();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapUp: _handleTap,
+      onLongPressStart: _handleLongPress,
       child: AnimatedBuilder(
         animation: _flash,
         builder: (context, _) {
