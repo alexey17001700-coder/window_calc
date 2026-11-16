@@ -370,48 +370,114 @@ void _buildWindow(List<_Prim> out) {
 
 // ═══════════════════════════ ИНСТРУМЕНТЫ ═══════════════════════════
 
-/// Точка на наклонной орбите.
-_V3 _orbit(double r, double tiltX, double tiltZ, double a) {
+/// Точка на наклонной орбите. У каждого инструмента СВОЯ плоскость:
+/// три независимых наклона (X, Y, Z) дают уникальную траекторию в 3D.
+_V3 _orbit(double r, double tx, double ty, double tz, double a) {
   var p = _V3(math.cos(a) * r, 0, math.sin(a) * r);
-  p = _rotX(p, tiltX);
-  p = _rotZ(p, tiltZ);
+  p = _rotX(p, tx);
+  p = _rotZ(p, tz);
+  p = _rotY(p, ty);
   return p;
 }
 
+/// Призрачное кольцо-траектория: показывает, по какой орбите летит инструмент.
+void _orbitRing(
+  List<_Prim> out,
+  double r,
+  double tx,
+  double ty,
+  double tz,
+  Color col,
+) {
+  const n = 44;
+  var prev = _orbit(r, tx, ty, tz, 0);
+  for (var i = 1; i <= n; i++) {
+    final cur = _orbit(r, tx, ty, tz, i / n * math.pi * 2);
+    out.add(_Prim([prev, cur], col,
+        alpha: 0.15, fill: false, stroke: 0.9, glow: true));
+    prev = cur;
+  }
+}
+
 void _buildTools(List<_Prim> out, double t) {
-  // ── Рулетка: своя орбита (наклон 0.55 / 0.25) ─────────────────────
+  // ── Призрачные траектории — видно, что у каждого инструмента своя ось ──
+  _orbitRing(out, 1.16, 0.55, 0.00, 0.25, _toolCyan);
+  _orbitRing(out, 1.34, -0.45, 0.90, 0.75, _toolGreen);
+  _orbitRing(out, 1.46, 0.85, -0.70, -0.35, _toolAmber);
+
+  // ── Рулетка: своя орбита (наклон X 0.55 · Z 0.25) ─────────────────
   {
     final a = t * 0.40;
-    final pos = _orbit(1.16, 0.55, 0.25, a);
+    final pos = _orbit(1.16, 0.55, 0.00, 0.25, a);
     final pl = _Place(pos, rx: 0.42, ry: a * 1.7, rz: 0.30);
-    _prism(out, const _V3(0, 0, 0), 0.085, 0.165, 6, _toolCyan,
-        pl: pl, alpha: 0.95, stroke: 1.3, fill: true);
-    _box(out, const _V3(0.115, 0, 0), const _V3(0.055, 0.105, 0.105), _toolCyan,
-        pl: pl, wire: true, stroke: 1.2, glow: true, alpha: 0.9);
+    // корпус — шестигранный барабан
+    _prism(out, const _V3(0, 0, 0), 0.088, 0.170, 6, _toolCyan,
+        pl: pl, alpha: 0.95, stroke: 1.4, fill: true);
+    // внутреннее кольцо катушки
+    _prism(out, const _V3(0, 0, 0), 0.052, 0.178, 6, _toolCyan,
+        pl: pl, alpha: 0.55, stroke: 0.9, fill: false);
+    // ось-ступица
+    _prism(out, const _V3(0, 0, 0), 0.020, 0.198, 8, _toolCyan,
+        pl: pl, alpha: 0.9, stroke: 1.0, fill: true);
+    // выдвинутая лента
+    _box(out, const _V3(0.150, 0, 0), const _V3(0.150, 0.030, 0.062), _toolCyan,
+        pl: pl, wire: true, stroke: 1.1, glow: true, alpha: 0.85);
+    // крючок на конце ленты
+    _box(out, const _V3(0.238, 0, 0), const _V3(0.024, 0.054, 0.054), _toolCyan,
+        pl: pl, wire: true, stroke: 1.0, glow: true, alpha: 0.8);
+    // клипса на поясе
+    _box(out, const _V3(-0.100, -0.072, 0), const _V3(0.072, 0.020, 0.030),
+        _toolCyan, pl: pl, wire: true, stroke: 0.9, glow: true, alpha: 0.7);
   }
 
-  // ── Уровень: своя орбита (наклон −0.45 / 0.75) ────────────────────
+  // ── Уровень: своя орбита (наклон X −0.45 · Y 0.90 · Z 0.75) ───────
   {
     final a = -t * 0.29 + 2.1;
-    final pos = _orbit(1.34, -0.45, 0.75, a);
+    final pos = _orbit(1.34, -0.45, 0.90, 0.75, a);
     final pl = _Place(pos, rx: 0.15, ry: a * 1.2, rz: 0.55);
-    _box(out, const _V3(0, 0, 0), const _V3(0.56, 0.070, 0.058), _toolGreen,
-        pl: pl, wire: true, stroke: 1.3, glow: true, alpha: 0.95);
-    _prism(out, const _V3(0, 0, 0), 0.026, 0.20, 6, _toolGreen,
-        pl: pl, alpha: 0.85, stroke: 1.0, fill: true);
+    // корпус — длинная каркасная коробка
+    _box(out, const _V3(0, 0, 0), const _V3(0.60, 0.074, 0.060), _toolGreen,
+        pl: pl, wire: true, stroke: 1.4, glow: true, alpha: 0.95);
+    // рёбра жёсткости
+    for (final x in const [-0.20, 0.0, 0.20]) {
+      _box(out, _V3(x, 0, 0), const _V3(0.010, 0.082, 0.068), _toolGreen,
+          pl: pl, wire: true, stroke: 0.9, glow: true, alpha: 0.6);
+    }
+    // три глазка-ампулы
+    for (final x in const [-0.17, 0.0, 0.17]) {
+      _prism(out, _V3(x, 0.030, 0), 0.024, 0.075, 6, _toolGreen,
+          pl: pl, alpha: 0.9, stroke: 1.0, fill: true);
+    }
+    // торцевые заглушки
+    for (final x in const [-0.30, 0.30]) {
+      _box(out, _V3(x, 0, 0), const _V3(0.026, 0.086, 0.072), _toolGreen,
+          pl: pl, wire: true, stroke: 1.0, glow: true, alpha: 0.8);
+    }
   }
 
-  // ── Карандаш: своя орбита (наклон 0.85 / −0.35) ───────────────────
+  // ── Карандаш: своя орбита (наклон X 0.85 · Y −0.70 · Z −0.35) ─────
   {
     final a = t * 0.24 + 4.0;
-    final pos = _orbit(1.46, 0.85, -0.35, a);
+    final pos = _orbit(1.46, 0.85, -0.70, -0.35, a);
     final pl = _Place(pos, rx: 0.30, ry: a * 1.4, rz: -0.35);
-    _prism(out, const _V3(-0.03, 0, 0), 0.028, 0.30, 5, _toolAmber,
-        pl: pl, alpha: 0.95, stroke: 1.2, fill: true);
-    _cone(out, const _V3(0.19, 0, 0), 0.028, 0.09, 5, _toolAmber,
-        pl: pl, alpha: 0.95, stroke: 1.2);
-    _box(out, const _V3(-0.20, 0, 0), const _V3(0.045, 0.048, 0.048), _toolAmber,
-        pl: pl, wire: true, stroke: 1.1, glow: true, alpha: 0.85);
+    // корпус — шестигранник
+    _prism(out, const _V3(-0.04, 0, 0), 0.030, 0.320, 6, _toolAmber,
+        pl: pl, alpha: 0.95, stroke: 1.3, fill: true);
+    // продольная грань-полоса
+    _prism(out, const _V3(-0.04, 0, 0), 0.018, 0.326, 6, _toolAmber,
+        pl: pl, alpha: 0.5, stroke: 0.8, fill: false);
+    // конус-острие
+    _cone(out, const _V3(0.205, 0, 0), 0.030, 0.100, 6, _toolAmber,
+        pl: pl, alpha: 0.95, stroke: 1.3);
+    // графитовый наконечник
+    _cone(out, const _V3(0.268, 0, 0), 0.014, 0.036, 6, _toolAmber,
+        pl: pl, alpha: 0.9, stroke: 1.0);
+    // обжимное кольцо
+    _prism(out, const _V3(-0.205, 0, 0), 0.034, 0.030, 6, _toolAmber,
+        pl: pl, alpha: 0.9, stroke: 1.1, fill: true);
+    // ластик
+    _box(out, const _V3(-0.248, 0, 0), const _V3(0.050, 0.052, 0.052),
+        _toolAmber, pl: pl, wire: true, stroke: 1.1, glow: true, alpha: 0.85);
   }
 }
 
