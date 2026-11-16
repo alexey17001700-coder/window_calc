@@ -3750,15 +3750,36 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
+  Widget _infoRow(BuildContext context, IconData icon, String text) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 17, color: onSurface.withOpacity(0.45)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 14, color: onSurface.withOpacity(0.78)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _shareButton(BuildContext context, IconData icon, String label, String sub, Color color, String text, {bool copyOnly = false}) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        subtitle: Text(sub, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-        onTap: () async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () async {
           if (copyOnly) {
             await Clipboard.setData(ClipboardData(text: text));
             if (context.mounted) {
