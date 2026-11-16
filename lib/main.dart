@@ -2489,35 +2489,53 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
           ),
           const SizedBox(height: 26),
           const _SectionTitle('Услуги по замеру'),
-          CheckboxListTile(
-            value: _hasTrashRemoval,
-            onChanged: (v) => setState(() => _hasTrashRemoval = v!),
-            title: Text('Вывоз мусора (${widget.price.trashRemoval.toStringAsFixed(0)} ₽)'),
-            dense: true,
-          ),
-          CheckboxListTile(
-            value: _hasLift,
-            onChanged: (v) => setState(() => _hasLift = v!),
-            title: Text('Подъём (${widget.price.liftPerFloor.toStringAsFixed(0)} ₽/этаж)'),
-            dense: true,
-          ),
-          if (_hasLift)
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: TextField(
-                controller: _liftFloorsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Этажей'),
-                onChanged: (_) => setState(() {}),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Column(
+                children: [
+                  CheckboxListTile(
+                    value: _hasTrashRemoval,
+                    onChanged: (v) => setState(() => _hasTrashRemoval = v!),
+                    title: const Text('Вывоз мусора', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
+                    subtitle: Text('${widget.price.trashRemoval.toStringAsFixed(0)} ₽',
+                        style: const TextStyle(fontSize: 12)),
+                    secondary: const Icon(Icons.delete_sweep_outlined, size: 20),
+                    dense: true,
+                  ),
+                  CheckboxListTile(
+                    value: _hasLift,
+                    onChanged: (v) => setState(() => _hasLift = v!),
+                    title: const Text('Подъём', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
+                    subtitle: Text('${widget.price.liftPerFloor.toStringAsFixed(0)} ₽ / этаж',
+                        style: const TextStyle(fontSize: 12)),
+                    secondary: const Icon(Icons.stairs_outlined, size: 20),
+                    dense: true,
+                  ),
+                  if (_hasLift)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                      child: TextField(
+                        controller: _liftFloorsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Этажей'),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    ),
+                  CheckboxListTile(
+                    value: _hasDelivery,
+                    onChanged: (v) => setState(() => _hasDelivery = v!),
+                    title: const Text('Доставка', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
+                    subtitle: Text('${widget.price.delivery.toStringAsFixed(0)} ₽',
+                        style: const TextStyle(fontSize: 12)),
+                    secondary: const Icon(Icons.local_shipping_outlined, size: 20),
+                    dense: true,
+                  ),
+                ],
               ),
             ),
-          CheckboxListTile(
-            value: _hasDelivery,
-            onChanged: (v) => setState(() => _hasDelivery = v!),
-            title: Text('Доставка (${widget.price.delivery.toStringAsFixed(0)} ₽)'),
-            dense: true,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 26),
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
             decoration: BoxDecoration(
