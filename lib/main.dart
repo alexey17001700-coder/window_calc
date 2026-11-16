@@ -2722,10 +2722,24 @@ class _PriceSettingsScreenState extends State<PriceSettingsScreen> {
             _row('Фасадное алюм. остекление', 'facadeAlumPerM2', suffix: '₽/м²'),
           ]),
           const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: _apply,
-            icon: const Icon(Icons.save),
-            label: const Text('Сохранить прайс'),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _apply,
+              icon: const Icon(Icons.check_rounded, size: 20),
+              label: const Text('СОХРАНИТЬ ПРАЙС'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 56),
+                backgroundColor: AppTheme.navy,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  fontSize: 14,
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 40),
         ],
