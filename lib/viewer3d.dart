@@ -433,13 +433,13 @@ void _buildTools(List<_Prim> out, double t) {
     _box(out, const _V3(0, 0, 0), const _V3(0.60, 0.074, 0.060), _toolGreen,
         pl: pl, wire: true, stroke: 1.4, glow: true, alpha: 0.95);
     // рёбра жёсткости
-    for (final x in const [-0.20, 0.0, 0.20]) {
+    for (final x in const [-0.20, 0.20]) {
       _box(out, _V3(x, 0, 0), const _V3(0.010, 0.082, 0.068), _toolGreen,
           pl: pl, wire: true, stroke: 0.9, glow: true, alpha: 0.6);
     }
-    // три глазка-ампулы
+    // три глазка-ампулы (4 грани вместо 6 — визуально не отличить)
     for (final x in const [-0.17, 0.0, 0.17]) {
-      _prism(out, _V3(x, 0.030, 0), 0.024, 0.075, 6, _toolGreen,
+      _prism(out, _V3(x, 0.030, 0), 0.024, 0.075, 4, _toolGreen,
           pl: pl, alpha: 0.9, stroke: 1.0, fill: true);
     }
     // торцевые заглушки
