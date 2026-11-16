@@ -547,26 +547,9 @@ class _ScenePainter extends CustomPainter {
   final List<_Prim> prims;
   _ScenePainter(this.yaw, this.pitch, this.prims);
 
-  // Кэш фонового шейдера: пересоздаётся только при смене размера,
-  // а не каждый кадр (экономит аллокации и работу GPU).
-  static Size? _bgSize;
-  static Paint? _bgPaint;
-
   @override
   void paint(Canvas canvas, Size size) {
-    // мягкое свечение позади сцены — «премиальная» подсветка
-    if (_bgSize != size || _bgPaint == null) {
-      _bgSize = size;
-      _bgPaint = Paint()
-        ..shader = RadialGradient(
-          colors: const [Color(0x2A3E7BB8), Color(0x00000000)],
-        ).createShader(Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2),
-          radius: size.shortestSide * 0.78,
-        ));
-    }
-    canvas.drawRect(Offset.zero & size, _bgPaint!);
-
+    // Фон не рисуем: контейнер прозрачный и сливается с фоном экрана.
     const camZ = -4.2;
     final f = size.shortestSide * 1.15;
     final cx = size.width / 2, cy = size.height / 2;
