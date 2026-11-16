@@ -2747,9 +2747,9 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
                 children: [
                   for (var k = 0; k < it.sills.length; k++)
                     Card(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                       child: Padding(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
