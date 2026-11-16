@@ -1480,6 +1480,7 @@ class MainMenuScreen extends StatelessWidget {
                   context,
                   icon: Icons.folder_copy_rounded,
                   accent: const Color(0xFF3E7CB1),
+                  index: 1,
                   title: 'Сохранённые замеры',
                   subtitle: '${measurements.length} шт. в архиве',
                   onTap: () {
