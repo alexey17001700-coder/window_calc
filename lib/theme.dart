@@ -168,11 +168,11 @@ class AppTheme {
       );
 
   // ── Компоненты ─────────────────────────────────────────────────
-  static CardThemeData _card(Color bg) => CardThemeData(
+  static CardTheme _card(Color bg) => CardTheme(
         color: bg,
         surfaceTintColor: Colors.transparent,
         elevation: 6,
-        shadowColor: Colors.black.withValues(alpha: 0.16),
+        shadowColor: Colors.black.withOpacity(0.16),
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(22),
@@ -242,7 +242,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: c,
           minimumSize: const Size.fromHeight(52),
-          side: BorderSide(color: c.withValues(alpha: 0.55), width: 1.4),
+          side: BorderSide(color: c.withOpacity(0.55), width: 1.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -310,9 +310,7 @@ class AppUi {
           Expanded(
             child: Container(
               height: 1,
-              color: dark
-                  ? const Color(0xFF22344F)
-                  : AppColors.line,
+              color: dark ? const Color(0xFF22344F) : AppColors.line,
             ),
           ),
         ],
@@ -334,7 +332,7 @@ class AppUi {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy900.withValues(alpha: 0.28),
+            color: AppColors.navy900.withOpacity(0.28),
             blurRadius: 22,
             offset: const Offset(0, 10),
           ),
