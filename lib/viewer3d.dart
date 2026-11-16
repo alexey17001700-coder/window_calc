@@ -306,7 +306,7 @@ void _buildWindow(List<_Prim> out) {
     ], _glassCol, alpha: 0.30, glass: true));
 
     // градиент неба: сверху плотнее, снизу прозрачнее
-    const rows = 5;
+    const rows = 3;
     for (var i = 0; i < rows; i++) {
       final y0 = gy0 + gh * i / rows;
       final y1 = gy0 + gh * (i + 1) / rows;
