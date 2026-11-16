@@ -187,16 +187,8 @@ class _SplashScreenState extends State<SplashScreen>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF000000),
+        color: AppColors.navy900,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF1B2C44)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.gold.withOpacity(0.10),
-            blurRadius: 26,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
