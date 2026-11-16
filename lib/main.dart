@@ -2708,21 +2708,32 @@ class _MeasurementEditorScreenState extends State<MeasurementEditorScreen> {
             }),
           ),
 
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => _showTemplateDialog(index),
-            icon: const Icon(Icons.dashboard_customize),
-            label: const Text('Выбрать шаблон'),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _showTemplateDialog(index),
+              icon: const Icon(Icons.dashboard_customize_outlined, size: 19),
+              label: const Text('ВЫБРАТЬ ШАБЛОН'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.6, fontSize: 12.5),
+              ),
+            ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
           Center(
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.35),
                 border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x0F1B2A4A), blurRadius: 14, offset: Offset(0, 6)),
+                ],
               ),
               child: WindowScheme(
                 columns: it.columns,
