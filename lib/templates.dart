@@ -2,19 +2,26 @@ class Section {
   String type;
   bool hasMosquito;
 
+  /// Зеркалить сторону открывания (петли слева ↔ справа).
+  /// Нужно для центральной створки в трёхстворчатом окне.
+  bool mirrorHinges;
+
   Section({
     this.type = 'Глухая',
     this.hasMosquito = false,
+    this.mirrorHinges = false,
   });
 
   Map<String, dynamic> toJson() => {
     'type': type,
     'hasMosquito': hasMosquito,
+    'mirrorHinges': mirrorHinges,
   };
 
   factory Section.fromJson(Map<String, dynamic> j) => Section(
     type: (j['type'] ?? 'Глухая').toString(),
     hasMosquito: j['hasMosquito'] ?? false,
+    mirrorHinges: j['mirrorHinges'] ?? false,
   );
 }
 
