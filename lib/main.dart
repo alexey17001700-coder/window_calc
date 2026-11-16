@@ -3578,52 +3578,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       color: AppTheme.bronze,
                     ),
                   ),
-                  ...m.items.asMap().entries.map((e) {
-                    final it = e.value;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${e.key + 1}. ${it.type} — ${it.widthMm.toInt()}x${it.heightMm.toInt()} мм x ${it.count}',
-                              style: const TextStyle(fontWeight: FontWeight.w500)),
-                          Text('   ${it.profile} • ${it.furniture} • ${it.sashes} ств.',
-                              style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          Text('   Стекло ${it.glassThickness.toInt()} мм',
-                              style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Center(
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.35),
-                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: WindowScheme(
-                                columns: it.columns,
-                                width: 190,
-                                height: 220,
-                                widthMm: it.widthMm,
-                                heightMm: it.heightMm,
-                                onChanged: () => setState(() {}),
-                              ),
-                            ),
-                          ),
-                          if (it.hasSlopes) Text('   Откосы: ${it.slopeCategory} (${it.houseType})',
-                              style: const TextStyle(fontSize: 12)),
-                          if (it.hasSill && it.sills.isNotEmpty) Text('   Подоконники: ${it.sills.length} шт',
-                              style: const TextStyle(fontSize: 12)),
-                          if (it.hasDrip) Text('   Отлив: ${it.dripColor}',
-                              style: const TextStyle(fontSize: 12)),
-                          if (it.hasFUgol) Text('   F-угол: ${it.fUgolType} x ${it.fUgolCount}',
-                              style: const TextStyle(fontSize: 12)),
-                          Text('   ${it.calcPrice(m.priceSettings).toStringAsFixed(0)} ₽',
-                              style: const TextStyle(fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    );
-                  }),
+                  ...m.items.asMap().entries.map((e) => _positionCard(context, e.key, e.value)),
                   if (m.hasTrashRemoval || m.hasLift || m.hasDelivery) ...[
                     const Divider(height: 24),
                     const Text('Услуги:', style: TextStyle(fontWeight: FontWeight.bold)),
