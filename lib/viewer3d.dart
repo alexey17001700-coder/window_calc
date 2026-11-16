@@ -572,7 +572,7 @@ class _ScenePainter extends CustomPainter {
           a[0],
           a[1],
           Paint()
-            ..color = pr.color.withOpacity(pr.alpha * 0.20)
+            ..color = pr.color.withOpacity(pr.alpha * 0.20 * it.fog)
             ..strokeWidth = pr.stroke * 3.4
             ..strokeCap = StrokeCap.round
             ..blendMode = BlendMode.plus,
@@ -581,7 +581,7 @@ class _ScenePainter extends CustomPainter {
           a[0],
           a[1],
           Paint()
-            ..color = pr.color.withOpacity(pr.alpha)
+            ..color = pr.color.withOpacity(pr.alpha * it.fog)
             ..strokeWidth = pr.stroke
             ..strokeCap = StrokeCap.round
             ..blendMode = pr.glow ? BlendMode.plus : BlendMode.srcOver,
