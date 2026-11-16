@@ -105,7 +105,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         _flip.value = 0;
       });
       // Шлейф плавно растворяется после окончания разворота.
-      _trail.animateBack(0, duration: const Duration(milliseconds: 460));
+      _trail.animateBack(0, duration: const Duration(milliseconds: 620));
     });
   }
 
