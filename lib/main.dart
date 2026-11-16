@@ -1767,21 +1767,24 @@ class MainMenuScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    int index = 0,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    return Padding(
+    return _Reveal(
+      index: index,
+      child: Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Material(
         color: isDark ? AppTheme.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
               ),
