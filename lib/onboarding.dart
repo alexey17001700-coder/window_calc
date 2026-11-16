@@ -96,6 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _animating = true;
       _drag = 0;
     });
+    _trail.forward(from: 0);
     _flip.forward(from: 0).whenComplete(() {
       if (!mounted) return;
       setState(() {
@@ -103,6 +104,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         _from = _to;
         _flip.value = 0;
       });
+      // Шлейф плавно растворяется после окончания разворота.
+      _trail.animateBack(0, duration: const Duration(milliseconds: 460));
     });
   }
 
