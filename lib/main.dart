@@ -1993,6 +1993,262 @@ class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
     );
   }
 
+  Widget _emptyState(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 92,
+              height: 92,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.gold.withOpacity(0.10),
+                border: Border.all(color: AppTheme.gold.withOpacity(0.28)),
+              ),
+              child: const Icon(Icons.folder_open_rounded, size: 40, color: AppTheme.bronze),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'АРХИВ ПУСТ',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 1.6),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Создайте первый замер — он появится здесь',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, height: 1.4, color: onSurface.withOpacity(0.55)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _summaryCard(BuildContext context) {
+    final total = _list.fold<double>(0, (s, m) => s + m.totalPrice);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF16233C), Color(0xFF0A1120)],
+        ),
+        boxShadow: const [
+          BoxShadow(color: Color(0x33000000), blurRadius: 22, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'ВСЕГО ЗАМЕРОВ',
+                  style: TextStyle(
+                    color: Color(0xFF9FB0CC),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.8,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${_list.length}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(width: 1, height: 46, color: const Color(0x26FFFFFF)),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'СУММА',
+                  style: TextStyle(
+                    color: Color(0xFF9FB0CC),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.8,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        total.toStringAsFixed(0),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      '₽',
+                      style: TextStyle(color: AppTheme.goldLight, fontSize: 16, fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _measurementCard(BuildContext context, Measurement m) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Material(
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ResultScreen(
+                  measurement: m,
+                  onUpdate: (updated) {
+                    final idx = _list.indexWhere((x) => x.id == updated.id);
+                    if (idx >= 0) {
+                      setState(() => _list[idx] = updated);
+                    }
+                    widget.onUpdate(updated);
+                  },
+                ),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isDark ? const Color(0xFF232C3E) : const Color(0xFFE6EAF2),
+              ),
+              boxShadow: isDark
+                  ? null
+                  : const [
+                      BoxShadow(color: Color(0x121B2A4A), blurRadius: 18, offset: Offset(0, 8)),
+                    ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.gold.withOpacity(isDark ? 0.34 : 0.18),
+                            AppTheme.gold.withOpacity(isDark ? 0.10 : 0.05),
+                          ],
+                        ),
+                        border: Border.all(color: AppTheme.gold.withOpacity(0.38)),
+                      ),
+                      child: const Icon(Icons.window_rounded, color: AppTheme.bronze, size: 23),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            m.clientName.isEmpty ? 'Без имени' : m.clientName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${Measurement.fmtDate(m.createdAt)} · ${m.items.length} поз.',
+                            style: TextStyle(fontSize: 12.5, color: onSurface.withOpacity(0.55)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete_outline, size: 20, color: onSurface.withOpacity(0.38)),
+                      onPressed: () => _confirmDelete(m),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    color: AppTheme.navy.withOpacity(isDark ? 0.30 : 0.045),
+                    border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.payments_outlined, size: 17, color: AppTheme.bronze),
+                      const SizedBox(width: 9),
+                      Text(
+                        'Стоимость',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${m.totalPrice.toStringAsFixed(0)} ₽',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16.5,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 12, color: onSurface.withOpacity(0.34)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _confirmDelete(Measurement m) {
     showDialog(
       context: context,
