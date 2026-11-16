@@ -1981,48 +1981,14 @@ class _SavedMeasurementsScreenState extends State<SavedMeasurementsScreen> {
         ],
       ),
       body: _list.isEmpty
-          ? const Center(child: Text('Пока нет сохранённых замеров'))
-          : ListView.separated(
-              itemCount: _list.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (_, i) {
-                final m = _list[i];
-                return ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.window)),
-                  title: Text(m.clientName),
-                  subtitle: Text('${Measurement.fmtDate(m.createdAt)} • ${m.items.length} поз.'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${m.totalPrice.toStringAsFixed(0)} ₽',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
-                        onPressed: () => _confirmDelete(m),
-                      ),
-                    ],
-                  ),
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ResultScreen(
-                          measurement: m,
-                          onUpdate: (updated) {
-                            final idx = _list.indexWhere((x) => x.id == updated.id);
-                            if (idx >= 0) {
-                              setState(() => _list[idx] = updated);
-                            }
-                            widget.onUpdate(updated);
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+          ? _emptyState(context)
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+              children: [
+                _summaryCard(context),
+                const SizedBox(height: 18),
+                ...List.generate(_list.length, (i) => _measurementCard(context, _list[i])),
+              ],
             ),
     );
   }
