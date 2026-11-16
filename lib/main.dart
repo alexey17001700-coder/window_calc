@@ -3683,12 +3683,24 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _setCustomPrice,
-            icon: const Icon(Icons.edit),
-            label: Text(m.customClientPrice == null
-                ? 'Указать свою цену для клиента'
-                : 'Изменить цену для клиента'),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _setCustomPrice,
+              icon: const Icon(Icons.edit_rounded, size: 19),
+              label: Text(
+                m.customClientPrice == null
+                    ? 'УКАЗАТЬ СВОЮ ЦЕНУ ДЛЯ КЛИЕНТА'
+                    : 'ИЗМЕНИТЬ ЦЕНУ ДЛЯ КЛИЕНТА',
+                style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.6, fontSize: 12.5),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 50),
+                foregroundColor: AppTheme.bronze,
+                side: BorderSide(color: AppTheme.gold.withOpacity(0.5), width: 1.4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
           ),
           const SizedBox(height: 26),
           const _SectionTitle('Отправить'),
