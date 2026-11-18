@@ -512,7 +512,34 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ─────────────────────── КАРТОЧКА 2: ИЗДЕЛИЕ ───────────────────────
+  // ─────────────── КАРТОЧКА 2: ВИД РАБОТ (ДЕРЕВО) ───────────────
+  Widget _cardWorkType() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _cardTitle('ВИД РАБОТ', 'Что делаем на объекте'),
+        const SizedBox(height: 16),
+        ...List.generate(_workItems.length, (i) {
+          final it = _workItems[i];
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: i < _workItems.length - 1 ? 11 : 0),
+            child: _ActionTile(
+              icon: it.icon,
+              title: it.title,
+              sub: it.sub,
+              selected: _workType == i,
+              onTap: () => setState(() => _workType = i),
+            ),
+          );
+        }),
+        const SizedBox(height: 20),
+        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
+      ],
+    );
+  }
+
+  // ─────────────────────── КАРТОЧКА 3: ИЗДЕЛИЕ ───────────────────────
   Widget _cardProduct() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
