@@ -22,6 +22,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
   final TextEditingController _name = TextEditingController();
+  final TextEditingController _phone = TextEditingController();
   final TextEditingController _addr = TextEditingController();
   final TextEditingController _flat = TextEditingController();
   final TextEditingController _floor = TextEditingController();
