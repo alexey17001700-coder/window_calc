@@ -525,28 +525,33 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ─────────────── КАРТОЧКА 2: ВИД РАБОТ (ДЕРЕВО) ───────────────
+  // ─────────────── ШАГ 2: ВИД РАБОТ — ДЕРЕВО НА ЭКРАНЕ ───────────────
   Widget _cardWorkType() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        WorkTreeView(
-          onWorkType: (i) {
-            if (_workType != i) setState(() => _workType = i);
-          },
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          'ТАП — РАСКРЫТЬ ВЕТКУ · ПОВТОРНЫЙ ТАП — СВЕРНУТЬ · ТЯНИ ВЛЕВО/ВПРАВО',
-          style: TextStyle(
-            fontSize: 8,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.7,
-            height: 1.4,
-            color: Color(0xFF5A6E86),
+        Expanded(
+          child: WorkTreeView(
+            onWorkType: (i) {
+              if (_workType != i) setState(() => _workType = i);
+            },
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 6),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            'ТАП — РАСКРЫТЬ ВЕТКУ · ПОВТОРНЫЙ ТАП — СВЕРНУТЬ · ТЯНИ ВЛЕВО/ВПРАВО',
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.7,
+              height: 1.4,
+              color: Color(0xFF5A6E86),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
       ],
     );
