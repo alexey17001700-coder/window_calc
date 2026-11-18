@@ -346,7 +346,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 0, 22, 4),
       child: Row(
-        children: List.generate(3, (i) {
+        children: List.generate(4, (i) {
           final done = i <= _page;
           return Expanded(
             child: AnimatedContainer(
