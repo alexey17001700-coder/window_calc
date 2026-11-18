@@ -80,6 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _flip.dispose();
     _trail.dispose();
     _name.dispose();
+    _phone.dispose();
     _addr.dispose();
     _flat.dispose();
     _floor.dispose();
