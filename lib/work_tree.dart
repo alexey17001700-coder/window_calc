@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-///  ДЕРЕВО ВИДОВ РАБОТ  ·  v3.4
-///  Горизонтальное дерево-ответвление.
-///  • Первая карточка («ЧТО ДЕЛАЕМ?») ужимается после выбора.
-///  • Ветки растут ВПРАВО, столбиком по центру.
+///  ДЕРЕВО ВИДОВ РАБОТ  ·  v3.5
+///  Дерево живёт НА ЭКРАНЕ (не внутри карточки).
+///  • Корневая карточка «ВИД РАБОТ» — с кнопками-пунктами.
+///  • Нажал пункт → корневая карточка ужимается.
+///  • Ветки растут ВПРАВО, столбиком по центру, того же компактного вида.
 ///  • Автоскролл вправо + ручной скролл вперёд/назад.
-///  • Тап по карточке раскрывает её ветку, повторный тап — сворачивает.
+///  • Тап по ветке раскрывает её подпункты, повторный тап — сворачивает.
 /// ═══════════════════════════════════════════════════════════════════
 
 /// Ветка дерева: иконка + название + подпункты.
@@ -54,15 +55,14 @@ class WorkTreeView extends StatefulWidget {
 }
 
 class _WorkTreeViewState extends State<WorkTreeView> {
-  // ── габариты дерева ──
-  static const double _cardW = 122;
-  static const double _cardH = 46;
-  static const double _rootW = 150;
-  static const double _rootH = 220;
-  static const double _gapX = 54; // место под линии-ветки
-  static const double _gapY = 9;
-  static const double _pad = 8;
-  static const double _vp = 250; // высота окна дерева
+  // ── габариты ──
+  static const double _cardW = 138; // компактная карточка-ветка
+  static const double _cardH = 52;
+  static const double _rootW = 190; // корневая карточка «ВИД РАБОТ»
+  static const double _rootH = 264;
+  static const double _gapX = 56; // место под линии-ветки
+  static const double _gapY = 10;
+  static const double _pad = 10;
 
   /// Выбранная цепочка: индекс на каждом уровне.
   final List<int> _path = [];
@@ -71,6 +71,8 @@ class _WorkTreeViewState extends State<WorkTreeView> {
   final ScrollController _v = ScrollController();
 
   double _vw = 320;
+  List<double> _xs = const [];
+  List<double> _ws = const [];
 
   @override
   void dispose() {
@@ -80,8 +82,8 @@ class _WorkTreeViewState extends State<WorkTreeView> {
   }
 
   // ─────────────────────── ДАННЫЕ УРОВНЯ ───────────────────────
+  /// Дети узла, стоящего на уровне k-1 (k ≥ 1).
   List<WorkNode> _level(int k) {
-    if (k == 0) return workTree;
     var nodes = workTree;
     for (var i = 0; i < k - 1; i++) {
       nodes = nodes[_path[i]].children;
@@ -90,13 +92,18 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     return nodes[_path[k - 1]].children;
   }
 
-  WorkNode _nodeAt(int level, int index) {
-    if (level == 0) return workTree[index];
-    var nodes = workTree;
-    for (var i = 0; i < level - 1; i++) {
-      nodes = nodes[_path[i]].children;
+  /// Колонки дерева: 0 — корень, дальше — раскрытые ветки.
+  List<List<WorkNode>> _columns() {
+    if (_path.isEmpty) return [workTree];
+    final cols = <List<WorkNode>>[
+      [workTree[_path[0]]],
+    ];
+    for (var k = 1; k <= _path.length; k++) {
+      final ch = _level(k);
+      if (ch.isEmpty) break;
+      cols.add(ch);
     }
-    return nodes[_path[level - 1]].children[index];
+    return cols;
   }
 
   // ─────────────────────── ВЫБОР ───────────────────────
@@ -109,15 +116,16 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     if (level == 0) {
       widget.onWorkType?.call(same ? -1 : index);
     }
-    _autoScroll(_path.length);
+    _autoScroll();
   }
 
-  /// Автоскролл вправо: новый уровень встаёт в центр окна.
-  void _autoScroll(int level) {
+  /// Автоскролл: новая колонка встаёт в центр экрана.
+  void _autoScroll() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_h.hasClients) return;
-      final x = _pad + level * (_cardW + _gapX);
-      final target = (x + _cardW / 2 - _vw / 2)
+      if (!mounted || !_h.hasClients || _xs.isEmpty) return;
+      final i = _xs.length - 1;
+      final w = i < _ws.length ? _ws[i] : _cardW;
+      final target = (_xs[i] + w / 2 - _vw / 2)
           .clamp(0.0, _h.position.maxScrollExtent)
           .toDouble();
       _h.animateTo(
@@ -128,67 +136,71 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     });
   }
 
-  // ─────────────────────── ГЕОМЕТРИЯ ───────────────────────
+  // ─────────────────────── ПОСТРОЕНИЕ ───────────────────────
   @override
   Widget build(BuildContext context) {
-    // Уровни, которые сейчас на экране: 0 .. _path.length
-    final levels = <List<WorkNode>>[];
-    for (var k = 0; k <= _path.length; k++) {
-      levels.add(_level(k));
-    }
+    return LayoutBuilder(
+      builder: (context, c) {
+        final vp = (c.maxHeight.isFinite && c.maxHeight > 160)
+            ? c.maxHeight
+            : 340.0;
+        _vw = c.maxWidth;
 
-    final n = levels.length;
-    final xs = List<double>.filled(n, 0);
-    final ws = List<double>.filled(n, 0);
-    final hs = List<double>.filled(n, 0);
-    final colH = List<double>.filled(n, 0);
+        final cols = _columns();
+        final n = cols.length;
+        final rootExpanded = _path.isEmpty;
 
-    for (var k = 0; k < n; k++) {
-      final rootTall = k == 0 && _path.isEmpty;
-      ws[k] = rootTall ? _rootW : _cardW;
-      hs[k] = rootTall ? _rootH : _cardH;
-      xs[k] = k == 0 ? _pad : xs[k - 1] + ws[k - 1] + _gapX;
-      final cnt = levels[k].length;
-      colH[k] = cnt == 0 ? 0 : cnt * hs[k] + (cnt - 1) * _gapY;
-    }
+        final xs = List<double>.filled(n, 0);
+        final ws = List<double>.filled(n, 0);
+        final hs = List<double>.filled(n, 0);
+        final colH = List<double>.filled(n, 0);
 
-    final canvasW = xs[n - 1] + ws[n - 1] + _pad;
-    var contentH = 0.0;
-    for (var k = 0; k < n; k++) {
-      if (colH[k] > contentH) contentH = colH[k];
-    }
-    final canvasH = (contentH + _pad * 2) < _vp ? _vp : (contentH + _pad * 2);
+        for (var k = 0; k < n; k++) {
+          final tall = k == 0 && rootExpanded;
+          ws[k] = tall ? _rootW : _cardW;
+          hs[k] = tall ? _rootH : _cardH;
+          xs[k] = k == 0 ? _pad : xs[k - 1] + ws[k - 1] + _gapX;
+          final cnt = cols[k].length;
+          colH[k] = cnt == 0 ? 0 : cnt * hs[k] + (cnt - 1) * _gapY;
+        }
+        _xs = xs;
+        _ws = ws;
 
-    // Прямоугольники всех карточек + связи родитель → дети.
-    final rects = <List<Rect>>[];
-    final startY = List<double>.filled(n, 0);
-    for (var k = 0; k < n; k++) {
-      startY[k] = (canvasH - colH[k]) / 2;
-      rects.add([
-        for (var j = 0; j < levels[k].length; j++)
-          Rect.fromLTWH(
-            xs[k],
-            startY[k] + j * (hs[k] + _gapY),
-            ws[k],
-            hs[k],
-          ),
-      ]);
-    }
+        final canvasW = xs[n - 1] + ws[n - 1] + _pad;
+        var contentH = 0.0;
+        for (var k = 0; k < n; k++) {
+          if (colH[k] > contentH) contentH = colH[k];
+        }
+        final canvasH = contentH + _pad * 2;
 
-    final edges = <List<Rect>>[];
-    for (var k = 1; k < n; k++) {
-      final parent = rects[k - 1][_path[k - 1]];
-      for (final child in rects[k]) {
-        edges.add([parent, child]);
-      }
-    }
+        // Прямоугольники всех карточек.
+        final rects = <List<Rect>>[];
+        for (var k = 0; k < n; k++) {
+          final startY = (canvasH - colH[k]) / 2;
+          rects.add([
+            for (var j = 0; j < cols[k].length; j++)
+              Rect.fromLTWH(
+                xs[k],
+                startY + j * (hs[k] + _gapY),
+                ws[k],
+                hs[k],
+              ),
+          ]);
+        }
 
-    return SizedBox(
-      height: _vp,
-      child: LayoutBuilder(
-        builder: (context, c) {
-          _vw = c.maxWidth;
-          return SingleChildScrollView(
+        // Связи: корень → ветки, ветка → её подпункты.
+        final edges = <List<Rect>>[];
+        for (var k = 1; k < n; k++) {
+          final parent =
+              (k == 1) ? rects[0][0] : rects[k - 1][_path[k - 1]];
+          for (final child in rects[k]) {
+            edges.add([parent, child]);
+          }
+        }
+
+        return SizedBox(
+          height: vp,
+          child: SingleChildScrollView(
             controller: _v,
             physics: const ClampingScrollPhysics(),
             child: SizedBox(
@@ -209,9 +221,23 @@ class _WorkTreeViewState extends State<WorkTreeView> {
                           child: CustomPaint(painter: _EdgePainter(edges)),
                         ),
                       ),
-                      // ── КАРТОЧКИ ──
-                      for (var k = 0; k < n; k++)
-                        for (var j = 0; j < levels[k].length; j++)
+                      // ── КОРЕНЬ ──
+                      Positioned(
+                        left: rects[0][0].left,
+                        top: rects[0][0].top,
+                        width: ws[0],
+                        height: hs[0],
+                        child: rootExpanded
+                            ? _rootCard()
+                            : _compactCard(
+                                workTree[_path[0]],
+                                selected: true,
+                                onTap: () => _select(0, _path[0]),
+                              ),
+                      ),
+                      // ── ВЕТКИ ──
+                      for (var k = 1; k < n; k++)
+                        for (var j = 0; j < cols[k].length; j++)
                           Positioned(
                             left: rects[k][j].left,
                             top: rects[k][j].top,
@@ -220,14 +246,12 @@ class _WorkTreeViewState extends State<WorkTreeView> {
                             child: _appear(
                               k,
                               j,
-                              (k == 0 && _path.isEmpty)
-                                  ? _rootCard()
-                                  : _compactCard(
-                                      levels[k][j],
-                                      selected:
-                                          _path.length > k && _path[k] == j,
-                                      onTap: () => _select(k, j),
-                                    ),
+                              _compactCard(
+                                cols[k][j],
+                                selected:
+                                    _path.length > k && _path[k] == j,
+                                onTap: () => _select(k, j),
+                              ),
                             ),
                           ),
                     ],
@@ -235,13 +259,13 @@ class _WorkTreeViewState extends State<WorkTreeView> {
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
-  /// Появление ветки с «доворотом» (кручение).
+  /// Появление ветки с «доворотом» (кручение вокруг оси Y).
   Widget _appear(int level, int index, Widget child) {
     return TweenAnimationBuilder<double>(
       key: ValueKey('wt-$level-$index'),
@@ -262,11 +286,31 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     );
   }
 
-  // ─────────────────── КОРНЕВАЯ КАРТОЧКА (ВОПРОС) ───────────────────
+  // ─────────────────── КОРНЕВАЯ КАРТОЧКА ───────────────────
   Widget _rootCard() {
     return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: _dec(false),
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF152740), Color(0xFF0B1524)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.gold.withOpacity(0.34)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.45),
+            blurRadius: 26,
+            offset: const Offset(0, 12),
+          ),
+          BoxShadow(
+            color: AppColors.gold.withOpacity(0.10),
+            blurRadius: 34,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -274,18 +318,18 @@ class _WorkTreeViewState extends State<WorkTreeView> {
             children: [
               Container(
                 width: 3,
-                height: 12,
+                height: 15,
                 decoration: BoxDecoration(
                   gradient: AppColors.goldGradient,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'ВИД РАБОТ',
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.6,
                     color: Colors.white,
@@ -294,23 +338,23 @@ class _WorkTreeViewState extends State<WorkTreeView> {
               ),
             ],
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 5),
           const Padding(
-            padding: EdgeInsets.only(left: 9),
+            padding: EdgeInsets.only(left: 11),
             child: Text(
               'Что делаем на объекте',
               style: TextStyle(
-                fontSize: 8.5,
+                fontSize: 10,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF7E93AC),
               ),
             ),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 12),
           for (var i = 0; i < workTree.length; i++)
             Padding(
-              padding: EdgeInsets.only(
-                  bottom: i < workTree.length - 1 ? 6 : 0),
+              padding:
+                  EdgeInsets.only(bottom: i < workTree.length - 1 ? 7 : 0),
               child: _rootRow(i),
             ),
         ],
@@ -323,24 +367,24 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     return GestureDetector(
       onTap: () => _select(0, i),
       child: Container(
-        height: 40,
-        padding: const EdgeInsets.symmetric(horizontal: 7),
+        height: 44,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: const Color(0xFF0A1220),
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFF1B2C44)),
         ),
         child: Row(
           children: [
-            _iconBox(node.icon, 24, 13),
-            const SizedBox(width: 6),
+            _iconBox(node.icon, 26, 14),
+            const SizedBox(width: 7),
             Expanded(
               child: Text(
                 node.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 8.5,
+                  fontSize: 9.5,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.7,
                   color: Colors.white,
@@ -348,14 +392,14 @@ class _WorkTreeViewState extends State<WorkTreeView> {
               ),
             ),
             const Icon(Icons.chevron_right_rounded,
-                size: 14, color: Color(0xFF3D5169)),
+                size: 15, color: Color(0xFF3D5169)),
           ],
         ),
       ),
     );
   }
 
-  // ─────────────────── КОМПАКТНАЯ КАРТОЧКА ВЕТКИ ───────────────────
+  // ─────────────────── КОМПАКТНАЯ КАРТОЧКА ───────────────────
   Widget _compactCard(WorkNode node,
       {required bool selected, required VoidCallback onTap}) {
     return GestureDetector(
@@ -363,19 +407,19 @@ class _WorkTreeViewState extends State<WorkTreeView> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 9),
         decoration: _dec(selected),
         child: Row(
           children: [
-            _iconBox(node.icon, 26, 13),
-            const SizedBox(width: 6),
+            _iconBox(node.icon, 28, 14),
+            const SizedBox(width: 7),
             Expanded(
               child: Text(
                 node.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 8.5,
+                  fontSize: 9.5,
                   height: 1.2,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
@@ -384,11 +428,10 @@ class _WorkTreeViewState extends State<WorkTreeView> {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_rounded,
-                  size: 12, color: AppColors.gold)
+              const Icon(Icons.check_rounded, size: 13, color: AppColors.gold)
             else if (node.children.isNotEmpty)
               const Icon(Icons.chevron_right_rounded,
-                  size: 13, color: Color(0xFF3D5169)),
+                  size: 14, color: Color(0xFF3D5169)),
           ],
         ),
       ),
@@ -418,7 +461,7 @@ class _WorkTreeViewState extends State<WorkTreeView> {
   BoxDecoration _dec(bool selected) {
     return BoxDecoration(
       color: selected ? const Color(0xFF12233A) : const Color(0xFF0A1220),
-      borderRadius: BorderRadius.circular(13),
+      borderRadius: BorderRadius.circular(14),
       border: Border.all(
         color: selected
             ? AppColors.gold.withOpacity(0.78)
