@@ -234,7 +234,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     alignment: Alignment.center,
                     transform: Matrix4.identity()
                       ..rotateY(showTo ? math.pi * _dir : 0.0),
-                    child: _cardWrap(h, _cardFor(idx)),
+                    child: _stageChild(h, idx),
                   ),
                 ),
               ),
