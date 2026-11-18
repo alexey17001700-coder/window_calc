@@ -49,6 +49,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Направление разворота: 1 — вперёд, -1 — назад.
   int _dir = 1;
 
+  /// Выбранный вид работ: 0 — замер, 1 — монтаж, 2 — ремонт, 3 — рекламации.
+  int _workType = -1;
+
   bool _animating = false;
 
   /// Доворот от пальца (радианы), пока идёт свайп.
