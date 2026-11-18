@@ -353,7 +353,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               duration: const Duration(milliseconds: 380),
               curve: Curves.easeOut,
               height: 3,
-              margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
+              margin: EdgeInsets.only(right: i < 3 ? 6 : 0),
               decoration: BoxDecoration(
                 gradient: done ? AppColors.goldGradient : null,
                 color: done ? null : const Color(0xFF16253A),
