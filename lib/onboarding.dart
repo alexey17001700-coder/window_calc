@@ -100,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   // ─────────────────────── ПЕРЕВОРОТ КАРТОЧКИ ───────────────────────
   void _flipTo(int target) {
-    if (_animating || target < 0 || target > 2 || target == _page) return;
+    if (_animating || target < 0 || target > 3 || target == _page) return;
     setState(() {
       _from = _page;
       _to = target;
