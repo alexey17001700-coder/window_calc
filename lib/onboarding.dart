@@ -123,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   void _next() {
-    if (_page >= 2) {
+    if (_page >= 3) {
       widget.onFinish();
       return;
     }
