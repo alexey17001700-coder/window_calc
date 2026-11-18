@@ -453,6 +453,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ),
         const SizedBox(height: 13),
         _PremiumField(
+          label: 'НОМЕР ТЕЛЕФОНА',
+          hint: '+7 900 000-00-00',
+          icon: Icons.phone_rounded,
+          controller: _phone,
+          kb: TextInputType.phone,
+        ),
+        const SizedBox(height: 13),
+        _PremiumField(
           label: 'АДРЕС ОБЪЕКТА',
           hint: 'Улица, дом',
           icon: Icons.location_on_rounded,
