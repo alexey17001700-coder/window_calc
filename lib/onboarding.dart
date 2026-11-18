@@ -261,6 +261,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       case 0:
         return _cardClient();
       case 1:
+        return _cardWorkType();
+      case 2:
         return _cardProduct();
       default:
         return _cardSummary();
