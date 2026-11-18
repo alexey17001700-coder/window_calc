@@ -283,18 +283,30 @@ class _WorkTreeViewState extends State<WorkTreeView> {
               const SizedBox(width: 6),
               const Expanded(
                 child: Text(
-                  'ЧТО ДЕЛАЕМ?',
+                  'ВИД РАБОТ',
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 1.1,
+                    letterSpacing: 1.6,
                     color: Colors.white,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 3),
+          const Padding(
+            padding: EdgeInsets.only(left: 9),
+            child: Text(
+              'Что делаем на объекте',
+              style: TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+          ),
+          const SizedBox(height: 9),
           for (var i = 0; i < workTree.length; i++)
             Padding(
               padding: EdgeInsets.only(
