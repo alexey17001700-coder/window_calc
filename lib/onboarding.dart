@@ -317,7 +317,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 260),
                   child: Text(
-                    'ШАГ ${_page + 1} ИЗ 3 · ${_titles[_page]}',
+                    'ШАГ ${_page + 1} ИЗ 4 · ${_titles[_page]}',
                     key: ValueKey('h$_page'),
                     style: const TextStyle(
                       fontSize: 9.5,
