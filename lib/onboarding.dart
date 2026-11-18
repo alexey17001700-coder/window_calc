@@ -518,8 +518,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _cardTitle('ВИД РАБОТ', 'Что делаем на объекте'),
-        const SizedBox(height: 12),
         WorkTreeView(
           onWorkType: (i) {
             if (_workType != i) setState(() => _workType = i);
