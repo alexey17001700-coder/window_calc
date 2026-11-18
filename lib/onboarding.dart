@@ -519,22 +519,24 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _cardTitle('ВИД РАБОТ', 'Что делаем на объекте'),
+        const SizedBox(height: 12),
+        WorkTreeView(
+          onWorkType: (i) {
+            if (_workType != i) setState(() => _workType = i);
+          },
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'ТАП — РАСКРЫТЬ ВЕТКУ · ПОВТОРНЫЙ ТАП — СВЕРНУТЬ · ТЯНИ ВЛЕВО/ВПРАВО',
+          style: TextStyle(
+            fontSize: 8,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.7,
+            height: 1.4,
+            color: Color(0xFF5A6E86),
+          ),
+        ),
         const SizedBox(height: 16),
-        ...List.generate(_workItems.length, (i) {
-          final it = _workItems[i];
-          return Padding(
-            padding: EdgeInsets.only(
-                bottom: i < _workItems.length - 1 ? 11 : 0),
-            child: _ActionTile(
-              icon: it.icon,
-              title: it.title,
-              sub: it.sub,
-              selected: _workType == i,
-              onTap: () => setState(() => _workType = i),
-            ),
-          );
-        }),
-        const SizedBox(height: 20),
         _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
       ],
     );
