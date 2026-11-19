@@ -552,54 +552,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ─────────────────────── КАРТОЧКА 3: ИЗДЕЛИЕ ───────────────────────
-  Widget _cardProduct() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _cardTitle('ИЗДЕЛИЕ', 'Что замеряем'),
-        const SizedBox(height: 18),
-        _placeholder(
-          Icons.grid_view_rounded,
-          'ВЫБОР ИЗДЕЛИЯ',
-          'Окно, балконный блок, дверь — с размерами и чертежом',
-        ),
-        const SizedBox(height: 14),
-        _placeholder(
-          Icons.straighten_rounded,
-          'РАЗМЕРЫ',
-          'Ширина и высота в мм, деление на створки',
-        ),
-        const SizedBox(height: 20),
-        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
-      ],
-    );
-  }
-
-  // ─────────────────────── КАРТОЧКА 3: ИТОГ ───────────────────────
-  Widget _cardSummary() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _cardTitle('ИТОГ ЗАМЕРА', 'Расчёт и отправка'),
-        const SizedBox(height: 18),
-        _placeholder(
-          Icons.receipt_long_rounded,
-          'РАСЧЁТ ЦЕНЫ',
-          'Стоимость изделий, монтажа, отделки и услуг',
-        ),
-        const SizedBox(height: 14),
-        _placeholder(
-          Icons.send_rounded,
-          'ОТПРАВКА',
-          'На завод, клиенту и дилеру — одним нажатием',
-        ),
-        const SizedBox(height: 20),
-        _GoldButton('ПЕРЕЙТИ В МЕНЮ', Icons.check_rounded, _next),
-      ],
-    );
-  }
-
   // ─────────────────────────── ЭЛЕМЕНТЫ ───────────────────────────
   Widget _cardTitle(String title, String sub) {
     return Column(
