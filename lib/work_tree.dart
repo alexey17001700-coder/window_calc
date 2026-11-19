@@ -22,9 +22,20 @@ class WorkNode {
 /// Данные дерева. Подпункты — заготовка, наполняется как нужно.
 const List<WorkNode> workTree = [
   WorkNode(Icons.straighten_rounded, 'ЗАМЕР', [
-    WorkNode(Icons.directions_car_rounded, 'ВЫЕЗД'),
-    WorkNode(Icons.square_foot_rounded, 'ОБМЕР ПРОЁМА'),
-    WorkNode(Icons.architecture_rounded, 'ЭСКИЗ'),
+    WorkNode(Icons.window_rounded, 'ОКНО', [
+      WorkNode(Icons.crop_portrait_rounded, 'ОДНОСТВОРЧАТОЕ'),
+      WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТОЕ'),
+      WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТОЕ'),
+      WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ'),
+    ]),
+    WorkNode(Icons.door_sliding_rounded, 'БАЛКОННЫЙ БЛОК'),
+    WorkNode(Icons.roofing_rounded, 'БАЛКОН'),
+    WorkNode(Icons.deck_rounded, 'ЛОДЖИЯ'),
+    WorkNode(Icons.door_front_door_rounded, 'ДВЕРЬ'),
+    WorkNode(Icons.architecture_rounded, 'ОТКОСЫ'),
+    WorkNode(Icons.water_drop_rounded, 'ОТЛИВ'),
+    WorkNode(Icons.shelves, 'ПОДОКОННИКИ'),
+    WorkNode(Icons.apartment_rounded, 'ФАСАДНОЕ ОСТЕКЛЕНИЕ'),
   ]),
   WorkNode(Icons.construction_rounded, 'МОНТАЖ', [
     WorkNode(Icons.delete_sweep_rounded, 'ДЕМОНТАЖ'),
