@@ -91,6 +91,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       padding: const EdgeInsets.fromLTRB(22, 16, 22, 12),
       child: Row(
         children: [
+          _RoundButton(
+            icon: Icons.arrow_back_rounded,
+            onTap: () {
+              if (_step == 1) {
+                setState(() => _step = 0);
+              } else {
+                widget.onBack?.call();
+              }
+            },
+          ),
+          const SizedBox(width: 10),
           Container(
             width: 46,
             height: 46,
