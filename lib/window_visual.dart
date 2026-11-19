@@ -174,7 +174,7 @@ class _WindowVisualState extends State<WindowVisual> {
             for (var i = 0; i < widget.sashes; i++)
               _SashChip(
                 index: i,
-                name: kSashModeShort[modes[i].clamp(0, 4)],
+                name: kSashModeShort[modes[i].clamp(0, 3)],
                 selected: _sel == i,
                 onTap: () => _tap(i),
               ),
