@@ -476,6 +476,80 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
+
+  /// Кнопка ручной проверки обновлений на главном экране.
+  Widget _checkButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.gold,
+          minimumSize: const Size.fromHeight(52),
+          side: BorderSide(color: AppColors.gold.withOpacity(0.55)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
+          ),
+        ),
+        onPressed: _checking ? null : _manualCheck,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_checking)
+              const SizedBox(
+                width: 15,
+                height: 15,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.8,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.gold),
+                ),
+              )
+            else
+              const Icon(Icons.system_update_rounded, size: 18),
+            const SizedBox(width: 9),
+            Text(_checking ? 'ПРОВЕРКА...' : 'ПРОВЕРИТЬ ОБНОВЛЕНИЕ'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Ручная проверка обновлений: пишет в лог, при находке открывает диалог.
+  Future<void> _manualCheck() async {
+    setState(() => _checking = true);
+    _push('РУЧНАЯ ПРОВЕРКА ОБНОВЛЕНИЙ...',
+        _progress < 0.64 ? 0.64 : _progress,
+        busy: true);
+
+    final res = await UpdateChecker.check();
+    if (!mounted) return;
+
+    if (res.error != null) {
+      _replaceLast('ОБНОВЛЕНИЯ: НЕ ПРОВЕРЕНО (${res.error})', _progress);
+      setState(() => _checking = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Не удалось проверить: ${res.error}')),
+      );
+      return;
+    }
+
+    if (res.hasUpdate) {
+      _replaceLast('ДОСТУПНО ОБНОВЛЕНИЕ v${res.latestVersion}', _progress);
+      setState(() => _checking = false);
+      _updateVersion = res.latestVersion;
+      UpdateChecker.showUpdate(context, res.latestVersion);
+    } else {
+      _replaceLast('ОБНОВЛЕНИЙ НЕТ · ВЕРСИЯ ${res.currentVersion}', _progress);
+      setState(() => _checking = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Обновлений нет · версия ${res.currentVersion}')),
+      );
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
