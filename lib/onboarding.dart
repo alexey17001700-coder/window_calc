@@ -150,7 +150,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final v = d.velocity.pixelsPerSecond.dx;
     final dx = _drag;
     setState(() => _drag = 0);
-    if ((dx > 0.16 || v < -260) && _page < 3) {
+    if ((dx > 0.16 || v < -260) && _page < 1) {
       _flipTo(_page + 1);
     } else if ((dx < -0.16 || v > 260) && _page > 0) {
       _flipTo(_page - 1);
