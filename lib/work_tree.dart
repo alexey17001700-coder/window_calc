@@ -92,13 +92,21 @@ const List<WorkNode> workTree = [
 ];
 
 class WorkTreeView extends StatefulWidget {
-  const WorkTreeView({super.key, this.onWorkType, this.onLeafSelected});
+  const WorkTreeView({
+    super.key,
+    this.onWorkType,
+    this.onPathChanged,
+    this.onMultiChanged,
+  });
 
   /// Индекс выбранного вида работ на 1-м уровне (или -1, если снят выбор).
   final ValueChanged<int>? onWorkType;
 
-  /// Цепочка названий, когда выбрана КОНЕЧНАЯ карточка (тип дома).
-  final ValueChanged<List<String>>? onLeafSelected;
+  /// Цепочка выбранных уровней (ЗАМЕР → ОКНО → вид → тип дома).
+  final ValueChanged<List<String>>? onPathChanged;
+
+  /// Отмеченные пункты комплектации (финальный уровень, мультивыбор).
+  final ValueChanged<List<String>>? onMultiChanged;
 
   @override
   State<WorkTreeView> createState() => _WorkTreeViewState();
