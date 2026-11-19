@@ -8,7 +8,7 @@ import 'work_tree.dart';
 /// ═══════════════════════════════════════════════════════════════════
 ///  ВИЗУАЛЬНОЕ ОКНО  ·  v3.4.16
 ///  После выбора типа дома показываем САМО окно (нарисованное) и под
-///  ним — выбор стеклопакета. Створки и арка берутся из выбранного вида.
+///  ним — выбор стеклопакета. Створки и арка берутся из вида окна.
 /// ═══════════════════════════════════════════════════════════════════
 class WindowVisual extends StatefulWidget {
   const WindowVisual({
@@ -227,7 +227,7 @@ class _GlassChipState extends State<_GlassChip> {
 }
 
 /// ═══════════════════════════════════════════════════════════════════
-///  РИСУНОК ОКНА: золотая рамка, стекло, импосты, ручки, арка
+///  РИСУНОК ОКНА: золотая рамка, стекло, импосты, ручки, арочный верх
 /// ═══════════════════════════════════════════════════════════════════
 class _WindowPainter extends CustomPainter {
   _WindowPainter({
@@ -271,10 +271,9 @@ class _WindowPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16),
     );
 
+    // ── СТЕКЛО ──
     canvas.save();
     canvas.clipPath(path);
-
-    // Стекло
     canvas.drawRect(
       r,
       Paint()
@@ -285,8 +284,7 @@ class _WindowPainter extends CustomPainter {
           const [0.0, 0.55, 1.0],
         ),
     );
-
-    // Отражение неба сверху
+    // отражение неба сверху
     canvas.drawRect(
       Rect.fromLTWH(r.left, r.top, r.width, r.height * 0.34),
       Paint()
@@ -296,8 +294,7 @@ class _WindowPainter extends CustomPainter {
           [Colors.white.withOpacity(0.09), Colors.white.withOpacity(0.0)],
         ),
     );
-
-    // Пробегающий блик по стеклу
+    // пробегающий блик
     final sx = r.left + (t * 1.5 - 0.25) * r.width;
     final sw = r.width * 0.20;
     canvas.drawRect(
@@ -313,8 +310,7 @@ class _WindowPainter extends CustomPainter {
           ],
         ),
     );
-
-    // Импосты между створками
+    // импосты между створками
     final mull = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.4
@@ -323,8 +319,7 @@ class _WindowPainter extends CustomPainter {
       final x = r.left + r.width * i / sashes;
       canvas.drawLine(Offset(x, r.top), Offset(x, r.bottom), mull);
     }
-
-    // Ручки у импостов
+    // ручки
     final handle = Paint()..color = AppColors.gold.withOpacity(0.85);
     for (var i = 1; i < sashes; i++) {
       final x = r.left + r.width * i / sashes;
@@ -340,10 +335,9 @@ class _WindowPainter extends CustomPainter {
         handle,
       );
     }
-
     canvas.restore();
 
-    // Золотая рамка
+    // ── ЗОЛОТАЯ РАМКА ──
     canvas.drawPath(
       path,
       Paint()
@@ -355,8 +349,7 @@ class _WindowPainter extends CustomPainter {
           [AppColors.gold, AppColors.bronze, AppColors.gold],
         ),
     );
-
-    // Тонкий блик по рамке
+    // тонкий блик по рамке
     canvas.drawPath(
       path,
       Paint()
