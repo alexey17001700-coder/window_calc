@@ -79,6 +79,13 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
     b.writeln('ИЗДЕЛИЕ: ${widget.path.isEmpty ? '—' : widget.path.join(' · ')}');
     b.writeln('СТЕКЛОПАКЕТ: ${widget.glass.isEmpty ? '—' : widget.glass}');
+    if (widget.sashModes.isNotEmpty) {
+      final s = <String>[];
+      for (var i = 0; i < widget.sashModes.length; i++) {
+        s.add('${i + 1}-${widget.sashModes[i]}');
+      }
+      b.writeln('СТВОРКИ: ${s.join(' · ')}');
+    }
     b.writeln(_dash);
 
     b.writeln('РАЗМЕРЫ (ММ):');
