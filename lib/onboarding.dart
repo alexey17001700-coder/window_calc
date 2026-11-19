@@ -476,6 +476,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
+  /// Сколько створок у выбранного типа окна.
+  int get _sashCount {
+    final t = _picked.length > 2 ? _picked[2] : '';
+    if (t == 'ДВУХСТВОРЧАТОЕ') return 2;
+    if (t == 'ТРЁХСТВОРЧАТОЕ') return 3;
+    return 1;
+  }
+
   /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
   int _mmOf(String field) {
     for (final e in _sizes.values) {
