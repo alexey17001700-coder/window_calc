@@ -45,10 +45,21 @@ const List<WorkNode> workTree = [
 ];
 
 class WorkTreeView extends StatefulWidget {
-  const WorkTreeView({super.key, this.onWorkType});
+  const WorkTreeView({
+    super.key,
+    this.onWorkType,
+    this.rootTitle = 'ВИД РАБОТ',
+    this.rootSub = 'Что делаем на объекте',
+  });
 
   /// Индекс выбранного вида работ на 1-м уровне (или -1, если свёрнуто).
   final ValueChanged<int>? onWorkType;
+
+  /// Заголовок корневой карточки.
+  final String rootTitle;
+
+  /// Подпись под заголовком корневой карточки.
+  final String rootSub;
 
   @override
   State<WorkTreeView> createState() => _WorkTreeViewState();
