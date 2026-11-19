@@ -344,9 +344,40 @@ class _SplashScreenState extends State<SplashScreen>
         border: Border.all(color: const Color(0xFF1B2C44)),
       ),
       child: ListView.builder(
-        itemCount: _log.length,
+        controller: _logScroll,
+        itemCount: _log.length + (_busy ? 1 : 0),
         itemBuilder: (_, i) {
-          final last = i == _log.length - 1;
+          if (i >= _log.length) {
+            return const Padding(
+              padding: EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 13,
+                    height: 13,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.6,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.gold),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'ВЫПОЛНЯЕТСЯ...',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.6,
+                        color: AppColors.goldLight,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          final last = i == _log.length - 1 && !_busy;
           return Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Row(
