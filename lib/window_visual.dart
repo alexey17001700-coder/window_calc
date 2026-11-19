@@ -649,7 +649,7 @@ class _GostPainter extends CustomPainter {
       canvas.drawPath(t, p);
     }
 
-    // откидная: вершина вниз
+    // откидная (О) и поворотно-откидная (ПО): вершина вниз
     if (mode == 2 || mode == 3) {
       final hh = g.height * 0.58;
       final half = g.width * 0.22;
