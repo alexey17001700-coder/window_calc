@@ -7,6 +7,10 @@ import 'update_checker.dart';
 import 'wizard_screen.dart';
 import 'onboarding.dart';
 
+/// Глобальный навигатор: позволяет переключать экраны из колбэков,
+/// даже когда контекст исходного экрана уже уничтожен (pushReplacement).
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const AlmasApp());
