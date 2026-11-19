@@ -61,12 +61,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     'ЧТО ДЕЛАЕМ',
     'РАЗМЕРЫ',
     'ВИЗУАЛЬНЫЙ ЗАМЕР',
+    'ЗАМЕРНЫЙ ЛИСТ',
   ];
   static const _icons = [
     Icons.person_rounded,
     Icons.account_tree_rounded,
     Icons.straighten_rounded,
     Icons.window_rounded,
+    Icons.receipt_long_rounded,
   ];
 
   @override
