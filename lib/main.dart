@@ -541,7 +541,7 @@ class _SplashScreenState extends State<SplashScreen>
       _replaceLast('ДОСТУПНО ОБНОВЛЕНИЕ v${res.latestVersion}', _progress);
       setState(() => _checking = false);
       _updateVersion = res.latestVersion;
-      UpdateChecker.showUpdate(context, res.latestVersion);
+      UpdateChecker.showUpdate(context, res.latestVersion!);
     } else {
       _replaceLast('ОБНОВЛЕНИЙ НЕТ · ВЕРСИЯ ${res.currentVersion}', _progress);
       setState(() => _checking = false);
