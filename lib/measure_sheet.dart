@@ -46,6 +46,9 @@ class MeasureSheetView extends StatefulWidget {
   /// Выбранный стеклопакет ('' — не выбран).
   final String glass;
 
+  /// Обозначения створок по ГОСТ (по порядку слева направо).
+  final List<String> sashModes;
+
   /// Назад — к визуальному замеру.
   final VoidCallback onBack;
 
