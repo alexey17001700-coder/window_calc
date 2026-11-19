@@ -350,11 +350,11 @@ class _WorkTreeViewState extends State<WorkTreeView> {
             ],
           ),
           const SizedBox(height: 5),
-          const Padding(
-            padding: EdgeInsets.only(left: 11),
+          Padding(
+            padding: const EdgeInsets.only(left: 11),
             child: Text(
-              'Что делаем на объекте',
-              style: TextStyle(
+              widget.rootSub,
+              style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF7E93AC),
