@@ -430,6 +430,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final parts = <String>[
       if (windowType.isNotEmpty) windowType,
       if (house.isNotEmpty) house,
+      ..._multi,
     ];
     return Container(
       width: double.infinity,
