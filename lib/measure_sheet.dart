@@ -106,6 +106,15 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     return b.toString();
   }
 
+  /// «1-ПОВОРОТНАЯ · 2-ГЛУХАЯ» — обозначения створок по ГОСТ.
+  String _sashLine() {
+    final s = <String>[];
+    for (var i = 0; i < widget.sashModes.length; i++) {
+      s.add('${i + 1} · ${widget.sashModes[i]}');
+    }
+    return s.join('   ');
+  }
+
   String _or(String v, String fallback) {
     final t = v.trim();
     return t.isEmpty ? fallback : t;
