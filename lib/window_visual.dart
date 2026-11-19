@@ -94,6 +94,7 @@ class _WindowVisualState extends State<WindowVisual> {
       : List<int>.filled(widget.sashes, 1);
 
   void _tap(int i) {
+    HapticFeedback.selectionClick();
     setState(() => _sel = i);
     widget.onSashTap?.call(i);
   }
