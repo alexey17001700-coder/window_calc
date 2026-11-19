@@ -431,6 +431,28 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
+  // ──────────── ШАГ 5: ЗАМЕРНЫЙ ЛИСТ (ОТПРАВКА) ────────────
+  /// Итог: клиент + цепочка дерева + комплектация + стеклопакет +
+  /// размеры (уже в МИЛЛИМЕТРАХ). Лист копируется или отправляется.
+  Widget _sheetStep() {
+    final glass = (_glass >= 0 && _glass < glassTypes.length)
+        ? glassTypes[_glass].title
+        : '';
+    return MeasureSheetView(
+      name: _name.text,
+      phone: _phone.text,
+      addr: _addr.text,
+      flat: _flat.text,
+      floor: _floor.text,
+      path: _picked,
+      multi: _multi,
+      sizes: _sizes,
+      glass: glass,
+      onBack: () => setState(() => _step = 3),
+      onFinish: widget.onFinish,
+    );
+  }
+
   /// Плашка выбранного: ОКНО · ДВУХСТВОРЧАТОЕ · КИРПИЧКА
   Widget _pickedBar(String windowType, String house) {
     final parts = <String>[
