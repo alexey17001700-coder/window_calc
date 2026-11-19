@@ -77,8 +77,11 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
   final List<String> _log = [];
+  final ScrollController _logScroll = ScrollController();
   double _progress = 0;
   bool _ready = false;
+  bool _busy = false;
+  String? _updateVersion;
 
   @override
   void initState() {
