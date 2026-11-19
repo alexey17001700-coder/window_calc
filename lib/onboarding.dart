@@ -578,6 +578,46 @@ class _GhostButtonState extends State<_GhostButton> {
 }
 
 /// ═══════════════════════════════════════════════════════════════════
+///  КРУГЛАЯ КНОПКА-ИКОНКА (назад на главный экран)
+/// ═══════════════════════════════════════════════════════════════════
+class _RoundButton extends StatefulWidget {
+  const _RoundButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  State<_RoundButton> createState() => _RoundButtonState();
+}
+
+class _RoundButtonState extends State<_RoundButton> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.92 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A1220),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.gold.withOpacity(0.42)),
+          ),
+          child: Icon(widget.icon, size: 19, color: AppColors.gold),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
 ///  ПРОБЕГАЮЩИЙ БЛИК ПО КАРТОЧКЕ
 /// ═══════════════════════════════════════════════════════════════════
 class _ShinePainter extends CustomPainter {
