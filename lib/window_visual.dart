@@ -711,13 +711,54 @@ class _GostPainter extends CustomPainter {
     tp.paint(canvas, Offset(box.left + 5, box.top + 2.5));
   }
 
-  // ─────────────── РУЧКА ───────────────
-  void _handle(Canvas canvas, Rect o, {required bool hingeLeft}) {
-    final x = hingeLeft ? o.right - 4 : o.left + 1.6;
-    canvas.drawRect(
-      Rect.fromLTWH(x, o.center.dy - 7, 2.4, 14),
-      Paint()..color = _ink,
-    );
+  // ─────────────── ФУРНИТУРА (по типу створки) ───────────────
+  //  Г  — глухая:            фурнитуры нет;
+  //  П  — поворотная:        петли на одной стороне, ручка напротив;
+  //  ПО — поворотно-откидная: петли + ручка + нижняя петля откидывания;
+  //  О  — откидная:          петли снизу, ручка сверху.
+  void _hardware(Canvas canvas, Rect o, int mode, {required bool hingeLeft}) {
+    if (mode == 0) return; // глухая — без фурнитуры
+
+    final ink = Paint()..color = _ink;
+
+    // ── ОТКИДНАЯ: две петли снизу, ручка по верхней обвязке ──
+    if (mode == 3) {
+      const pw = 12.0;
+      canvas.drawRect(
+          Rect.fromLTWH(o.center.dx - 12 - pw / 2, o.bottom - 3.4, pw, 3.4), ink);
+      canvas.drawRect(
+          Rect.fromLTWH(o.center.dx + 12 - pw / 2, o.bottom - 3.4, pw, 3.4), ink);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(o.center.dx - 7, o.top + 1.2, 14, 2.6),
+          const Radius.circular(1.3),
+        ),
+        ink,
+      );
+      return;
+    }
+
+    // ── П и ПО: три петли по стороне петель ──
+    final hx = hingeLeft ? o.left : o.right - 3;
+    for (final t in const [0.15, 0.50, 0.85]) {
+      canvas.drawRect(
+        Rect.fromLTWH(hx, o.top + o.height * t - 5, 3, 10),
+        ink,
+      );
+    }
+
+    // ручка на противоположной петлям стороне (площадка + рычаг)
+    final rx = hingeLeft ? o.right - 5.4 : o.left + 1.6;
+    canvas.drawRect(Rect.fromLTWH(rx, o.center.dy - 4, 3.8, 8), ink);
+    canvas.drawRect(Rect.fromLTWH(rx, o.center.dy - 7.5, 2.2, 15), ink);
+
+    // ── ПО: нижняя петля откидывания ──
+    if (mode == 2) {
+      canvas.drawRect(
+        Rect.fromLTWH(o.center.dx - 6, o.bottom - 3.4, 12, 3.4),
+        ink,
+      );
+    }
   }
 
   // ─────────────── ОТКОСЫ ───────────────
