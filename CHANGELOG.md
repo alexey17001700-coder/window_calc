@@ -1,5 +1,31 @@
 # Changelog
 
+## 3.4.13+76
+
+### Исправлена ошибка сборки: `String?` → `String`
+
+**Ошибка из Actions:**
+
+```
+lib/main.dart:544:45: Error: The argument type 'String?' can't be assigned to
+the parameter type 'String' because 'String?' is nullable and 'String' isn't.
+      UpdateChecker.showUpdate(context, res.latestVersion);
+```
+
+**Причина:** в `_manualCheck()` (заставка) вызывался
+`UpdateChecker.showUpdate(context, res.latestVersion)`, а поле
+`UpdateResult.latestVersion` объявлено как `String?`. В ветке `res.hasUpdate`
+оно гарантированно не пустое, но компилятор этого не знает.
+
+**Исправление (`lib/main.dart`, строка 544):**
+
+- `UpdateChecker.showUpdate(context, res.latestVersion)` →
+  **`UpdateChecker.showUpdate(context, res.latestVersion!)`**
+- больше в проекте таких мест нет: в `_boot()` и `checkOnStart()` уже стоит
+  проверка `!= null` и `!`
+
+`pubspec.yaml`: **3.4.12+75 → 3.4.13+76** — новый тег, чистая сборка.
+
 ## 3.4.11+74
 
 ### Перезапуск сборки APK (проверка кода)
