@@ -90,6 +90,11 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
         s.add('${i + 1}-${widget.sashModes[i]}');
       }
       b.writeln('СТВОРКИ: ${s.join(' · ')}');
+      b.writeln('КОНСТРУКЦИЯ: ${widget.sashModes.length} '
+          '${_sashWord(widget.sashModes.length)} · ${_sashLetters()}');
+      if (widget.widthMm > 0) {
+        b.writeln('ШИРИНА СЕКЦИЙ (ММ): ${_sectionsMm()}');
+      }
     }
     b.writeln(_dash);
 
