@@ -375,7 +375,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ──────── ШАГ 3: ВИЗУАЛЬНОЕ ОКНО + ВЫБОР СТЕКЛОПАКЕТА ────────
+  // ──────── ШАГ 4: ВИЗУАЛЬНОЕ ОКНО + ВЫБОР СТЕКЛОПАКЕТА ────────
   Widget _visualStep() {
     final windowType = _picked.length > 2 ? _picked[2] : '';
     final house = _picked.length > 3 ? _picked[3] : '';
