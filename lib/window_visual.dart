@@ -127,16 +127,20 @@ class _WindowVisualState extends State<WindowVisual> {
               ),
             ),
             const SizedBox(width: 8),
-            const Expanded(
+            Expanded(
               child: Text(
-                'нажми на створку',
-                style: TextStyle(
+                'СЕКЦИЯ ${_sel + 1} · ${kSashModeNames[modes[_sel].clamp(0, 3)]}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w700,
                   color: Color(0xFF7E93AC),
                 ),
               ),
             ),
+            const Icon(Icons.touch_app_rounded,
+                size: 13, color: Color(0xFF7E93AC)),
           ],
         ),
         const SizedBox(height: 10),
