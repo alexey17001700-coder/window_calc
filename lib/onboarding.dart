@@ -465,6 +465,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       multi: _multi,
       sizes: _sizes,
       glass: glass,
+      widthMm: _mmOf('ШИРИНА'),
       sashModes: [
         for (final m in (_sashModes.length == _sashCount
             ? _sashModes
