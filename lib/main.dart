@@ -95,30 +95,76 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _c.dispose();
+    _logScroll.dispose();
     super.dispose();
   }
 
+  /// Добавить строку в лог и прокрутить панель вниз.
+  void _push(String line, double progress, {bool busy = false}) {
+    if (!mounted) return;
+    setState(() {
+      _log.add(line);
+      _progress = progress;
+      _busy = busy;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_logScroll.hasClients) {
+        _logScroll.animateTo(
+          _logScroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  /// Заменить последнюю строку лога (для «выполняется…» → результат).
+  void _replaceLast(String line, double progress) {
+    if (!mounted) return;
+    setState(() {
+      if (_log.isNotEmpty) _log.removeLast();
+      _log.add(line);
+      _progress = progress;
+      _busy = false;
+    });
+  }
+
   Future<void> _boot() async {
-    final steps = <List<String>>[
-      ['ИНИЦИАЛИЗАЦИЯ ЯДРА', '0.12'],
-      ['ЗАГРУЗКА ПРАЙС-ЛИСТА', '0.30'],
-      ['ПОДГОТОВКА ШАБЛОНОВ ОКОН', '0.52'],
-      ['ПРОВЕРКА ЦЕЛОСТНОСТИ ДАННЫХ', '0.72'],
-      ['СИНХРОНИЗАЦИЯ С СЕРВЕРОМ', '0.90'],
-      ['СИСТЕМА ГОТОВА', '1.00'],
-    ];
-    for (final s in steps) {
-      await Future.delayed(const Duration(milliseconds: 260));
-      if (!mounted) return;
-      setState(() {
-        _log.add(s[0]);
-        _progress = double.parse(s[1]);
-      });
+    const tick = Duration(milliseconds: 240);
+
+    _push('ИНИЦИАЛИЗАЦИЯ ЯДРА', 0.10);
+    await Future.delayed(tick);
+    _push('ЗАГРУЗКА ПРАЙС-ЛИСТА', 0.24);
+    await Future.delayed(tick);
+    _push('ПОДГОТОВКА ШАБЛОНОВ ОКОН', 0.38);
+    await Future.delayed(tick);
+    _push('ПРОВЕРКА ЦЕЛОСТНОСТИ ДАННЫХ', 0.52);
+    await Future.delayed(tick);
+
+    // ── Реальная проверка обновлений ──
+    _push('ПРОВЕРКА ОБНОВЛЕНИЙ...', 0.64, busy: true);
+    final res = await UpdateChecker.check();
+    if (!mounted) return;
+    if (res.error != null) {
+      _replaceLast('ОБНОВЛЕНИЯ: НЕ ПРОВЕРЕНО (${res.error})', 0.78);
+    } else if (res.hasUpdate) {
+      _updateVersion = res.latestVersion;
+      _replaceLast('ДОСТУПНО ОБНОВЛЕНИЕ v${res.latestVersion}', 0.78);
+    } else {
+      _replaceLast('ОБНОВЛЕНИЙ НЕТ · ВЕРСИЯ ${res.currentVersion}', 0.78);
     }
+
+    await Future.delayed(tick);
+    _push('СИНХРОНИЗАЦИЯ С СЕРВЕРОМ', 0.90);
+    await Future.delayed(tick);
+    _push('СИСТЕМА ГОТОВА', 1.00);
     await Future.delayed(const Duration(milliseconds: 320));
     if (!mounted) return;
     setState(() => _ready = true);
-    if (mounted) UpdateChecker.checkOnStart(context);
+
+    if (_updateVersion != null && mounted) {
+      UpdateChecker.showUpdate(context, _updateVersion!);
+    }
   }
 
   @override
