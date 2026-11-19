@@ -168,6 +168,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                       widget.path.isEmpty ? '—' : widget.path.join(' · ')),
                   ('СТЕКЛОПАКЕТ',
                       widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
+                  if (widget.sashModes.isNotEmpty)
+                    ('СТВОРКИ', _sashLine()),
                 ]),
                 const SizedBox(height: 12),
                 _sizesBlock(items),
