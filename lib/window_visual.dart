@@ -628,8 +628,8 @@ class _GostPainter extends CustomPainter {
     final p = _line(_ink, 1.2);
     final cy = g.center.dy;
 
-    // поворотная: вершина треугольника — к петлям
-    if (mode == 1 || mode == 3) {
+    // поворотная (П) и поворотно-откидная (ПО): вершина — к петлям
+    if (mode == 1 || mode == 2) {
       final h = g.width * 0.60;
       final half = g.height * 0.24;
       final Path t;
