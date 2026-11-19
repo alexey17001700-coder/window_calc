@@ -51,6 +51,9 @@ class MeasureSheetView extends StatefulWidget {
   /// Обозначения створок по ГОСТ (по порядку слева направо).
   final List<String> sashModes;
 
+  /// Габарит по ширине, мм (0 — неизвестно) — для ширин секций.
+  final int widthMm;
+
   /// Назад — к визуальному замеру.
   final VoidCallback onBack;
 
