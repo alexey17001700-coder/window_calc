@@ -501,13 +501,15 @@ class _GostPainter extends CustomPainter {
 
     // ── ПРОЁМ ──
     final openPath = _openPath(g.opening, arched);
-    canvas.drawPath(openPath, Paint()..color = const Color(0xFFFDFEFF));
     canvas.drawPath(openPath, _line(_ink, 1.3));
 
     // ── РАМА (двойная линия) ──
-    canvas.drawRect(g.frameOuter, Paint()..color = const Color(0xFFE9EFF7));
     canvas.drawRect(g.frameOuter, _line(_ink, 1.2));
     canvas.drawRect(g.frameInner, _line(_ink, 1.0));
+
+    // ── ОСЕВЫЕ ЛИНИИ (штрихпунктир) ──
+    _axisV(canvas, g.opening.center.dx, g.wall.top - 18, g.wall.bottom + 18);
+    _axisH(canvas, g.opening.center.dy, g.wall.left - 18, g.wall.right + 18);
 
     // ── СТВОРКИ ──
     final rects = _sashRects(g.glass, sashes);
@@ -518,7 +520,6 @@ class _GostPainter extends CustomPainter {
       final o = s.deflate(2.5);
       canvas.drawRect(o, _line(_ink, 1.1));
       final gl = o.deflate(3.5);
-      canvas.drawRect(gl, Paint()..color = _glassFill);
       canvas.drawRect(gl, _line(_ink, 0.9));
 
       _openingMark(canvas, gl, modes[i].clamp(0, 4), hingeLeft: i == 0);
@@ -535,6 +536,12 @@ class _GostPainter extends CustomPainter {
       }
     }
     canvas.restore();
+
+    // ── УГЛОВЫЕ ВЫНОСКИ 90° ──
+    _corner90(canvas, g.opening.topLeft, 1, 1);
+    _corner90(canvas, g.opening.topRight, -1, 1);
+    _corner90(canvas, g.opening.bottomLeft, 1, -1);
+    _corner90(canvas, g.opening.bottomRight, -1, -1);
 
     // ── КОМПЛЕКТАЦИЯ НА ЧЕРТЕЖЕ ──
     final hasSill = parts.contains('С ПОДОКОННИКОМ');
