@@ -350,7 +350,7 @@ class _WorkTreeViewState extends State<WorkTreeView> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           for (var i = 0; i < workTree.length; i++)
             Padding(
               padding:
@@ -362,22 +362,19 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     );
   }
 
+  /// Кнопка-пункт корневой карточки — ТАКАЯ ЖЕ карточка, как ветки дерева.
   Widget _rootRow(int i) {
     final node = workTree[i];
     return GestureDetector(
       onTap: () => _select(0, i),
       child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0A1220),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF1B2C44)),
-        ),
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 9),
+        decoration: _dec(false),
         child: Row(
           children: [
-            _iconBox(node.icon, 26, 14),
-            const SizedBox(width: 7),
+            _iconBox(node.icon, 28, 14),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 node.title,
