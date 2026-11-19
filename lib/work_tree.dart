@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-///  ДЕРЕВО ВИДОВ РАБОТ  ·  v3.5.3
+///  ДЕРЕВО ВИДОВ РАБОТ  ·  v3.4.16
 ///  Дерево собрано из ОДИНАКОВЫХ КАРТОЧЕК — одна карточка = один пункт.
 ///  • 1-й уровень: 4 ОТДЕЛЬНЫЕ карточки (ЗАМЕР, МОНТАЖ, РЕМОНТ, РЕКЛАМАЦИИ).
 ///  • Нажал карточку → справа вырастает столбик её подпунктов.
 ///  • НИКАКОЙ общей карточки-обёртки с меню внутри.
 ///  • Автоскролл вправо + ручной скролл вперёд/назад.
+///  • Выбор ТИПА ДОМА (конечная карточка) → отдаём цепочку наружу,
+///    мастер открывает визуальное окно с выбором стеклопакета.
 /// ═══════════════════════════════════════════════════════════════════
 
 /// Ветка дерева: иконка + название + подпункты.
@@ -19,7 +21,7 @@ class WorkNode {
   final List<WorkNode> children;
 }
 
-/// Стеклопакет — 4-й уровень дерева (после выбора типа дома).
+/// Стеклопакет — выбор ПОД визуальным окном (в дерево не входит).
 const List<WorkNode> glassTypes = [
   WorkNode(Icons.crop_square_rounded, 'ОДНОКАМЕРНЫЙ'),
   WorkNode(Icons.layers_rounded, 'ДВУХКАМЕРНЫЙ'),
@@ -30,13 +32,14 @@ const List<WorkNode> glassTypes = [
 ];
 
 /// Тип дома — 3-й уровень дерева (после выбора изделия и его вида).
+/// Конечные карточки: дальше дерево не растёт, открывается визуальное окно.
 const List<WorkNode> houseTypes = [
-  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА', glassTypes),
-  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА', glassTypes),
-  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА', glassTypes),
-  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА', glassTypes),
-  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ', glassTypes),
-  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', glassTypes),
+  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА'),
+  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА'),
+  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА'),
+  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА'),
+  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ'),
+  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА'),
 ];
 
 /// Данные дерева. Подпункты — заготовка, наполняется как нужно.
@@ -75,10 +78,13 @@ const List<WorkNode> workTree = [
 ];
 
 class WorkTreeView extends StatefulWidget {
-  const WorkTreeView({super.key, this.onWorkType});
+  const WorkTreeView({super.key, this.onWorkType, this.onLeafSelected});
 
   /// Индекс выбранного вида работ на 1-м уровне (или -1, если снят выбор).
   final ValueChanged<int>? onWorkType;
+
+  /// Цепочка названий, когда выбрана КОНЕЧНАЯ карточка (тип дома).
+  final ValueChanged<List<String>>? onLeafSelected;
 
   @override
   State<WorkTreeView> createState() => _WorkTreeViewState();
@@ -141,7 +147,35 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     if (level == 0) {
       widget.onWorkType?.call(same ? -1 : index);
     }
+    // Выбран тип дома (4-й уровень) → отдаём цепочку наружу.
+    if (!same && _path.length >= 4) {
+      final node = _nodeAt(level, index);
+      if (node.children.isEmpty) {
+        widget.onLeafSelected?.call(_titles());
+      }
+    }
     _autoScroll();
+  }
+
+  /// Узел по уровню и индексу в текущей цепочке.
+  WorkNode _nodeAt(int level, int index) {
+    var nodes = workTree;
+    for (var i = 0; i < level; i++) {
+      nodes = nodes[_path[i]].children;
+    }
+    return nodes[index];
+  }
+
+  /// Названия выбранной цепочки.
+  List<String> _titles() {
+    final out = <String>[];
+    var nodes = workTree;
+    for (var i = 0; i < _path.length; i++) {
+      final n = nodes[_path[i]];
+      out.add(n.title);
+      nodes = n.children;
+    }
+    return out;
   }
 
   /// Автоскролл: новая колонка встаёт в центр экрана.
