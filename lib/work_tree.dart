@@ -32,15 +32,28 @@ const List<WorkNode> glassTypes = [
   WorkNode(Icons.blur_on_rounded, 'МАТОВЫЙ'),
 ];
 
+/// Финальный уровень дерева — КОМПЛЕКТАЦИЯ. Мультивыбор.
+/// Это ПОСЛЕДНИЕ пункты: дальше дерево не растёт.
+const List<WorkNode> finishingTypes = [
+  WorkNode(Icons.window_rounded, 'ПРОСТО ОКНО'),
+  WorkNode(Icons.water_drop_rounded, 'С ОТЛИВОМ'),
+  WorkNode(Icons.shelves, 'С ПОДОКОННИКОМ'),
+  WorkNode(Icons.architecture_rounded, 'С ОТКОСАМИ'),
+  WorkNode(Icons.change_history_rounded, 'АБРИС'),
+  WorkNode(Icons.linear_scale_rounded, 'ПСУЛ'),
+  WorkNode(Icons.cleaning_services_rounded, 'ОТМАЗКА'),
+  WorkNode(Icons.compare_arrows_rounded, 'ОТМАЗКА С ДВУХ СТОРОН'),
+];
+
 /// Тип дома — 3-й уровень дерева (после выбора изделия и его вида).
-/// Конечные карточки: дальше дерево не растёт, открывается визуальное окно.
+/// Дальше идёт финальный уровень — комплектация (мультивыбор).
 const List<WorkNode> houseTypes = [
-  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА'),
-  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА'),
-  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА'),
-  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА'),
-  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ'),
-  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА'),
+  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА', finishingTypes),
+  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА', finishingTypes),
+  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА', finishingTypes),
+  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА', finishingTypes),
+  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ', finishingTypes),
+  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', finishingTypes),
 ];
 
 /// Данные дерева. Подпункты — заготовка, наполняется как нужно.
