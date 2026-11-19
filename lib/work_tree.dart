@@ -404,14 +404,36 @@ class _WorkTreeViewState extends State<WorkTreeView> {
                 ),
               ),
             ),
-            if (selected)
+            if (node.children.isEmpty)
+              _checkBox(selected)
+            else if (selected)
               const Icon(Icons.check_rounded, size: 16, color: AppColors.gold)
-            else if (node.children.isNotEmpty)
+            else
               const Icon(Icons.chevron_right_rounded,
                   size: 17, color: Color(0xFF3D5169)),
           ],
         ),
       ),
+    );
+  }
+
+  /// Квадратик-галочка для мультивыбора (финальный уровень).
+  Widget _checkBox(bool on) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 19,
+      height: 19,
+      decoration: BoxDecoration(
+        color: on ? AppColors.gold : Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: on ? AppColors.gold : const Color(0xFF3D5169),
+          width: 1.4,
+        ),
+      ),
+      child: on
+          ? const Icon(Icons.check_rounded, size: 13, color: AppColors.navy900)
+          : null,
     );
   }
 
