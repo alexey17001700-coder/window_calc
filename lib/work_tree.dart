@@ -350,6 +350,44 @@ class _WorkTreeViewState extends State<WorkTreeView> {
 }
 
 /// ═══════════════════════════════════════════════════════════════════
+///  КАРТОЧКА С НАЖАТИЕМ: при касании сжимается, при отпускании — назад
+/// ═══════════════════════════════════════════════════════════════════
+class _PressCard extends StatefulWidget {
+  const _PressCard({required this.child, required this.onTap});
+
+  final Widget child;
+  final VoidCallback onTap;
+
+  @override
+  State<_PressCard> createState() => _PressCardState();
+}
+
+class _PressCardState extends State<_PressCard> {
+  bool _down = false;
+
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _set(true),
+      onTapUp: (_) => _set(false),
+      onTapCancel: () => _set(false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.93 : 1.0,
+        duration: Duration(milliseconds: _down ? 90 : 190),
+        curve: _down ? Curves.easeOut : Curves.easeOutBack,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
 ///  ЛИНИИ-ВЕТКИ: от правого торца карточки к левому торцу подпункта
 /// ═══════════════════════════════════════════════════════════════════
 class _EdgePainter extends CustomPainter {
