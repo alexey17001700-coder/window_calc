@@ -61,6 +61,7 @@ class _AlmasAppState extends State<AlmasApp> {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: _mode,
+      navigatorKey: appNavigatorKey,
       home: SplashScreen(onToggleTheme: toggleTheme),
     );
   }
