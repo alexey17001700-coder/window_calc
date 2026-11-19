@@ -296,8 +296,15 @@ class _SplashScreenState extends State<SplashScreen>
       children: [
         Row(
           children: [
-            AppUi.label('ЗАГРУЗКА СИСТЕМЫ',
-                color: const Color(0xFF7E93AC), size: 10.5),
+            Expanded(
+              child: AppUi.label(
+                _busy
+                    ? 'ПРОВЕРКА ОБНОВЛЕНИЙ'
+                    : (_log.isEmpty ? 'ЗАГРУЗКА СИСТЕМЫ' : _log.last),
+                color: const Color(0xFF7E93AC),
+                size: 10.5,
+              ),
+            ),
             const Spacer(),
             Text(
               '${(_progress * 100).round()}%',
