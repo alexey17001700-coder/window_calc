@@ -4,13 +4,15 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'theme.dart';
+import 'window_visual.dart';
 import 'work_tree.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-///  ПРЕМИАЛЬНЫЙ ЭКРАН  ·  v3.4.4
-///  Два шага мастера:
+///  ПРЕМИАЛЬНЫЙ ЭКРАН  ·  v3.4.16
+///  Три шага мастера:
 ///    1) «ДАННЫЕ КЛИЕНТА» — карточка с полями;
-///    2) «ЧТО ДЕЛАЕМ» — дерево видов работ НА ЭКРАНЕ (без карточки-обёртки).
+///    2) «ЧТО ДЕЛАЕМ» — дерево видов работ НА ЭКРАНЕ (без карточки-обёртки);
+///    3) «ВИЗУАЛЬНЫЙ ЗАМЕР» — нарисованное окно + выбор стеклопакета под ним.
 /// ═══════════════════════════════════════════════════════════════════
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.onFinish, this.onBack});
@@ -34,11 +36,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Пробегающий блик по карточке.
   late final AnimationController _shine;
 
-  /// Шаг мастера: 0 — данные клиента, 1 — дерево «ЧТО ДЕЛАЕМ».
+  /// Шаг мастера: 0 — данные клиента, 1 — дерево, 2 — визуальное окно.
   int _step = 0;
 
-  static const _titles = ['ДАННЫЕ КЛИЕНТА', 'ЧТО ДЕЛАЕМ'];
-  static const _icons = [Icons.person_rounded, Icons.account_tree_rounded];
+  /// Выбранная цепочка дерева: ЗАМЕР → ОКНО → вид → тип дома.
+  List<String> _picked = const [];
+
+  /// Выбранный стеклопакет (-1 — не выбран).
+  int _glass = -1;
+
+  static const _titles = ['ДАННЫЕ КЛИЕНТА', 'ЧТО ДЕЛАЕМ', 'ВИЗУАЛЬНЫЙ ЗАМЕР'];
+  static const _icons = [
+    Icons.person_rounded,
+    Icons.account_tree_rounded,
+    Icons.window_rounded,
+  ];
 
   @override
   void initState() {
@@ -74,7 +86,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 Expanded(
                   child: _step == 0
                       ? _cardWrap(h, _cardClient())
-                      : _treeStep(),
+                      : _step == 1
+                          ? _treeStep()
+                          : _visualStep(),
                 ),
                 const SizedBox(height: 14),
               ],
@@ -94,8 +108,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           _RoundButton(
             icon: Icons.arrow_back_rounded,
             onTap: () {
-              if (_step == 1) {
-                setState(() => _step = 0);
+              if (_step > 0) {
+                setState(() => _step -= 1);
               } else {
                 widget.onBack?.call();
               }
@@ -291,7 +305,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Column(
       children: [
         Expanded(
-          child: const WorkTreeView(),
+          child: WorkTreeView(
+            onLeafSelected: (titles) {
+              setState(() {
+                _picked = titles;
+                _step = 2;
+              });
+            },
+          ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
@@ -308,6 +329,92 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ),
         ),
       ],
+    );
+  }
+
+  // ──────── ШАГ 3: ВИЗУАЛЬНОЕ ОКНО + ВЫБОР СТЕКЛОПАКЕТА ────────
+  Widget _visualStep() {
+    final windowType = _picked.length > 2 ? _picked[2] : '';
+    final house = _picked.length > 3 ? _picked[3] : '';
+    final sashes = windowType == 'ДВУХСТВОРЧАТОЕ'
+        ? 2
+        : windowType == 'ТРЁХСТВОРЧАТОЕ'
+            ? 3
+            : 1;
+    final arched = windowType == 'ФИГУРНОЕ';
+
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _pickedBar(windowType, house),
+                const SizedBox(height: 12),
+                WindowVisual(
+                  sashes: sashes,
+                  arched: arched,
+                  selectedGlass: _glass,
+                  onGlass: (i) => setState(() => _glass = i),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Row(
+            children: [
+              _GhostButton('НАЗАД', Icons.arrow_back_rounded,
+                  () => setState(() => _step = 1)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _GoldButton(
+                    'ДАЛЕЕ', Icons.arrow_forward_rounded, widget.onFinish),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Плашка выбранного: ОКНО · ДВУХСТВОРЧАТОЕ · КИРПИЧКА
+  Widget _pickedBar(String windowType, String house) {
+    final parts = <String>[
+      if (windowType.isNotEmpty) windowType,
+      if (house.isNotEmpty) house,
+    ];
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.window_rounded, size: 16, color: AppColors.gold),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              parts.isEmpty ? 'ОКНО' : parts.join('  ·  '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
