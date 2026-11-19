@@ -58,8 +58,8 @@ class _WorkTreeViewState extends State<WorkTreeView> {
   // ── габариты ──
   static const double _cardW = 138; // компактная карточка-ветка
   static const double _cardH = 52;
-  static const double _rootW = 190; // корневая карточка «ВИД РАБОТ»
-  static const double _rootH = 264;
+  static const double _rootW = 196; // корневая карточка «ВИД РАБОТ»
+  static const double _rootH = 284;
   static const double _gapX = 56; // место под линии-ветки
   static const double _gapY = 10;
   static const double _pad = 10;
