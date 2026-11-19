@@ -730,7 +730,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         }),
         const SizedBox(width: 12),
         Text(
-          '${_page + 1} / 4',
+          '${_page + 1} / 2',
           style: const TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w700,
