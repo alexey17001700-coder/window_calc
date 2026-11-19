@@ -407,6 +407,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 WindowVisual(
                   sashes: sashes,
                   arched: arched,
+                  parts: _multi,
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
                 ),
