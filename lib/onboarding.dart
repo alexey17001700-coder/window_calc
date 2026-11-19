@@ -318,17 +318,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   // ─────────────── ШАГ 2: ДЕРЕВО «ЧТО ДЕЛАЕМ» ───────────────
   /// Дерево живёт НА ЭКРАНЕ — без карточки-обёртки, без рамки, от края до края.
+  /// Финальный уровень — комплектация: можно отметить один пункт,
+  /// несколько или все. Есть отметка → внизу появляется «ПОДТВЕРДИТЬ».
   Widget _treeStep() {
+    final hasPick = _multi.isNotEmpty;
     return Column(
       children: [
         Expanded(
           child: WorkTreeView(
-            onLeafSelected: (titles) {
-              setState(() {
-                _picked = titles;
-                _step = 2;
-              });
-            },
+            onPathChanged: (titles) => setState(() => _picked = titles),
+            onMultiChanged: (items) => setState(() => _multi = items),
           ),
         ),
         Padding(
@@ -339,13 +338,40 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   () => setState(() => _step = 0)),
               const SizedBox(width: 12),
               Expanded(
-                child: _GoldButton(
-                    'ДАЛЕЕ', Icons.arrow_forward_rounded, widget.onFinish),
+                child: hasPick
+                    ? _GoldButton(
+                        'ПОДТВЕРДИТЬ (${_multi.length})',
+                        Icons.check_rounded,
+                        _confirmTree,
+                      )
+                    : _GoldButton(
+                        'ДАЛЕЕ', Icons.arrow_forward_rounded, widget.onFinish),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  /// «ПОДТВЕРДИТЬ»: выбор по дереву и по клиенту запоминается,
+  /// открывается ввод размеров — по одному экрану на каждый пункт.
+  void _confirmTree() {
+    setState(() {
+      _sizes = const {};
+      _step = 2;
+    });
+  }
+
+  // ─────────────── ШАГ 3: РАЗМЕРЫ ПО ПУНКТАМ ───────────────
+  Widget _sizesStep() {
+    return MeasureSizesView(
+      items: _multi,
+      onBack: () => setState(() => _step = 1),
+      onDone: (mm) => setState(() {
+        _sizes = mm;
+        _step = 3;
+      }),
     );
   }
 
