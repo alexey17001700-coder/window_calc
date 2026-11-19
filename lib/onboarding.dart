@@ -103,7 +103,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ? _cardWrap(h, _cardClient())
                       : _step == 1
                           ? _treeStep()
-                          : _visualStep(),
+                          : _step == 2
+                              ? _sizesStep()
+                              : _visualStep(),
                 ),
                 const SizedBox(height: 14),
               ],
