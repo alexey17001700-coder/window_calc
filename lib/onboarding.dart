@@ -119,9 +119,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   ),
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  _title,
-                  style: TextStyle(
+                Text(
+                  _titles[_step],
+                  style: const TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.4,
