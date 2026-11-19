@@ -33,7 +33,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   /// Шаг мастера: 0 — данные клиента, 1 — дерево «ЧТО ДЕЛАЕМ».
   int _step = 0;
-  int _workType = -1;
 
   static const _titles = ['ДАННЫЕ КЛИЕНТА', 'ЧТО ДЕЛАЕМ'];
   static const _icons = [Icons.person_rounded, Icons.account_tree_rounded];
