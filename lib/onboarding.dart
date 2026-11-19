@@ -705,7 +705,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ...List.generate(4, (i) {
+        ...List.generate(2, (i) {
           final active = i == _page;
           return AnimatedContainer(
             duration: const Duration(milliseconds: 280),
