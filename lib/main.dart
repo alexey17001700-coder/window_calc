@@ -305,7 +305,7 @@ class _SplashScreenState extends State<SplashScreen>
                 size: 10.5,
               ),
             ),
-            const Spacer(),
+            const SizedBox(width: 10),
             Text(
               '${(_progress * 100).round()}%',
               style: const TextStyle(
