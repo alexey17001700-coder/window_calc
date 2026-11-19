@@ -336,10 +336,10 @@ class _WorkTreeViewState extends State<WorkTreeView> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'ВИД РАБОТ',
-                  style: TextStyle(
+                  widget.rootTitle,
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.6,
