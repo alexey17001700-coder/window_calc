@@ -412,7 +412,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           child: Row(
             children: [
               _GhostButton('НАЗАД', Icons.arrow_back_rounded,
-                  () => setState(() => _step = 1)),
+                  () => setState(() => _step = 2)),
               const SizedBox(width: 12),
               Expanded(
                 child: _GoldButton(
