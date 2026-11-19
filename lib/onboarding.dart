@@ -13,8 +13,11 @@ import 'work_tree.dart';
 ///    2) «ЧТО ДЕЛАЕМ» — дерево видов работ НА ЭКРАНЕ (без карточки-обёртки).
 /// ═══════════════════════════════════════════════════════════════════
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key, required this.onFinish});
+  const OnboardingScreen({super.key, required this.onFinish, this.onBack});
   final VoidCallback onFinish;
+
+  /// Возврат на главный экран (заставка с проверкой обновлений).
+  final VoidCallback? onBack;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
