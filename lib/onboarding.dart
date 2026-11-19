@@ -68,7 +68,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             child: Column(
               children: [
                 _header(),
-                Expanded(child: _cardWrap(h, _cardClient())),
+                Expanded(
+                  child: _step == 0
+                      ? _cardWrap(h, _cardClient())
+                      : _treeStep(),
+                ),
                 const SizedBox(height: 14),
               ],
             ),
