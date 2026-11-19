@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-///  ДЕРЕВО ВИДОВ РАБОТ  ·  v3.5
-///  Дерево живёт НА ЭКРАНЕ (не внутри карточки).
-///  • Корневая карточка «ВИД РАБОТ» — с кнопками-пунктами.
-///  • Нажал пункт → корневая карточка ужимается.
-///  • Ветки растут ВПРАВО, столбиком по центру, того же компактного вида.
+///  ДЕРЕВО ВИДОВ РАБОТ  ·  v3.5.1
+///  Дерево собрано из ОДИНАКОВЫХ КАРТОЧЕК — одна карточка = один пункт.
+///  • 1-й уровень: 4 ОТДЕЛЬНЫЕ карточки (ЗАМЕР, МОНТАЖ, РЕМОНТ, РЕКЛАМАЦИИ).
+///  • Нажал карточку → справа вырастает столбик её подпунктов.
+///  • НИКАКОЙ общей карточки-обёртки с меню внутри.
 ///  • Автоскролл вправо + ручной скролл вперёд/назад.
-///  • Тап по ветке раскрывает её подпункты, повторный тап — сворачивает.
 /// ═══════════════════════════════════════════════════════════════════
 
 /// Ветка дерева: иконка + название + подпункты.
@@ -45,21 +44,10 @@ const List<WorkNode> workTree = [
 ];
 
 class WorkTreeView extends StatefulWidget {
-  const WorkTreeView({
-    super.key,
-    this.onWorkType,
-    this.rootTitle = 'ВИД РАБОТ',
-    this.rootSub = 'Что делаем на объекте',
-  });
+  const WorkTreeView({super.key, this.onWorkType});
 
-  /// Индекс выбранного вида работ на 1-м уровне (или -1, если свёрнуто).
+  /// Индекс выбранного вида работ на 1-м уровне (или -1, если снят выбор).
   final ValueChanged<int>? onWorkType;
-
-  /// Заголовок корневой карточки.
-  final String rootTitle;
-
-  /// Подпись под заголовком корневой карточки.
-  final String rootSub;
 
   @override
   State<WorkTreeView> createState() => _WorkTreeViewState();
@@ -67,11 +55,9 @@ class WorkTreeView extends StatefulWidget {
 
 class _WorkTreeViewState extends State<WorkTreeView> {
   // ── габариты ──
-  static const double _cardW = 138; // компактная карточка-ветка
-  static const double _cardH = 52;
-  static const double _rootW = 196; // корневая карточка «ВИД РАБОТ»
-  static const double _rootH = 284;
-  static const double _gapX = 56; // место под линии-ветки
+  static const double _cardW = 152; // карточка-пункт
+  static const double _cardH = 54;
+  static const double _gapX = 58; // место под линии-ветки
   static const double _gapY = 10;
   static const double _pad = 10;
 
@@ -103,12 +89,9 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     return nodes[_path[k - 1]].children;
   }
 
-  /// Колонки дерева: 0 — корень, дальше — раскрытые ветки.
+  /// Колонки дерева: 0 — все 4 карточки 1-го уровня, дальше — раскрытые ветки.
   List<List<WorkNode>> _columns() {
-    if (_path.isEmpty) return [workTree];
-    final cols = <List<WorkNode>>[
-      [workTree[_path[0]]],
-    ];
+    final cols = <List<WorkNode>>[workTree];
     for (var k = 1; k <= _path.length; k++) {
       final ch = _level(k);
       if (ch.isEmpty) break;
@@ -159,20 +142,16 @@ class _WorkTreeViewState extends State<WorkTreeView> {
 
         final cols = _columns();
         final n = cols.length;
-        final rootExpanded = _path.isEmpty;
 
         final xs = List<double>.filled(n, 0);
         final ws = List<double>.filled(n, 0);
-        final hs = List<double>.filled(n, 0);
         final colH = List<double>.filled(n, 0);
 
         for (var k = 0; k < n; k++) {
-          final tall = k == 0 && rootExpanded;
-          ws[k] = tall ? _rootW : _cardW;
-          hs[k] = tall ? _rootH : _cardH;
+          ws[k] = _cardW;
           xs[k] = k == 0 ? _pad : xs[k - 1] + ws[k - 1] + _gapX;
           final cnt = cols[k].length;
-          colH[k] = cnt == 0 ? 0 : cnt * hs[k] + (cnt - 1) * _gapY;
+          colH[k] = cnt == 0 ? 0 : cnt * _cardH + (cnt - 1) * _gapY;
         }
         _xs = xs;
         _ws = ws;
@@ -192,18 +171,17 @@ class _WorkTreeViewState extends State<WorkTreeView> {
             for (var j = 0; j < cols[k].length; j++)
               Rect.fromLTWH(
                 xs[k],
-                startY + j * (hs[k] + _gapY),
+                startY + j * (_cardH + _gapY),
                 ws[k],
-                hs[k],
+                _cardH,
               ),
           ]);
         }
 
-        // Связи: корень → ветки, ветка → её подпункты.
+        // Связи: выбранная карточка → её подпункты.
         final edges = <List<Rect>>[];
         for (var k = 1; k < n; k++) {
-          final parent =
-              (k == 1) ? rects[0][0] : rects[k - 1][_path[k - 1]];
+          final parent = rects[k - 1][_path[k - 1]];
           for (final child in rects[k]) {
             edges.add([parent, child]);
           }
@@ -232,38 +210,31 @@ class _WorkTreeViewState extends State<WorkTreeView> {
                           child: CustomPaint(painter: _EdgePainter(edges)),
                         ),
                       ),
-                      // ── КОРЕНЬ ──
-                      Positioned(
-                        left: rects[0][0].left,
-                        top: rects[0][0].top,
-                        width: ws[0],
-                        height: hs[0],
-                        child: rootExpanded
-                            ? _rootCard()
-                            : _compactCard(
-                                workTree[_path[0]],
-                                selected: true,
-                                onTap: () => _select(0, _path[0]),
-                              ),
-                      ),
-                      // ── ВЕТКИ ──
-                      for (var k = 1; k < n; k++)
+                      // ── КАРТОЧКИ ВСЕХ УРОВНЕЙ ──
+                      for (var k = 0; k < n; k++)
                         for (var j = 0; j < cols[k].length; j++)
                           Positioned(
                             left: rects[k][j].left,
                             top: rects[k][j].top,
                             width: ws[k],
-                            height: hs[k],
-                            child: _appear(
-                              k,
-                              j,
-                              _compactCard(
-                                cols[k][j],
-                                selected:
-                                    _path.length > k && _path[k] == j,
-                                onTap: () => _select(k, j),
-                              ),
-                            ),
+                            height: _cardH,
+                            child: k == 0
+                                ? _card(
+                                    cols[k][j],
+                                    selected: _path.isNotEmpty &&
+                                        _path[0] == j,
+                                    onTap: () => _select(0, j),
+                                  )
+                                : _appear(
+                                    k,
+                                    j,
+                                    _card(
+                                      cols[k][j],
+                                      selected: _path.length > k &&
+                                          _path[k] == j,
+                                      onTap: () => _select(k, j),
+                                    ),
+                                  ),
                           ),
                     ],
                   ),
@@ -297,137 +268,27 @@ class _WorkTreeViewState extends State<WorkTreeView> {
     );
   }
 
-  // ─────────────────── КОРНЕВАЯ КАРТОЧКА ───────────────────
-  Widget _rootCard() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF152740), Color(0xFF0B1524)],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.gold.withOpacity(0.34)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.45),
-            blurRadius: 26,
-            offset: const Offset(0, 12),
-          ),
-          BoxShadow(
-            color: AppColors.gold.withOpacity(0.10),
-            blurRadius: 34,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 3,
-                height: 15,
-                decoration: BoxDecoration(
-                  gradient: AppColors.goldGradient,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  widget.rootTitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.6,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.only(left: 11),
-            child: Text(
-              widget.rootSub,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF7E93AC),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          for (var i = 0; i < workTree.length; i++)
-            Padding(
-              padding:
-                  EdgeInsets.only(bottom: i < workTree.length - 1 ? 7 : 0),
-              child: _rootRow(i),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// Кнопка-пункт корневой карточки — ТАКАЯ ЖЕ карточка, как ветки дерева.
-  Widget _rootRow(int i) {
-    final node = workTree[i];
-    return GestureDetector(
-      onTap: () => _select(0, i),
-      child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 9),
-        decoration: _dec(false),
-        child: Row(
-          children: [
-            _iconBox(node.icon, 28, 14),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                node.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.7,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded,
-                size: 15, color: Color(0xFF3D5169)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ─────────────────── КОМПАКТНАЯ КАРТОЧКА ───────────────────
-  Widget _compactCard(WorkNode node,
+  // ─────────────────── КАРТОЧКА-ПУНКТ ───────────────────
+  Widget _card(WorkNode node,
       {required bool selected, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: _dec(selected),
         child: Row(
           children: [
-            _iconBox(node.icon, 28, 14),
-            const SizedBox(width: 7),
+            _iconBox(node.icon, 30, 15),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 node.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 9.5,
+                  fontSize: 10,
                   height: 1.2,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
@@ -436,10 +297,10 @@ class _WorkTreeViewState extends State<WorkTreeView> {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_rounded, size: 13, color: AppColors.gold)
+              const Icon(Icons.check_rounded, size: 14, color: AppColors.gold)
             else if (node.children.isNotEmpty)
               const Icon(Icons.chevron_right_rounded,
-                  size: 14, color: Color(0xFF3D5169)),
+                  size: 15, color: Color(0xFF3D5169)),
           ],
         ),
       ),
