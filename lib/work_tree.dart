@@ -19,14 +19,24 @@ class WorkNode {
   final List<WorkNode> children;
 }
 
+/// Стеклопакет — 4-й уровень дерева (после выбора типа дома).
+const List<WorkNode> glassTypes = [
+  WorkNode(Icons.crop_square_rounded, 'ОДНОКАМЕРНЫЙ'),
+  WorkNode(Icons.layers_rounded, 'ДВУХКАМЕРНЫЙ'),
+  WorkNode(Icons.layers_clear_rounded, 'ТРЁХКАМЕРНЫЙ'),
+  WorkNode(Icons.energy_savings_leaf_rounded, 'ЭНЕРГОСБЕРЕГАЮЩИЙ'),
+  WorkNode(Icons.shield_rounded, 'УДАРОПРОЧНЫЙ'),
+  WorkNode(Icons.blur_on_rounded, 'МАТОВЫЙ'),
+];
+
 /// Тип дома — 3-й уровень дерева (после выбора изделия и его вида).
 const List<WorkNode> houseTypes = [
-  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА'),
-  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА'),
-  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА'),
-  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА'),
-  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ'),
-  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА'),
+  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА', glassTypes),
+  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА', glassTypes),
+  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА', glassTypes),
+  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА', glassTypes),
+  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ', glassTypes),
+  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', glassTypes),
 ];
 
 /// Данные дерева. Подпункты — заготовка, наполняется как нужно.
