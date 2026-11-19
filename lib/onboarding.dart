@@ -512,6 +512,62 @@ class _GoldButtonState extends State<_GoldButton> {
 }
 
 /// ═══════════════════════════════════════════════════════════════════
+///  ПРОЗРАЧНАЯ КНОПКА «НАЗАД» (стеклянная, с золотой рамкой)
+/// ═══════════════════════════════════════════════════════════════════
+class _GhostButton extends StatefulWidget {
+  const _GhostButton(this.text, this.icon, this.onTap);
+  final String text;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  State<_GhostButton> createState() => _GhostButtonState();
+}
+
+class _GhostButtonState extends State<_GhostButton> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A1220),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: AppColors.gold.withOpacity(0.42)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(widget.icon, size: 17, color: AppColors.gold),
+              const SizedBox(width: 7),
+              Text(
+                widget.text,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.9,
+                  color: AppColors.gold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
 ///  ПРОБЕГАЮЩИЙ БЛИК ПО КАРТОЧКЕ
 /// ═══════════════════════════════════════════════════════════════════
 class _ShinePainter extends CustomPainter {
