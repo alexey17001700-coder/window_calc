@@ -858,15 +858,31 @@ class _GostPainter extends CustomPainter {
     );
   }
 
-  void _dimV(Canvas canvas, double y1, double y2, double x, String label) {
+  void _dimV(Canvas canvas, double y1, double y2, double x, String label,
+      {bool small = false, bool right = false}) {
     final p = _line(_ink, 0.9);
     canvas.drawLine(Offset(x, y1), Offset(x, y2), p);
     canvas.drawLine(Offset(x - 4, y1), Offset(x + 4, y1), p);
     canvas.drawLine(Offset(x - 4, y2), Offset(x + 4, y2), p);
     _arrowV(canvas, Offset(x, y1), -1);
     _arrowV(canvas, Offset(x, y2), 1);
-    _text(canvas, label, Offset(x - 9, (y1 + y2) / 2),
-        size: 9.5, vertical: true);
+    _text(canvas, label, Offset(x + (right ? 9 : -9), (y1 + y2) / 2),
+        size: small ? 7.5 : 9.5, vertical: true);
+  }
+
+  // ─────────────── ВЫНОСНЫЕ ЛИНИИ ───────────────
+  /// Выносная линия к горизонтальному размеру (вертикальная).
+  void _extV(Canvas canvas, double x, double fromY, double toY) {
+    final p = _line(const Color(0xFF8FA3BC), 0.7);
+    final dir = toY < fromY ? -1.0 : 1.0;
+    canvas.drawLine(Offset(x, fromY), Offset(x, toY + dir * 3), p);
+  }
+
+  /// Выносная линия к вертикальному размеру (горизонтальная).
+  void _extH(Canvas canvas, double y, double fromX, double toX) {
+    final p = _line(const Color(0xFF8FA3BC), 0.7);
+    final dir = toX < fromX ? -1.0 : 1.0;
+    canvas.drawLine(Offset(fromX, y), Offset(toX + dir * 3, y), p);
   }
 
   void _arrow(Canvas canvas, Offset tip, int dir) {
