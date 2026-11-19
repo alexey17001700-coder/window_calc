@@ -592,67 +592,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  Widget _placeholder(IconData icon, String title, String sub) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A1220),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1B2C44)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.gold.withOpacity(0.22),
-                  AppColors.bronze.withOpacity(0.10),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.gold.withOpacity(0.30)),
-            ),
-            child: Icon(icon, size: 19, color: AppColors.gold),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.1,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  sub,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    height: 1.35,
-                    color: Color(0xFF6E819A),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded,
-              size: 18, color: Color(0xFF3D5169)),
-        ],
-      ),
-    );
-  }
-
   Widget _dots() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
