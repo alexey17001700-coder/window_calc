@@ -125,6 +125,31 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     return s.join('   ');
   }
 
+  /// «Г · ПО» — буквы по ГОСТ.
+  String _sashLetters() => widget.sashModes
+      .map((m) => kSashModeLetter[_modeIndex(m)])
+      .join(' · ');
+
+  /// «1 · 600 мм   2 · 700 мм» — ширина каждой секции.
+  String _sectionsMm() {
+    final n = widget.sashModes.length;
+    if (n == 0) return '—';
+    final w = (widget.widthMm / n).round();
+    final s = <String>[];
+    for (var i = 0; i < n; i++) {
+      s.add('${i + 1} · $w мм');
+    }
+    return s.join('   ');
+  }
+
+  String _sashWord(int n) => n == 1 ? 'СТВОРКА' : 'СТВОРКИ';
+
+  /// Индекс типа створки по её названию (для буквы по ГОСТ).
+  int _modeIndex(String name) {
+    final i = kSashModeNames.indexOf(name.toUpperCase());
+    return i < 0 ? 0 : i;
+  }
+
   String _or(String v, String fallback) {
     final t = v.trim();
     return t.isEmpty ? fallback : t;
