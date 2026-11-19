@@ -470,6 +470,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
+  /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
+  int _mmOf(String field) {
+    for (final e in _sizes.values) {
+      final v = e[field];
+      if (v != null && v > 0) return v;
+    }
+    return 0;
+  }
+
   /// Плашка выбранного: ОКНО · ДВУХСТВОРЧАТОЕ · КИРПИЧКА
   Widget _pickedBar(String windowType, String house) {
     final parts = <String>[
