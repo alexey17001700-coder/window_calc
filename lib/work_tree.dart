@@ -19,14 +19,24 @@ class WorkNode {
   final List<WorkNode> children;
 }
 
+/// Тип дома — 3-й уровень дерева (после выбора изделия и его вида).
+const List<WorkNode> houseTypes = [
+  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА'),
+  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА'),
+  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА'),
+  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА'),
+  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ'),
+  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА'),
+];
+
 /// Данные дерева. Подпункты — заготовка, наполняется как нужно.
 const List<WorkNode> workTree = [
   WorkNode(Icons.straighten_rounded, 'ЗАМЕР', [
     WorkNode(Icons.window_rounded, 'ОКНО', [
-      WorkNode(Icons.crop_portrait_rounded, 'ОДНОСТВОРЧАТОЕ'),
-      WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТОЕ'),
-      WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТОЕ'),
-      WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ'),
+      WorkNode(Icons.crop_portrait_rounded, 'ОДНОСТВОРЧАТОЕ', houseTypes),
+      WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТОЕ', houseTypes),
+      WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТОЕ', houseTypes),
+      WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
     ]),
     WorkNode(Icons.door_sliding_rounded, 'БАЛКОННЫЙ БЛОК'),
     WorkNode(Icons.roofing_rounded, 'БАЛКОН'),
