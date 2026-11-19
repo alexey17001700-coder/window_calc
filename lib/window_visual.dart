@@ -573,6 +573,38 @@ class _GostPainter extends CustomPainter {
         size: 7.5, color: const Color(0xFF7E93AC), alignLeft: true);
   }
 
+  // ─────────────── ОСЕВАЯ ЛИНИЯ (штрихпунктир) ───────────────
+  void _axisV(Canvas canvas, double x, double y1, double y2) =>
+      _dashDot(canvas, Offset(x, y1), Offset(x, y2));
+
+  void _axisH(Canvas canvas, double y, double x1, double x2) =>
+      _dashDot(canvas, Offset(x1, y), Offset(x2, y));
+
+  void _dashDot(Canvas canvas, Offset a, Offset b) {
+    final total = (b - a).distance;
+    if (total <= 0) return;
+    final dir = (b - a) / total;
+    final p = _line(_axis, 0.8);
+    double t = 0;
+    while (t < total) {
+      final dash = math.min(9.0, total - t);
+      canvas.drawLine(a + dir * t, a + dir * (t + dash), p);
+      t += dash + 3;
+      if (t >= total) break;
+      final dot = math.min(1.6, total - t);
+      canvas.drawLine(a + dir * t, a + dir * (t + dot), p);
+      t += dot + 3;
+    }
+  }
+
+  // ─────────────── УГЛОВАЯ ВЫНОСКА 90° ───────────────
+  void _corner90(Canvas canvas, Offset c, int sx, int sy) {
+    const d = 9.0;
+    final p = _line(_ink, 0.9);
+    canvas.drawLine(c, Offset(c.dx + sx * d, c.dy), p);
+    canvas.drawLine(c, Offset(c.dx, c.dy + sy * d), p);
+  }
+
   // ─────────────── ШТРИХОВКА СТЕНЫ ───────────────
   void _hatch(Canvas canvas, Rect r) {
     canvas.save();
