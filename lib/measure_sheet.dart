@@ -212,10 +212,18 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                       widget.path.isEmpty ? '—' : widget.path.join(' · ')),
                   ('СТЕКЛОПАКЕТ',
                       widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
-                  if (widget.sashModes.isNotEmpty)
-                    ('СТВОРКИ', _sashLine()),
                 ]),
                 const SizedBox(height: 12),
+                if (widget.sashModes.isNotEmpty) ...[
+                  _block('КОНСТРУКЦИЯ', [
+                    ('СТВОРОК', '${widget.sashModes.length}'),
+                    ('СТВОРКИ', _sashLine()),
+                    ('ПО ГОСТ', _sashLetters()),
+                    if (widget.widthMm > 0)
+                      ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
+                  ]),
+                  const SizedBox(height: 12),
+                ],
                 _sizesBlock(items),
                 const SizedBox(height: 12),
                 _sheetButton(),
