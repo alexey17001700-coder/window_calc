@@ -417,6 +417,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   parts: _multi,
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
+                  sashModes: modes,
+                  widthMm: _mmOf('ШИРИНА'),
+                  heightMm: _mmOf('ВЫСОТА'),
+                  onSashTap: (i) => setState(() {
+                    final m = List<int>.from(modes);
+                    m[i] = (m[i] + 1) % kSashModeNames.length;
+                    _sashModes = m;
+                  }),
                 ),
               ],
             ),
