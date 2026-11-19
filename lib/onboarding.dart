@@ -271,6 +271,36 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
+  // ─────────────── ШАГ 2: ДЕРЕВО «ЧТО ДЕЛАЕМ» ───────────────
+  /// Дерево живёт НА ЭКРАНЕ — без карточки-обёртки, без рамки, от края до края.
+  Widget _treeStep() {
+    return Column(
+      children: [
+        Expanded(
+          child: WorkTreeView(
+            rootTitle: 'ЧТО ДЕЛАЕМ',
+            rootSub: 'Выбери вид работ на объекте',
+            onWorkType: (i) => _workType = i,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Row(
+            children: [
+              _GhostButton('НАЗАД', Icons.arrow_back_rounded,
+                  () => setState(() => _step = 0)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _GoldButton(
+                    'ДАЛЕЕ', Icons.arrow_forward_rounded, widget.onFinish),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   // ─────────────────────────── ЭЛЕМЕНТЫ ───────────────────────────
   Widget _cardTitle(String title, String sub) {
     return Column(
