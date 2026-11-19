@@ -441,44 +441,60 @@ class _SplashScreenState extends State<SplashScreen>
             letterSpacing: 1.0,
           ),
         ),
-        onPressed: () {
-          Navigator.of(context).pushReplacement(
-            PageRouteBuilder(
-              transitionDuration: const Duration(milliseconds: 420),
-              pageBuilder: (_, a, __) => FadeTransition(
-                opacity: a,
-                child: OnboardingScreen(
-                  onBack: () {
-                    Navigator.of(context).pushReplacement(
-                      PageRouteBuilder(
-                        transitionDuration: const Duration(milliseconds: 380),
-                        pageBuilder: (_, a3, __) => FadeTransition(
-                          opacity: a3,
-                          child: SplashScreen(
-                              onToggleTheme: widget.onToggleTheme),
-                        ),
-                      ),
-                    );
-                  },
-                  onFinish: () {
-                    Navigator.of(context).pushReplacement(
-                      PageRouteBuilder(
-                        transitionDuration: const Duration(milliseconds: 380),
-                        pageBuilder: (_, a2, __) => FadeTransition(
-                          opacity: a2,
-                          child:
-                              HomeScreen(onToggleTheme: widget.onToggleTheme),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          );
-        },
+        onPressed: _openOnboarding,
         child: const Text('НАЧАТЬ РАБОТУ'),
       ),
+    );
+  }
+
+  /// Открыть мастер замера. Колбэки работают через глобальный навигатор —
+  /// контекст этого экрана после pushReplacement уже мёртв.
+  void _openOnboarding() {
+    final nav = appNavigatorKey.currentState;
+    if (nav == null) return;
+    nav.push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 420),
+        pageBuilder: (_, a, __) => FadeTransition(
+          opacity: a,
+          child: OnboardingScreen(
+            onBack: _backToSplash,
+            onFinish: _openHome,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Возврат из мастера на главный экран (заставка с проверкой обновлений).
+  void _backToSplash() {
+    final nav = appNavigatorKey.currentState;
+    if (nav == null) return;
+    nav.pushAndRemoveUntil(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 380),
+        pageBuilder: (_, a, __) => FadeTransition(
+          opacity: a,
+          child: SplashScreen(onToggleTheme: widget.onToggleTheme),
+        ),
+      ),
+      (route) => false,
+    );
+  }
+
+  /// Мастер завершён → главное меню.
+  void _openHome() {
+    final nav = appNavigatorKey.currentState;
+    if (nav == null) return;
+    nav.pushAndRemoveUntil(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 380),
+        pageBuilder: (_, a, __) => FadeTransition(
+          opacity: a,
+          child: HomeScreen(onToggleTheme: widget.onToggleTheme),
+        ),
+      ),
+      (route) => false,
     );
   }
 
