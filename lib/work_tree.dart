@@ -55,10 +55,10 @@ class WorkTreeView extends StatefulWidget {
 
 class _WorkTreeViewState extends State<WorkTreeView> {
   // ── габариты ──
-  static const double _cardW = 152; // карточка-пункт
-  static const double _cardH = 54;
-  static const double _gapX = 58; // место под линии-ветки
-  static const double _gapY = 10;
+  static const double _cardW = 180; // карточка-пункт
+  static const double _cardH = 66;
+  static const double _gapX = 62; // место под линии-ветки
+  static const double _gapY = 12;
   static const double _pad = 10;
 
   /// Выбранная цепочка: индекс на каждом уровне.
