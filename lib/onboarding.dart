@@ -277,10 +277,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Column(
       children: [
         Expanded(
-          child: WorkTreeView(
+          child: const WorkTreeView(
             rootTitle: 'ЧТО ДЕЛАЕМ',
             rootSub: 'Выбери вид работ на объекте',
-            onWorkType: (i) => _workType = i,
           ),
         ),
         Padding(
