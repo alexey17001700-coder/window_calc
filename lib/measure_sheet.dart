@@ -24,6 +24,7 @@ class MeasureSheetView extends StatefulWidget {
     required this.glass,
     required this.onBack,
     required this.onFinish,
+    this.sashModes = const [],
   });
 
   /// Данные клиента.
