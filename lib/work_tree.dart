@@ -164,21 +164,27 @@ class _WorkTreeViewState extends State<WorkTreeView> {
 
   // ─────────────────────── ВЫБОР ───────────────────────
   void _select(int level, int index) {
+    final node = _nodeAt(level, index);
+
+    // ── ФИНАЛЬНЫЙ УРОВЕНЬ (комплектация): мультивыбор ──
+    if (node.children.isEmpty) {
+      setState(() {
+        if (!_multi.remove(index)) _multi.add(index);
+      });
+      widget.onMultiChanged?.call(_multiTitles());
+      return;
+    }
+
+    // ── ОБЫЧНЫЙ УРОВЕНЬ: одна ветка; смена ветки сбрасывает комплектацию ──
     final same = _path.length > level && _path[level] == index;
     setState(() {
       if (_path.length > level) _path.removeRange(level, _path.length);
       if (!same) _path.add(index);
+      _multi.clear();
     });
-    if (level == 0) {
-      widget.onWorkType?.call(same ? -1 : index);
-    }
-    // Выбран тип дома (4-й уровень) → отдаём цепочку наружу.
-    if (!same && _path.length >= 4) {
-      final node = _nodeAt(level, index);
-      if (node.children.isEmpty) {
-        widget.onLeafSelected?.call(_titles());
-      }
-    }
+    if (level == 0) widget.onWorkType?.call(same ? -1 : index);
+    widget.onPathChanged?.call(_titles());
+    widget.onMultiChanged?.call(const []);
     _autoScroll();
   }
 
@@ -199,6 +205,18 @@ class _WorkTreeViewState extends State<WorkTreeView> {
       final n = nodes[_path[i]];
       out.add(n.title);
       nodes = n.children;
+    }
+    return out;
+  }
+
+  /// Названия отмеченных пунктов комплектации.
+  List<String> _multiTitles() {
+    final cols = _columns();
+    if (cols.isEmpty) return const [];
+    final last = cols.last;
+    final out = <String>[];
+    for (var i = 0; i < last.length; i++) {
+      if (_multi.contains(i)) out.add(last[i].title);
     }
     return out;
   }
