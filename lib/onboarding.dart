@@ -395,6 +395,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ? 3
             : 1;
     final arched = windowType == 'ФИГУРНОЕ';
+    // Обозначения створок: если ещё не заданы — все «поворотные».
+    final modes = _sashModes.length == sashes
+        ? _sashModes
+        : List<int>.filled(sashes, 1);
 
     return Column(
       children: [
