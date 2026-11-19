@@ -255,16 +255,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Widget _cardFor(int i) {
-    switch (i) {
-      case 0:
-        return _cardClient();
-      case 1:
-        return _cardWorkType();
-      case 2:
-        return _cardProduct();
-      default:
-        return _cardSummary();
-    }
+    if (i == 1) return _cardWorkType();
+    return _cardClient();
   }
 
   /// Содержимое шага. Шаг 2 («ВИД РАБОТ») — дерево живёт НА ЭКРАНЕ,
