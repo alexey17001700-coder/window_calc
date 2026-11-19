@@ -249,14 +249,29 @@ class _WindowVisualState extends State<WindowVisual> {
     );
   }
 
-  /// Какая створка под пальцем.
+  /// Какая СЕКЦИЯ под пальцем.
+  /// Секция — вся ячейка проёма целиком (рама + обвязка + штапик + стекло),
+  /// поэтому попадание считается по проёму, а не по стеклу: палец может
+  /// промахнуться мимо стекла на профиль — секция всё равно определится.
   int _hit(Size size, Offset p) {
     final g = _geo(size);
-    final rects = _sashRects(g.glass, widget.sashes);
-    for (var i = 0; i < rects.length; i++) {
-      if (rects[i].inflate(3).contains(p)) return i;
+    // Палец вне проёма (стена, поле листа) — не наша секция.
+    if (!_openPath(g.opening, widget.arched).contains(p)) return -1;
+    final cells = _sashRects(g.opening.deflate(2), widget.sashes);
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i].inflate(4).contains(p)) return i;
     }
-    return -1;
+    // Попал в проём, но между ячейками (арка) — берём ближайшую по X.
+    var best = 0;
+    var dist = double.infinity;
+    for (var i = 0; i < cells.length; i++) {
+      final d = (cells[i].center.dx - p.dx).abs();
+      if (d < dist) {
+        dist = d;
+        best = i;
+      }
+    }
+    return best;
   }
 }
 
