@@ -4,13 +4,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'theme.dart';
-import 'work_tree.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-///  ПРЕМИАЛЬНЫЙ СВАЙП-МАСТЕР  ·  v3.3
-///  Карточки переворачиваются в 3D: отдаление → разворот → приближение.
-///  Свайп влево/вправо или кнопка «ДАЛЕЕ».
-///  Каждая карточка занимает не более 50% высоты экрана.
+///  ПРЕМИАЛЬНЫЙ ЭКРАН  ·  v3.4.3
+///  Остался ОДИН экран — «ДАННЫЕ КЛИЕНТА».
+///  Все остальные шаги мастера (ВИД РАБОТ, ИЗДЕЛИЕ, ИТОГ) удалены.
 /// ═══════════════════════════════════════════════════════════════════
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.onFinish});
@@ -21,55 +19,18 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _phone = TextEditingController();
   final TextEditingController _addr = TextEditingController();
   final TextEditingController _flat = TextEditingController();
   final TextEditingController _floor = TextEditingController();
 
+  /// Пробегающий блик по карточке.
   late final AnimationController _shine;
-  late final AnimationController _flip;
 
-  /// Шлейф от ближнего торца карточки (серебристая дымка).
-  late final AnimationController _trail;
-
-  /// Ключ карточки — нужен, чтобы знать её габариты для шлейфа.
-  final GlobalKey _cardKey = GlobalKey();
-  Size _cardSize = const Size(300, 240);
-
-  /// Текущая (целевая) страница — шапка, прогресс и точки реагируют сразу.
-  int _page = 0;
-
-  /// Страница, которая сейчас «лицом» на экране (до середины разворота).
-  int _from = 0;
-
-  /// Страница, которая покажется после разворота.
-  int _to = 0;
-
-  /// Направление разворота: 1 — вперёд, -1 — назад.
-  int _dir = 1;
-
-  /// Выбранный вид работ: 0 — замер, 1 — монтаж, 2 — ремонт, 3 — рекламации.
-  int _workType = -1;
-
-  bool _animating = false;
-
-  /// Доворот от пальца (радианы), пока идёт свайп.
-  double _drag = 0;
-
-  static const _titles = [
-    'ДАННЫЕ КЛИЕНТА',
-    'ВИД РАБОТ',
-  ];
-  static const _subs = [
-    'Кому считаем окна',
-    'Что делаем на объекте',
-  ];
-  static const _icons = [
-    Icons.person_rounded,
-    Icons.handyman_rounded,
-  ];
+  static const _title = 'ДАННЫЕ КЛИЕНТА';
+  static const _icon = Icons.person_rounded;
 
   @override
   void initState() {
@@ -77,84 +38,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _shine = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 4200))
       ..repeat();
-    _flip = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 940));
-    _trail = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 940));
   }
 
   @override
   void dispose() {
     _shine.dispose();
-    _flip.dispose();
-    _trail.dispose();
     _name.dispose();
     _phone.dispose();
     _addr.dispose();
     _flat.dispose();
     _floor.dispose();
     super.dispose();
-  }
-
-  // ─────────────────────── ПЕРЕВОРОТ КАРТОЧКИ ───────────────────────
-  void _flipTo(int target) {
-    if (_animating || target < 0 || target > 1 || target == _page) return;
-    setState(() {
-      _from = _page;
-      _to = target;
-      _dir = target > _page ? 1 : -1;
-      _page = target;
-      _animating = true;
-      _drag = 0;
-    });
-    _trail.forward(from: 0);
-    _flip.forward(from: 0).whenComplete(() {
-      if (!mounted) return;
-      setState(() {
-        _animating = false;
-        _from = _to;
-        _flip.value = 0;
-      });
-      // Шлейф плавно растворяется после окончания разворота.
-      _trail.animateBack(0, duration: const Duration(milliseconds: 620));
-    });
-  }
-
-  void _next() {
-    if (_page >= 1) {
-      widget.onFinish();
-      return;
-    }
-    _flipTo(_page + 1);
-  }
-
-  void _prev() {
-    if (_page <= 0) return;
-    _flipTo(_page - 1);
-  }
-
-  // ─────────────────────── СВАЙП ───────────────────────
-  void _onDragUpdate(DragUpdateDetails d) {
-    if (_animating) return;
-    final w = MediaQuery.of(context).size.width;
-    setState(() {
-      _drag = (_drag - d.delta.dx / w * 0.9).clamp(-0.55, 0.55);
-    });
-  }
-
-  void _onDragEnd(DragEndDetails d) {
-    if (_animating) {
-      setState(() => _drag = 0);
-      return;
-    }
-    final v = d.velocity.pixelsPerSecond.dx;
-    final dx = _drag;
-    setState(() => _drag = 0);
-    if ((dx > 0.16 || v < -260) && _page < 1) {
-      _flipTo(_page + 1);
-    } else if ((dx < -0.16 || v > 260) && _page > 0) {
-      _flipTo(_page - 1);
-    }
   }
 
   @override
@@ -169,16 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             child: Column(
               children: [
                 _header(),
-                _progress(),
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onHorizontalDragUpdate: _onDragUpdate,
-                    onHorizontalDragEnd: _onDragEnd,
-                    child: _flipStage(h),
-                  ),
-                ),
-                _dots(),
+                Expanded(child: _cardWrap(h, _cardClient())),
                 const SizedBox(height: 14),
               ],
             ),
@@ -188,115 +73,27 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ─────────────────── СЦЕНА С 3D-РАЗВОРОТОМ ───────────────────
-  Widget _flipStage(double h) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_flip, _trail]),
-      builder: (context, _) {
-        final t = _flip.value;
-
-        // Кто показан: до середины — старая карточка, после — новая.
-        final showTo = t >= 0.5;
-        final idx = showTo ? _to : _from;
-
-        // Угол разворота + доворот от пальца.
-        final angle = t * math.pi * _dir + _drag;
-
-        // Отдаление в начале разворота → приближение в конце.
-        final scale = 1.0 - 0.16 * math.sin(t * math.pi);
-
-        // Габариты карточки (layout не зависит от 3D-трансформации).
-        final box = _cardKey.currentContext?.findRenderObject() as RenderBox?;
-        if (box != null && box.hasSize) _cardSize = box.size;
-
-        // Яркость шлейфа: во время разворота + лёгкий след при свайпе.
-        final dragI = (_drag.abs() / 0.55).clamp(0.0, 1.0) * 0.5;
-        final intensity = math.max(_trail.value, dragI);
-
-        return SizedBox.expand(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.0014)
-                    ..rotateY(angle)
-                    ..scale(scale),
-                  child: Transform(
-                    // Контрразворот: новая карточка читается «лицом», а не зеркалом.
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()
-                      ..rotateY(showTo ? math.pi * _dir : 0.0),
-                    child: _stageChild(h, idx),
-                  ),
-                ),
-              ),
-              // Серебристый шлейф от ближнего торца — поверх карточки.
-              if (intensity > 0.004)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: _TrailPainter(
-                        t: t,
-                        dir: _dir,
-                        drag: _drag,
-                        intensity: intensity,
-                        cardSize: _cardSize,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _cardFor(int i) {
-    if (i == 1) return _cardWorkType();
-    return _cardClient();
-  }
-
-  /// Содержимое шага. Шаг 2 («ВИД РАБОТ») — дерево живёт НА ЭКРАНЕ,
-  /// без карточки-обёртки: ни рамки, ни обрезки, ни лимита 50%.
-  Widget _stageChild(double h, int i) {
-    // Шаг 2 — ОТДЕЛЬНЫЙ ЭКРАН с деревом из карточек: ни карточки-обёртки,
-    // ни рамки, ни обрезки, ни отступов. Дерево занимает весь экран.
-    if (i == 1) return _cardWorkType();
-    return _cardWrap(h, _cardFor(i));
-  }
-
   // ─────────────────────────── ШАПКА ───────────────────────────
   Widget _header() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 16, 22, 12),
       child: Row(
         children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 320),
-            transitionBuilder: (w, a) => ScaleTransition(
-              scale: a,
-              child: FadeTransition(opacity: a, child: w),
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: AppColors.goldGradient,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.gold.withOpacity(0.38),
+                  blurRadius: 20,
+                  offset: const Offset(0, 7),
+                ),
+              ],
             ),
-            child: Container(
-              key: ValueKey(_page),
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                gradient: AppColors.goldGradient,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.gold.withOpacity(0.38),
-                    blurRadius: 20,
-                    offset: const Offset(0, 7),
-                  ),
-                ],
-              ),
-              child: Icon(_icons[_page], color: AppColors.navy900, size: 23),
-            ),
+            child: const Icon(_icon, color: AppColors.navy900, size: 23),
           ),
           const SizedBox(width: 13),
           Expanded(
@@ -313,62 +110,19 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   ),
                 ),
                 const SizedBox(height: 3),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 260),
-                  child: Text(
-                    'ШАГ ${_page + 1} ИЗ 2 · ${_titles[_page]}',
-                    key: ValueKey('h$_page'),
-                    style: const TextStyle(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.4,
-                      color: AppColors.gold,
-                    ),
+                const Text(
+                  _title,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.4,
+                    color: AppColors.gold,
                   ),
                 ),
               ],
             ),
           ),
-          if (_page > 0)
-            IconButton(
-              onPressed: _prev,
-              icon: const Icon(Icons.arrow_back_rounded,
-                  color: Color(0xFF7E93AC), size: 20),
-            ),
         ],
-      ),
-    );
-  }
-
-  // ─────────────────────── ПОЛОСА ПРОГРЕССА ───────────────────────
-  Widget _progress() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 0, 22, 4),
-      child: Row(
-        children: List.generate(2, (i) {
-          final done = i <= _page;
-          return Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 380),
-              curve: Curves.easeOut,
-              height: 3,
-              margin: EdgeInsets.only(right: i < 1 ? 6 : 0),
-              decoration: BoxDecoration(
-                gradient: done ? AppColors.goldGradient : null,
-                color: done ? null : const Color(0xFF16253A),
-                borderRadius: BorderRadius.circular(2),
-                boxShadow: done
-                    ? [
-                        BoxShadow(
-                          color: AppColors.gold.withOpacity(0.35),
-                          blurRadius: 8,
-                        ),
-                      ]
-                    : null,
-              ),
-            ),
-          );
-        }),
       ),
     );
   }
@@ -381,7 +135,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: screenH * 0.50),
           child: Container(
-            key: _cardKey,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -450,7 +203,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ─────────────────────── КАРТОЧКА 1: КЛИЕНТ ───────────────────────
+  // ─────────────────────── КАРТОЧКА: КЛИЕНТ ───────────────────────
   Widget _cardClient() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,51 +256,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ],
         ),
         const SizedBox(height: 20),
-        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
-      ],
-    );
-  }
-
-  // ─────────── ШАГ 2: ВИД РАБОТ — ОТДЕЛЬНЫЙ ЭКРАН С ДЕРЕВОМ ───────────
-  /// Второй экран мастера (сразу после карточки «ДАННЫЕ КЛИЕНТА»).
-  /// Здесь нет карточки-обёртки: дерево из карточек занимает ВЕСЬ экран,
-  /// от края до края. Внизу — только узкая строка подсказки и кнопка.
-  Widget _cardWorkType() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: WorkTreeView(
-            onWorkType: (i) {
-              if (_workType != i) setState(() => _workType = i);
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'ТАП — РАСКРЫТЬ ВЕТКУ\nПОВТОРНЫЙ ТАП — СВЕРНУТЬ',
-                  style: TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.6,
-                    height: 1.45,
-                    color: Color(0xFF5A6E86),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 140,
-                child: _GoldButton(
-                    'ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
-              ),
-            ],
-          ),
-        ),
+        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, widget.onFinish),
       ],
     );
   }
@@ -586,47 +295,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             fontSize: 11.5,
             fontWeight: FontWeight.w500,
             color: Color(0xFF7E93AC),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _dots() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ...List.generate(2, (i) {
-          final active = i == _page;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOut,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: active ? 26 : 8,
-            height: 8,
-            decoration: BoxDecoration(
-              gradient: active ? AppColors.goldGradient : null,
-              color: active ? null : const Color(0xFF1B2C44),
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: active
-                  ? [
-                      BoxShadow(
-                        color: AppColors.gold.withOpacity(0.40),
-                        blurRadius: 10,
-                      ),
-                    ]
-                  : null,
-            ),
-          );
-        }),
-        const SizedBox(width: 12),
-        Text(
-          '${_page + 1} / 2',
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-            color: Color(0xFF5A6E86),
           ),
         ),
       ],
@@ -801,162 +469,6 @@ class _GoldButtonState extends State<_GoldButton> {
       ),
     );
   }
-}
-
-/// ═══════════════════════════════════════════════════════════════════
-///  СЕРЕБРИСТЫЙ ШЛЕЙФ ОТ БЛИЖНЕГО ТОРЦА КАРТОЧКИ
-///  Торец «тлеет», из него тянется дымка. Только во время разворота.
-/// ═══════════════════════════════════════════════════════════════════
-class _TrailPainter extends CustomPainter {
-  _TrailPainter({
-    required this.t,
-    required this.dir,
-    required this.drag,
-    required this.intensity,
-    required this.cardSize,
-  });
-
-  final double t;
-  final int dir;
-  final double drag;
-  final double intensity;
-  final Size cardSize;
-
-  // Ядро — бело-голубое, дымка — серебристо-серая с лёгким золотом.
-  static const _core = Color(0xFFEAF4FF);
-  static const _ice = Color(0xFFB9D4F2);
-  static const _silver = Color(0xFFA9B8CC);
-  static const _gold = Color(0xFFC9A227);
-
-  /// Детерминированный «шум» — стабилен между кадрами, без Random.
-  static double _hash(int i, double k) {
-    final x = math.sin(i * 12.9898 + k * 78.233) * 43758.5453;
-    return x - x.floorToDouble();
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (intensity <= 0.004) return;
-
-    final angle = t * math.pi * dir + drag;
-    final scale = 1.0 - 0.16 * math.sin(t * math.pi);
-
-    final halfW = cardSize.width / 2;
-    final halfH = cardSize.height / 2;
-
-    // Ближний торец: тот, что при развороте идёт на зрителя.
-    final s = math.sin(angle) >= 0 ? 1.0 : -1.0;
-
-    // Проекция торца (та же математика, что в Matrix4 разворота).
-    final z = -s * halfW * math.sin(angle) * scale;
-    final w = 1.0 + 0.0014 * z;
-    final edgeX = size.width / 2 + (s * halfW * math.cos(angle) * scale) / w;
-    final halfHp = (halfH * scale) / w;
-    final top = size.height / 2 - halfHp;
-    final bot = size.height / 2 + halfHp;
-    final h = bot - top;
-
-    // Раскрытие разворота — максимум в середине.
-    final open = math.sin(t * math.pi).clamp(0.0, 1.0).toDouble();
-    final glow = intensity * (0.35 + 0.65 * open);
-
-    // ── 1. ДЫМКА: слоистые полупрозрачные градиенты (не сплошной блок) ──
-    for (var i = 0; i < 3; i++) {
-      final k = i / 2.0;
-      final reach = (10 + 46 * open) * scale * (0.45 + k * 0.85);
-      final a = glow * (0.085 - k * 0.022);
-      canvas.drawRect(
-        Rect.fromLTRB(
-          s > 0 ? edgeX : edgeX - reach,
-          top + h * 0.04 * k,
-          s > 0 ? edgeX + reach : edgeX,
-          bot - h * 0.04 * k,
-        ),
-        Paint()
-          ..shader = ui.Gradient.linear(
-            Offset(edgeX, 0),
-            Offset(edgeX + s * reach, 0),
-            [
-              _silver.withOpacity(a * 1.6),
-              _ice.withOpacity(a * 0.7),
-              _silver.withOpacity(0.0),
-            ],
-            const [0.0, 0.35, 1.0],
-          ),
-      );
-    }
-
-    // ── 2. ШУМ: мягкие сгустки, стелющиеся от торца ──
-    for (var i = 0; i < 16; i++) {
-      final ph = _hash(i, 1.0);
-      final prog = ((t * 0.85 + ph) % 1.0);
-      final dist = (6 + prog * (16 + 54 * open)) * scale;
-      final cy = top + _hash(i, 2.0) * h;
-      final cx = edgeX + s * dist;
-      final rad = (7 + _hash(i, 3.0) * 13) * scale * (0.6 + prog * 0.7);
-      final a = glow * (1.0 - prog) * (0.055 + _hash(i, 4.0) * 0.05);
-      final col = _hash(i, 5.0) > 0.78 ? _gold : _silver;
-      final cy2 = cy + math.sin(t * 3.1 + ph * 6.3) * 4 * scale;
-      canvas.drawCircle(
-        Offset(cx, cy2),
-        rad,
-        Paint()
-          ..shader = ui.Gradient.radial(Offset(cx, cy2), rad, [
-            col.withOpacity(a),
-            col.withOpacity(0.0),
-          ]),
-      );
-    }
-
-    // ── 3. РАСКАЛЁННАЯ КРОМКА: узкое свечение + почти белая нить ──
-    canvas.drawLine(
-      Offset(edgeX, top + h * 0.02),
-      Offset(edgeX, bot - h * 0.02),
-      Paint()
-        ..color = _ice.withOpacity(0.30 * glow)
-        ..strokeWidth = 3.2
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0),
-    );
-    canvas.drawLine(
-      Offset(edgeX, top + h * 0.03),
-      Offset(edgeX, bot - h * 0.03),
-      Paint()
-        ..color = _core.withOpacity(0.85 * glow)
-        ..strokeWidth = 1.0,
-    );
-
-    // ── 4. ИСКРЫ: мелкие, разной скорости, с вилянием, быстро гаснут ──
-    final p = Paint();
-    for (var i = 0; i < 44; i++) {
-      final ph = _hash(i, 11.0);
-      final speed = 0.55 + _hash(i, 12.0) * 1.35;
-      final prog = ((t * speed + ph) % 1.0);
-      final ease = (1.0 - math.pow(1.0 - prog, 2.2)).toDouble();
-      final dist = (4 + ease * (14 + 62 * open)) * scale;
-      final wob =
-          math.sin(prog * 9.0 + ph * 12.0) * (2.5 + _hash(i, 13.0) * 5.0);
-      final px = edgeX + s * dist;
-      final py = top + _hash(i, 14.0) * h + wob * scale;
-      final fade = math.pow(1.0 - prog, 1.8).toDouble();
-      final a = glow * fade * (0.35 + _hash(i, 15.0) * 0.5);
-      final r = (0.55 + _hash(i, 16.0) * 1.9) * scale;
-
-      // Ореол — только у самых ярких искр.
-      if (r > 1.5) {
-        p.color = _ice.withOpacity(a * 0.22);
-        canvas.drawCircle(Offset(px, py), r * 2.4, p);
-      }
-      p.color = (i % 9 == 0 ? _gold : _core).withOpacity(a);
-      canvas.drawCircle(Offset(px, py), r, p);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _TrailPainter old) =>
-      old.t != t ||
-      old.drag != drag ||
-      old.intensity != intensity ||
-      old.cardSize != cardSize;
 }
 
 /// ═══════════════════════════════════════════════════════════════════
