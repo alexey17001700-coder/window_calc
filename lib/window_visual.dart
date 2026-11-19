@@ -661,18 +661,33 @@ class _GostPainter extends CustomPainter {
       canvas.drawPath(t, p);
     }
 
-    // раздвижная: стрелка
-    if (mode == 4) {
-      canvas.drawLine(Offset(g.left + 4, cy), Offset(g.right - 4, cy), p);
-      canvas.drawPath(
-        Path()
-          ..moveTo(g.right - 4, cy)
-          ..lineTo(g.right - 11, cy - 3)
-          ..lineTo(g.right - 11, cy + 3)
-          ..close(),
-        Paint()..color = _ink,
-      );
-    }
+  }
+
+  // ─────────────── БУКВЕННОЕ ОБОЗНАЧЕНИЕ СТВОРКИ (Г/П/ПО/О) ───────────────
+  void _sashLetter(Canvas canvas, Rect g, int mode) {
+    final s = kSashModeLetter[mode.clamp(0, 3)];
+    final tp = TextPainter(
+      text: TextSpan(
+        text: s,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w900,
+          color: _ink,
+          letterSpacing: 0.5,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    // рамка-плашка в левом верхнем углу стекла
+    final box = Rect.fromLTWH(
+      g.left + 4,
+      g.top + 4,
+      tp.width + 10,
+      tp.height + 5,
+    );
+    canvas.drawRect(box, Paint()..color = _paper);
+    canvas.drawRect(box, _line(_ink, 1.0));
+    tp.paint(canvas, Offset(box.left + 5, box.top + 2.5));
   }
 
   // ─────────────── РУЧКА ───────────────
