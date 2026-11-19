@@ -102,7 +102,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 ),
               ],
             ),
-            child: const Icon(_icon, color: AppColors.navy900, size: 23),
+            child: Icon(_icons[_step], color: AppColors.navy900, size: 23),
           ),
           const SizedBox(width: 13),
           Expanded(
