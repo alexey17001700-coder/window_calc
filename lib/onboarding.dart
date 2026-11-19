@@ -522,10 +522,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ─────────────── ШАГ 2: ВИД РАБОТ — ДЕРЕВО НА ЭКРАНЕ ───────────────
+  // ─────────── ШАГ 2: ВИД РАБОТ — ОТДЕЛЬНЫЙ ЭКРАН С ДЕРЕВОМ ───────────
+  /// Второй экран мастера (сразу после карточки «ДАННЫЕ КЛИЕНТА»).
+  /// Здесь нет карточки-обёртки: дерево из карточек занимает ВЕСЬ экран,
+  /// от края до края. Внизу — только узкая строка подсказки и кнопка.
   Widget _cardWorkType() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
           child: WorkTreeView(
@@ -534,22 +537,31 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             },
           ),
         ),
-        const SizedBox(height: 6),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            'ТАП — РАСКРЫТЬ ВЕТКУ · ПОВТОРНЫЙ ТАП — СВЕРНУТЬ · ТЯНИ ВЛЕВО/ВПРАВО',
-            style: TextStyle(
-              fontSize: 8,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.7,
-              height: 1.4,
-              color: Color(0xFF5A6E86),
-            ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'ТАП — РАСКРЫТЬ ВЕТКУ\nПОВТОРНЫЙ ТАП — СВЕРНУТЬ',
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                    height: 1.45,
+                    color: Color(0xFF5A6E86),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 140,
+                child: _GoldButton(
+                    'ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
-        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, _next),
       ],
     );
   }
