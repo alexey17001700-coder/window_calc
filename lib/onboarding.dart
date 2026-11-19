@@ -265,7 +265,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ],
         ),
         const SizedBox(height: 20),
-        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded, widget.onFinish),
+        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded,
+            () => setState(() => _step = 1)),
       ],
     );
   }
