@@ -525,8 +525,9 @@ class _GostPainter extends CustomPainter {
       final gl = o.deflate(3.5);
       canvas.drawRect(gl, _line(_ink, 0.9));
 
-      _openingMark(canvas, gl, modes[i].clamp(0, 4), hingeLeft: i == 0);
+      _openingMark(canvas, gl, modes[i].clamp(0, 3), hingeLeft: i == 0);
       _handle(canvas, o, hingeLeft: i == 0);
+      _sashLetter(canvas, gl, modes[i].clamp(0, 3));
 
       if (i == selected) {
         canvas.drawRect(
