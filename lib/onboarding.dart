@@ -57,6 +57,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Выбранный стеклопакет (-1 — не выбран).
   int _glass = -1;
 
+  /// Обозначение каждой створки на чертеже (индекс в kSashModeNames).
+  List<int> _sashModes = const [];
+
   static const _titles = [
     'ДАННЫЕ КЛИЕНТА',
     'ЧТО ДЕЛАЕМ',
