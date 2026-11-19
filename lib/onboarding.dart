@@ -61,20 +61,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   static const _titles = [
     'ДАННЫЕ КЛИЕНТА',
     'ВИД РАБОТ',
-    'ИЗДЕЛИЕ',
-    'ИТОГ ЗАМЕРА',
   ];
   static const _subs = [
     'Кому считаем окна',
     'Что делаем на объекте',
-    'Что замеряем',
-    'Расчёт и отправка',
   ];
   static const _icons = [
     Icons.person_rounded,
     Icons.handyman_rounded,
-    Icons.grid_view_rounded,
-    Icons.receipt_long_rounded,
   ];
 
   @override
