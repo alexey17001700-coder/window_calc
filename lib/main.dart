@@ -443,6 +443,18 @@ class _SplashScreenState extends State<SplashScreen>
               pageBuilder: (_, a, __) => FadeTransition(
                 opacity: a,
                 child: OnboardingScreen(
+                  onBack: () {
+                    Navigator.of(context).pushReplacement(
+                      PageRouteBuilder(
+                        transitionDuration: const Duration(milliseconds: 380),
+                        pageBuilder: (_, a3, __) => FadeTransition(
+                          opacity: a3,
+                          child: SplashScreen(
+                              onToggleTheme: widget.onToggleTheme),
+                        ),
+                      ),
+                    );
+                  },
                   onFinish: () {
                     Navigator.of(context).pushReplacement(
                       PageRouteBuilder(
