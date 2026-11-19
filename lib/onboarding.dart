@@ -39,19 +39,31 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Пробегающий блик по карточке.
   late final AnimationController _shine;
 
-  /// Шаг мастера: 0 — данные клиента, 1 — дерево, 2 — визуальное окно.
+  /// Шаг мастера: 0 — клиент, 1 — дерево, 2 — размеры, 3 — визуальный замер.
   int _step = 0;
 
   /// Выбранная цепочка дерева: ЗАМЕР → ОКНО → вид → тип дома.
   List<String> _picked = const [];
 
+  /// Отмеченная комплектация (финальный уровень дерева, мультивыбор).
+  List<String> _multi = const [];
+
+  /// Размеры по пунктам комплектации — уже в МИЛЛИМЕТРАХ.
+  Map<String, Map<String, int>> _sizes = const {};
+
   /// Выбранный стеклопакет (-1 — не выбран).
   int _glass = -1;
 
-  static const _titles = ['ДАННЫЕ КЛИЕНТА', 'ЧТО ДЕЛАЕМ', 'ВИЗУАЛЬНЫЙ ЗАМЕР'];
+  static const _titles = [
+    'ДАННЫЕ КЛИЕНТА',
+    'ЧТО ДЕЛАЕМ',
+    'РАЗМЕРЫ',
+    'ВИЗУАЛЬНЫЙ ЗАМЕР',
+  ];
   static const _icons = [
     Icons.person_rounded,
     Icons.account_tree_rounded,
+    Icons.straighten_rounded,
     Icons.window_rounded,
   ];
 
