@@ -271,24 +271,24 @@ class _WorkTreeViewState extends State<WorkTreeView> {
   // ─────────────────── КАРТОЧКА-ПУНКТ ───────────────────
   Widget _card(WorkNode node,
       {required bool selected, required VoidCallback onTap}) {
-    return GestureDetector(
+    return _PressCard(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: _dec(selected),
         child: Row(
           children: [
-            _iconBox(node.icon, 30, 15),
-            const SizedBox(width: 8),
+            _iconBox(node.icon, 36, 18),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 node.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 11.5,
                   height: 1.2,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
@@ -297,10 +297,10 @@ class _WorkTreeViewState extends State<WorkTreeView> {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_rounded, size: 14, color: AppColors.gold)
+              const Icon(Icons.check_rounded, size: 16, color: AppColors.gold)
             else if (node.children.isNotEmpty)
               const Icon(Icons.chevron_right_rounded,
-                  size: 15, color: Color(0xFF3D5169)),
+                  size: 17, color: Color(0xFF3D5169)),
           ],
         ),
       ),
