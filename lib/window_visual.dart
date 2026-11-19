@@ -473,7 +473,7 @@ class _GostPainter extends CustomPainter {
 
   static const _ink = Color(0xFF16233A);
   static const _paper = Color(0xFFF7F9FC);
-  static const _glassFill = Color(0xFFEAF3FF);
+  static const _axis = Color(0xFF5B6B80);
 
   Paint _line(Color c, double w) => Paint()
     ..style = PaintingStyle.stroke
