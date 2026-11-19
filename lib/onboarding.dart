@@ -109,7 +109,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ? _treeStep()
                           : _step == 2
                               ? _sizesStep()
-                              : _visualStep(),
+                              : _step == 3
+                                  ? _visualStep()
+                                  : _sheetStep(),
                 ),
                 const SizedBox(height: 14),
               ],
