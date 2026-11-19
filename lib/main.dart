@@ -226,6 +226,8 @@ class _SplashScreenState extends State<SplashScreen>
               _logPanel(),
               const SizedBox(height: 16),
               if (_ready) _startButton(),
+              if (_ready) const SizedBox(height: 10),
+              if (_ready) _checkButton(),
             ],
           ),
         ),
