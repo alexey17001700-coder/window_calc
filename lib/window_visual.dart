@@ -582,17 +582,50 @@ class _GostPainter extends CustomPainter {
     }
 
     // ── РАЗМЕРНЫЕ ЛИНИИ ──
-    _dimH(canvas, g.opening.left, g.opening.right, g.wall.top - 15,
+    // Габарит по ширине — сверху, с выносными линиями от углов проёма.
+    final dimTop = g.wall.top - 15;
+    _dimH(canvas, g.opening.left, g.opening.right, dimTop,
         widthMm > 0 ? '$widthMm' : '?');
-    _dimV(canvas, g.opening.top, g.opening.bottom, g.wall.left - 17,
-        heightMm > 0 ? '$heightMm' : '?');
+    _extV(canvas, g.opening.left, g.opening.top, dimTop);
+    _extV(canvas, g.opening.right, g.opening.top, dimTop);
 
-    if (rects.length > 1 && widthMm > 0) {
-      final y = g.wall.bottom + 17;
+    // Габарит по высоте — слева, с выносными линиями.
+    final dimLeft = g.wall.left - 17;
+    _dimV(canvas, g.opening.top, g.opening.bottom, dimLeft,
+        heightMm > 0 ? '$heightMm' : '?');
+    _extH(canvas, g.opening.top, g.opening.left, dimLeft);
+    _extH(canvas, g.opening.bottom, g.opening.left, dimLeft);
+
+    // Промежуточные размеры по ширине — по каждой секции (нижний ряд).
+    if (rects.length > 1) {
+      final y = g.wall.bottom + (hasSill || hasDrip ? 30 : 17);
       for (final r in rects) {
         _dimH(canvas, r.left, r.right, y,
-            '${(widthMm / rects.length).round()}',
+            widthMm > 0 ? '${(widthMm / rects.length).round()}' : '?',
             small: true, below: true);
+        _extV(canvas, r.left, g.opening.bottom, y);
+        _extV(canvas, r.right, g.opening.bottom, y);
+      }
+    }
+
+    // Промежуточный размер по высоте — справа: у фигурного окна это высота
+    // арки, у обычного — высота стеклопакета.
+    if (heightMm > 0) {
+      final x = g.wall.right + 17;
+      if (arched) {
+        final rad = g.opening.width * 0.5;
+        final hArch = (heightMm * rad / g.opening.height).round();
+        _dimV(canvas, g.opening.top, g.opening.top + rad, x, '$hArch',
+            small: true, right: true);
+        _extH(canvas, g.opening.top, g.opening.right, x);
+        _extH(canvas, g.opening.top + rad, g.opening.right, x);
+      } else {
+        final gt = g.frameInner.top;
+        final gb = g.frameInner.bottom;
+        final hGlass = (heightMm * (gb - gt) / g.opening.height).round();
+        _dimV(canvas, gt, gb, x, '$hGlass', small: true, right: true);
+        _extH(canvas, gt, g.frameInner.right, x);
+        _extH(canvas, gb, g.frameInner.right, x);
       }
     }
 
