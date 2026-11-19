@@ -345,14 +345,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 0, 22, 4),
       child: Row(
-        children: List.generate(4, (i) {
+        children: List.generate(2, (i) {
           final done = i <= _page;
           return Expanded(
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 380),
               curve: Curves.easeOut,
               height: 3,
-              margin: EdgeInsets.only(right: i < 3 ? 6 : 0),
+              margin: EdgeInsets.only(right: i < 1 ? 6 : 0),
               decoration: BoxDecoration(
                 gradient: done ? AppColors.goldGradient : null,
                 color: done ? null : const Color(0xFF16253A),
