@@ -81,6 +81,7 @@ class _SplashScreenState extends State<SplashScreen>
   double _progress = 0;
   bool _ready = false;
   bool _busy = false;
+  bool _checking = false;
   String? _updateVersion;
 
   @override
