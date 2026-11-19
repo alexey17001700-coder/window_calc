@@ -123,6 +123,9 @@ class _WorkTreeViewState extends State<WorkTreeView> {
   /// Выбранная цепочка: индекс на каждом уровне.
   final List<int> _path = [];
 
+  /// Отмеченные пункты финального уровня (комплектация) — мультивыбор.
+  final Set<int> _multi = {};
+
   final ScrollController _h = ScrollController();
   final ScrollController _v = ScrollController();
 
