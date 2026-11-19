@@ -276,12 +276,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Содержимое шага. Шаг 2 («ВИД РАБОТ») — дерево живёт НА ЭКРАНЕ,
   /// без карточки-обёртки: ни рамки, ни обрезки, ни лимита 50%.
   Widget _stageChild(double h, int i) {
-    if (i == 1) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
-        child: _cardWorkType(),
-      );
-    }
+    // Шаг 2 — ОТДЕЛЬНЫЙ ЭКРАН с деревом из карточек: ни карточки-обёртки,
+    // ни рамки, ни обрезки, ни отступов. Дерево занимает весь экран.
+    if (i == 1) return _cardWorkType();
     return _cardWrap(h, _cardFor(i));
   }
 
