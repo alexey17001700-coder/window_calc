@@ -6,9 +6,67 @@ import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// Результат проверки обновления (без показа диалога).
+class UpdateResult {
+  const UpdateResult({
+    required this.currentVersion,
+    this.latestVersion,
+    this.hasUpdate = false,
+    this.error,
+  });
+
+  final String currentVersion;
+  final String? latestVersion;
+  final bool hasUpdate;
+  final String? error;
+}
+
 class UpdateChecker {
   static const String owner = 'alexey17001700-coder';
   static const String repo = 'window_calc';
+
+  /// Тихая проверка: возвращает результат, ничего не показывает.
+  static Future<UpdateResult> check() async {
+    String current = '?';
+    try {
+      final info = await PackageInfo.fromPlatform();
+      current = info.version;
+    } catch (_) {}
+
+    try {
+      final url = Uri.parse(
+          'https://api.github.com/repos/$owner/$repo/releases/latest');
+      final resp = await http.get(url, headers: {
+        'Accept': 'application/vnd.github+json',
+      }).timeout(const Duration(seconds: 12));
+
+      if (resp.statusCode != 200) {
+        return UpdateResult(
+            currentVersion: current, error: 'GitHub ${resp.statusCode}');
+      }
+
+      final match =
+          RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(resp.body);
+      if (match == null) {
+        return UpdateResult(currentVersion: current, error: 'нет тега релиза');
+      }
+
+      final tag = match.group(1) ?? '';
+      final latest = tag.split('+').first;
+      return UpdateResult(
+        currentVersion: current,
+        latestVersion: latest,
+        hasUpdate: _isNewer(latest, current),
+      );
+    } catch (_) {
+      return UpdateResult(currentVersion: current, error: 'сеть недоступна');
+    }
+  }
+
+  /// Показать диалог обновления (публично, для заставки).
+  static void showUpdate(BuildContext context, String newVersion) {
+    _showUpdateDialog(context, newVersion);
+  }
 
   /// Возвращает текст отчёта (для отладочного окна)
   static Future<String> getReport() async {
