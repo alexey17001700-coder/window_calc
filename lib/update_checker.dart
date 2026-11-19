@@ -186,40 +186,15 @@ class UpdateChecker {
   }
   }
 
-  /// Проверка при запуске с задержкой и логированием ошибок
+  /// Проверка при запуске (совместимость): тихо проверяет и показывает диалог.
   static Future<void> checkOnStart(BuildContext context) async {
     await Future.delayed(const Duration(seconds: 2));
     if (!context.mounted) return;
 
-    try {
-      final info = await PackageInfo.fromPlatform();
-      final currentVersion = info.version;
-
-      final url = Uri.parse(
-          'https://api.github.com/repos/$owner/$repo/releases/latest');
-      final resp = await http.get(url, headers: {
-        'Accept': 'application/vnd.github+json',
-      });
-      if (resp.statusCode != 200) return;
-
-      final match =
-          RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(resp.body);
-      if (match == null) return;
-
-      final tag = match.group(1) ?? '';
-      final latestVersion = tag.split('+').first;
-
-      if (_isNewer(latestVersion, currentVersion)) {
-        if (context.mounted) {
-          _showUpdateDialog(context, latestVersion);
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка проверки: $e')),
-        );
-      }
+    final res = await check();
+    if (!context.mounted) return;
+    if (res.hasUpdate && res.latestVersion != null) {
+      _showUpdateDialog(context, res.latestVersion!);
     }
   }
 
