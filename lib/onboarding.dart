@@ -410,7 +410,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final windowType = _picked.length > 2 ? _picked[2] : '';
     final house = _picked.length > 3 ? _picked[3] : '';
     final sashes = _sashCount;
-    final arched = windowType == 'ФИГУРНОЕ';
+    final arched = windowType.toUpperCase().contains('ФИГУРН');
     // Обозначения створок: если ещё не заданы — все «поворотные».
     final modes = _sashModes.length == sashes
         ? _sashModes
