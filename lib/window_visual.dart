@@ -56,6 +56,7 @@ class WindowVisual extends StatefulWidget {
     this.widthMm = 0,
     this.heightMm = 0,
     this.sectionWidths = const [],
+    this.hingeCounts = const [],
   });
 
   /// Число створок: 1, 2, 3 или 4.
