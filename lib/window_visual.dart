@@ -265,7 +265,8 @@ class _WindowVisualState extends State<WindowVisual> {
     final g = _geo(size);
     // Палец вне проёма (стена, поле листа) — не наша секция.
     if (!_openPath(g.opening, widget.arched).contains(p)) return -1;
-    final cells = _sashRects(g.opening.deflate(2), widget.sashes);
+    final cells =
+        _sashRects(g.opening.deflate(2), widget.sashes, widget.sectionWidths);
     for (var i = 0; i < cells.length; i++) {
       if (cells[i].inflate(4).contains(p)) return i;
     }
