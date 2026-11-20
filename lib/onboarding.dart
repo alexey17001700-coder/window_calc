@@ -444,6 +444,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   widthMm: _mmOf('ШИРИНА'),
                   heightMm: _mmOf('ВЫСОТА'),
                   sectionWidths: _secWidths,
+                  hingeCounts: _hingeCounts,
                   onSashTap: (i) => setState(() {
                     final m = List<int>.from(modes);
                     m[i] = (m[i] + 1) % kSashModeNames.length;
