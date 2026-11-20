@@ -578,6 +578,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
+  /// Изделие на балконе / лоджии: у подоконника, отлива и козырька
+  /// ДРУГИЕ надбавки к длине. Признак — балкон/лоджия в дереве либо
+  /// козырёк в комплектации (козырёк бывает только на балконе).
+  bool get _balcony {
+    final all = [..._picked, ..._multi].join(' ').toUpperCase();
+    return all.contains('БАЛКОН') ||
+        all.contains('ЛОДЖИ') ||
+        all.contains('КОЗЫР');
+  }
+
   /// Сколько створок: ручной выбор замерщика, иначе — по типу изделия.
   int get _sashCount {
     if (_sashManual > 0) return _sashManual;
