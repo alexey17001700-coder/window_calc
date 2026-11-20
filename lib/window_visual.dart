@@ -560,7 +560,7 @@ class _GostPainter extends CustomPainter {
     _axisH(canvas, g.opening.center.dy, g.wall.left - 18, g.wall.right + 18);
 
     // ── СТВОРКИ ──
-    final rects = _sashRects(g.glass, sashes);
+    final rects = _sashRects(g.glass, sashes, sectionWidths);
     canvas.save();
     canvas.clipPath(openPath);
     for (var i = 0; i < rects.length; i++) {
