@@ -458,11 +458,24 @@ _Geo _geo(Size s) {
   return _Geo(wall, opening, frameOuter, frameInner, frameInner);
 }
 
-List<Rect> _sashRects(Rect glass, int n) {
+/// Доли ширины секций: пусто или не то число — делим поровну.
+List<double> _normWidths(int n, List<double> widths) {
+  if (widths.length == n) {
+    final sum = widths.fold<double>(0, (a, b) => a + b);
+    if (sum > 0) return [for (final w in widths) w / sum];
+  }
+  return List<double>.filled(n, 1.0 / n);
+}
+
+/// Прямоугольники секций с УЧЁТОМ ручной ширины (долей).
+List<Rect> _sashRects(Rect glass, int n, [List<double>? widths]) {
   final out = <Rect>[];
-  final w = glass.width / n;
+  final ws = _normWidths(n, widths ?? const []);
+  var x = glass.left;
   for (var i = 0; i < n; i++) {
-    out.add(Rect.fromLTWH(glass.left + i * w, glass.top, w, glass.height));
+    final w = glass.width * ws[i];
+    out.add(Rect.fromLTWH(x, glass.top, w, glass.height));
+    x += w;
   }
   return out;
 }
