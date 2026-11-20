@@ -402,6 +402,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _sizesStep() {
     return MeasureSizesView(
       items: _multi,
+      balcony: _balcony,
       onBack: () => setState(() => _step = 1),
       onDone: (mm) => setState(() {
         _sizes = mm;
