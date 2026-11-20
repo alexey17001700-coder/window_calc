@@ -55,9 +55,10 @@ class WindowVisual extends StatefulWidget {
     this.onSashTap,
     this.widthMm = 0,
     this.heightMm = 0,
+    this.sectionWidths = const [],
   });
 
-  /// Число створок: 1, 2 или 3.
+  /// Число створок: 1, 2, 3 или 4.
   final int sashes;
 
   /// Фигурное окно (арочный верх).
