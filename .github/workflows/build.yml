@@ -41,7 +41,7 @@ jobs:
           sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 34/' android/app/build.gradle
           sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' android/app/build.gradle
           sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle
-          sed -i 's/targetSdkVersion .*/targetSdkVersion 34/' android/app/build.gradle
+          sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle
           echo "── ИТОГ: уровни SDK ──"
           grep -nE 'compileSdk|minSdk|targetSdk' android/app/build.gradle
 
