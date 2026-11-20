@@ -76,6 +76,10 @@ jobs:
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Remove old release/tag (если тег уже есть)
+        run: gh release delete "v${{ steps.version.outputs.version }}" --yes --cleanup-tag || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
