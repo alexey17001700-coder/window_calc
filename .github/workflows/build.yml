@@ -41,6 +41,14 @@ jobs:
           sed -i 's|id "org.jetbrains.kotlin.android" version ".*"|id "org.jetbrains.kotlin.android" version "1.9.24"|' settings.gradle
           sed -i "s|ext.kotlin_version = .*|ext.kotlin_version = '1.9.24'|" build.gradle
           cd ..
+      - name: Force Android SDK 35
+        run: |
+          sed -i 's|compileSdk = flutter.compileSdkVersion|compileSdk = 35|' android/app/build.gradle
+          sed -i 's|compileSdkVersion flutter.compileSdkVersion|compileSdkVersion 35|' android/app/build.gradle
+          sed -i 's|targetSdk = flutter.targetSdkVersion|targetSdk = 35|' android/app/build.gradle
+          sed -i 's|targetSdkVersion flutter.targetSdkVersion|targetSdkVersion 35|' android/app/build.gradle
+          echo "android.suppressUnsupportedCompileSdk=35" >> android/gradle.properties
+          grep -n "compileSdk\|targetSdk" android/app/build.gradle
       - name: Set app name
         run: |
           sed -i 's|android:label="[^"]*"|android:label="Замерщик окон Almas"|' android/app/src/main/AndroidManifest.xml
