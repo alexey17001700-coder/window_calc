@@ -55,6 +55,9 @@ class MeasureSheetView extends StatefulWidget {
   /// Габарит по ширине, мм (0 — неизвестно) — для ширин секций.
   final int widthMm;
 
+  /// Доли ширины секций (сумма ≈ 1.0). Пусто — секции равные.
+  final List<double> sectionWidths;
+
   /// Назад — к визуальному замеру.
   final VoidCallback onBack;
 
