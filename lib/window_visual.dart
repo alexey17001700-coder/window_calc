@@ -787,18 +787,40 @@ class _GostPainter extends CustomPainter {
   //  П  — поворотная:        петли на одной стороне, ручка напротив;
   //  ПО — поворотно-откидная: петли + ручка + нижняя петля откидывания;
   //  О  — откидная:          петли снизу, ручка сверху.
-  void _hardware(Canvas canvas, Rect o, int mode, {required bool hingeLeft}) {
+  /// Сколько петель у створки i. По умолчанию 2 (верхняя и нижняя).
+  int _hingesFor(int i) {
+    if (hingeCounts.length == sashes) return hingeCounts[i].clamp(2, 6);
+    return 2;
+  }
+
+  /// Положения петель по высоте створки (доли 0..1).
+  /// 2 петли — верхняя и нижняя; больше — равномерно между ними.
+  List<double> _hingePositions(int n) {
+    if (n <= 2) return const [0.10, 0.90];
+    final out = <double>[];
+    for (var i = 0; i < n; i++) {
+      out.add(0.10 + 0.80 * i / (n - 1));
+    }
+    return out;
+  }
+
+  void _hardware(Canvas canvas, Rect o, int mode,
+      {required bool hingeLeft, int hinges = 2}) {
     if (mode == 0) return; // глухая — без фурнитуры
 
     final ink = Paint()..color = _ink;
+    final n = hinges.clamp(2, 6);
 
-    // ── ОТКИДНАЯ: две петли снизу, ручка по верхней обвязке ──
+    // ── ОТКИДНАЯ: петли по НИЖНЕЙ обвязке, ручка сверху ──
     if (mode == 3) {
       const pw = 12.0;
-      canvas.drawRect(
-          Rect.fromLTWH(o.center.dx - 12 - pw / 2, o.bottom - 3.4, pw, 3.4), ink);
-      canvas.drawRect(
-          Rect.fromLTWH(o.center.dx + 12 - pw / 2, o.bottom - 3.4, pw, 3.4), ink);
+      final pos = _hingePositions(n);
+      for (final t in pos) {
+        canvas.drawRect(
+          Rect.fromLTWH(o.left + o.width * t - pw / 2, o.bottom - 3.4, pw, 3.4),
+          ink,
+        );
+      }
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(o.center.dx - 7, o.top + 1.2, 14, 2.6),
@@ -809,9 +831,10 @@ class _GostPainter extends CustomPainter {
       return;
     }
 
-    // ── П и ПО: три петли по стороне петель ──
+    // ── П и ПО: петли по стороне петель.
+    //    По умолчанию ДВЕ — верхняя и нижняя. Доп. петли — вручную.
     final hx = hingeLeft ? o.left : o.right - 3;
-    for (final t in const [0.15, 0.50, 0.85]) {
+    for (final t in _hingePositions(n)) {
       canvas.drawRect(
         Rect.fromLTWH(hx, o.top + o.height * t - 5, 3, 10),
         ink,
