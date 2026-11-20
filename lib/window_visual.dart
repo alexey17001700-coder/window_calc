@@ -507,6 +507,7 @@ class _GostPainter extends CustomPainter {
     required this.selected,
     required this.widthMm,
     required this.heightMm,
+    this.sectionWidths = const [],
   });
 
   final int sashes;
@@ -516,6 +517,7 @@ class _GostPainter extends CustomPainter {
   final int selected;
   final int widthMm;
   final int heightMm;
+  final List<double> sectionWidths;
 
   static const _ink = Color(0xFF16233A);
   static const _paper = Color(0xFFF7F9FC);
