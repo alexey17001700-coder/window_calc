@@ -85,6 +85,9 @@ class WindowVisual extends StatefulWidget {
   /// Габарит по высоте, мм (0 — неизвестно).
   final int heightMm;
 
+  /// Доли ширины секций (сумма ≈ 1.0). Пусто — секции равные.
+  final List<double> sectionWidths;
+
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
