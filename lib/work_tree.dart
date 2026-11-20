@@ -245,8 +245,16 @@ const List<WorkNode> workTree = [
     ]),
   ]),
   WorkNode(Icons.report_problem_rounded, 'РЕКЛАМАЦИИ', [
-    WorkNode(Icons.verified_rounded, 'ГАРАНТИЙНЫЙ СЛУЧАЙ'),
-    WorkNode(Icons.replay_rounded, 'ПОВТОРНЫЙ ВЫЕЗД'),
+    WorkNode(Icons.verified_rounded, 'ГАРАНТИЙНЫЙ СЛУЧАЙ', [
+      WorkNode(Icons.air_rounded, 'ПРОДУВАНИЕ', serviceTypes),
+      WorkNode(Icons.water_drop_rounded, 'КОНДЕНСАТ', serviceTypes),
+      WorkNode(Icons.blur_on_rounded, 'ЗАПОТЕВАНИЕ', serviceTypes),
+      WorkNode(Icons.umbrella_rounded, 'ПРОТЕЧКА', serviceTypes),
+    ]),
+    WorkNode(Icons.replay_rounded, 'ПОВТОРНЫЙ ВЫЕЗД', [
+      WorkNode(Icons.verified_rounded, 'ПО ГАРАНТИИ', serviceTypes),
+      WorkNode(Icons.payments_rounded, 'ПЛАТНЫЙ', serviceTypes),
+    ]),
   ]),
 ];
 
