@@ -68,6 +68,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Доли ширины секций (пусто — секции равные).
   List<double> _secW = const [];
 
+  /// Число петель на каждой створке (пусто — по 2: верхняя и нижняя).
+  /// Дополнительные петли замерщик добавляет ВРУЧНУЮ (например, на дверь).
+  List<int> _hinges = const [];
+
   static const _titles = [
     'ДАННЫЕ КЛИЕНТА',
     'ЧТО ДЕЛАЕМ',
