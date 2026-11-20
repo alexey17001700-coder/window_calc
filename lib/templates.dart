@@ -6,22 +6,32 @@ class Section {
   /// Нужно для центральной створки в трёхстворчатом окне.
   bool mirrorHinges;
 
+  /// ДОПОЛНИТЕЛЬНЫЕ петли сверх стандартных двух (верх + низ).
+  /// Стандарт для ПВХ-окна — 2 петли. Дополнительные ставятся
+  /// вручную: например, на дверь или на высокую створку.
+  int extraHinges;
+
   Section({
     this.type = 'Глухая',
     this.hasMosquito = false,
     this.mirrorHinges = false,
+    this.extraHinges = 0,
   });
 
   Map<String, dynamic> toJson() => {
     'type': type,
     'hasMosquito': hasMosquito,
     'mirrorHinges': mirrorHinges,
+    'extraHinges': extraHinges,
   };
 
   factory Section.fromJson(Map<String, dynamic> j) => Section(
     type: (j['type'] ?? 'Глухая').toString(),
     hasMosquito: j['hasMosquito'] ?? false,
     mirrorHinges: j['mirrorHinges'] ?? false,
+    extraHinges: (j['extraHinges'] ?? 0) is int
+        ? (j['extraHinges'] ?? 0)
+        : int.tryParse('${j['extraHinges']}') ?? 0,
   );
 }
 
