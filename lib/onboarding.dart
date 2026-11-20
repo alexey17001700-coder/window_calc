@@ -66,6 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     'ЧТО ДЕЛАЕМ',
     'РАЗМЕРЫ',
     'ВИЗУАЛЬНЫЙ ЗАМЕР',
+    'СМЕТА',
     'ЗАМЕРНЫЙ ЛИСТ',
   ];
   static const _icons = [
