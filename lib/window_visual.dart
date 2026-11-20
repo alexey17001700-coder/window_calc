@@ -89,6 +89,10 @@ class WindowVisual extends StatefulWidget {
   /// Доли ширины секций (сумма ≈ 1.0). Пусто — секции равные.
   final List<double> sectionWidths;
 
+  /// Число петель на каждой створке. По умолчанию 2 — верхняя и нижняя.
+  /// Дополнительные петли замерщик добавляет ВРУЧНУЮ (например, на дверь).
+  final List<int> hingeCounts;
+
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
