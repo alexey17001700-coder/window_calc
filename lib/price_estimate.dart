@@ -319,8 +319,10 @@ class EstimateView extends StatelessWidget {
             child: Text(
               estimate.isEmpty
                   ? 'НЕТ РАЗМЕРОВ'
-                  : '${estimate.widthMm} × ${estimate.heightMm} ММ  ·  '
-                      '${estimate.areaM2.toStringAsFixed(2).replaceAll('.', ',')} М²',
+                  : estimate.hasSize
+                      ? '${estimate.widthMm} × ${estimate.heightMm} ММ  ·  '
+                          '${estimate.areaM2.toStringAsFixed(2).replaceAll('.', ',')} М²'
+                      : 'КОМПЛЕКТАЦИЯ · ГАБАРИТ ИЗДЕЛИЯ НЕ ЗАДАН',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
