@@ -172,6 +172,7 @@ class _WindowVisualState extends State<WindowVisual> {
                   selected: _sel,
                   widthMm: widget.widthMm,
                   heightMm: widget.heightMm,
+                  sectionWidths: widget.sectionWidths,
                 ),
               ),
             );
