@@ -349,6 +349,15 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
       final mm = mmFrom(_ctrl(item, s.label).text, _unitOf(item, s.label));
       if (sizeError(mm, s) != null) return s.label;
     }
+    if (_needGabarit) {
+      for (final s in _gabaritSpecs) {
+        final mm = mmFrom(
+          _ctrl(_gabaritKey, s.label).text,
+          _unitOf(_gabaritKey, s.label),
+        );
+        if (sizeError(mm, s) != null) return s.label;
+      }
+    }
     return null;
   }
 
