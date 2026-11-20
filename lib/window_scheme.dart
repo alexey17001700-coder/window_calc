@@ -925,13 +925,26 @@ class _WindowSchemePainter extends CustomPainter {
     String type,
     bool hingeLeft, {
     bool isLeaf = false,
+    int extraHinges = 0,
   }) {
     final r = rect.deflate(1.5);
     if (r.width < 10 || r.height < 20) return;
 
-    // ── Петли: всегда 2 — сверху и снизу, без центральной
+    // ── Петли: СТАНДАРТ — 2 штуки (верхняя + нижняя).
+    //    Дополнительные петли добавляются ВРУЧНУЮ (Section.extraHinges)
+    //    и равномерно распределяются между верхней и нижней.
     final hx = hingeLeft ? r.left + 1.6 : r.right - 1.6;
-    const hingePos = [0.10, 0.90];
+    final extra = extraHinges < 0 ? 0 : extraHinges;
+    final total = 2 + extra;
+    final List<double> hingePos;
+    if (extra == 0) {
+      hingePos = const [0.10, 0.90];
+    } else {
+      hingePos = List<double>.generate(
+        total,
+        (i) => 0.10 + (0.80 * i) / (total - 1),
+      );
+    }
     for (final f in hingePos) {
       final y = r.top + r.height * f;
       final hr = Rect.fromCenter(center: Offset(hx, y), width: 3.2, height: 7.0);
