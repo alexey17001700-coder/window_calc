@@ -572,9 +572,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Сколько створок: ручной выбор замерщика, иначе — по типу изделия.
   int get _sashCount {
     if (_sashManual > 0) return _sashManual;
-    final t = _picked.length > 2 ? _picked[2] : '';
-    if (t == 'ДВУХСТВОРЧАТОЕ') return 2;
-    if (t == 'ТРЁХСТВОРЧАТОЕ') return 3;
+    final t = (_picked.length > 2 ? _picked[2] : '').toUpperCase();
+    if (t.contains('ТРЁХСТВ') || t.contains('ТРЕХСТВ')) return 3;
+    if (t.contains('ДВУХСТВ') || t.contains('ДВУСТВ')) return 2;
     return 1;
   }
 
