@@ -89,6 +89,71 @@ const List<SizeSpec> _fallback = [
   SizeSpec('ВЫСОТА', '1400', minMm: 300, maxMm: 4000),
 ];
 
+/// ═══════════════════════════════════════════════════════════════════
+///  АВТО-ДЛИНА КОМПЛЕКТАЦИИ
+///  Длина подоконника, отлива и козырька считается от ШИРИНЫ изделия:
+///    • ОКНО:   подоконник = ширина + 200 мм, отлив = ширина + 100 мм;
+///    • БАЛКОН: подоконник и отлив = ширина + 100 мм,
+///              козырёк = ширина + 200 мм (балкон 3000 → козырёк 3200);
+///    • козырёк из двух частей: каждая = половина + нахлёст 150 мм
+///              (балкон 3000 → 3200 → по 1750 мм).
+///  Значение подставляется в поле, но замерщик может его переписать —
+///  тогда АВТО по этому полю больше не срабатывает.
+/// ═══════════════════════════════════════════════════════════════════
+const int kAutoSillWindow = 200;
+const int kAutoEbbWindow = 100;
+const int kAutoSillBalcony = 100;
+const int kAutoEbbBalcony = 100;
+const int kAutoCanopyBalcony = 200;
+const int kAutoCanopyOverlap = 150;
+
+/// Поле, которое заполняется автоматически, по пункту комплектации.
+const Map<String, String> kAutoLengthField = {
+  'С ПОДОКОННИКОМ': 'ДЛИНА ПОДОКОННИКА',
+  'С ОТЛИВОМ': 'ДЛИНА ОТЛИВА',
+  'КОЗЫРЁК': 'ДЛИНА КОЗЫРЬКА',
+  'КОЗЫРЁК ИЗ 2 ЧАСТЕЙ': 'ДЛИНА ЧАСТИ',
+};
+
+/// Авто-длина, мм. null — для пункта правила нет или ширина неизвестна.
+int? autoLengthMm({
+  required String item,
+  required int widthMm,
+  required bool balcony,
+}) {
+  if (widthMm <= 0) return null;
+  switch (item) {
+    case 'С ПОДОКОННИКОМ':
+      return widthMm + (balcony ? kAutoSillBalcony : kAutoSillWindow);
+    case 'С ОТЛИВОМ':
+      return widthMm + (balcony ? kAutoEbbBalcony : kAutoEbbWindow);
+    case 'КОЗЫРЁК':
+      return balcony ? widthMm + kAutoCanopyBalcony : null;
+    case 'КОЗЫРЁК ИЗ 2 ЧАСТЕЙ':
+      if (!balcony) return null;
+      return ((widthMm + kAutoCanopyBalcony) / 2).round() +
+          kAutoCanopyOverlap;
+    default:
+      return null;
+  }
+}
+
+/// Подсказка-формула для поля авто-длины.
+String autoLengthHint(String item, bool balcony) {
+  switch (item) {
+    case 'С ПОДОКОННИКОМ':
+      return balcony ? 'АВТО: ШИРИНА + 100 ММ' : 'АВТО: ШИРИНА + 200 ММ';
+    case 'С ОТЛИВОМ':
+      return 'АВТО: ШИРИНА + 100 ММ';
+    case 'КОЗЫРЁК':
+      return 'АВТО: ШИРИНА + 200 ММ';
+    case 'КОЗЫРЁК ИЗ 2 ЧАСТЕЙ':
+      return 'АВТО: ПОЛОВИНА + 150 ММ';
+    default:
+      return '';
+  }
+}
+
 /// Единицы ввода: замерщик выбирает ЯВНО, программа не угадывает.
 const String kUnitMm = 'ММ';
 const String kUnitCm = 'СМ';
