@@ -87,8 +87,12 @@ class Estimate {
   /// Итог сметы.
   double get total => _round2(lines.fold(0.0, (a, l) => a + l.sum));
 
-  /// Есть ли что считать.
-  bool get isEmpty => widthMm <= 0 || heightMm <= 0 || lines.isEmpty;
+  /// Есть ли что считать. Габарит изделия может быть не задан —
+  /// тогда считаем только комплектацию (подоконник · отлив · откосы).
+  bool get isEmpty => lines.isEmpty;
+
+  /// Задан ли габарит изделия (ширина × высота).
+  bool get hasSize => widthMm > 0 && heightMm > 0;
 }
 
 double _round2(double v) => (v * 100).roundToDouble() / 100;
