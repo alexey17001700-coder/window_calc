@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'theme.dart';
+import 'measure_media.dart';
 import 'window_visual.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
