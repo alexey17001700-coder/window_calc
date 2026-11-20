@@ -393,6 +393,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _sashManual = 0;
       _secW = const [];
       _sashModes = const [];
+      _hinges = const [];
       _step = 2;
     });
   }
