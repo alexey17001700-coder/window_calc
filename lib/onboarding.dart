@@ -506,7 +506,57 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
       ],
       onBack: () => setState(() => _step = 4),
-      onFinish: widget.onFinish,
+      onFinish: () {
+        _saveRecord();
+        widget.onFinish();
+      },
+    );
+  }
+
+  /// Готовый замер уходит в историю (lib/measure_history.dart).
+  Future<void> _saveRecord() async {
+    final glass = (_glass >= 0 && _glass < glassTypes.length)
+        ? glassTypes[_glass].title
+        : '';
+    final windowType = _picked.length > 2 ? _picked[2] : '';
+    final w = _mmOf('ШИРИНА');
+    final h = _mmOf('ВЫСОТА');
+    final est = buildEstimate(
+      widthMm: w,
+      heightMm: h,
+      windowType: windowType,
+      parts: _multi,
+      glass: glass,
+    );
+    final modes = _sashModes.length == _sashCount
+        ? _sashModes
+        : List<int>.filled(_sashCount, 1);
+    await MeasureHistory.add(MeasureRecord(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      createdAt: DateTime.now(),
+      name: _name.text,
+      phone: _phone.text,
+      addr: _addr.text,
+      flat: _flat.text,
+      floor: _floor.text,
+      path: List<String>.from(_picked),
+      multi: List<String>.from(_multi),
+      sizes: _sizes,
+      glass: glass,
+      widthMm: w,
+      heightMm: h,
+      sashModes: [
+        for (final m in modes)
+          kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
+      ],
+      total: est.total.round(),
+    ));
+  }
+
+  /// Открыть историю замеров и базу клиентов.
+  void _openHistory() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const HistoryView()),
     );
   }
 
