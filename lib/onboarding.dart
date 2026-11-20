@@ -74,6 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     Icons.account_tree_rounded,
     Icons.straighten_rounded,
     Icons.window_rounded,
+    Icons.calculate_rounded,
     Icons.receipt_long_rounded,
   ];
 
