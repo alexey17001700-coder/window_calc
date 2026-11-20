@@ -227,6 +227,23 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
   /// Итог в миллиметрах: пункт → поле → мм.
   final Map<String, Map<String, int>> _mm = {};
 
+  /// Ключи полей, заполненных АВТОМАТИЧЕСКИ (замерщик их не трогал).
+  final Set<String> _auto = {};
+
+  /// Пункт-«габарит изделия»: показывается, когда ни один отмеченный
+  /// пункт не даёт ШИРИНУ (например, отмечен только подоконник).
+  /// От него считаются АВТО-длины подоконника, отлива и козырька.
+  static const String _gabaritKey = 'ГАБАРИТ ИЗДЕЛИЯ';
+
+  static const List<SizeSpec> _gabaritSpecs = [
+    SizeSpec('ШИРИНА', '1300', minMm: 300, maxMm: 8000),
+    SizeSpec('ВЫСОТА', '1400', minMm: 300, maxMm: 4000),
+  ];
+
+  /// Нужен ли блок габарита: ни один пункт не даёт ШИРИНУ.
+  bool get _needGabarit =>
+      !widget.items.any((i) => _specs(i).any((s) => s.label == 'ШИРИНА'));
+
   List<SizeSpec> _specs(String item) => sizeSpecs[item] ?? _fallback;
 
   TextEditingController _ctrl(String item, String field) =>
