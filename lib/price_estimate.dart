@@ -141,10 +141,10 @@ Estimate buildEstimate({
 
   if (area > 0) {
     // ── Изделие ───────────────────────────────────────────────
-    final base =
-        PriceBook.windowPerM2[windowType] ?? PriceBook.windowDefaultPerM2;
+    final base = windowPerM2For(windowType);
     var perM2 = base + glassPerM2(glass);
-    final figured = windowType == 'ФИГУРНОЕ' || parts.contains('АБРИС');
+    final figured =
+        windowType.toUpperCase().contains('ФИГУРН') || parts.contains('АБРИС');
     if (figured) perM2 *= 1 + PriceBook.figuredMarkup;
 
     lines.add(EstimateLine(
