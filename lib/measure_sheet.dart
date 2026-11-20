@@ -134,16 +134,25 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       .map((m) => kSashModeLetter[_modeIndex(m)])
       .join(' · ');
 
-  /// «1 · 600 мм   2 · 700 мм» — ширина каждой секции.
+  /// «1 · 600 мм   2 · 700 мм» — ширина каждой секции (с учётом ручной).
   String _sectionsMm() {
     final n = widget.sashModes.length;
     if (n == 0) return '—';
-    final w = (widget.widthMm / n).round();
     final s = <String>[];
     for (var i = 0; i < n; i++) {
-      s.add('${i + 1} · $w мм');
+      s.add('${i + 1} · ${(widget.widthMm * _secShare(i, n)).round()} мм');
     }
     return s.join('   ');
+  }
+
+  /// Доля ширины секции i (ручная или равная).
+  double _secShare(int i, int n) {
+    final w = widget.sectionWidths;
+    if (w.length == n) {
+      final sum = w.fold<double>(0, (a, b) => a + b);
+      if (sum > 0) return w[i] / sum;
+    }
+    return 1.0 / n;
   }
 
   String _sashWord(int n) => n == 1 ? 'СТВОРКА' : 'СТВОРКИ';
