@@ -1,7 +1,7 @@
 name: window_calc
 description: Калькулятор окон для замерщика Almas
 publish_to: 'none'
-version: 3.4.26+89
+version: 3.4.27+90
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
