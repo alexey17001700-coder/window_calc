@@ -382,7 +382,13 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
       return;
     }
     _collect(_i);
+    _collectGabarit();
+    // АВТО-длина текущего пункта — от ширины изделия.
+    _applyAuto(_i);
+    _collect(_i);
     if (_i < widget.items.length - 1) {
+      // Заранее готовим АВТО-длину следующего пункта.
+      _applyAuto(_i + 1);
       setState(() => _i += 1);
     } else {
       widget.onDone(_mm);
