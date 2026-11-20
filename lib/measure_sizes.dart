@@ -518,9 +518,15 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
                           spec: specs[k],
                           controller: _ctrl(item, specs[k].label),
                           unit: _unitOf(item, specs[k].label),
+                          auto: _auto.contains('$item|${specs[k].label}'),
+                          autoHint: autoLengthHint(item, widget.balcony),
                           onToggleUnit: () =>
                               _toggleUnit(item, specs[k].label),
-                          onChanged: () => setState(() {}),
+                          onChanged: () {
+                            // Замерщик правит вручную — АВТО больше не трогаем.
+                            _auto.remove('$item|${specs[k].label}');
+                            setState(() {});
+                          },
                         ),
                       ],
                     ],
