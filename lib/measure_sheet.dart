@@ -107,6 +107,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
     b.writeln('ИЗДЕЛИЕ: ${widget.path.isEmpty ? '—' : widget.path.join(' · ')}');
     b.writeln('СТЕКЛОПАКЕТ: ${widget.glass.isEmpty ? '—' : widget.glass}');
+    b.writeln('ФОТО ПРОЁМА: ${_photos.isEmpty ? '—' : '${_photos.length} шт'}');
     if (widget.sashModes.isNotEmpty) {
       final s = <String>[];
       for (var i = 0; i < widget.sashModes.length; i++) {
