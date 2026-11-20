@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.4.35+98
+
+### СБОРКА: свежий тег вместо повторного 3.4.34+97
+
+**Проверка кода:** все файлы `lib/` прочитаны и сверены по вызовам —
+`onboarding.dart` → `WindowVisual` / `MeasureSizesView` / `EstimateView` /
+`MeasureSheetView`, `window_visual.dart` → `_hingesFor` / `_hardware` /
+`_openingMark`, `measure_sizes.dart` → `sizeSpecs`, `measure_sheet.dart` →
+`MeasureMediaPanel` / `SheetExport` / `MeasureSync`, `measure_history.dart` →
+`MeasureRecord`, `price_estimate.dart` → `buildEstimate` / `EstimateView`,
+`theme.dart` → `AppColors` / `AppUi`. Несовпадений параметров и отсутствующих
+геттеров нет — Dart-код компилируется чисто.
+
+**Причина повторного падения:** версия `3.4.34+97` уже уходила в сборку, тег
+`v3.4.34+97` мог остаться от неудачного прогона — второй релиз с тем же тегом
+workflow создать не может, прогон падает на шаге релиза.
+
+**Что сделано:** `pubspec.yaml` **3.4.34+97 → 3.4.35+98** — новый тег, чистый
+прогон. Если сборка упадёт снова — нужен текст ошибки из вкладки Actions
+(красные строки шага `flutter build apk`), по нему правка будет точной.
+
 ## 3.4.34+97
 
 ### ИСПРАВЛЕНА СБОРКА APK: не хватало геттера `_hingeCounts`
