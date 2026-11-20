@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.4.36+99
+
+### СБОРКА: убраны реальные причины падения (SDK 35 + «плавающие» плагины)
+
+**Причина падения найдена в workflow, а не в Dart-коде.** Dart-код компилируется
+чисто: `lib/` сверен по вызовам (`onboarding.dart` → `WindowVisual` /
+`MeasureSizesView` / `EstimateView` / `MeasureSheetView`, `window_visual.dart` →
+`_hingesFor` / `_hardware` / `_openingMark`, `measure_sizes.dart` → `sizeSpecs`,
+`main.dart` → `UpdateChecker` / `WizardStep1Screen`). Геттер `_hingeCounts` на
+месте, `wizard_screen.dart` и `update_checker.dart` существуют.
+
+**Что реально валило сборку:**
+
+1. **`compileSdk = 35`** — предыдущая правка подняла SDK до 35, но шаблон
+   Flutter 3.24 ставит **AGP 8.3**, а compileSdk 35 требует **AGP 8.6+**.
+   Gradle падал на конфигурации. Вернул **compileSdk 34 / targetSdk 34 /
+   minSdk 21** — ровно то, что поддерживает AGP из шаблона.
+2. **«Плавающие» версии плагинов** (`image_picker: ^1.0.7` и т. п.) — символ
+   `^` тянул свежие мажорные версии, которые требуют compileSdk 35. Версии
+   **зафиксированы точно** (`image_picker: 1.0.7`, `share_plus: 7.2.2`,
+   `package_info_plus: 5.0.1`, `path_provider: 2.1.1`, `open_filex: 4.3.4`,
+   `shared_preferences: 2.2.2`, `http: 1.1.0`, `dio: 5.4.0`) — сборка
+   перестала зависеть от того, что вышло на pub.dev сегодня.
+
+**Диагностика на будущее (`.github/workflows/build.yml`):**
+
+- шаг **«Версии инструментов»** — печатает Flutter/Dart в лог
+- шаги **«Set Android SDK levels»**, **«Fix Kotlin version»**,
+  **«Configure signing»** теперь **печатают итог** (`grep`), видно, что
+  правки реально применились
+- сборка идёт через `tee build.log`, а шаг **«Показать ошибки сборки»**
+  (`if: failure()`) выводит красные строки Gradle прямо в лог Actions —
+  больше не нужно угадывать причину
+
+`pubspec.yaml`: **3.4.35+98 → 3.4.36+99** — новый тег, чистый прогон.
+
 ## 3.4.35+98
 
 ### СБОРКА: свежий тег вместо повторного 3.4.34+97
