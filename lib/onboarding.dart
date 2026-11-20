@@ -443,7 +443,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   () => setState(() => _step = 2)),
               const SizedBox(width: 12),
               Expanded(
-                child: _GoldButton('ЗАМЕРНЫЙ ЛИСТ', Icons.receipt_long_rounded,
+                child: _GoldButton('СМЕТА', Icons.calculate_rounded,
                     () => setState(() => _step = 4)),
               ),
             ],
