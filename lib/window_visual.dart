@@ -579,7 +579,8 @@ class _GostPainter extends CustomPainter {
       canvas.drawRect(gl, _line(_ink, 0.9));
 
       _openingMark(canvas, gl, modes[i].clamp(0, 3), hingeLeft: i == 0);
-      _hardware(canvas, o, modes[i].clamp(0, 3), hingeLeft: i == 0);
+      _hardware(canvas, o, modes[i].clamp(0, 3),
+          hingeLeft: i == 0, hinges: _hingesFor(i));
       _sashLetter(canvas, gl, modes[i].clamp(0, 3));
 
       if (i == selected) {
