@@ -439,7 +439,12 @@ class _WorkTreeViewState extends State<WorkTreeView>
                       // ── ЛИНИИ-ВЕТКИ ──
                       Positioned.fill(
                         child: IgnorePointer(
-                          child: CustomPaint(painter: _EdgePainter(edges)),
+                          child: AnimatedBuilder(
+                            animation: _glow,
+                            builder: (context, _) => CustomPaint(
+                              painter: _EdgePainter(edges, _glow.value),
+                            ),
+                          ),
                         ),
                       ),
                       // ── КАРТОЧКИ ВСЕХ УРОВНЕЙ ──
