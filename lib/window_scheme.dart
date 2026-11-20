@@ -523,7 +523,7 @@ class _WindowSchemePainter extends CustomPainter {
       );
       if (below.height <= 0.5) continue;
       canvas.drawRect(below, Paint()..color = _wall);
-      _hatch(canvas, below, _wallHatch, 8, false);
+      _hatch(canvas, below, _wallHatch, 11, false);
       canvas.drawRect(
         below,
         Paint()
