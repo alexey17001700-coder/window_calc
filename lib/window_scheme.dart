@@ -817,8 +817,16 @@ class _WindowSchemePainter extends CustomPainter {
       if (isLeaf) {
         final type = _leafOpenType(secs);
         if (type == null) continue;
+        final extra = secs.fold<int>(0, (a, s) => a + s.extraHinges);
         _paintTurnSymbol(canvas, c.glass, type, c.hingeLeft);
-        _paintFittings(canvas, c.glass, type, c.hingeLeft, isLeaf: true);
+        _paintFittings(
+          canvas,
+          c.glass,
+          type,
+          c.hingeLeft,
+          isLeaf: true,
+          extraHinges: extra,
+        );
         continue;
       }
 
@@ -827,7 +835,13 @@ class _WindowSchemePainter extends CustomPainter {
         final type = sec?.type ?? 'Глухая';
         if (type == 'Сэндвич' || type == 'Глухая') continue;
         _paintTurnSymbol(canvas, c.secRects[s], type, c.hingeLeft);
-        _paintFittings(canvas, c.secRects[s], type, c.hingeLeft);
+        _paintFittings(
+          canvas,
+          c.secRects[s],
+          type,
+          c.hingeLeft,
+          extraHinges: sec?.extraHinges ?? 0,
+        );
       }
     }
   }
