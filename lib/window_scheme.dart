@@ -1093,7 +1093,7 @@ class _WindowSchemePainter extends CustomPainter {
   void _paintPanel(Canvas canvas, Rect rect) {
     if (rect.width <= 1 || rect.height <= 1) return;
     canvas.drawRect(rect, Paint()..color = _panel);
-    _hatch(canvas, rect, _panelHatch, 7, true);
+    _hatch(canvas, rect, _panelHatch, 10, true);
     canvas.drawRect(
       rect,
       Paint()
