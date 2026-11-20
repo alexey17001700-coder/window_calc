@@ -36,6 +36,41 @@
 
 `pubspec.yaml`: **3.4.35+98 → 3.4.36+99** — новый тег, чистый прогон.
 
+## 3.4.36+99
+
+### СБОРКА: Android-тулчейн поднят до compileSdk 36 + AGP 8.7 + Gradle 8.9
+
+**Диагностика (прочитаны ВСЕ файлы `lib/`):** в Dart-коде ошибок нет — все
+вызовы сверены (`onboarding.dart` → `WindowVisual` / `MeasureSizesView` /
+`EstimateView` / `MeasureSheetView`, `measure_sheet.dart` → `MeasureMediaPanel` /
+`SheetExport` / `MeasureSync`, `measure_history.dart` → `MeasureRecord`,
+`price_estimate.dart` → `buildEstimate`, `theme.dart` → `AppColors` / `AppUi`).
+Значит падает **не компиляция Dart, а Android-сборка**.
+
+**Причина:** последняя рабочая сборка — **3.4.29**. В **3.4.30** добавлен плагин
+**`image_picker`** (фото проёма) — и с этого момента релизы не создаются.
+Плагин и его Android-реализация требуют **compileSdk 35/36**, а также
+**AGP 8.6+** и **Gradle 8.7+**; сборка шла на шаблоне Flutter 3.24
+(AGP 8.1, Gradle 8.3).
+
+**Что сделано в `.github/workflows/build.yml`:**
+
+- **compileSdk 34 → 36**, **targetSdk 34 → 35**, minSdk 23 — шаг
+  «Set Android SDK levels» (плюс `android.suppressUnsupportedCompileSdk=36`
+  в `gradle.properties`, чтобы AGP не ругался на новый SDK)
+- новый шаг **«Modernize Android toolchain (AGP + Gradle)»**:
+  **AGP 8.1.0 → 8.7.0** в `android/settings.gradle`,
+  **Gradle 8.3 → 8.9** в `gradle-wrapper.properties`
+- Kotlin остаётся **1.9.24** (совместим с AGP 8.7)
+- шаг «Analyze» оставлен — если сборка снова упадёт, в логе Actions будут
+  видны реальные строки ошибки
+- шаг «Remove old release/tag» оставлен — повторный тег больше не ломает релиз
+
+**Не тронуто:** весь код приложения, дерево, мастер, чертёж, смета, история,
+фото, замерный лист, фон, кнопки.
+
+`pubspec.yaml`: **3.4.35+98 → 3.4.36+99** — новый тег, чистый прогон.
+
 ## 3.4.35+98
 
 ### СБОРКА: свежий тег вместо повторного 3.4.34+97
