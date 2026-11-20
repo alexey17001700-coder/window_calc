@@ -409,11 +409,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _visualStep() {
     final windowType = _picked.length > 2 ? _picked[2] : '';
     final house = _picked.length > 3 ? _picked[3] : '';
-    final sashes = windowType == 'ДВУХСТВОРЧАТОЕ'
-        ? 2
-        : windowType == 'ТРЁХСТВОРЧАТОЕ'
-            ? 3
-            : 1;
+    final sashes = _sashCount;
     final arched = windowType == 'ФИГУРНОЕ';
     // Обозначения створок: если ещё не заданы — все «поворотные».
     final modes = _sashModes.length == sashes
@@ -431,6 +427,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               children: [
                 _pickedBar(windowType, house),
                 const SizedBox(height: 12),
+                _sashControls(sashes),
+                const SizedBox(height: 12),
                 WindowVisual(
                   sashes: sashes,
                   arched: arched,
@@ -440,6 +438,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   sashModes: modes,
                   widthMm: _mmOf('ШИРИНА'),
                   heightMm: _mmOf('ВЫСОТА'),
+                  sectionWidths: _secWidths,
                   onSashTap: (i) => setState(() {
                     final m = List<int>.from(modes);
                     m[i] = (m[i] + 1) % kSashModeNames.length;
