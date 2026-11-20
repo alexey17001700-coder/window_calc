@@ -131,6 +131,7 @@ Estimate buildEstimate({
   required String windowType,
   required List<String> parts,
   required String glass,
+  Map<String, Map<String, int>> sizes = const {},
 }) {
   final lines = <EstimateLine>[];
 
@@ -139,8 +140,16 @@ Estimate buildEstimate({
   final area = _round2(w * h);
   final perim = _round2(2 * (w + h));
 
+  /// Длина пункта комплектации в метрах: берём ВВЕДЁННЫЙ размер
+  /// (ДЛИНА …), а если его нет — габарит изделия.
+  double partLen(String item, String field, double fallback) {
+    final v = sizes[item]?[field];
+    if (v != null && v > 0) return _round2(v / 1000.0);
+    return fallback;
+  }
+
+  // ── Изделие ───────────────────────────────────────────────
   if (area > 0) {
-    // ── Изделие ───────────────────────────────────────────────
     final base = windowPerM2For(windowType);
     var perM2 = base + glassPerM2(glass);
     final figured =
@@ -153,37 +162,57 @@ Estimate buildEstimate({
       'м²',
       _round2(perM2),
     ));
+  }
 
-    // ── Комплектация ──────────────────────────────────────────
-    for (final p in parts) {
-      switch (p) {
-        case 'С ОТЛИВОМ':
-          lines.add(EstimateLine('Отлив', w, 'м.п.', PriceBook.ebbPerM));
-          break;
-        case 'С ПОДОКОННИКОМ':
-          lines.add(EstimateLine('Подоконник', w, 'м.п.', PriceBook.sillPerM));
-          break;
-        case 'С ОТКОСАМИ':
-          lines.add(EstimateLine('Откосы (периметр)', perim, 'м.п.',
-              PriceBook.slopePerM));
-          break;
-        case 'ПСУЛ':
-          lines.add(EstimateLine('ПСУЛ', perim, 'м.п.', PriceBook.psuPerM));
-          break;
-        case 'ОТМАЗКА':
+  // ── Комплектация ──────────────────────────────────────────
+  // Считается и без габарита изделия: у подоконника, отлива и откосов
+  // свои ДЛИНА и ГЛУБИНА, они мерятся отдельно.
+  for (final p in parts) {
+    switch (p) {
+      case 'С ОТЛИВОМ':
+        final len = partLen('С ОТЛИВОМ', 'ДЛИНА ОТЛИВА', w);
+        if (len > 0) {
+          lines.add(EstimateLine('Отлив', len, 'м.п.', PriceBook.ebbPerM));
+        }
+        break;
+      case 'С ПОДОКОННИКОМ':
+        final len = partLen('С ПОДОКОННИКОМ', 'ДЛИНА ПОДОКОННИКА', w);
+        if (len > 0) {
           lines.add(
-              EstimateLine('Отмазка, 1 сторона', area, 'м²', PriceBook.strippingPerM2));
-          break;
-        case 'ОТМАЗКА С ДВУХ СТОРОН':
+              EstimateLine('Подоконник', len, 'м.п.', PriceBook.sillPerM));
+        }
+        break;
+      case 'С ОТКОСАМИ':
+        final len = partLen('С ОТКОСАМИ', 'ДЛИНА ОТКОСА', perim);
+        if (len > 0) {
+          lines.add(
+              EstimateLine('Откосы', len, 'м.п.', PriceBook.slopePerM));
+        }
+        break;
+      case 'ПСУЛ':
+        if (perim > 0) {
+          lines.add(EstimateLine('ПСУЛ', perim, 'м.п.', PriceBook.psuPerM));
+        }
+        break;
+      case 'ОТМАЗКА':
+        if (area > 0) {
+          lines.add(EstimateLine(
+              'Отмазка, 1 сторона', area, 'м²', PriceBook.strippingPerM2));
+        }
+        break;
+      case 'ОТМАЗКА С ДВУХ СТОРОН':
+        if (area > 0) {
           lines.add(EstimateLine('Отмазка, 2 стороны', area, 'м²',
               PriceBook.strippingPerM2 * 2));
-          break;
-        default:
-          break;
-      }
+        }
+        break;
+      default:
+        break;
     }
+  }
 
-    // ── Монтаж и доставка ────────────────────────────────────
+  // ── Монтаж и доставка ────────────────────────────────────
+  if (area > 0) {
     final install = _round2(area * PriceBook.installPerM2);
     lines.add(EstimateLine(
       'Монтаж',
