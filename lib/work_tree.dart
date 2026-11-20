@@ -56,23 +56,85 @@ const List<WorkNode> houseTypes = [
   WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', finishingTypes),
 ];
 
+/// ─── ВИДЫ ИЗДЕЛИЙ (3-й уровень дерева) ───
+/// У КАЖДОГО изделия СВОЁ дерево: вид изделия → тип дома → комплектация.
+/// Пустых веток нет — галочка-квадратик появляется ТОЛЬКО на финальном
+/// уровне (комплектация), а не на изделии.
+const List<WorkNode> windowKinds = [
+  WorkNode(Icons.crop_portrait_rounded, 'ОДНОСТВОРЧАТОЕ', houseTypes),
+  WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТОЕ', houseTypes),
+  WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТОЕ', houseTypes),
+  WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
+];
+
+const List<WorkNode> balconyBlockKinds = [
+  WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТЫЙ', houseTypes),
+  WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТЫЙ', houseTypes),
+  WorkNode(Icons.door_front_door_rounded, 'С ДВЕРЬЮ', houseTypes),
+  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', houseTypes),
+];
+
+const List<WorkNode> balconyKinds = [
+  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', houseTypes),
+  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', houseTypes),
+  WorkNode(Icons.roofing_rounded, 'С КРЫШЕЙ', houseTypes),
+  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', houseTypes),
+];
+
+const List<WorkNode> loggiaKinds = [
+  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', houseTypes),
+  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', houseTypes),
+  WorkNode(Icons.swap_horiz_rounded, 'РАЗДВИЖНАЯ', houseTypes),
+  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВАЯ', houseTypes),
+];
+
+const List<WorkNode> doorKinds = [
+  WorkNode(Icons.door_front_door_rounded, 'БАЛКОННАЯ ПВХ', houseTypes),
+  WorkNode(Icons.door_back_door_rounded, 'ВХОДНАЯ ПВХ', houseTypes),
+  WorkNode(Icons.door_sliding_rounded, 'РАЗДВИЖНАЯ', houseTypes),
+  WorkNode(Icons.sensor_door_rounded, 'АЛЮМИНИЕВАЯ', houseTypes),
+];
+
+const List<WorkNode> slopeKinds = [
+  WorkNode(Icons.architecture_rounded, 'ВНУТРЕННИЕ', houseTypes),
+  WorkNode(Icons.water_drop_rounded, 'НАРУЖНЫЕ', houseTypes),
+  WorkNode(Icons.compare_arrows_rounded, 'ВНУТРЕННИЕ И НАРУЖНЫЕ', houseTypes),
+  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВЫЕ', houseTypes),
+];
+
+const List<WorkNode> flashingKinds = [
+  WorkNode(Icons.water_drop_rounded, 'МЕТАЛЛИЧЕСКИЙ', houseTypes),
+  WorkNode(Icons.window_rounded, 'ПЛАСТИКОВЫЙ', houseTypes),
+  WorkNode(Icons.linear_scale_rounded, 'С ЗАГЛУШКАМИ', houseTypes),
+  WorkNode(Icons.open_in_full_rounded, 'ШИРОКИЙ', houseTypes),
+];
+
+const List<WorkNode> sillKinds = [
+  WorkNode(Icons.shelves, 'ПВХ', houseTypes),
+  WorkNode(Icons.layers_rounded, 'ЛАМИНИРОВАННЫЙ', houseTypes),
+  WorkNode(Icons.linear_scale_rounded, 'С ЗАГЛУШКАМИ', houseTypes),
+  WorkNode(Icons.build_rounded, 'С КРОНШТЕЙНАМИ', houseTypes),
+];
+
+const List<WorkNode> facadeKinds = [
+  WorkNode(Icons.grid_on_rounded, 'СТОЙКА-РИГЕЛЬ', houseTypes),
+  WorkNode(Icons.blur_on_rounded, 'СПАЙДЕР', houseTypes),
+  WorkNode(Icons.view_module_rounded, 'СТРУКТУРНОЕ', houseTypes),
+  WorkNode(Icons.roofing_rounded, 'ЗЕНИТНЫЙ ФОНАРЬ', houseTypes),
+];
+
 /// Данные дерева. Подпункты — заготовка, наполняется как нужно.
 const List<WorkNode> workTree = [
   WorkNode(Icons.straighten_rounded, 'ЗАМЕР', [
-    WorkNode(Icons.window_rounded, 'ОКНО', [
-      WorkNode(Icons.crop_portrait_rounded, 'ОДНОСТВОРЧАТОЕ', houseTypes),
-      WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТОЕ', houseTypes),
-      WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТОЕ', houseTypes),
-      WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
-    ]),
-    WorkNode(Icons.door_sliding_rounded, 'БАЛКОННЫЙ БЛОК'),
-    WorkNode(Icons.roofing_rounded, 'БАЛКОН'),
-    WorkNode(Icons.deck_rounded, 'ЛОДЖИЯ'),
-    WorkNode(Icons.door_front_door_rounded, 'ДВЕРЬ'),
-    WorkNode(Icons.architecture_rounded, 'ОТКОСЫ'),
-    WorkNode(Icons.water_drop_rounded, 'ОТЛИВ'),
-    WorkNode(Icons.shelves, 'ПОДОКОННИКИ'),
-    WorkNode(Icons.apartment_rounded, 'ФАСАДНОЕ ОСТЕКЛЕНИЕ'),
+    WorkNode(Icons.window_rounded, 'ОКНО', windowKinds),
+    WorkNode(Icons.door_sliding_rounded, 'БАЛКОННЫЙ БЛОК', balconyBlockKinds),
+    WorkNode(Icons.roofing_rounded, 'БАЛКОН', balconyKinds),
+    WorkNode(Icons.deck_rounded, 'ЛОДЖИЯ', loggiaKinds),
+    WorkNode(Icons.door_front_door_rounded, 'ДВЕРЬ', doorKinds),
+    WorkNode(Icons.architecture_rounded, 'ОТКОСЫ', slopeKinds),
+    WorkNode(Icons.water_drop_rounded, 'ОТЛИВ', flashingKinds),
+    WorkNode(Icons.shelves, 'ПОДОКОННИКИ', sillKinds),
+    WorkNode(Icons.apartment_rounded, 'ФАСАДНОЕ ОСТЕКЛЕНИЕ', facadeKinds),
   ]),
   WorkNode(Icons.construction_rounded, 'МОНТАЖ', [
     WorkNode(Icons.delete_sweep_rounded, 'ДЕМОНТАЖ'),
