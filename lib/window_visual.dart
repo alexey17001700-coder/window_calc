@@ -178,6 +178,7 @@ class _WindowVisualState extends State<WindowVisual> {
                   widthMm: widget.widthMm,
                   heightMm: widget.heightMm,
                   sectionWidths: widget.sectionWidths,
+                  hingeCounts: widget.hingeCounts,
                 ),
               ),
             );
