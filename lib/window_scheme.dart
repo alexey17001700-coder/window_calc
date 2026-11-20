@@ -853,34 +853,33 @@ class _WindowSchemePainter extends CustomPainter {
     final hingeX = hingeLeft ? r.left : r.right;
     final handleX = hingeLeft ? r.right : r.left;
 
+    // ── ПОВОРОТНЫЙ режим: узкая вершина смотрит НА РУЧКУ,
+    //    два угла основания — В СТОРОНУ ПЕТЕЛЬ.
+    void turn() => _triangle(
+          canvas,
+          Offset(handleX, r.center.dy),
+          Offset(hingeX, r.top),
+          Offset(hingeX, r.bottom),
+        );
+
+    // ── ОТКИДНОЙ режим: вершина смотрит ВВЕРХ и стоит на верхней
+    //    кромке створки, основание растянуто ВНИЗ — до нижней кромки.
+    void tilt() => _triangle(
+          canvas,
+          Offset(r.center.dx, r.top),
+          Offset(r.left, r.bottom),
+          Offset(r.right, r.bottom),
+        );
+
     if (type == 'Поворотная') {
-      _triangle(
-        canvas,
-        Offset(handleX, r.center.dy),
-        Offset(hingeX, r.top + 2),
-        Offset(hingeX, r.bottom - 2),
-      );
+      turn();
     } else if (type == 'Откидная') {
-      _triangle(
-        canvas,
-        Offset(r.center.dx, r.top + 2),
-        Offset(r.left + 2, r.bottom - 2),
-        Offset(r.right - 2, r.bottom - 2),
-      );
+      tilt();
     } else if (type == 'Поворотно-откидная') {
-      _triangle(
-        canvas,
-        Offset(handleX, r.center.dy),
-        Offset(hingeX, r.top + 2),
-        Offset(hingeX, r.bottom - 2),
-      );
-      final top = Rect.fromLTRB(r.left, r.top, r.right, r.center.dy - 2);
-      _triangle(
-        canvas,
-        Offset(top.center.dx, top.top + 2),
-        Offset(top.left + 2, top.bottom - 2),
-        Offset(top.right - 2, top.bottom - 2),
-      );
+      // Оба режима на одной створке: треугольники накладываются
+      // и оба растянуты на всю высоту створки.
+      turn();
+      tilt();
     }
   }
 
