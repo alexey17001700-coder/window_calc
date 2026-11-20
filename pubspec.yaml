@@ -6,18 +6,22 @@ version: 3.4.36+99
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
+# ВАЖНО: версии плагинов ЗАФИКСИРОВАНЫ (без «^»).
+# Символ «^» тянул свежие мажорные версии, которые требуют compileSdk 35
+# и AGP 8.6+ — из-за этого сборка APK падала. Точные версии собираются
+# на compileSdk 34, который поддерживает AGP из шаблона Flutter 3.24.
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.2.2
-  # фото проёма: камера + галерея (ЭТАП 5)
-  image_picker: ^1.0.7
-  share_plus: ^7.2.2
-  package_info_plus: ^5.0.1
-  http: ^1.1.0
-  path_provider: ^2.1.1
-  open_filex: ^4.3.4
-  dio: ^5.4.0
+  shared_preferences: 2.2.2
+  # фото проёма: камера + галерея
+  image_picker: 1.0.7
+  share_plus: 7.2.2
+  package_info_plus: 5.0.1
+  http: 1.1.0
+  path_provider: 2.1.1
+  open_filex: 4.3.4
+  dio: 5.4.0
   # 3D-просмотр реализован собственным рендерером (lib/viewer3d.dart):
   # без WebView, WebGL и внешних пакетов — сборка APK остаётся стабильной.
 
