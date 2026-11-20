@@ -733,6 +733,28 @@ class _SizeFieldState extends State<_SizeField> {
                 ),
               ),
             ),
+            if (widget.auto) ...[
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.gold.withOpacity(0.16),
+                  borderRadius: BorderRadius.circular(7),
+                  border:
+                      Border.all(color: AppColors.gold.withOpacity(0.45)),
+                ),
+                child: const Text(
+                  'АВТО',
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.9,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+            ],
             // Переключатель единицы: тап меняет ММ ↔ СМ.
             GestureDetector(
               onTap: widget.onToggleUnit,
