@@ -269,6 +269,67 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
     super.dispose();
   }
 
+  /// Ширина изделия в ММ: сначала блок габарита, потом любая ШИРИНА.
+  int _widthMm() {
+    if (_needGabarit) {
+      final g = mmFrom(
+        _ctrl(_gabaritKey, 'ШИРИНА').text,
+        _unitOf(_gabaritKey, 'ШИРИНА'),
+      );
+      if (g != null && g > 0) return g;
+    }
+    for (final e in _mm.values) {
+      final v = e['ШИРИНА'];
+      if (v != null && v > 0) return v;
+    }
+    for (final item in widget.items) {
+      for (final s in _specs(item)) {
+        if (s.label != 'ШИРИНА') continue;
+        final v = mmFrom(_ctrl(item, s.label).text, _unitOf(item, s.label));
+        if (v != null && v > 0) return v;
+      }
+    }
+    return 0;
+  }
+
+  /// Собрать блок «ГАБАРИТ ИЗДЕЛИЯ» (если он показан).
+  void _collectGabarit() {
+    if (!_needGabarit) return;
+    final out = <String, int>{};
+    for (final s in _gabaritSpecs) {
+      final mm = mmFrom(
+        _ctrl(_gabaritKey, s.label).text,
+        _unitOf(_gabaritKey, s.label),
+      );
+      if (mm != null) out[s.label] = mm;
+    }
+    if (out.isEmpty) {
+      _mm.remove(_gabaritKey);
+    } else {
+      _mm[_gabaritKey] = out;
+    }
+  }
+
+  /// Подставить АВТО-длину в пункт. Ручной ввод замерщика не трогаем.
+  void _applyAuto(int index) {
+    if (index < 0 || index >= widget.items.length) return;
+    final item = widget.items[index];
+    final field = kAutoLengthField[item];
+    if (field == null) return;
+    final v = autoLengthMm(
+      item: item,
+      widthMm: _widthMm(),
+      balcony: widget.balcony,
+    );
+    if (v == null) return;
+    final k = '$item|$field';
+    final c = _ctrl(item, field);
+    if (c.text.trim().isNotEmpty && !_auto.contains(k)) return;
+    final txt = '$v';
+    if (c.text != txt) c.text = txt;
+    _auto.add(k);
+  }
+
   /// Собрать текущий пункт в миллиметрах (с учётом выбранной единицы).
   void _collect(int index) {
     final item = widget.items[index];
