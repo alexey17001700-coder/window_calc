@@ -192,6 +192,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ],
             ),
           ),
+          const SizedBox(width: 8),
+          _RoundButton(
+            icon: Icons.history_rounded,
+            onTap: _openHistory,
+          ),
         ],
       ),
     );
