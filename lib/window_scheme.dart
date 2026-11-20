@@ -458,9 +458,9 @@ class _WindowSchemePainter extends CustomPainter {
   static const _glassB = Color(0xFFD2E8FA);
   static const _glassLine = Color(0xFF9CC2DE);
   static const _wall = Color(0xFFF8FAFC);
-  static const _wallHatch = Color(0xFFC2CDD9);
+  static const _wallHatch = Color(0xFFD3DDE7); // мягкая штриховка стены
   static const _panel = Color(0xFFEFF3F7);
-  static const _panelHatch = Color(0xFFA9B6C4);
+  static const _panelHatch = Color(0xFFC0CBD8); // мягкая штриховка панели
   static const _net = Color(0xFF2E7D32);
   static const _accent = Color(0xFF1E88E5);
   static const _hinge = Color(0xFF37474F);
