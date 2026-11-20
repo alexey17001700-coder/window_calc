@@ -194,10 +194,15 @@ class MeasureSizesView extends StatefulWidget {
     required this.items,
     required this.onDone,
     required this.onBack,
+    this.balcony = false,
   });
 
   /// Отмеченные пункты комплектации — по одному экрану на каждый.
   final List<String> items;
+
+  /// Изделие на балконе / лоджии / балконный блок: у подоконника, отлива
+  /// и козырька другие надбавки к длине.
+  final bool balcony;
 
   /// Готово: размеры по пунктам, уже в МИЛЛИМЕТРАХ.
   final ValueChanged<Map<String, Map<String, int>>> onDone;
