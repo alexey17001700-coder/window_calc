@@ -717,39 +717,42 @@ class _GostPainter extends CustomPainter {
     final p = _line(_ink, 1.2);
     final cy = g.center.dy;
 
-    // поворотная (П) и поворотно-откидная (ПО): вершина — к петлям
+    // ── ПОВОРОТНАЯ (П) и ПОВОРОТНО-ОТКИДНАЯ (ПО):
+    //    УЗКАЯ ВЕРШИНА — К РУЧКЕ, два угла основания — К ПЕТЛЯМ.
     if (mode == 1 || mode == 2) {
       final h = g.width * 0.60;
       final half = g.height * 0.24;
       final Path t;
       if (hingeLeft) {
-        t = Path()
-          ..moveTo(g.left + 3, cy)
-          ..lineTo(g.left + 3 + h, cy - half)
-          ..lineTo(g.left + 3 + h, cy + half)
-          ..close();
-      } else {
+        // петли слева → ручка справа → вершина справа
         t = Path()
           ..moveTo(g.right - 3, cy)
           ..lineTo(g.right - 3 - h, cy - half)
           ..lineTo(g.right - 3 - h, cy + half)
           ..close();
+      } else {
+        // петли справа → ручка слева → вершина слева
+        t = Path()
+          ..moveTo(g.left + 3, cy)
+          ..lineTo(g.left + 3 + h, cy - half)
+          ..lineTo(g.left + 3 + h, cy + half)
+          ..close();
       }
       canvas.drawPath(t, p);
     }
 
-    // откидная (О) и поворотно-откидная (ПО): вершина вниз
+    // ── ОТКИДНАЯ (О) и ПОВОРОТНО-ОТКИДНАЯ (ПО):
+    //    вершина ВВЕРХУ на верхней кромке, основание растянуто ВНИЗ
+    //    до самой нижней кромки створки.
     if (mode == 2 || mode == 3) {
-      final hh = g.height * 0.58;
       final half = g.width * 0.22;
       final t = Path()
-        ..moveTo(g.center.dx, g.bottom - 3)
-        ..lineTo(g.center.dx - half, g.bottom - 3 - hh)
-        ..lineTo(g.center.dx + half, g.bottom - 3 - hh)
+        ..moveTo(g.center.dx, g.top + 3)
+        ..lineTo(g.center.dx - half, g.bottom - 3)
+        ..lineTo(g.center.dx + half, g.bottom - 3)
         ..close();
       canvas.drawPath(t, p);
     }
-
   }
 
   // ─────────────── БУКВЕННОЕ ОБОЗНАЧЕНИЕ СТВОРКИ (Г/П/ПО/О) ───────────────
