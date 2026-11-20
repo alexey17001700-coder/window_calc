@@ -62,6 +62,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Обозначение каждой створки на чертеже (индекс в kSashModeNames).
   List<int> _sashModes = const [];
 
+  /// Ручное число створок (0 — по типу изделия из дерева).
+  int _sashManual = 0;
+
+  /// Доли ширины секций (пусто — секции равные).
+  List<double> _secW = const [];
+
   static const _titles = [
     'ДАННЫЕ КЛИЕНТА',
     'ЧТО ДЕЛАЕМ',
