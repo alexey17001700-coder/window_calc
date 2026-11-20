@@ -247,7 +247,18 @@ class _WorkTreeViewState extends State<WorkTreeView>
   List<double> _ws = const [];
 
   @override
+  void initState() {
+    super.initState();
+    // Огонёк бежит по линиям слева направо, цикл бесконечный.
+    _glow = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
+  }
+
+  @override
   void dispose() {
+    _glow.dispose();
     _h.dispose();
     _v.dispose();
     super.dispose();
