@@ -595,6 +595,92 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       ),
     );
   }
+
+  // ─────────────────── PDF-ЛИСТ И ОТПРАВКА НА СЕРВЕР ───────────────────
+  Widget _pdfRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: _SheetGhost(
+            'PDF / ЛИСТ',
+            Icons.picture_as_pdf_rounded,
+            _exportSheet,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _SheetGhost(
+            _syncBusy ? 'ОТПРАВКА...' : 'НА СЕРВЕР',
+            Icons.cloud_upload_rounded,
+            _syncBusy ? _noop : _pushToServer,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _noop() {}
+
+  /// Собрать лист в HTML (с фото) и отдать на печать → PDF / отправку.
+  Future<void> _exportSheet() async {
+    final photos = await PhotoStore.asBase64(_photos);
+    final rows = <(String, String)>[
+      ('ТЕЛЕФОН', _or(widget.phone, '—')),
+      ('АДРЕС', _or(widget.addr, '—')),
+      ('КВ. / ЭТАЖ', '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
+      ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
+      if (widget.sashModes.isNotEmpty)
+        ('КОНСТРУКЦИЯ',
+            '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
+      if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
+        ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
+      for (final item in widget.multi) (item, _sizesLine(item)),
+    ];
+
+    final html = SheetExport.html(
+      client: _or(widget.name, '—'),
+      product: widget.path.isEmpty ? '—' : widget.path.join(' · '),
+      rows: rows,
+      photos: photos,
+    );
+    final path = await SheetExport.save(html, 'zamer');
+    if (!mounted) return;
+    await SheetExport.share(path, _sheetText());
+  }
+
+  /// «ШИРИНА: 1300 мм · ВЫСОТА: 1400 мм» — размеры одного пункта.
+  String _sizesLine(String item) {
+    final f = widget.sizes[item];
+    if (f == null || f.isEmpty) return 'РАЗМЕРЫ НЕ ЗАПОЛНЕНЫ';
+    return f.entries.map((e) => '${e.key}: ${e.value} мм').join(' · ');
+  }
+
+  /// Отправить замер на сервер Штаба; нет сети — замер уходит в очередь.
+  Future<void> _pushToServer() async {
+    setState(() => _syncBusy = true);
+    final payload = <String, dynamic>{
+      'client': _or(widget.name, '—'),
+      'phone': _or(widget.phone, '—'),
+      'address': _or(widget.addr, '—'),
+      'flat': _or(widget.flat, '—'),
+      'floor': _or(widget.floor, '—'),
+      'product': widget.path,
+      'multi': widget.multi,
+      'glass': widget.glass,
+      'sash': widget.sashModes,
+      'widthMm': widget.widthMm,
+      'sizes': widget.sizes,
+      'photos': _photos.length,
+      'at': DateTime.now().millisecondsSinceEpoch,
+    };
+    final ok = await MeasureSync.push(payload);
+    final pending = await MeasureSync.pending();
+    if (!mounted) return;
+    setState(() => _syncBusy = false);
+    _snack(ok
+        ? 'ЗАМЕР ОТПРАВЛЕН НА СЕРВЕР'
+        : 'СЕТИ НЕТ · ЗАМЕР В ОЧЕРЕДИ (${pending})');
+  }
 }
 
 /// ═══════════════════════════════════════════════════════════════════
