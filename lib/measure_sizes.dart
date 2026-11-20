@@ -46,11 +46,13 @@ const Map<String, List<SizeSpec>> sizeSpecs = {
     SizeSpec('ДЛИНА ПОДОКОННИКА', '1400', minMm: 300, maxMm: 4000),
     SizeSpec('ГЛУБИНА ПОДОКОННИКА', '300', minMm: 100, maxMm: 800),
   ],
+  // Откосы: только ГЛУБИНА и ВЫСОТА откоса (боковой и верхний
+  // считаются по одной глубине — так и мерят на объекте).
   'С ОТКОСАМИ': [
     SizeSpec('ШИРИНА', '1300', minMm: 300, maxMm: 4000),
     SizeSpec('ВЫСОТА', '1400', minMm: 300, maxMm: 4000),
-    SizeSpec('ОТКОС БОКОВОЙ', '150', minMm: 40, maxMm: 600),
-    SizeSpec('ОТКОС ВЕРХНИЙ', '150', minMm: 40, maxMm: 600),
+    SizeSpec('ГЛУБИНА ОТКОСА', '150', minMm: 40, maxMm: 600),
+    SizeSpec('ВЫСОТА ОТКОСА', '1400', minMm: 100, maxMm: 4000),
   ],
   'АБРИС': [
     SizeSpec('ШИРИНА', '1300', minMm: 300, maxMm: 4000),
