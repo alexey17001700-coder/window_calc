@@ -386,6 +386,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void _confirmTree() {
     setState(() {
       _sizes = const {};
+      _sashManual = 0;
+      _secW = const [];
+      _sashModes = const [];
       _step = 2;
     });
   }
