@@ -568,12 +568,129 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  /// Сколько створок у выбранного типа окна.
+  /// Сколько створок: ручной выбор замерщика, иначе — по типу изделия.
   int get _sashCount {
+    if (_sashManual > 0) return _sashManual;
     final t = _picked.length > 2 ? _picked[2] : '';
     if (t == 'ДВУХСТВОРЧАТОЕ') return 2;
     if (t == 'ТРЁХСТВОРЧАТОЕ') return 3;
     return 1;
+  }
+
+  /// Доли ширины секций: пусто или не то число — делим поровну.
+  List<double> get _secWidths {
+    final n = _sashCount;
+    if (_secW.length == n) {
+      final sum = _secW.fold<double>(0, (a, b) => a + b);
+      if (sum > 0) return [for (final w in _secW) w / sum];
+    }
+    return List<double>.filled(n, 1.0 / n);
+  }
+
+  /// Изменить ширину секции i: отдаём/забираем долю у соседа.
+  void _bumpSection(int i, int dir) {
+    final n = _sashCount;
+    if (n < 2) return;
+    final ws = List<double>.from(_secWidths);
+    if (i < 0 || i >= ws.length) return;
+    final j = i == 0 ? 1 : i - 1;
+    const d = 0.05;
+    if (dir > 0) {
+      if (ws[j] - d < 0.10) return;
+      ws[i] += d;
+      ws[j] -= d;
+    } else {
+      if (ws[i] - d < 0.10) return;
+      ws[i] -= d;
+      ws[j] += d;
+    }
+    setState(() => _secW = ws);
+  }
+
+  /// Панель створок: число створок (для ЛЮБОГО изделия) + ширина секций.
+  Widget _sashControls(int sashes) {
+    final total = _mmOf('ШИРИНА');
+    final ws = _secWidths;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.view_column_rounded,
+                  size: 15, color: AppColors.gold),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'СТВОРКИ',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.3,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              for (var n = 1; n <= 4; n++) ...[
+                if (n > 1) const SizedBox(width: 6),
+                _SashCountChip(
+                  n: n,
+                  selected: sashes == n,
+                  onTap: () => setState(() {
+                    _sashManual = n;
+                    _sashModes = List<int>.filled(n, 1);
+                    _secW = List<double>.filled(n, 1.0 / n);
+                  }),
+                ),
+              ],
+            ],
+          ),
+          if (sashes > 1) ...[
+            const SizedBox(height: 11),
+            Row(
+              children: [
+                const Text(
+                  'ШИРИНА СЕКЦИЙ',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: Color(0xFF7E93AC),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  total > 0 ? 'ВСЕГО $total ММ' : 'ВВЕДИ ШИРИНУ',
+                  style: const TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 7),
+            for (var i = 0; i < sashes; i++) ...[
+              if (i > 0) const SizedBox(height: 6),
+              _SectionWidthRow(
+                index: i,
+                mm: total > 0 ? (total * ws[i]).round() : 0,
+                onMinus: () => _bumpSection(i, -1),
+                onPlus: () => _bumpSection(i, 1),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
   }
 
   /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
