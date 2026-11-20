@@ -661,6 +661,8 @@ class _SizeField extends StatefulWidget {
     required this.unit,
     required this.onToggleUnit,
     required this.onChanged,
+    this.auto = false,
+    this.autoHint = '',
   });
 
   final SizeSpec spec;
@@ -668,6 +670,12 @@ class _SizeField extends StatefulWidget {
 
   /// Текущая единица поля: ММ или СМ.
   final String unit;
+
+  /// Значение подставлено АВТОМАТИЧЕСКИ (замерщик его не трогал).
+  final bool auto;
+
+  /// Формула АВТО — подсказка под полем.
+  final String autoHint;
 
   /// Переключить единицу (ММ ↔ СМ).
   final VoidCallback onToggleUnit;
