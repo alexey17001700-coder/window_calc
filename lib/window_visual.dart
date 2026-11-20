@@ -1002,6 +1002,7 @@ class _GostPainter extends CustomPainter {
       old.widthMm != widthMm ||
       old.heightMm != heightMm ||
       !_sameD(old.sectionWidths, sectionWidths) ||
+      !_sameInt(old.hingeCounts, hingeCounts) ||
       !_same(old.parts, parts) ||
       !_sameInt(old.modes, modes);
 
