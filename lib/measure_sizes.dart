@@ -434,6 +434,10 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
               children: [
                 _progress(),
                 const SizedBox(height: 12),
+                if (_needGabarit && _i == 0) ...[
+                  _gabaritCard(),
+                  const SizedBox(height: 12),
+                ],
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
