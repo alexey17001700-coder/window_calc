@@ -487,6 +487,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       windowType: windowType,
       parts: _multi,
       glass: glass,
+      sizes: _sizes,
     );
     return EstimateView(
       estimate: estimate,
