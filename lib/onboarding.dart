@@ -1177,3 +1177,126 @@ class _BgPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _BgPainter old) => old.t != t;
 }
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ЧИП ЧИСЛА СТВОРОК (1..4)
+/// ═══════════════════════════════════════════════════════════════════
+class _SashCountChip extends StatelessWidget {
+  const _SashCountChip({
+    required this.n,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final int n;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 34,
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF12233A) : const Color(0xFF0B1524),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? AppColors.gold.withOpacity(0.80)
+                : const Color(0xFF1B2C44),
+          ),
+        ),
+        child: Text(
+          '$n',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: selected ? AppColors.gold : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  СТРОКА ШИРИНЫ СЕКЦИИ: номер · мм · − / +
+/// ═══════════════════════════════════════════════════════════════════
+class _SectionWidthRow extends StatelessWidget {
+  const _SectionWidthRow({
+    required this.index,
+    required this.mm,
+    required this.onMinus,
+    required this.onPlus,
+  });
+
+  final int index;
+  final int mm;
+  final VoidCallback onMinus;
+  final VoidCallback onPlus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          'СЕКЦИЯ ${index + 1}',
+          style: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+            color: Color(0xFF7E93AC),
+          ),
+        ),
+        const Spacer(),
+        _StepBtn(icon: Icons.remove_rounded, onTap: onMinus),
+        SizedBox(
+          width: 74,
+          child: Text(
+            mm > 0 ? '$mm ММ' : '—',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        _StepBtn(icon: Icons.add_rounded, onTap: onPlus),
+      ],
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  КНОПКА ШАГА (− / +)
+/// ═══════════════════════════════════════════════════════════════════
+class _StepBtn extends StatelessWidget {
+  const _StepBtn({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 30,
+        height: 30,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B1524),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: AppColors.gold.withOpacity(0.42)),
+        ),
+        child: Icon(icon, size: 15, color: AppColors.gold),
+      ),
+    );
+  }
+}
