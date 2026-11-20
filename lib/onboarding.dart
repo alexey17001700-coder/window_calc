@@ -453,7 +453,29 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  // ──────────── ШАГ 5: ЗАМЕРНЫЙ ЛИСТ (ОТПРАВКА) ────────────
+  // ──────────── ШАГ 5: СМЕТА (ПРАЙС И ИТОГ) ────────────
+  /// Считаем стоимость по площади изделия и комплектации.
+  /// Прайс — в lib/price_estimate.dart (класс PriceBook).
+  Widget _estimateStep() {
+    final glass = (_glass >= 0 && _glass < glassTypes.length)
+        ? glassTypes[_glass].title
+        : '';
+    final windowType = _picked.length > 2 ? _picked[2] : '';
+    final estimate = buildEstimate(
+      widthMm: _mmOf('ШИРИНА'),
+      heightMm: _mmOf('ВЫСОТА'),
+      windowType: windowType,
+      parts: _multi,
+      glass: glass,
+    );
+    return EstimateView(
+      estimate: estimate,
+      onBack: () => setState(() => _step = 3),
+      onNext: () => setState(() => _step = 5),
+    );
+  }
+
+  // ──────────── ШАГ 6: ЗАМЕРНЫЙ ЛИСТ (ОТПРАВКА) ────────────
   /// Итог: клиент + цепочка дерева + комплектация + стеклопакет +
   /// размеры (уже в МИЛЛИМЕТРАХ). Лист копируется или отправляется.
   Widget _sheetStep() {
