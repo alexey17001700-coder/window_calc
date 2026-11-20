@@ -454,13 +454,15 @@ class _WindowSchemePainter extends CustomPainter {
   static const _inkSoft = Color(0xFF6B7A8C); // размеры
   static const _profile = Color(0xFFF5F8FB); // тело профиля
   static const _profileLine = Color(0xFF8C9BAA); // внутренний контур
-  static const _glassA = Color(0xFFEAF6FF);
-  static const _glassB = Color(0xFFD2E8FA);
-  static const _glassLine = Color(0xFF9CC2DE);
+  // Стеклопакет — ГОЛУБОЙ (заливка + контур).
+  static const _glassA = Color(0xFFD8EDFC);
+  static const _glassB = Color(0xFFB6DBF4);
+  static const _glassLine = Color(0xFF7FB3D5);
   static const _wall = Color(0xFFF8FAFC);
   static const _wallHatch = Color(0xFFD3DDE7); // мягкая штриховка стены
-  static const _panel = Color(0xFFEFF3F7);
-  static const _panelHatch = Color(0xFFC0CBD8); // мягкая штриховка панели
+  // Сэндвич-панель — БЕЛАЯ, штриховка едва заметная.
+  static const _panel = Color(0xFFFFFFFF);
+  static const _panelHatch = Color(0xFFE3E9F0); // почти невидимая штриховка
   static const _net = Color(0xFF2E7D32);
   static const _accent = Color(0xFF1E88E5);
   static const _hinge = Color(0xFF37474F);
