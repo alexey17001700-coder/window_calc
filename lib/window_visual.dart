@@ -985,4 +985,12 @@ class _GostPainter extends CustomPainter {
     }
     return true;
   }
+
+  bool _sameD(List<double> a, List<double> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
