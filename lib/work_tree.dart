@@ -227,9 +227,22 @@ const List<WorkNode> workTree = [
     ]),
   ]),
   WorkNode(Icons.build_circle_rounded, 'РЕМОНТ', [
-    WorkNode(Icons.tune_rounded, 'РЕГУЛИРОВКА'),
-    WorkNode(Icons.swap_horiz_rounded, 'ЗАМЕНА УЗЛА'),
-    WorkNode(Icons.window_rounded, 'ЗАМЕНА СТЕКЛОПАКЕТА'),
+    WorkNode(Icons.tune_rounded, 'РЕГУЛИРОВКА', [
+      WorkNode(Icons.door_sliding_rounded, 'СТВОРКИ', serviceTypes),
+      WorkNode(Icons.hardware_rounded, 'ФУРНИТУРЫ', serviceTypes),
+      WorkNode(Icons.compress_rounded, 'ПРИЖИМА', serviceTypes),
+    ]),
+    WorkNode(Icons.swap_horiz_rounded, 'ЗАМЕНА УЗЛА', [
+      WorkNode(Icons.hardware_rounded, 'ПЕТЛИ', serviceTypes),
+      WorkNode(Icons.back_hand_rounded, 'РУЧКА', serviceTypes),
+      WorkNode(Icons.lock_rounded, 'ЗАПОР', serviceTypes),
+      WorkNode(Icons.open_in_full_rounded, 'НОЖНИЦЫ', serviceTypes),
+    ]),
+    WorkNode(Icons.window_rounded, 'ЗАМЕНА СТЕКЛОПАКЕТА', [
+      WorkNode(Icons.crop_square_rounded, 'ОДНОКАМЕРНЫЙ', serviceTypes),
+      WorkNode(Icons.layers_rounded, 'ДВУХКАМЕРНЫЙ', serviceTypes),
+      WorkNode(Icons.shield_rounded, 'ТРИПЛЕКС', serviceTypes),
+    ]),
   ]),
   WorkNode(Icons.report_problem_rounded, 'РЕКЛАМАЦИИ', [
     WorkNode(Icons.verified_rounded, 'ГАРАНТИЙНЫЙ СЛУЧАЙ'),
