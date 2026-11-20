@@ -477,7 +477,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             : List<int>.filled(_sashCount, 1)))
           kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
       ],
-      onBack: () => setState(() => _step = 3),
+      onBack: () => setState(() => _step = 4),
       onFinish: widget.onFinish,
     );
   }
