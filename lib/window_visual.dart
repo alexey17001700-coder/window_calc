@@ -620,9 +620,11 @@ class _GostPainter extends CustomPainter {
     // Промежуточные размеры по ширине — по каждой секции (нижний ряд).
     if (rects.length > 1) {
       final y = g.wall.bottom + (hasSill || hasDrip ? 30 : 17);
-      for (final r in rects) {
+      final ws = _normWidths(sashes, sectionWidths);
+      for (var i = 0; i < rects.length; i++) {
+        final r = rects[i];
         _dimH(canvas, r.left, r.right, y,
-            widthMm > 0 ? '${(widthMm / rects.length).round()}' : '?',
+            widthMm > 0 ? '${(widthMm * ws[i]).round()}' : '?',
             small: true, below: true);
         _extV(canvas, r.left, g.opening.bottom, y);
         _extV(canvas, r.right, g.opening.bottom, y);
