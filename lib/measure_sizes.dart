@@ -860,6 +860,25 @@ class _SizeFieldState extends State<_SizeField> {
             ),
           ),
         ),
+        if (widget.auto && widget.autoHint.isNotEmpty) ...[
+          const SizedBox(height: 5),
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome_rounded,
+                  size: 11, color: AppColors.gold),
+              const SizedBox(width: 5),
+              Text(
+                widget.autoHint,
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: AppColors.gold,
+                ),
+              ),
+            ],
+          ),
+        ],
         if (bad) ...[
           const SizedBox(height: 5),
           Row(
