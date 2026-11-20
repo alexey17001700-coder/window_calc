@@ -72,6 +72,24 @@ class MeasureSheetView extends StatefulWidget {
 class _MeasureSheetViewState extends State<MeasureSheetView> {
   bool _copied = false;
 
+  /// Фото проёма этого замера (привязаны к клиенту и адресу).
+  List<MeasurePhoto> _photos = [];
+
+  /// Идёт отправка на сервер.
+  bool _syncBusy = false;
+
+  /// Ключ сессии замера для хранилища фото.
+  String get _mediaKey =>
+      '${widget.name.trim().toLowerCase()}_${widget.addr.trim().toLowerCase()}';
+
+  @override
+  void initState() {
+    super.initState();
+    PhotoStore.load(_mediaKey).then((p) {
+      if (mounted) setState(() => _photos = p);
+    });
+  }
+
   String get _dash => '─' * 26;
 
   /// Текст замерного листа — все размеры в миллиметрах.
