@@ -560,6 +560,66 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
     );
   }
 
+  /// Блок «ГАБАРИТ ИЗДЕЛИЯ» — база для АВТО-длин подоконника,
+  /// отлива и козырька. Показывается, если ни один отмеченный пункт
+  /// не даёт ШИРИНУ (например, отмечен только подоконник).
+  Widget _gabaritCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.crop_free_rounded,
+                  size: 16, color: AppColors.gold),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'ГАБАРИТ ИЗДЕЛИЯ',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'ОТ НЕГО СЧИТАЮТСЯ ДЛИНЫ ПОДОКОННИКА, ОТЛИВА И КОЗЫРЬКА',
+            style: TextStyle(
+              fontSize: 8.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.9,
+              color: AppColors.gold,
+            ),
+          ),
+          const SizedBox(height: 14),
+          for (var k = 0; k < _gabaritSpecs.length; k++) ...[
+            if (k > 0) const SizedBox(height: 12),
+            _SizeField(
+              spec: _gabaritSpecs[k],
+              controller: _ctrl(_gabaritKey, _gabaritSpecs[k].label),
+              unit: _unitOf(_gabaritKey, _gabaritSpecs[k].label),
+              onToggleUnit: () =>
+                  _toggleUnit(_gabaritKey, _gabaritSpecs[k].label),
+              onChanged: () => setState(() {}),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   /// Полоса прогресса: пункт N из M.
   Widget _progress() {
     final n = widget.items.length;
