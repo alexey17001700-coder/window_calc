@@ -13,17 +13,6 @@ import 'theme.dart';
 ///  стеклопакет, створки и итог сметы.
 /// ═══════════════════════════════════════════════════════════════════
 
-/// Деньги: 1234567 → «1 234 567 ₽».
-String money(int v) {
-  final s = v.abs().toString();
-  final b = StringBuffer();
-  for (var i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) b.write(' ');
-    b.write(s[i]);
-  }
-  return '${v < 0 ? '-' : ''}$b ₽';
-}
-
 /// Дата: «14.03.2026 · 18:40».
 String stamp(DateTime d) {
   String p(int v) => v < 10 ? '0$v' : '$v';
