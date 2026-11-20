@@ -205,10 +205,26 @@ const List<WorkNode> workTree = [
     WorkNode(Icons.apartment_rounded, 'ФАСАДНОЕ ОСТЕКЛЕНИЕ', facadeKinds),
   ]),
   WorkNode(Icons.construction_rounded, 'МОНТАЖ', [
-    WorkNode(Icons.delete_sweep_rounded, 'ДЕМОНТАЖ'),
-    WorkNode(Icons.build_rounded, 'УСТАНОВКА'),
-    WorkNode(Icons.water_drop_rounded, 'ОТКОСЫ И ОТЛИВЫ'),
-    WorkNode(Icons.cleaning_services_rounded, 'УБОРКА'),
+    WorkNode(Icons.delete_sweep_rounded, 'ДЕМОНТАЖ', [
+      WorkNode(Icons.content_cut_rounded, 'ЧАСТИЧНЫЙ', serviceTypes),
+      WorkNode(Icons.delete_forever_rounded, 'ПОЛНЫЙ', serviceTypes),
+      WorkNode(Icons.local_shipping_rounded, 'С ВЫВОЗОМ', serviceTypes),
+    ]),
+    WorkNode(Icons.build_rounded, 'УСТАНОВКА', [
+      WorkNode(Icons.hardware_rounded, 'НА АНКЕР', serviceTypes),
+      WorkNode(Icons.linear_scale_rounded, 'НА ПЛАСТИНЫ', serviceTypes),
+      WorkNode(Icons.blur_on_rounded, 'НА ПЕНУ', serviceTypes),
+    ]),
+    WorkNode(Icons.water_drop_rounded, 'ОТКОСЫ И ОТЛИВЫ', [
+      WorkNode(Icons.architecture_rounded, 'НАРУЖНЫЕ', serviceTypes),
+      WorkNode(Icons.home_rounded, 'ВНУТРЕННИЕ', serviceTypes),
+      WorkNode(Icons.all_inclusive_rounded, 'ПОЛНЫЙ КОНТУР', serviceTypes),
+    ]),
+    WorkNode(Icons.cleaning_services_rounded, 'УБОРКА', [
+      WorkNode(Icons.auto_awesome_rounded, 'СУХАЯ', serviceTypes),
+      WorkNode(Icons.water_drop_rounded, 'ВЛАЖНАЯ', serviceTypes),
+      WorkNode(Icons.construction_rounded, 'ПОСЛЕ МОНТАЖА', serviceTypes),
+    ]),
   ]),
   WorkNode(Icons.build_circle_rounded, 'РЕМОНТ', [
     WorkNode(Icons.tune_rounded, 'РЕГУЛИРОВКА'),
