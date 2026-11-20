@@ -221,7 +221,11 @@ class WorkTreeView extends StatefulWidget {
   State<WorkTreeView> createState() => _WorkTreeViewState();
 }
 
-class _WorkTreeViewState extends State<WorkTreeView> {
+class _WorkTreeViewState extends State<WorkTreeView>
+    with SingleTickerProviderStateMixin {
+  /// Бегущий огонёк по линиям-веткам (слева направо, без остановки).
+  late final AnimationController _glow;
+
   // ── габариты ──
   static const double _cardW = 180; // карточка-пункт
   static const double _cardH = 66;
