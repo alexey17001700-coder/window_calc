@@ -594,6 +594,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return List<double>.filled(n, 1.0 / n);
   }
 
+  /// Число петель на каждой створке: пусто или не то число — по 2
+  /// (верхняя и нижняя). Дополнительные петли замерщик добавляет вручную.
+  List<int> get _hingeCounts {
+    final n = _sashCount;
+    if (_hinges.length == n) return _hinges;
+    return List<int>.filled(n, 2);
+  }
+
   /// Изменить ширину секции i: отдаём/забираем долю у соседа.
   void _bumpSection(int i, int dir) {
     final n = _sashCount;
