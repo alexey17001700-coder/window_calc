@@ -545,9 +545,11 @@ class _WindowSchemePainter extends CustomPainter {
     if (rect.width <= 1 || rect.height <= 1) return;
     canvas.save();
     canvas.clipRect(rect);
+    // Штриховка намеренно приглушённая: тонкая линия + прозрачность,
+    // чтобы чертёж не «давил» на глаза.
     final p = Paint()
-      ..color = color
-      ..strokeWidth = 0.9;
+      ..color = color.withOpacity(0.55)
+      ..strokeWidth = 0.7;
     final span = rect.width + rect.height;
     for (var i = -rect.height; i < span; i += step) {
       if (down) {
