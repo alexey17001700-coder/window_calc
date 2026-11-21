@@ -101,6 +101,8 @@ const List<WorkNode> balconyBlockFinishing = [
   WorkNode(Icons.water_drop_rounded, 'С ОТЛИВОМ'),
   WorkNode(Icons.shelves, 'С ПОДОКОННИКОМ'),
   WorkNode(Icons.architecture_rounded, 'С ОТКОСАМИ'),
+  // Откосы с двух сторон: внутренние + наружные.
+  WorkNode(Icons.compare_arrows_rounded, 'ОТКОСЫ С ДВУХ СТОРОН'),
   WorkNode(Icons.change_history_rounded, 'АБРИС'),
   WorkNode(Icons.linear_scale_rounded, 'ПСУЛ'),
   WorkNode(Icons.cleaning_services_rounded, 'ОТМАЗКА'),
