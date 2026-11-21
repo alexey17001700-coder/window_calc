@@ -366,6 +366,32 @@ class _WindowVisualState extends State<WindowVisual> {
     return null;
   }
 
+  /// Попадание в НИЖНЮЮ размерную линию секции → её номер (-1 — мимо).
+  int _hitSectionDim(Size size, Offset p) {
+    if (widget.onSectionEdit == null) return -1;
+    if (widget.sashes < 2) return -1;
+    final g = _geo(size);
+    final hasSill = widget.parts.contains('С ПОДОКОННИКОМ');
+    final hasDrip = widget.parts.contains('С ОТЛИВОМ');
+    // Та же высота, на которой рисуется нижний ряд размеров.
+    final y = g.wall.bottom + (hasSill || hasDrip ? 30 : 17);
+    if (p.dy < y - 14 || p.dy > y + 14) return -1;
+    final cells = _sashRects(g.glass, widget.sashes, widget.sectionWidths);
+    for (var i = 0; i < cells.length; i++) {
+      if (p.dx > cells[i].left - 9 && p.dx < cells[i].right + 9) return i;
+    }
+    return -1;
+  }
+
+  /// Ввод ширины секции: диалог в ММ, остальные секции — автоматом.
+  void _editSection(int i) {
+    final cb = widget.onSectionEdit;
+    if (cb == null) return;
+    final ws = _normWidths(widget.sashes, widget.sectionWidths);
+    final cur = widget.widthMm > 0 ? (widget.widthMm * ws[i]).round() : 0;
+    _editDim('ШИРИНА СЕКЦИИ ${i + 1}', '800', cur, (v) => cb(i, v));
+  }
+
   /// Ввод размера: диалог с цифровой клавиатурой, значение в ММ.
   Future<void> _editDim(
       String title, String hint, int value, ValueChanged<int>? cb) async {
