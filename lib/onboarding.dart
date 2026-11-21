@@ -731,6 +731,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
   int _mmOf(String field) {
+    // Габарит изделия вводится ТАПОМ по чертежу — он в приоритете.
+    if (field == 'ШИРИНА' && _wMm > 0) return _wMm;
+    if (field == 'ВЫСОТА' && _hMm > 0) return _hMm;
     for (final e in _sizes.values) {
       final v = e[field];
       if (v != null && v > 0) return v;
