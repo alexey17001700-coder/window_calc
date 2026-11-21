@@ -1381,12 +1381,16 @@ class _SectionWidthRow extends StatelessWidget {
     required this.mm,
     required this.onMinus,
     required this.onPlus,
+    required this.onEdit,
   });
 
   final int index;
   final int mm;
   final VoidCallback onMinus;
   final VoidCallback onPlus;
+
+  /// Тап по значению — ручной ввод ММ (остальные секции считаются сами).
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
