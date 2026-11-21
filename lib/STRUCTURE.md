@@ -8,7 +8,7 @@
 
 | Файл | Что внутри | Ключевые имена |
 |---|---|---|
-| `main.dart` | ЗАСТАВКА (ГЛАВНЫЙ файл библиотеки): тема,#3D-сцена, лог загрузки, прогресс, кнопки, навигация | `appNavigatorKey`, `AlmasApp`, `_AlmasAppState`, `SplashScreen`, `_SplashScreenState`, `_boot()`, `_push()`, `_replaceLast()`, `_model3d()`, `_logo()`, `_progressBar()`, `_logPanel()`, `_startButton()`, `_openOnboarding()`, `_backToSplash()`, `_openHome()`, `_checkButton()`, `_manualCheck()` |
+| `main.dart` | ЗАСТАВКА (ГЛАВНЫЙ файл библиотеки): тема, 3D-сцена, лог загрузки, прогресс, кнопки, навигация | `appNavigatorKey`, `AlmasApp`, `_AlmasAppState`, `SplashScreen`, `_SplashScreenState`, `_boot()`, `_push()`, `_replaceLast()`, `_model3d()`, `_logo()`, `_progressBar()`, `_logPanel()`, `_startButton()`, `_openOnboarding()`, `_backToSplash()`, `_openHome()`, `_checkButton()`, `_manualCheck()` |
 | `home_screen.dart` | часть `main.dart`: ГЛАВНОЕ МЕНЮ, шапка, карточки, каскадное появление | `HomeScreen`, `_HomeScreenState`, `_header()`, `_card()`, `_soon()`, `_checkUpdate()`, `_Reveal`, `_RevealState` |
 | `onboarding.dart` | МАСТЕР ЗАМЕРА: 6 шагов, состояние, сборка шагов (ГЛАВНЫЙ файл библиотеки) | `OnboardingScreen`, `_OnboardingScreenState`, `_cardClient()`, `_treeStep()`, `_sizesStep()`, `_visualStep()`, `_estimateStep()`, `_sheetStep()`, `_confirmTree()`, `_saveRecord()`, `_sashCount`, `_secWidths`, `_bumpSection()`, `_balcony` |
 | `onboarding/widgets.dart` | часть `onboarding.dart`: поля ввода, кнопки, чипы створок, строки секций | `_PremiumField`, `_GoldButton`, `_GhostButton`, `_RoundButton`, `_SashCountChip`, `_SectionWidthRow`, `_StepBtn` |
