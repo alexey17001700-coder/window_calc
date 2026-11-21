@@ -57,6 +57,9 @@ class WindowVisual extends StatefulWidget {
     this.heightMm = 0,
     this.sectionWidths = const [],
     this.hingeCounts = const [],
+    this.onWidthEdit,
+    this.onHeightEdit,
+    this.onSectionEdit,
   });
 
   /// Число створок: 1, 2, 3 или 4.
