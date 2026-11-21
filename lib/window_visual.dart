@@ -227,7 +227,7 @@ class _WindowVisualState extends State<WindowVisual> {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                'ТАПНИ РАЗМЕР СВЕРХУ (ШИРИНА) ИЛИ СЛЕВА (ВЫСОТА) — ВВОД В ММ',
+                'ТАП: СВЕРХУ — ШИРИНА, СЛЕВА — ВЫСОТА, ПОД СЕКЦИЕЙ — ЕЁ ШИРИНА',
                 style: TextStyle(
                   fontSize: 8.5,
                   fontWeight: FontWeight.w800,
