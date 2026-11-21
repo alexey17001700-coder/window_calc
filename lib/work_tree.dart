@@ -112,11 +112,11 @@ const List<WorkNode> balconyShapes = [
       finishingTypes),
 ];
 
+// «УГЛОВОЙ» убран: угловой балкон = Г-ОБРАЗНЫЙ (он есть в balconyShapes).
 const List<WorkNode> balconyKinds = [
   WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', balconyShapes),
   WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', balconyShapes),
   WorkNode(Icons.roofing_rounded, 'С КРЫШЕЙ', balconyShapes),
-  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', balconyShapes),
 ];
 
 const List<WorkNode> loggiaKinds = [
