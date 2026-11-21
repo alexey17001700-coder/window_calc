@@ -448,8 +448,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
                   sashModes: modes,
-                  widthMm: _mmOf('ШИРИНА'),
-                  heightMm: _mmOf('ВЫСОТА'),
+                  widthMm: _wMm,
+                  heightMm: _hMm,
+                  onWidthEdit: (v) => setState(() => _wMm = v),
+                  onHeightEdit: (v) => setState(() => _hMm = v),
                   sectionWidths: _secWidths,
                   hingeCounts: _hingeCounts,
                   onSashTap: (i) => setState(() {
