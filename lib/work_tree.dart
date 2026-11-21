@@ -326,12 +326,18 @@ class _WorkTreeViewState extends State<WorkTreeView>
 
   // ─────────────────────── ВЫБОР ───────────────────────
   void _select(int level, int index) {
-    final node = _nodeAt(level, index);
+    // Берём узел из ТЕКУЩИХ колонок: финальный уровень может быть отфильтрован.
+    final cols = _columns();
+    if (level < 0 || level >= cols.length) return;
+    if (index < 0 || index >= cols[level].length) return;
+    final node = cols[level][index];
 
     // ── ФИНАЛЬНЫЙ УРОВЕНЬ (комплектация): мультивыбор ──
     if (node.children.isEmpty) {
       setState(() {
-        if (!_multi.remove(index)) _multi.add(index);
+        if (!_multi.remove(node.title)) _multi.add(node.title);
+        // Отметил ПСУЛ / АБРИС — «С ПОДОКОННИКОМ» гаснет и снимается.
+        _pruneMulti();
       });
       widget.onMultiChanged?.call(_multiTitles());
       return;
