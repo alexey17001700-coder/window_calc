@@ -452,6 +452,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   heightMm: _hMm,
                   onWidthEdit: (v) => setState(() => _wMm = v),
                   onHeightEdit: (v) => setState(() => _hMm = v),
+                  onSectionEdit: _setSectionMm,
                   sectionWidths: _secWidths,
                   hingeCounts: _hingeCounts,
                   onSashTap: (i) => setState(() {
