@@ -172,6 +172,19 @@ class _WindowVisualState extends State<WindowVisual> {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapUp: (d) {
+                // 1) Тап по РАЗМЕРНОЙ ЛИНИИ → ввод размера в ММ.
+                final dim = _hitDim(size, d.localPosition);
+                if (dim == 'w') {
+                  _editDim('ШИРИНА ИЗДЕЛИЯ', '1300', widget.widthMm,
+                      widget.onWidthEdit);
+                  return;
+                }
+                if (dim == 'h') {
+                  _editDim('ВЫСОТА ИЗДЕЛИЯ', '1400', widget.heightMm,
+                      widget.onHeightEdit);
+                  return;
+                }
+                // 2) Иначе — выбор створки (смена обозначения по ГОСТ).
                 final i = _hit(size, d.localPosition);
                 if (i >= 0) _tap(i);
               },
