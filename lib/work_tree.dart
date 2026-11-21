@@ -95,10 +95,31 @@ const List<WorkNode> windowKinds = [
   WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
 ];
 
+// Комплектация БАЛКОННОГО БЛОКА: козырька не бывает (он только на балконе).
+const List<WorkNode> balconyBlockFinishing = [
+  WorkNode(Icons.window_rounded, 'ПРОСТО ОКНО'),
+  WorkNode(Icons.water_drop_rounded, 'С ОТЛИВОМ'),
+  WorkNode(Icons.shelves, 'С ПОДОКОННИКОМ'),
+  WorkNode(Icons.architecture_rounded, 'С ОТКОСАМИ'),
+  WorkNode(Icons.change_history_rounded, 'АБРИС'),
+  WorkNode(Icons.linear_scale_rounded, 'ПСУЛ'),
+  WorkNode(Icons.cleaning_services_rounded, 'ОТМАЗКА'),
+  WorkNode(Icons.compare_arrows_rounded, 'ОТМАЗКА С ДВУХ СТОРОН'),
+];
+
+const List<WorkNode> balconyBlockHouseTypes = [
+  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА', balconyBlockFinishing),
+  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА', balconyBlockFinishing),
+  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА', balconyBlockFinishing),
+  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА', balconyBlockFinishing),
+  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ', balconyBlockFinishing),
+  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', balconyBlockFinishing),
+];
+
 // Балконный блок И ТАК идёт с дверью — отдельный пункт «С ДВЕРЬЮ» убран.
 const List<WorkNode> balconyBlockKinds = [
-  WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТЫЙ', houseTypes),
-  WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТЫЙ', houseTypes),
+  WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТЫЙ', balconyBlockHouseTypes),
+  WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТЫЙ', balconyBlockHouseTypes),
 ];
 
 /// ФОРМА БАЛКОНА — уровень дерева после вида работ.
