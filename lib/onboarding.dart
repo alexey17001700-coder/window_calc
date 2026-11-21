@@ -59,6 +59,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Выбранный стеклопакет (-1 — не выбран).
   int _glass = -1;
 
+  /// Габарит изделия (ШИРИНА / ВЫСОТА) — вводится ТАПОМ по чертежу.
+  int _wMm = 0;
+  int _hMm = 0;
+
   /// Обозначение каждой створки на чертеже (индекс в kSashModeNames).
   List<int> _sashModes = const [];
 
