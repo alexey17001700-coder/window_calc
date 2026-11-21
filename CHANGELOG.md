@@ -1,5 +1,45 @@
 # Changelog
 
+## 3.4.55+118
+
+### КОД РАЗБИТ НА МОДУЛИ (5 этапов) — читать и править стало быстрее
+
+**Причина:** файлы выросли (window_visual 1270 строк, measure_sizes 1010,
+work_tree 880, main 800) — целиком их не прочитать, любая правка требовала
+поиска по большому файлу.
+
+**Как сделано:** разбивка через `part` / `part of` — одна библиотека, приватные
+классы (`_GostPainter`, `_PremiumBg`, `_EdgePainter`) остаются доступными,
+импорты только в главном файле, публичные имена не менялись → внешние вызовы
+из `main.dart` / `onboarding.dart` не тронуты. Логика перенесена слово в слово.
+
+**Новые файлы:**
+
+- `lib/visual/geo.dart` — геометрия чертежа (`_Geo`, `_geo`, `_normWidths`,
+  `_sashRects`, `_openPath`)
+- `lib/visual/chips.dart` — `_SashChip`, `_GlassChip`
+- `lib/visual/painter.dart` — `_GostPainter`
+- `lib/onboarding/widgets.dart` — `_PremiumField`, `_GoldButton`, `_GhostButton`,
+  `_RoundButton`, `_SashCountChip`, `_SectionWidthRow`, `_StepBtn`
+- `lib/onboarding/background.dart` — `_PremiumBg`, `_BgPainter`, `_ShinePainter`
+- `lib/work_tree_data.dart` — `WorkNode`, ветки дерева, `finishFor()`
+- `lib/work_tree_painter.dart` — `_EdgePainter`, `_PressCard`
+- `lib/measure_sizes_specs.dart` — `SizeSpec`, `sizeSpecs`, единицы, допуски,
+  АВТО-формулы
+- `lib/measure_sizes_fields.dart` — `_SizeField`, `_SizeGold`, `_SizeGhost`
+- `lib/home_screen.dart` — `HomeScreen`, `_Reveal`
+- `lib/STRUCTURE.md` — карта кода: файл → что внутри → ключевые имена
+
+**Главные файлы уменьшились:** `window_visual.dart` 1270 → 470,
+`work_tree.dart` 880 → 500, `measure_sizes.dart` 1010 → 490,
+`main.dart` 800 → 490. Ничего не удалено — блоки переехали.
+
+**Не тронуто:** дерево, шаг размеров, АВТО-длины, чертёж по ГОСТ, визуальный
+замер, смета, история, фото, замерный лист, фон, кнопки, логика обновления
+приложения.
+
+`pubspec.yaml`: **3.4.54+117 → 3.4.55+118**.
+
 ## 3.4.54+117
 
 ### ВИЗУАЛЬНЫЙ ЗАМЕР: стеклопакет на чертеже — ГОЛУБОЙ
