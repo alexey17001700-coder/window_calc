@@ -149,11 +149,21 @@ const List<WorkNode> balconyKinds = [
   WorkNode(Icons.roofing_rounded, 'С КРЫШЕЙ', balconyShapes),
 ];
 
+// Лоджия — тоже балкон, поэтому комплектация С КОЗЫРЬКОМ (как у балкона).
+const List<WorkNode> loggiaHouseTypes = [
+  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА', balconyFinishing),
+  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА', balconyFinishing),
+  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА', balconyFinishing),
+  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА', balconyFinishing),
+  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ', balconyFinishing),
+  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', balconyFinishing),
+];
+
 const List<WorkNode> loggiaKinds = [
-  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', houseTypes),
-  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', houseTypes),
-  WorkNode(Icons.swap_horiz_rounded, 'РАЗДВИЖНАЯ', houseTypes),
-  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВАЯ', houseTypes),
+  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', loggiaHouseTypes),
+  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', loggiaHouseTypes),
+  WorkNode(Icons.swap_horiz_rounded, 'РАЗДВИЖНАЯ', loggiaHouseTypes),
+  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВАЯ', loggiaHouseTypes),
 ];
 
 const List<WorkNode> doorKinds = [
