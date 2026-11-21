@@ -409,10 +409,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return MeasureSizesView(
       items: _multi,
       balcony: _balcony,
-      onBack: () => setState(() => _step = 1),
+      onBack: () => setState(() => _step = 2),
       onDone: (mm) => setState(() {
         _sizes = mm;
-        _step = 3;
+        _step = 4;
       }),
     );
   }
