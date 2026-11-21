@@ -95,6 +95,12 @@ class WindowVisual extends StatefulWidget {
   /// Дополнительные петли замерщик добавляет ВРУЧНУЮ (например, на дверь).
   final List<int> hingeCounts;
 
+  /// Ввод ШИРИНЫ прямо на чертеже: тап по размерной линии сверху.
+  final ValueChanged<int>? onWidthEdit;
+
+  /// Ввод ВЫСОТЫ прямо на чертеже: тап по размерной линии слева.
+  final ValueChanged<int>? onHeightEdit;
+
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
