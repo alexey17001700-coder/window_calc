@@ -561,7 +561,7 @@ class _WorkTreeViewState extends State<WorkTreeView>
                                     _card(
                                       cols[k][j],
                                       selected: cols[k][j].children.isEmpty
-                                          ? _multi.contains(j)
+                                          ? _multi.contains(cols[k][j].title)
                                           : (_path.length > k &&
                                               _path[k] == j),
                                       onTap: () => _select(k, j),
