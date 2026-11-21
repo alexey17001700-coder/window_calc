@@ -95,11 +95,10 @@ const List<WorkNode> windowKinds = [
   WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
 ];
 
+// Балконный блок И ТАК идёт с дверью — отдельный пункт «С ДВЕРЬЮ» убран.
 const List<WorkNode> balconyBlockKinds = [
   WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТЫЙ', houseTypes),
   WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТЫЙ', houseTypes),
-  WorkNode(Icons.door_front_door_rounded, 'С ДВЕРЬЮ', houseTypes),
-  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', houseTypes),
 ];
 
 /// ФОРМА БАЛКОНА — уровень дерева после вида работ.
