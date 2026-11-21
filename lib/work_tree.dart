@@ -380,16 +380,14 @@ class _WorkTreeViewState extends State<WorkTreeView>
     return out;
   }
 
-  /// Названия отмеченных пунктов комплектации.
+  /// Названия отмеченных пунктов комплектации — в порядке колонки.
   List<String> _multiTitles() {
     final cols = _columns();
     if (cols.isEmpty) return const [];
-    final last = cols.last;
-    final out = <String>[];
-    for (var i = 0; i < last.length; i++) {
-      if (_multi.contains(i)) out.add(last[i].title);
-    }
-    return out;
+    return [
+      for (final n in cols.last)
+        if (_multi.contains(n.title)) n.title,
+    ];
   }
 
   /// Автоскролл: новая колонка встаёт в центр экрана.
