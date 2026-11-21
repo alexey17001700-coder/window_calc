@@ -43,11 +43,15 @@ const List<WorkNode> finishingTypes = [
   WorkNode(Icons.linear_scale_rounded, 'ПСУЛ'),
   WorkNode(Icons.cleaning_services_rounded, 'ОТМАЗКА'),
   WorkNode(Icons.compare_arrows_rounded, 'ОТМАЗКА С ДВУХ СТОРОН'),
-  // Козырёк — только на балконе / лоджии. Длина считается АВТОМАТИЧЕСКИ:
-  // ширина изделия + 200 мм (балкон 3000 → козырёк 3200).
+];
+
+/// Козырёк бывает ТОЛЬКО на балконе / лоджии — у окна его нет.
+/// Длина считается АВТОМАТИЧЕСКИ: ширина изделия + 200 мм
+/// (балкон 3000 → козырёк 3200). Из двух частей: каждая = половина +
+/// нахлёст 150 мм (балкон 3000 → 3200 → по 1750 мм).
+const List<WorkNode> balconyFinishing = [
+  ...finishingTypes,
   WorkNode(Icons.roofing_rounded, 'КОЗЫРЁК'),
-  // Козырёк из двух частей: каждая часть = половина + нахлёст 150 мм
-  // (балкон 3000 → 3200 → по 1750 мм).
   WorkNode(Icons.splitscreen_rounded, 'КОЗЫРЁК ИЗ 2 ЧАСТЕЙ'),
 ];
 
