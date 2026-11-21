@@ -120,6 +120,7 @@ const List<WorkNode> balconyBlockHouseTypes = [
 
 // Балконный блок И ТАК идёт с дверью — отдельный пункт «С ДВЕРЬЮ» убран.
 const List<WorkNode> balconyBlockKinds = [
+  WorkNode(Icons.crop_square_rounded, 'ГЛУХНЯК', balconyBlockHouseTypes),
   WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТЫЙ', balconyBlockHouseTypes),
   WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТЫЙ', balconyBlockHouseTypes),
 ];
