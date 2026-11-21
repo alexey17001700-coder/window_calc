@@ -205,6 +205,27 @@ class _WindowVisualState extends State<WindowVisual> {
             );
           },
         ),
+        const SizedBox(height: 8),
+
+        // ── ПОДСКАЗКА: РАЗМЕРЫ ПРАВЯТСЯ ТАПОМ ПО ЧЕРТЕЖУ ──
+        Row(
+          children: [
+            const Icon(Icons.touch_app_rounded,
+                size: 13, color: AppColors.gold),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                'ТАПНИ РАЗМЕР СВЕРХУ (ШИРИНА) ИЛИ СЛЕВА (ВЫСОТА) — ВВОД В ММ',
+                style: TextStyle(
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.7,
+                  color: AppColors.gold.withOpacity(0.9),
+                ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 10),
 
         // ── ОБОЗНАЧЕНИЯ СТВОРОК ──
