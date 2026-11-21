@@ -762,8 +762,9 @@ class _GostPainter extends CustomPainter {
     for (var i = 0; i < rects.length; i++) {
       final s = rects[i];
       final o = s.deflate(2.5);
+      // обвязка створки — ОДНА линия, штапик не рисуем
       canvas.drawRect(o, _line(_ink, 1.1));
-      final gl = o.deflate(3.5);
+      final gl = o.deflate(1.6);
       // стеклопакет — ГОЛУБОЙ: заливка + голубой контур (стекло видно сразу)
       final glR = RRect.fromRectAndRadius(gl, const Radius.circular(2));
       canvas.drawRRect(
