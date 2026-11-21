@@ -102,6 +102,11 @@ class WindowVisual extends StatefulWidget {
   /// Ввод ВЫСОТЫ прямо на чертеже: тап по размерной линии слева.
   final ValueChanged<int>? onHeightEdit;
 
+  /// Ввод ширины СЕКЦИИ прямо на чертеже: тап по её нижней размерной линии.
+  /// Передаёт номер секции и ширину в ММ. Остальные секции пересчитываются
+  /// автоматически из общего габарита.
+  final void Function(int index, int mm)? onSectionEdit;
+
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
