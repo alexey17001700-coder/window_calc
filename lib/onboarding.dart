@@ -811,7 +811,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 ),
                 const Spacer(),
                 Text(
-                  total > 0 ? 'ВСЕГО $total ММ' : 'ВВЕДИ ШИРИНУ',
+                  total > 0 ? 'ВСЕГО $total ММ · ТАПНИ ЧИСЛО' : 'ВВЕДИ ШИРИНУ',
                   style: const TextStyle(
                     fontSize: 8.5,
                     fontWeight: FontWeight.w800,
