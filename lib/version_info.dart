@@ -42,8 +42,8 @@ class VersionBadge extends StatelessWidget {
     final due = AppVersion.due;
     final color = due ? const Color(0xFFFF4D6D) : AppColors.gold;
     final text = due
-        ? 'ПОРА ОБНОВЛЯТЬ · ПРАВОК ${AppVersion.edits}/${AppVersion.limit}'
-        : 'ВЕРСИЯ ${AppVersion.version} · ПРАВОК ${AppVersion.edits}/${AppVersion.limit}'
+        ? 'АЛМАЗ · ПОРА ОБНОВЛЯТЬ · ПРАВОК ${AppVersion.edits}/${AppVersion.limit}'
+        : 'АЛМАЗ · ВЕРСИЯ ${AppVersion.version} · ПРАВОК ${AppVersion.edits}/${AppVersion.limit}'
             ' · ДО ОБНОВЛЕНИЯ ${AppVersion.left}';
     return Container(
       width: double.infinity,
