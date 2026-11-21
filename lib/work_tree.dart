@@ -51,6 +51,28 @@ const List<WorkNode> finishingTypes = [
   WorkNode(Icons.splitscreen_rounded, 'КОЗЫРЁК ИЗ 2 ЧАСТЕЙ'),
 ];
 
+/// ═══════════════════════════════════════════════════════════════════
+///  ЧЕГО НЕ БЫВАЕТ ПРИ РАБОТЕ
+///  ПСУЛ (уплотнение), АБРИС (наличник) и замена резинки — работы
+///  по проёму: подоконник при них не ставится, поэтому пункт
+///  «С ПОДОКОННИКОМ» из комплектации ГАСНЕТ.
+/// ═══════════════════════════════════════════════════════════════════
+const List<String> noSillWorks = ['ПСУЛ', 'АБРИС', 'ЗАМЕНА РЕЗИНКИ'];
+
+/// Пункты комплектации, которые убираем при работах из [noSillWorks].
+const List<String> noSillParts = ['С ПОДОКОННИКОМ'];
+
+/// Убрать из финального уровня пункты, которых НЕ БЫВАЕТ при выбранной
+/// работе. [picked] — цепочка дерева + отмеченная комплектация.
+List<WorkNode> finishFor(List<WorkNode> nodes, List<String> picked) {
+  final all = picked.join(' ').toUpperCase();
+  if (!noSillWorks.any(all.contains)) return nodes;
+  return [
+    for (final n in nodes)
+      if (!noSillParts.contains(n.title)) n,
+  ];
+}
+
 /// Тип дома — 3-й уровень дерева (после выбора изделия и его вида).
 /// Дальше идёт финальный уровень — комплектация (мультивыбор).
 const List<WorkNode> houseTypes = [
