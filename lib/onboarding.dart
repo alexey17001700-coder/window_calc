@@ -1407,15 +1407,23 @@ class _SectionWidthRow extends StatelessWidget {
         ),
         const Spacer(),
         _StepBtn(icon: Icons.remove_rounded, onTap: onMinus),
-        SizedBox(
-          width: 74,
-          child: Text(
-            mm > 0 ? '$mm ММ' : '—',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
+        GestureDetector(
+          onTap: onEdit,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: 74,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Text(
+              mm > 0 ? '$mm ММ' : '—',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                decoration: TextDecoration.underline,
+                decorationColor: AppColors.gold,
+              ),
             ),
           ),
         ),
