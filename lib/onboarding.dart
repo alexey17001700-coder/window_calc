@@ -439,6 +439,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _pickedBar(windowType, house),
+                const SizedBox(height: 10),
+                const VersionBadge(),
                 const SizedBox(height: 12),
                 _sashControls(sashes),
                 const SizedBox(height: 12),
