@@ -267,7 +267,9 @@ class _WorkTreeViewState extends State<WorkTreeView>
   final List<int> _path = [];
 
   /// Отмеченные пункты финального уровня (комплектация) — мультивыбор.
-  final Set<int> _multi = {};
+  /// Храним НАЗВАНИЯ, а не индексы: список пунктов меняется (ПСУЛ / АБРИС /
+  /// замена резинки гасят «С ПОДОКОННИКОМ»), индексы при этом съезжают.
+  final Set<String> _multi = {};
 
   final ScrollController _h = ScrollController();
   final ScrollController _v = ScrollController();
