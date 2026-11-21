@@ -576,7 +576,18 @@ class _GostPainter extends CustomPainter {
       final o = s.deflate(2.5);
       canvas.drawRect(o, _line(_ink, 1.1));
       final gl = o.deflate(3.5);
-      canvas.drawRect(gl, _line(_ink, 0.9));
+      // стеклопакет — ГОЛУБОЙ: заливка + голубой контур (стекло видно сразу)
+      final glR = RRect.fromRectAndRadius(gl, const Radius.circular(2));
+      canvas.drawRRect(
+        glR,
+        Paint()
+          ..shader = const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFD8EDFC), Color(0xFFB6DBF4)],
+          ).createShader(gl),
+      );
+      canvas.drawRRect(glR, _line(const Color(0xFF7FB3D5), 0.9));
 
       _openingMark(canvas, gl, modes[i].clamp(0, 3), hingeLeft: i == 0);
       _hardware(canvas, o, modes[i].clamp(0, 3),
