@@ -748,9 +748,8 @@ class _GostPainter extends CustomPainter {
     final openPath = _openPath(g.opening, arched);
     canvas.drawPath(openPath, _line(_ink, 1.3));
 
-    // ── РАМА (двойная линия) ──
-    canvas.drawRect(g.frameOuter, _line(_ink, 1.2));
-    canvas.drawRect(g.frameInner, _line(_ink, 1.0));
+    // ── РАМА (ОДНА линия — штапик убран, контур упрощён) ──
+    canvas.drawRect(g.frameOuter, _line(_ink, 1.3));
 
     // ── ОСЕВЫЕ ЛИНИИ (штрихпунктир) ──
     _axisV(canvas, g.opening.center.dx, g.wall.top - 18, g.wall.bottom + 18);
