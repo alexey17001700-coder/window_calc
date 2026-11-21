@@ -75,16 +75,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   static const _titles = [
     'ДАННЫЕ КЛИЕНТА',
     'ЧТО ДЕЛАЕМ',
-    'РАЗМЕРЫ',
     'ВИЗУАЛЬНЫЙ ЗАМЕР',
+    'РАЗМЕРЫ',
     'СМЕТА',
     'ЗАМЕРНЫЙ ЛИСТ',
   ];
   static const _icons = [
     Icons.person_rounded,
     Icons.account_tree_rounded,
-    Icons.straighten_rounded,
     Icons.window_rounded,
+    Icons.straighten_rounded,
     Icons.calculate_rounded,
     Icons.receipt_long_rounded,
   ];
