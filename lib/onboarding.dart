@@ -829,6 +829,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 mm: total > 0 ? (total * ws[i]).round() : 0,
                 onMinus: () => _bumpSection(i, -1),
                 onPlus: () => _bumpSection(i, 1),
+                onEdit: () => _askSectionMm(i),
               ),
             ],
           ],
