@@ -644,6 +644,113 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     setState(() => _secW = ws);
   }
 
+  /// Ручная ширина секции i в ММ. Остальные секции пересчитываются
+  /// автоматически из общего габарита: вписал первую — вторая уже посчитана.
+  void _setSectionMm(int i, int mm) {
+    final n = _sashCount;
+    final total = _mmOf('ШИРИНА');
+    if (n < 2 || total <= 0 || mm <= 0) return;
+    final ws = List<double>.from(_secWidths);
+    if (i < 0 || i >= ws.length) return;
+    final f = (mm / total).clamp(0.10, 0.90);
+    final rest = 1.0 - f;
+    final oldRest = 1.0 - ws[i];
+    for (var k = 0; k < n; k++) {
+      if (k == i) {
+        ws[i] = f;
+      } else {
+        ws[k] = oldRest > 0.001 ? rest * ws[k] / oldRest : rest / (n - 1);
+      }
+    }
+    setState(() => _secW = ws);
+  }
+
+  /// Диалог ручного ввода ширины секции в ММ.
+  Future<void> _askSectionMm(int i) async {
+    final total = _mmOf('ШИРИНА');
+    if (total <= 0) return;
+    final cur = (total * _secWidths[i]).round();
+    final c = TextEditingController(text: cur > 0 ? '$cur' : '');
+    final v = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F1D31),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: AppColors.gold.withOpacity(0.45)),
+        ),
+        title: Text(
+          'ШИРИНА СЕКЦИИ ${i + 1}',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: Colors.white,
+          ),
+        ),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          cursorColor: AppColors.gold,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+          decoration: InputDecoration(
+            hintText: '800',
+            hintStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF7E93AC),
+            ),
+            suffixText: 'ММ',
+            suffixStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gold,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF0A1220),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(13),
+              borderSide: BorderSide(color: AppColors.gold.withOpacity(0.4)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'ОТМЕНА',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final p = double.tryParse(c.text.trim().replaceAll(',', '.'));
+              Navigator.pop(ctx, p == null ? null : p.round());
+            },
+            child: const Text(
+              'ОК',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: AppColors.gold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (v != null && v > 0) _setSectionMm(i, v);
+  }
+
   /// Панель створок: число створок (для ЛЮБОГО изделия) + ширина секций.
   Widget _sashControls(int sashes) {
     final total = _mmOf('ШИРИНА');
