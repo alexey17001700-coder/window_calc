@@ -190,6 +190,12 @@ class _WindowVisualState extends State<WindowVisual> {
                       widget.onHeightEdit);
                   return;
                 }
+                // 1б) Тап по НИЖНЕЙ размерной линии секции → ввод её ширины.
+                final sec = _hitSectionDim(size, d.localPosition);
+                if (sec >= 0) {
+                  _editSection(sec);
+                  return;
+                }
                 // 2) Иначе — выбор створки (смена обозначения по ГОСТ).
                 final i = _hit(size, d.localPosition);
                 if (i >= 0) _tap(i);
