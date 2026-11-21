@@ -57,7 +57,6 @@ class WindowVisual extends StatefulWidget {
     this.heightMm = 0,
     this.sectionWidths = const [],
     this.hingeCounts = const [],
-    this.onWidthEdit,
     this.onHeightEdit,
     this.onSectionEdit,
   });
@@ -704,7 +703,6 @@ class _GostPainter extends CustomPainter {
     required this.heightMm,
     this.sectionWidths = const [],
     this.hingeCounts = const [],
-    this.onWidthEdit,
     this.onHeightEdit,
     this.onSectionEdit,
   });
