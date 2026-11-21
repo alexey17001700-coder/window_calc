@@ -309,6 +309,115 @@ class _WindowVisualState extends State<WindowVisual> {
     }
     return best;
   }
+
+  /// Попадание в РАЗМЕРНУЮ ЛИНИЮ: 'w' — ширина (полоса сверху),
+  /// 'h' — высота (полоса слева). Тап по ним открывает ввод в ММ.
+  String? _hitDim(Size size, Offset p) {
+    final g = _geo(size);
+    // Ширина: полоса над стеной, по ширине проёма.
+    final wTop = g.wall.top - 15;
+    if (p.dy > wTop - 13 &&
+        p.dy < g.wall.top &&
+        p.dx > g.opening.left - 10 &&
+        p.dx < g.opening.right + 10) {
+      return 'w';
+    }
+    // Высота: полоса слева от стены, по высоте проёма.
+    final hLeft = g.wall.left - 17;
+    if (p.dx > hLeft - 13 &&
+        p.dx < g.wall.left &&
+        p.dy > g.opening.top - 10 &&
+        p.dy < g.opening.bottom + 10) {
+      return 'h';
+    }
+    return null;
+  }
+
+  /// Ввод размера: диалог с цифровой клавиатурой, значение в ММ.
+  Future<void> _editDim(
+      String title, String hint, int value, ValueChanged<int>? cb) async {
+    if (cb == null) return;
+    final c = TextEditingController(text: value > 0 ? '$value' : '');
+    HapticFeedback.lightImpact();
+    final res = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F1D31),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: AppColors.gold.withOpacity(0.45)),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: Colors.white,
+          ),
+        ),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          cursorColor: AppColors.gold,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF7E93AC),
+            ),
+            suffixText: 'ММ',
+            suffixStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gold,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF0A1220),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(13),
+              borderSide: BorderSide(color: AppColors.gold.withOpacity(0.4)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'ОТМЕНА',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final v = double.tryParse(c.text.trim().replaceAll(',', '.'));
+              Navigator.pop(ctx, v == null ? null : v.round());
+            },
+            child: const Text(
+              'ОК',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: AppColors.gold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (res != null && res > 0) cb(res);
+  }
 }
 
 /// ═══════════════════════════════════════════════════════════════════
