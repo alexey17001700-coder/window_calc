@@ -17,7 +17,7 @@ class AppVersion {
   static const int build = 118;
 
   /// Сколько правок накоплено после последнего поднятия версии.
-  static const int edits = 2;
+  static const int edits = 1;
 
   /// Предел правок до поднятия версии.
   static const int limit = 5;
