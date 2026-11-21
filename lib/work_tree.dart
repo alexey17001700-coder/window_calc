@@ -102,11 +102,21 @@ const List<WorkNode> balconyBlockKinds = [
   WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', houseTypes),
 ];
 
+/// ФОРМА БАЛКОНА — уровень дерева после вида работ.
+/// Дальше идёт комплектация: подоконник, отлив, козырёк.
+const List<WorkNode> balconyShapes = [
+  WorkNode(Icons.horizontal_rule_rounded, 'ПРЯМОЙ', finishingTypes),
+  WorkNode(Icons.space_bar_rounded, 'П-ОБРАЗНЫЙ', finishingTypes),
+  WorkNode(Icons.turn_right_rounded, 'Г-ОБРАЗНЫЙ', finishingTypes),
+  WorkNode(Icons.remove_circle_outline_rounded, 'БЕЗ ПАРАПЕТА',
+      finishingTypes),
+];
+
 const List<WorkNode> balconyKinds = [
-  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', houseTypes),
-  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', houseTypes),
-  WorkNode(Icons.roofing_rounded, 'С КРЫШЕЙ', houseTypes),
-  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', houseTypes),
+  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', balconyShapes),
+  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', balconyShapes),
+  WorkNode(Icons.roofing_rounded, 'С КРЫШЕЙ', balconyShapes),
+  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', balconyShapes),
 ];
 
 const List<WorkNode> loggiaKinds = [
