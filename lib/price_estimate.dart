@@ -193,6 +193,13 @@ Estimate buildEstimate({
               EstimateLine('Откосы', len, 'м.п.', PriceBook.slopePerM));
         }
         break;
+      case 'ОТКОСЫ С ДВУХ СТОРОН':
+        final len = partLen('ОТКОСЫ С ДВУХ СТОРОН', 'ДЛИНА ОТКОСА', perim);
+        if (len > 0) {
+          lines.add(EstimateLine('Откосы, 2 стороны', len, 'м.п.',
+              PriceBook.slopePerM * 2));
+        }
+        break;
       case 'ПСУЛ':
         if (perim > 0) {
           lines.add(EstimateLine('ПСУЛ', perim, 'м.п.', PriceBook.psuPerM));
