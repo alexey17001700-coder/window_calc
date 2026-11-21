@@ -99,7 +99,8 @@ const List<WorkNode> windowKinds = [
   WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
 ];
 
-// Комплектация БАЛКОННОГО БЛОКА: козырька не бывает (он только на балконе).
+// Комплектация БАЛКОННОГО БЛОКА. Балконный блок — часть балкона,
+// поэтому козырёк здесь ЕСТЬ (как и у балкона).
 const List<WorkNode> balconyBlockFinishing = [
   WorkNode(Icons.window_rounded, 'ПРОСТО ОКНО'),
   WorkNode(Icons.water_drop_rounded, 'С ОТЛИВОМ'),
@@ -111,6 +112,8 @@ const List<WorkNode> balconyBlockFinishing = [
   WorkNode(Icons.linear_scale_rounded, 'ПСУЛ'),
   WorkNode(Icons.cleaning_services_rounded, 'ОТМАЗКА'),
   WorkNode(Icons.compare_arrows_rounded, 'ОТМАЗКА С ДВУХ СТОРОН'),
+  WorkNode(Icons.roofing_rounded, 'КОЗЫРЁК'),
+  WorkNode(Icons.splitscreen_rounded, 'КОЗЫРЁК ИЗ 2 ЧАСТЕЙ'),
 ];
 
 const List<WorkNode> balconyBlockHouseTypes = [
