@@ -304,7 +304,13 @@ class _WorkTreeViewState extends State<WorkTreeView>
       nodes = nodes[_path[i]].children;
     }
     if (_path.length < k) return const [];
-    return nodes[_path[k - 1]].children;
+    final ch = nodes[_path[k - 1]].children;
+    // Финальный уровень (комплектация): гасим пункты, которых НЕ БЫВАЕТ
+    // при выбранной работе — ПСУЛ / АБРИС / замена резинки → без подоконника.
+    if (ch.isNotEmpty && ch.every((n) => n.children.isEmpty)) {
+      return finishFor(ch, [..._titles(), ..._multi]);
+    }
+    return ch;
   }
 
   /// Колонки дерева: 0 — все 4 карточки 1-го уровня, дальше — раскрытые ветки.
