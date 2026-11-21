@@ -207,6 +207,8 @@ const List<WorkNode> workTree = [
       WorkNode(Icons.back_hand_rounded, 'РУЧКА', serviceTypes),
       WorkNode(Icons.lock_rounded, 'ЗАПОР', serviceTypes),
       WorkNode(Icons.open_in_full_rounded, 'НОЖНИЦЫ', serviceTypes),
+      // Резинка (уплотнитель). Подоконника при этой работе не бывает.
+      WorkNode(Icons.linear_scale_rounded, 'ЗАМЕНА РЕЗИНКИ', serviceTypes),
     ]),
     WorkNode(Icons.window_rounded, 'ЗАМЕНА СТЕКЛОПАКЕТА', [
       WorkNode(Icons.crop_square_rounded, 'ОДНОКАМЕРНЫЙ', serviceTypes),
