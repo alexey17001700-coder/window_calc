@@ -356,13 +356,16 @@ class _WorkTreeViewState extends State<WorkTreeView>
     _autoScroll();
   }
 
-  /// Узел по уровню и индексу в текущей цепочке.
-  WorkNode _nodeAt(int level, int index) {
-    var nodes = workTree;
-    for (var i = 0; i < level; i++) {
-      nodes = nodes[_path[i]].children;
+  /// Снять отметки с пунктов, которых больше нет в финальном уровне
+  /// (например, подоконник при ПСУЛ / АБРИС / замене резинки).
+  void _pruneMulti() {
+    final cols = _columns();
+    if (cols.isEmpty) {
+      _multi.clear();
+      return;
     }
-    return nodes[index];
+    final allowed = {for (final n in cols.last) n.title};
+    _multi.removeWhere((t) => !allowed.contains(t));
   }
 
   /// Названия выбранной цепочки.
