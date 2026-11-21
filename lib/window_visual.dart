@@ -57,6 +57,8 @@ class WindowVisual extends StatefulWidget {
     this.heightMm = 0,
     this.sectionWidths = const [],
     this.hingeCounts = const [],
+    this.onWidthEdit,
+    this.onHeightEdit,
   });
 
   /// Число створок: 1, 2, 3 или 4.
@@ -515,6 +517,8 @@ class _GostPainter extends CustomPainter {
     required this.heightMm,
     this.sectionWidths = const [],
     this.hingeCounts = const [],
+    this.onWidthEdit,
+    this.onHeightEdit,
   });
 
   final int sashes;
