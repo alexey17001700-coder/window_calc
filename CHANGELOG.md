@@ -1,5 +1,46 @@
 # Changelog
 
+## 3.4.56+119
+
+### КАРТА КОДА ОБНОВЛЕНА + чистка после разбивки на модули
+
+**Проверка после 3.4.55+118 (разбивка на модули):** прочитаны все главные файлы
+библиотек и все `part`-файлы — сверены директивы `part` / `part of`, вызовы и
+дубли классов. Несовпадений нет:
+
+- `window_visual.dart` → `visual/geo.dart` + `visual/chips.dart` +
+  `visual/painter.dart`
+- `work_tree.dart` → `work_tree_data.dart` + `work_tree_painter.dart`
+- `measure_sizes.dart` → `measure_sizes_specs.dart` + `measure_sizes_fields.dart`
+- `onboarding.dart` → `onboarding/widgets.dart` + `onboarding/background.dart`
+- `main.dart` → `home_screen.dart`
+
+Дублей нет: `_GostPainter` живёт только в `visual/painter.dart`,
+`MeasureMediaPanel` / `SheetExport` / `MeasureSync` — только в `measure_media.dart`
+(`measure_sheet.dart` их вызывает, а не объявляет).
+
+**Файл `lib/STRUCTURE.md` — карта приведена к факту:**
+
+- добавлены строки **`visual/geo.dart`** (`_Geo`, `_geo`, `_normWidths`,
+  `_sashRects`, `_openPath`), **`visual/chips.dart`** (`_SashChip`, `_GlassChip`),
+  **`visual/painter.dart`** (`_GostPainter` и все его методы) — их в карте не было
+- строка **`window_visual.dart`** исправлена: там остались `WindowVisual`,
+  обозначения створок, попадание пальцем (`_hit`, `_hitDim`, `_hitSectionDim`)
+  и ввод размеров (`_editDim`, `_editSection`) — а не художник
+- строка **`measure_sheet.dart`** исправлена: `MeasureMediaPanel` / `SheetExport` /
+  `MeasureSync` живут в `measure_media.dart`
+- в правила добавлен пункт: **карта обновляется в том же коммите, что и разбивка**
+  (иначе карта врёт — так и вышло после 3.4.55+118)
+
+**Удалён `zz_probe.html`** — служебный файл диагностики записи в репозиторий,
+больше не нужен.
+
+**Не тронуто:** весь код приложения — дерево, мастер, шаг размеров, АВТО-длины,
+чертёж по ГОСТ, визуальный замер, смета, история, фото, замерный лист, фон,
+кнопки, логика обновления приложения.
+
+`pubspec.yaml`: **3.4.55+118 → 3.4.56+119** — новый тег, чистая сборка APK.
+
 ## 3.4.55+118
 
 ### КОД РАЗБИТ НА МОДУЛИ (5 этапов) — читать и править стало быстрее
