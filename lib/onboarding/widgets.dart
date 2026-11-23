@@ -399,3 +399,106 @@ class _StepBtn extends StatelessWidget {
     );
   }
 }
+
+/// ═══════════════════════════════════════════════════════════════════
+///  КАРТОЧКА ИЗДЕЛИЯ (экран «ИЗДЕЛИЯ»)
+/// ═══════════════════════════════════════════════════════════════════
+class _ItemCard extends StatelessWidget {
+  const _ItemCard({
+    required this.index,
+    required this.item,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  final int index;
+  final MeasureItem item;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final w = item.mmOf('ШИРИНА');
+    final h = item.mmOf('ВЫСОТА');
+    final size = (w > 0 && h > 0) ? '$w × $h ММ' : 'РАЗМЕР НЕ ЗАДАН';
+    final parts =
+        item.multi.isEmpty ? 'БЕЗ КОМПЛЕКТАЦИИ' : item.multi.join(' · ');
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A1220),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                gradient: AppColors.goldGradient,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Text(
+                '${index + 1}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.navy900,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    size,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.gold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    parts,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF7E93AC),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              onPressed: onRemove,
+              icon: const Icon(Icons.close_rounded,
+                  size: 18, color: Color(0xFF7E93AC)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
