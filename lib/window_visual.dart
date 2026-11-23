@@ -318,8 +318,7 @@ class _WindowVisualState extends State<WindowVisual> {
                   ),
                   _SashChip(
                     index: 1,
-                    name: 'ГЛУХНЯК · '
-                        '${kSashModeShort[widget.fixedMode.clamp(0, 3)]}',
+                    name: 'ГЛУХНЯК · ${kSashModeShort[widget.fixedMode.clamp(0, 3)]}',
                     selected: _sel == 1,
                     onTap: () => _balconyTap(1),
                   ),
