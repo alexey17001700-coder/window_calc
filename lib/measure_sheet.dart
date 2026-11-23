@@ -298,7 +298,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _head(),
+                _head(items.length),
                 const SizedBox(height: 12),
                 _block('КЛИЕНТ', [
                   ('ИМЯ', _or(widget.name, '—')),
