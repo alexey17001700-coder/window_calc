@@ -343,7 +343,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   }
 
   // ─────────────────────────── ЗАГОЛОВОК ───────────────────────────
-  Widget _head() {
+  Widget _head(int total) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
