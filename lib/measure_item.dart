@@ -58,6 +58,23 @@ class MeasureItem {
   /// Число петель на каждой створке (пусто — по 2: верхняя и нижняя).
   final List<int> hinges;
 
+  /// БАЛКОННЫЙ БЛОК: дверь + глухняк сверху боковой колонны.
+  /// Ширина двери · высота двери · ширина глухняка · высота глухняка (ММ).
+  final int doorW;
+  final int doorH;
+  final int fixedW;
+  final int fixedH;
+
+  /// Обозначения ДВЕРИ и ГЛУХНЯКА (индексы в kSashModeNames).
+  final int doorMode;
+  final int fixedMode;
+
+  /// Это БАЛКОННЫЙ БЛОК? (2-й уровень дерева — «БАЛКОННЫЙ БЛОК»).
+  bool get balconyBlock => kind.toUpperCase().contains('БАЛКОННЫЙ');
+
+  /// Общая ширина блока = ширина двери + ширина глухняка.
+  int get blockWidth => doorW + fixedW;
+
   /// Тип изделия (2-й уровень дерева): ОКНО, БАЛКОН, ДВЕРЬ…
   String get kind => path.length > 1 ? path[1] : '';
 
