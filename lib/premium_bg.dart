@@ -1,12 +1,11 @@
-import 'dart:math' as math;
-
+import 'dart:math';
 import 'package:flutter/material.dart';
-
 import 'theme.dart';
 
-/// Премиальный фон: глубокий градиент, плывущие орбы и парящие частицы.
+/// Живой фон: тёмный градиент + плавно поднимающиеся пузыри.
 class PremiumBg extends StatefulWidget {
-  const PremiumBg({super.key});
+  final Widget child;
+  const PremiumBg({super.key, required this.child});
 
   @override
   State<PremiumBg> createState() => _PremiumBgState();
@@ -15,14 +14,23 @@ class PremiumBg extends StatefulWidget {
 class _PremiumBgState extends State<PremiumBg>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
+  final List<_Bubble> _bubbles = [];
+  final Random _rnd = Random(7);
 
   @override
   void initState() {
     super.initState();
-    _c = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 18),
-    )..repeat();
+    for (var i = 0; i < 18; i++) {
+      _bubbles.add(_Bubble(
+        x: _rnd.nextDouble(),
+        y: _rnd.nextDouble(),
+        r: 6 + _rnd.nextDouble() * 26,
+        speed: 0.2 + _rnd.nextDouble() * 0.6,
+        alpha: 0.04 + _rnd.nextDouble() * 0.08,
+      ));
+    }
+    _c = AnimationController(vsync: this, duration: const Duration(seconds: 12))
+      ..repeat();
   }
 
   @override
@@ -33,74 +41,60 @@ class _PremiumBgState extends State<PremiumBg>
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _c,
-        builder: (context, _) => CustomPaint(
-          painter: _BgPainter(_c.value),
-          size: Size.infinite,
+    return Stack(
+      children: [
+        const Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(gradient: AppColors.navyGradient),
+          ),
         ),
-      ),
+        Positioned.fill(
+          child: AnimatedBuilder(
+            animation: _c,
+            builder: (_, __) => CustomPaint(
+              painter: _BubblePainter(_bubbles, _c.value),
+            ),
+          ),
+        ),
+        widget.child,
+      ],
     );
   }
 }
 
-class _BgPainter extends CustomPainter {
+class _Bubble {
+  final double x;
+  final double y;
+  final double r;
+  final double speed;
+  final double alpha;
+  _Bubble({
+    required this.x,
+    required this.y,
+    required this.r,
+    required this.speed,
+    required this.alpha,
+  });
+}
+
+class _BubblePainter extends CustomPainter {
+  final List<_Bubble> bubbles;
   final double t;
-
-  _BgPainter(this.t);
-
-  static double _hash(int i, int k) {
-    final v = math.sin(i * 12.9898 + k * 78.233) * 43758.5453;
-    return v - v.floorToDouble();
-  }
+  _BubblePainter(this.bubbles, this.t);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.navy900, AppColors.navy800, Color(0xFF0B1526)],
-        ).createShader(rect),
-    );
-
-    void orb(double cx, double cy, double r, Color c, double phase) {
-      final dx = math.sin((t + phase) * math.pi * 2) * 0.06;
-      final dy = math.cos((t + phase) * math.pi * 2) * 0.05;
-      final center = Offset(size.width * (cx + dx), size.height * (cy + dy));
-      final radius = size.shortestSide * r;
-      canvas.drawCircle(
-        center,
-        radius,
-        Paint()
-          ..shader = RadialGradient(
-            colors: [c.withOpacity(0.15), c.withOpacity(0.0)],
-          ).createShader(Rect.fromCircle(center: center, radius: radius)),
-      );
-    }
-
-    orb(0.20, 0.24, 0.42, AppColors.gold, 0.0);
-    orb(0.82, 0.38, 0.38, const Color(0xFF3E7BB8), 0.33);
-    orb(0.55, 0.86, 0.40, const Color(0xFF8A6A2A), 0.66);
-
-    final p = Paint();
-    for (var i = 0; i < 46; i++) {
-      final bx = _hash(i, 1);
-      final by = _hash(i, 2);
-      final sp = 0.35 + _hash(i, 3) * 0.9;
-      final y = (by - (t * sp) % 1.0 + 1.0) % 1.0;
-      final x = (bx + math.sin((t + bx) * math.pi * 2) * 0.02) % 1.0;
-      final r = 0.6 + _hash(i, 4) * 1.6;
-      p.color = (i % 7 == 0 ? AppColors.gold : const Color(0xFF9FB4CC))
-          .withOpacity(0.10 + _hash(i, 5) * 0.22);
-      canvas.drawCircle(Offset(x * size.width, y * size.height), r, p);
+    for (final b in bubbles) {
+      var y = (b.y - t * b.speed) % 1.0;
+      if (y < 0) y += 1.0;
+      final paint = Paint()
+        ..color = AppColors.gold.withOpacity(b.alpha)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2;
+      canvas.drawCircle(Offset(b.x * size.width, y * size.height), b.r, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _BgPainter old) => old.t != t;
+  bool shouldRepaint(covariant _BubblePainter old) => old.t != t;
 }
