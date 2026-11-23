@@ -633,8 +633,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 const SizedBox(height: 10),
                 const VersionBadge(),
                 const SizedBox(height: 12),
-                _sashControls(sashes),
-                const SizedBox(height: 12),
+                if (bb) ...[
+                  _balconyControls(),
+                  const SizedBox(height: 12),
+                ] else ...[
+                  _sashControls(sashes),
+                  const SizedBox(height: 12),
+                ],
                 WindowVisual(
                   sashes: sashes,
                   arched: arched,
@@ -642,18 +647,35 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
                   sashModes: modes,
-                  widthMm: _wMm,
-                  heightMm: _hMm,
-                  onWidthEdit: (v) => setState(() => _wMm = v),
-                  onHeightEdit: (v) => setState(() => _hMm = v),
-                  onSectionEdit: _setSectionMm,
+                  widthMm: bb ? _bbTotalW : _wMm,
+                  heightMm: bb ? _bbDoorH : _hMm,
+                  onWidthEdit: bb ? null : (v) => setState(() => _wMm = v),
+                  onHeightEdit: bb ? null : (v) => setState(() => _hMm = v),
+                  onSectionEdit: bb ? null : _setSectionMm,
                   sectionWidths: _secWidths,
                   hingeCounts: _hingeCounts,
-                  onSashTap: (i) => setState(() {
-                    final m = List<int>.from(modes);
-                    m[i] = (m[i] + 1) % kSashModeNames.length;
-                    _sashModes = m;
+                  onSashTap: bb
+                      ? null
+                      : (i) => setState(() {
+                            final m = List<int>.from(modes);
+                            m[i] = (m[i] + 1) % kSashModeNames.length;
+                            _sashModes = m;
+                          }),
+                  balconyBlock: bb,
+                  doorMode: _doorMode,
+                  fixedMode: _fixedMode,
+                  doorWidthMm: _bbDoorW,
+                  doorHeightMm: _bbDoorH,
+                  fixedWidthMm: _bbFixedW,
+                  fixedHeightMm: _bbFixedH,
+                  onBalconyTap: (i) => setState(() {
+                    if (i == 0) {
+                      _doorMode = (_doorMode + 1) % kSashModeNames.length;
+                    } else {
+                      _fixedMode = (_fixedMode + 1) % kSashModeNames.length;
+                    }
                   }),
+                  onBalconyEdit: _setBalcony,
                 ),
               ],
             ),
