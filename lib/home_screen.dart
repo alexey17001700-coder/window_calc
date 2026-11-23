@@ -125,6 +125,23 @@ class HomeScreen extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(AppUi.radiusLg),
           onTap: () {
+            if (title == 'НОВЫЙ ЗАМЕР') {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => OnboardingScreen(
+                    onBack: () => Navigator.of(context).maybePop(),
+                    onFinish: () => Navigator.of(context).maybePop(),
+                  ),
+                ),
+              );
+              return;
+            }
+            if (title == 'ИСТОРИЯ') {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const HistoryView()),
+              );
+              return;
+            }
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('$title · РАЗДЕЛ ГОТОВИТСЯ')),
             );
