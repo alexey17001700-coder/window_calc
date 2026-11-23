@@ -1,134 +1,137 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'theme.dart';
 
-/// Результат тихой проверки обновлений.
+/// Итог проверки обновлений.
 class UpdateResult {
   final String currentVersion;
   final String? latestVersion;
-  final bool hasUpdate;
+  final String? apkUrl;
   final String? error;
 
   const UpdateResult({
     required this.currentVersion,
     this.latestVersion,
-    this.hasUpdate = false,
+    this.apkUrl,
     this.error,
   });
+
+  bool get hasUpdate {
+    final l = latestVersion;
+    if (l == null) return false;
+    return _cmp(l, currentVersion) > 0;
+  }
+
+  static int _cmp(String a, String b) {
+    List<int> parts(String v) => v
+        .split(RegExp(r'[^0-9]'))
+        .where((e) => e.isNotEmpty)
+        .map(int.parse)
+        .toList();
+    final x = parts(a);
+    final y = parts(b);
+    final n = x.length > y.length ? x.length : y.length;
+    for (var i = 0; i < n; i++) {
+      final xi = i < x.length ? x[i] : 0;
+      final yi = i < y.length ? y[i] : 0;
+      if (xi != yi) return xi > yi ? 1 : -1;
+    }
+    return 0;
+  }
 }
 
-/// Проверка обновлений через GitHub Releases.
+/// Проверка и установка обновлений с GitHub Releases.
 class UpdateChecker {
-  static const repo = 'alexey17001700-coder/window_calc';
-  static const _api = 'https://api.github.com/repos/$repo/releases/latest';
-  static const apkUrl =
-      'https://github.com/$repo/releases/latest/download/app-release.apk';
+  UpdateChecker._();
 
-  /// Текущая версия приложения (из pubspec через PackageInfo).
+  static const String repo = 'alexey17001700-coder/window_calc';
+
   static Future<String> currentVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      return info.version.isEmpty ? '0.0.0' : info.version;
+      return info.version;
     } catch (_) {
       return '0.0.0';
     }
   }
 
-  /// Сравнение версий «3.4.64» и «3.4.63» → 1.
-  static int _cmp(String a, String b) {
-    final pa = a.split('.');
-    final pb = b.split('.');
-    final n = pa.length > pb.length ? pa.length : pb.length;
-    for (var i = 0; i < n; i++) {
-      final x = i < pa.length ? int.tryParse(pa[i].replaceAll(RegExp(r'[^0-9]'), '')) ?? 0 : 0;
-      final y = i < pb.length ? int.tryParse(pb[i].replaceAll(RegExp(r'[^0-9]'), '')) ?? 0 : 0;
-      if (x != y) return x > y ? 1 : -1;
-    }
-    return 0;
-  }
-
-  /// Тихая проверка: ничего не показывает, отдаёт результат наружу.
+  /// Тихая проверка: ничего не показывает, отдаёт результат.
   static Future<UpdateResult> check() async {
     final cur = await currentVersion();
     try {
       final res = await http
-          .get(Uri.parse(_api), headers: const {'Accept': 'application/vnd.github+json'})
+          .get(
+            Uri.parse('https://api.github.com/repos/$repo/releases/latest'),
+            headers: {'Accept': 'application/vnd.github+json'},
+          )
           .timeout(const Duration(seconds: 12));
       if (res.statusCode != 200) {
         return UpdateResult(currentVersion: cur, error: 'HTTP ${res.statusCode}');
       }
-      final data = jsonDecode(res.body) as Map<String, dynamic>;
-      final raw = (data['tag_name'] as String? ?? '').trim();
-      final tag = raw.startsWith('v') ? raw.substring(1) : raw;
-      if (tag.isEmpty) {
-        return UpdateResult(currentVersion: cur, error: 'нет тега релиза');
+      final map = jsonDecode(res.body) as Map<String, dynamic>;
+      final tag = (map['tag_name'] as String? ?? '').replaceAll('v', '');
+      String? apk;
+      final assets = map['assets'];
+      if (assets is List) {
+        for (final a in assets) {
+          final name = (a['name'] as String? ?? '').toLowerCase();
+          if (name.endsWith('.apk')) {
+            apk = a['browser_download_url'] as String?;
+            break;
+          }
+        }
       }
-      return UpdateResult(
-        currentVersion: cur,
-        latestVersion: tag,
-        hasUpdate: _cmp(tag, cur) > 0,
-      );
-    } catch (_) {
-      return UpdateResult(currentVersion: cur, error: 'сеть недоступна');
+      return UpdateResult(currentVersion: cur, latestVersion: tag, apkUrl: apk);
+    } catch (e) {
+      return UpdateResult(currentVersion: cur, error: e.toString());
     }
   }
 
-  /// Проверка при старте: тихо проверяет и показывает диалог, если есть новее.
+  /// Проверка при старте: нашёл обновление — сразу показывает диалог.
   static Future<void> checkOnStart(BuildContext context) async {
     final res = await check();
     if (!context.mounted) return;
     if (res.hasUpdate && res.latestVersion != null) {
-      await showUpdate(context, res.latestVersion!);
+      await showUpdate(context, res.latestVersion!, apkUrl: res.apkUrl);
     }
   }
 
-  /// Диалог «Доступно обновление» со ссылкой на APK.
-  static Future<void> showUpdate(BuildContext context, String version) async {
+  /// Показ диалога обновления.
+  static Future<void> showUpdate(
+    BuildContext context,
+    String version, {
+    String? apkUrl,
+  }) async {
     await showDialog<void>(
       context: context,
-      barrierDismissible: true,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.navy800,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppUi.radiusSm),
-          side: const BorderSide(color: AppColors.line),
+          borderRadius: BorderRadius.circular(AppUi.radiusLg),
+          side: const BorderSide(color: AppColors.border),
         ),
         title: const Text(
           'ДОСТУПНО ОБНОВЛЕНИЕ',
-          style: TextStyle(color: AppColors.gold, fontSize: 13, letterSpacing: 2),
+          style: TextStyle(
+            color: AppColors.gold,
+            fontSize: 14,
+            letterSpacing: 1.4,
+          ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Версия v$version',
-              style: const TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Скачай новый APK и установи поверх — данные замеров сохранятся.',
-              style: TextStyle(color: AppColors.textDim, fontSize: 12.5, height: 1.4),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.navy900,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.line),
-              ),
-              child: const SelectableText(
-                apkUrl,
-                style: TextStyle(color: AppColors.glass, fontSize: 10.5),
-              ),
-            ),
-          ],
+        content: Text(
+          'Версия $version уже вышла.\nУстановить сейчас?',
+          style: const TextStyle(
+            color: AppColors.text,
+            fontSize: 13,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
@@ -136,14 +139,26 @@ class UpdateChecker {
             child: const Text('ПОЗЖЕ', style: TextStyle(color: AppColors.textDim)),
           ),
           TextButton(
-            onPressed: () async {
-              await Clipboard.setData(const ClipboardData(text: apkUrl));
-              if (ctx.mounted) Navigator.of(ctx).pop();
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              if (apkUrl != null) install(apkUrl);
             },
-            child: const Text('СКОПИРОВАТЬ ССЫЛКУ', style: TextStyle(color: AppColors.gold)),
+            child: const Text('УСТАНОВИТЬ', style: TextStyle(color: AppColors.gold)),
           ),
         ],
       ),
     );
+  }
+
+  /// Скачивает APK и открывает системный установщик.
+  static Future<void> install(String url) async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final path = '${dir.path}/almas_update.apk';
+      await Dio().download(url, path);
+      await OpenFilex.open(path);
+    } catch (_) {
+      // тихо: не удалось скачать — пользователь попробует позже
+    }
   }
 }
