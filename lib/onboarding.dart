@@ -503,6 +503,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         sashManual: _sashManual,
         secW: List<double>.from(_secW),
         hinges: List<int>.from(_hinges),
+        doorW: _bbDoorW,
+        doorH: _bbDoorH,
+        fixedW: _bbFixedW,
+        fixedH: _bbFixedH,
+        doorMode: _doorMode,
+        fixedMode: _fixedMode,
       );
 
   /// Загрузить изделие в поля мастера.
