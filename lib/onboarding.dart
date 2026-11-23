@@ -680,6 +680,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       addr: _addr.text,
       flat: _flat.text,
       floor: _floor.text,
+      items: _items,
       path: _picked,
       multi: _multi,
       sizes: _sizes,
