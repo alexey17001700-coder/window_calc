@@ -205,6 +205,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       }
       b.writeln(_dash);
     }
+    b.writeln('ВСЕГО ИЗДЕЛИЙ: ${items.length}');
     return b.toString();
   }
 
