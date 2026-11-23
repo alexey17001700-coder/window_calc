@@ -600,15 +600,15 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
           else
             for (var i = 0; i < items.length; i++) ...[
               if (i > 0) const SizedBox(height: 12),
-              _sizeItem(items[i]),
+              _sizeItem(items[i], sizes),
             ],
         ],
       ),
     );
   }
 
-  Widget _sizeItem(String item) {
-    final f = widget.sizes[item];
+  Widget _sizeItem(String item, Map<String, Map<String, int>> sizes) {
+    final f = sizes[item];
     final rows = <MapEntry<String, int>>[
       if (f != null) ...f.entries,
     ];
