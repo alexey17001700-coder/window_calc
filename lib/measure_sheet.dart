@@ -411,6 +411,76 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     );
   }
 
+  // ─────────────────────── БЛОК ОДНОГО ИЗДЕЛИЯ ───────────────────────
+  Widget _itemBlock(int i, _SheetItem it, int total) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _itemHead(i, total),
+        const SizedBox(height: 10),
+        _block('ИЗДЕЛИЕ', [
+          ('ЦЕПОЧКА', it.path.isEmpty ? '—' : it.path.join(' · ')),
+          ('СТЕКЛОПАКЕТ', it.glass.isEmpty ? 'НЕ ВЫБРАН' : it.glass),
+        ]),
+        if (it.sashModes.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _block('КОНСТРУКЦИЯ', [
+            ('СТВОРОК', '${it.sashModes.length}'),
+            ('СТВОРКИ', _sashLineOf(it.sashModes)),
+            ('ПО ГОСТ', _sashLettersOf(it.sashModes)),
+            if (it.widthMm > 0) ('ШИРИНА СЕКЦИЙ', _sectionsMmOf(it)),
+          ]),
+        ],
+        const SizedBox(height: 12),
+        _sizesBlock(it.multi, it.sizes),
+      ],
+    );
+  }
+
+  /// Заголовок изделия: «ИЗДЕЛИЕ 2 ИЗ 3».
+  Widget _itemHead(int i, int total) {
+    return Row(
+      children: [
+        Container(
+          width: 26,
+          height: 26,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: AppColors.goldGradient,
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.gold.withOpacity(0.30),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            '${i + 1}',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: AppColors.navy900,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            'ИЗДЕЛИЕ ${i + 1} ИЗ $total',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.4,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   // ─────────────────────────── БЛОК СТРОК ───────────────────────────
   Widget _block(String title, List<(String, String)> rows) {
     return Container(
