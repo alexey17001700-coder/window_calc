@@ -2,101 +2,81 @@ import 'package:flutter/material.dart';
 
 /// Палитра приложения «Замерщик окон Almas».
 class AppColors {
-  static const navy900 = Color(0xFF070C16);
-  static const navy800 = Color(0xFF0A1220);
-  static const navy700 = Color(0xFF0E1A2C);
-  static const card = Color(0xFF0B1524);
-  static const line = Color(0xFF1B2C44);
+  AppColors._();
 
-  static const gold = Color(0xFFC9A227);
-  static const goldLight = Color(0xFFEFE0B4);
-  static const goldDark = Color(0xFF9E7B2A);
-  static const goldSoft = Color(0xFFDCBB66);
+  static const Color navy900 = Color(0xFF060B14);
+  static const Color navy800 = Color(0xFF0A1220);
+  static const Color navy700 = Color(0xFF0E1A2C);
+  static const Color card = Color(0xFF0C1626);
+  static const Color border = Color(0xFF1B2C44);
 
-  /// Бронза — тёплый тёмно-золотой акцент (орбы фона, иконки полей).
-  static const bronze = Color(0xFF8A6A2A);
+  static const Color gold = Color(0xFFC9A227);
+  static const Color goldLight = Color(0xFFEFE0B4);
+  static const Color goldDark = Color(0xFF9E7B2A);
 
-  /// Градиент золота: кнопки, плитки, акценты.
-  static const goldGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [goldLight, gold, goldDark],
-  );
+  static const Color text = Color(0xFFE8EEF7);
+  static const Color textDim = Color(0xFF7E93AC);
+  static const Color textFaint = Color(0xFF44586F);
 
-  /// Градиент шапки мастера.
-  static const navyGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [navy700, navy900],
-  );
+  static const Color glassTop = Color(0xFFD8EDFC);
+  static const Color glassBottom = Color(0xFFB6DBF4);
+  static const Color glassLine = Color(0xFF7FB3D5);
 
-  static const text = Color(0xFFE8EEF7);
-  static const textDim = Color(0xFF7E93AC);
-  static const textFaint = Color(0xFF44586F);
-
-  static const glass = Color(0xFFB6DBF4);
-  static const glassDeep = Color(0xFF7FB3D5);
-  static const danger = Color(0xFFE05A5A);
+  static const Color danger = Color(0xFFE05A5A);
+  static const Color ok = Color(0xFF4CC38A);
 }
 
-/// Общие размеры, градиенты и тени интерфейса.
+/// Общие размеры интерфейса.
 class AppUi {
-  static const radius = 26.0;
-  static const radiusSm = 14.0;
-  static const pad = 18.0;
-  static const buttonH = 52.0;
+  AppUi._();
 
-  static const currency = '₽';
+  static const double radius = 16;
+  static const double radiusLg = 26;
+  static const double pad = 16;
+  static const double gap = 12;
+  static const double buttonH = 52;
+}
 
-  static const goldGrad = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [AppColors.goldLight, AppColors.gold, AppColors.goldDark],
+/// Тёмная тема приложения.
+ThemeData buildAppTheme() {
+  final base = ThemeData.dark(useMaterial3: true);
+  return base.copyWith(
+    scaffoldBackgroundColor: AppColors.navy900,
+    colorScheme: base.colorScheme.copyWith(
+      primary: AppColors.gold,
+      secondary: AppColors.goldLight,
+      surface: AppColors.navy800,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.navy900,
+      elevation: 0,
+      centerTitle: true,
+      iconTheme: IconThemeData(color: AppColors.gold),
+      titleTextStyle: TextStyle(
+        color: AppColors.text,
+        fontSize: 15,
+        letterSpacing: 1.6,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: false,
+      fillColor: Colors.transparent,
+      border: InputBorder.none,
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      disabledBorder: InputBorder.none,
+      errorBorder: InputBorder.none,
+      hintStyle: TextStyle(color: AppColors.textDim, fontSize: 14),
+    ),
+    textTheme: base.textTheme.apply(
+      bodyColor: AppColors.text,
+      displayColor: AppColors.text,
+    ),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: AppColors.navy700,
+      contentTextStyle: TextStyle(color: AppColors.text, fontSize: 13),
+      behavior: SnackBarBehavior.floating,
+    ),
   );
-
-  static const cardGrad = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [AppColors.navy700, AppColors.navy800],
-  );
-
-  static const bgGrad = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFF0B1526), AppColors.navy900, Color(0xFF04070D)],
-  );
-
-  static const cardShadow = <BoxShadow>[
-    BoxShadow(color: Color(0xCC000000), blurRadius: 34, offset: Offset(0, 16)),
-    BoxShadow(color: Color(0x33C9A227), blurRadius: 26, offset: Offset(0, 8)),
-  ];
-
-  static const softShadow = <BoxShadow>[
-    BoxShadow(color: Color(0x99000000), blurRadius: 22, offset: Offset(0, 10)),
-  ];
-
-  /// Подпись поля / мелкий заголовок с разрядкой.
-  static Widget label(String text, {Color? color, double size = 10}) => Text(
-        text.toUpperCase(),
-        style: TextStyle(
-          fontSize: size,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.4,
-          color: color ?? AppColors.gold,
-        ),
-      );
-
-  /// Заголовок раздела.
-  static Widget sectionTitle(BuildContext context, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Text(
-          text.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.6,
-            color: AppColors.gold,
-          ),
-        ),
-      );
 }
