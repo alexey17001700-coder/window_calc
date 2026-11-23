@@ -76,6 +76,28 @@ class MeasureSheetView extends StatefulWidget {
   State<MeasureSheetView> createState() => _MeasureSheetViewState();
 }
 
+/// Одно изделие, разобранное для показа в листе:
+/// стеклопакет — уже текстом, створки — названиями по ГОСТ.
+class _SheetItem {
+  _SheetItem({
+    required this.path,
+    required this.multi,
+    required this.sizes,
+    required this.glass,
+    required this.sashModes,
+    required this.widthMm,
+    required this.sectionWidths,
+  });
+
+  final List<String> path;
+  final List<String> multi;
+  final Map<String, Map<String, int>> sizes;
+  final String glass;
+  final List<String> sashModes;
+  final int widthMm;
+  final List<double> sectionWidths;
+}
+
 class _MeasureSheetViewState extends State<MeasureSheetView> {
   bool _copied = false;
 
