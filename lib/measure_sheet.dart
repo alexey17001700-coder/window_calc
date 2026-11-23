@@ -745,22 +745,31 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   /// Собрать лист в HTML (с фото) и отдать на печать → PDF / отправку.
   Future<void> _exportSheet() async {
     final photos = await PhotoStore.asBase64(_photos);
+    final items = _items;
     final rows = <(String, String)>[
       ('ТЕЛЕФОН', _or(widget.phone, '—')),
       ('АДРЕС', _or(widget.addr, '—')),
       ('КВ. / ЭТАЖ', '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
-      ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
-      if (widget.sashModes.isNotEmpty)
-        ('КОНСТРУКЦИЯ',
-            '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
-      if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
-        ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
-      for (final item in widget.multi) (item, _sizesLine(item)),
+      for (var n = 0; n < items.length; n++) ...[
+        ('ИЗДЕЛИЕ ${n + 1}',
+            items[n].path.isEmpty ? '—' : items[n].path.join(' · ')),
+        ('СТЕКЛОПАКЕТ',
+            items[n].glass.isEmpty ? 'НЕ ВЫБРАН' : items[n].glass),
+        if (items[n].sashModes.isNotEmpty)
+          ('КОНСТРУКЦИЯ',
+              '${items[n].sashModes.length} СТВ. · ${_sashLettersOf(items[n].sashModes)}'),
+        if (items[n].sashModes.isNotEmpty && items[n].widthMm > 0)
+          ('ШИРИНА СЕКЦИЙ', _sectionsMmOf(items[n])),
+        for (final item in items[n].multi)
+          (item, _sizesLine(item, items[n].sizes)),
+      ],
     ];
 
     final html = SheetExport.html(
       client: _or(widget.name, '—'),
-      product: widget.path.isEmpty ? '—' : widget.path.join(' · '),
+      product: items.length > 1
+          ? 'ИЗДЕЛИЙ: ${items.length}'
+          : (items.first.path.isEmpty ? '—' : items.first.path.join(' · ')),
       rows: rows,
       photos: photos,
     );
