@@ -196,6 +196,12 @@ class MeasureItem {
       sashManual: j['sashManual'] is num ? (j['sashManual'] as num).toInt() : 0,
       secW: dl(j['secW']),
       hinges: il(j['hinges']),
+      doorW: j['doorW'] is num ? (j['doorW'] as num).toInt() : 600,
+      doorH: j['doorH'] is num ? (j['doorH'] as num).toInt() : 2100,
+      fixedW: j['fixedW'] is num ? (j['fixedW'] as num).toInt() : 600,
+      fixedH: j['fixedH'] is num ? (j['fixedH'] as num).toInt() : 500,
+      doorMode: j['doorMode'] is num ? (j['doorMode'] as num).toInt() : 1,
+      fixedMode: j['fixedMode'] is num ? (j['fixedMode'] as num).toInt() : 0,
     );
   }
 }
