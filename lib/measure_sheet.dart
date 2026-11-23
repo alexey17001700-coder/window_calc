@@ -788,18 +788,32 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   /// Отправить замер на сервер Штаба; нет сети — замер уходит в очередь.
   Future<void> _pushToServer() async {
     setState(() => _syncBusy = true);
+    final items = _items;
+    final first = items.first;
     final payload = <String, dynamic>{
       'client': _or(widget.name, '—'),
       'phone': _or(widget.phone, '—'),
       'address': _or(widget.addr, '—'),
       'flat': _or(widget.flat, '—'),
       'floor': _or(widget.floor, '—'),
-      'product': widget.path,
-      'multi': widget.multi,
-      'glass': widget.glass,
-      'sash': widget.sashModes,
-      'widthMm': widget.widthMm,
-      'sizes': widget.sizes,
+      'product': first.path,
+      'multi': first.multi,
+      'glass': first.glass,
+      'sash': first.sashModes,
+      'widthMm': first.widthMm,
+      'sizes': first.sizes,
+      'itemsCount': items.length,
+      'items': [
+        for (final it in items)
+          {
+            'product': it.path,
+            'multi': it.multi,
+            'glass': it.glass,
+            'sash': it.sashModes,
+            'widthMm': it.widthMm,
+            'sizes': it.sizes,
+          },
+      ],
       'photos': _photos.length,
       'at': DateTime.now().millisecondsSinceEpoch,
     };
