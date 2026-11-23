@@ -53,6 +53,12 @@ class _GostPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // ── БАЛКОННЫЙ БЛОК — отдельный чертёж ──
+    if (balconyBlock) {
+      _paintBalcony(canvas, size);
+      return;
+    }
+
     final g = _geo(size);
 
     // ── ЛИСТ ──
