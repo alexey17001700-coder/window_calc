@@ -48,6 +48,88 @@ List<Rect> _sashRects(Rect glass, int n, [List<double>? widths]) {
   return out;
 }
 
+/// ═══════════════════════════════════════════════════════════════════
+///  ГЕОМЕТРИЯ БАЛКОННОГО БЛОКА
+///  Дверь слева (на всю высоту) + боковая колонна справа:
+///  сверху — глухой стеклопакет, снизу — сэндвич-панель.
+/// ═══════════════════════════════════════════════════════════════════
+class _BalconyGeo {
+  const _BalconyGeo({
+    required this.wall,
+    required this.opening,
+    required this.frameOuter,
+    required this.door,
+    required this.side,
+    required this.fixed,
+    required this.panel,
+  });
+
+  final Rect wall;
+  final Rect opening;
+  final Rect frameOuter;
+
+  /// Створка ДВЕРИ — на всю высоту блока.
+  final Rect door;
+
+  /// Боковая колонна целиком (глухняк + панель).
+  final Rect side;
+
+  /// Глухой стеклопакет сверху колонны.
+  final Rect fixed;
+
+  /// Сэндвич-панель снизу колонны.
+  final Rect panel;
+}
+
+/// doorFrac — доля ширины двери от общей ширины блока,
+/// fixedFrac — доля высоты глухняка от высоты блока.
+_BalconyGeo _balconyGeo(Size s, double doorFrac, double fixedFrac) {
+  final wall = Rect.fromLTWH(
+    44,
+    30,
+    math.max(20, s.width - 62),
+    math.max(20, s.height - 70),
+  );
+  final opening = wall.deflate(11);
+  final frameOuter = opening.deflate(5);
+  final inner = frameOuter.deflate(4.5);
+  final dw = doorFrac.clamp(0.25, 0.75);
+  final door = Rect.fromLTWH(
+    inner.left,
+    inner.top,
+    inner.width * dw,
+    inner.height,
+  );
+  final side = Rect.fromLTWH(
+    door.right,
+    inner.top,
+    inner.width * (1 - dw),
+    inner.height,
+  );
+  final fh = fixedFrac.clamp(0.10, 0.90);
+  final fixed = Rect.fromLTWH(
+    side.left,
+    side.top,
+    side.width,
+    inner.height * fh,
+  );
+  final panel = Rect.fromLTWH(
+    side.left,
+    fixed.bottom,
+    side.width,
+    inner.height * (1 - fh),
+  );
+  return _BalconyGeo(
+    wall: wall,
+    opening: opening,
+    frameOuter: frameOuter,
+    door: door,
+    side: side,
+    fixed: fixed,
+    panel: panel,
+  );
+}
+
 Path _openPath(Rect r, bool arched) {
   if (!arched) return Path()..addRect(r);
   final rad = r.width * 0.5;
