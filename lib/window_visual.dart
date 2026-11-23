@@ -288,7 +288,9 @@ class _WindowVisualState extends State<WindowVisual> {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                'ТАП: СВЕРХУ — ШИРИНА, СЛЕВА — ВЫСОТА, ПОД СЕКЦИЕЙ — ЕЁ ШИРИНА',
+                widget.balconyBlock
+                    ? 'ТАП: ПОД ДВЕРЬЮ — ШИРИНА ДВЕРИ, ПОД ГЛУХНЯКОМ — ЕГО ШИРИНА, СЛЕВА — ВЫСОТА, СПРАВА — ВЫСОТА ГЛУХНЯКА'
+                    : 'ТАП: СВЕРХУ — ШИРИНА, СЛЕВА — ВЫСОТА, ПОД СЕКЦИЕЙ — ЕЁ ШИРИНА',
                 style: TextStyle(
                   fontSize: 8.5,
                   fontWeight: FontWeight.w800,
