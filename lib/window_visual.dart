@@ -198,7 +198,7 @@ class _WindowVisualState extends State<WindowVisual> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'СЕКЦИЯ ${_sel + 1} · ${kSashModeNames[modes[_sel].clamp(0, 3)]}',
+                _headText(modes),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
