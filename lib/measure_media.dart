@@ -3,9 +3,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+// ВАЖНО: и image_picker, и share_plus экспортируют XFile (из cross_file).
+// Два экспорта одного имени — ошибка компиляции:
+//   «The name 'XFile' is defined in the libraries
+//    'package:image_picker/image_picker.dart' and
+//    'package:share_plus/share_plus.dart'»
+// Именно она валила сборку APK с 3.4.30 (когда появился этот файл).
+// Поэтому XFile берём НАПРЯМУЮ из cross_file, а из пакетов его скрываем.
+import 'package:cross_file/cross_file.dart' show XFile;
+import 'package:image_picker/image_picker.dart' hide XFile;
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:share_plus/share_plus.dart' hide XFile;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme.dart';
