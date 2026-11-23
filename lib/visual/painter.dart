@@ -197,6 +197,179 @@ class _GostPainter extends CustomPainter {
         size: 7.5, color: const Color(0xFF7E93AC), alignLeft: true);
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  //  БАЛКОННЫЙ БЛОК
+  //  Дверь 600 × 2100 слева + боковая колонна 600: сверху глухой
+  //  стеклопакет 600 × 500, снизу сэндвич-панель. Итог 1200 × 2100.
+  //  Размеры правятся ТАПОМ: слева — высота двери, справа — высота
+  //  глухняка, снизу — ширина двери и ширина глухняка.
+  // ═══════════════════════════════════════════════════════════════
+  void _paintBalcony(Canvas canvas, Size size) {
+    final g = _balconyGeo(size, _doorFrac, _fixedFrac);
+
+    // ── ЛИСТ ──
+    final sheet = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(14),
+    );
+    canvas.drawRRect(sheet, Paint()..color = _paper);
+    canvas.drawRRect(sheet, _line(const Color(0xFFC9D4E2), 1));
+
+    // ── СТЕНА · ПРОЁМ · РАМА ──
+    canvas.drawRect(g.wall, _line(_ink, 1.2));
+    canvas.drawRect(g.opening, _line(_ink, 1.3));
+    canvas.drawRect(g.frameOuter, _line(_ink, 1.3));
+
+    // ── ОСЕВЫЕ ЛИНИИ ──
+    _axisV(canvas, g.opening.center.dx, g.wall.top - 18, g.wall.bottom + 18);
+    _axisH(canvas, g.opening.center.dy, g.wall.left - 18, g.wall.right + 18);
+
+    // ── ДВЕРЬ (на всю высоту блока) ──
+    _leaf(canvas, g.door, doorMode.clamp(0, 3),
+        hingeLeft: true, hinges: 3, selected: selected == 0);
+
+    // ── ГЛУХНЯК (сверху боковой колонны) ──
+    _leaf(canvas, g.fixed, fixedMode.clamp(0, 3),
+        hingeLeft: true, hinges: 2, selected: selected == 1);
+
+    // ── СЭНДВИЧ-ПАНЕЛЬ (низ боковой колонны) ──
+    _panel(canvas, g.panel);
+
+    // ── УГЛОВЫЕ ВЫНОСКИ 90° ──
+    _corner90(canvas, g.opening.topLeft, 1, 1);
+    _corner90(canvas, g.opening.topRight, -1, 1);
+    _corner90(canvas, g.opening.bottomLeft, 1, -1);
+    _corner90(canvas, g.opening.bottomRight, -1, -1);
+
+    // ── КОМПЛЕКТАЦИЯ НА ЧЕРТЕЖЕ ──
+    final hasSill = parts.contains('С ПОДОКОННИКОМ');
+    final hasDrip = parts.contains('С ОТЛИВОМ');
+    if (parts.contains('С ОТКОСАМИ')) _otkos(canvas, _geo(size));
+    if (hasSill) _sill(canvas, g.opening, g.opening.bottom);
+    if (hasDrip) {
+      _drip(canvas, g.opening, g.opening.bottom + (hasSill ? 9 : 0));
+    }
+
+    // ── РАЗМЕРЫ ──
+    // Габарит блока по ширине — сверху (дверь + глухняк).
+    final totalW = doorWidthMm + fixedWidthMm;
+    final dimTop = g.wall.top - 15;
+    _dimH(canvas, g.opening.left, g.opening.right, dimTop,
+        totalW > 0 ? '$totalW' : '?');
+    _extV(canvas, g.opening.left, g.opening.top, dimTop);
+    _extV(canvas, g.opening.right, g.opening.top, dimTop);
+    _text(canvas, 'БАЛКОННЫЙ БЛОК',
+        Offset(g.opening.center.dx, dimTop - 9),
+        size: 7.5, color: const Color(0xFF7E93AC));
+
+    // Высота блока — слева (= высота двери).
+    final dimLeft = g.wall.left - 17;
+    _dimV(canvas, g.opening.top, g.opening.bottom, dimLeft,
+        doorHeightMm > 0 ? '$doorHeightMm' : '?');
+    _extH(canvas, g.opening.top, g.opening.left, dimLeft);
+    _extH(canvas, g.opening.bottom, g.opening.left, dimLeft);
+
+    // Ширины — нижний ряд: дверь и глухняк.
+    final y = g.wall.bottom + (hasSill || hasDrip ? 30 : 17);
+    _dimH(canvas, g.door.left, g.door.right, y,
+        doorWidthMm > 0 ? '$doorWidthMm' : '?',
+        small: true, below: true);
+    _extV(canvas, g.door.left, g.opening.bottom, y);
+    _extV(canvas, g.door.right, g.opening.bottom, y);
+    _dimH(canvas, g.side.left, g.side.right, y,
+        fixedWidthMm > 0 ? '$fixedWidthMm' : '?',
+        small: true, below: true);
+    _extV(canvas, g.side.left, g.opening.bottom, y);
+    _extV(canvas, g.side.right, g.opening.bottom, y);
+    _text(canvas, 'ДВЕРЬ', Offset(g.door.center.dx, y + 20),
+        size: 7, color: const Color(0xFF7E93AC));
+    _text(canvas, 'ГЛУХНЯК', Offset(g.side.center.dx, y + 20),
+        size: 7, color: const Color(0xFF7E93AC));
+
+    // Высоты справа: глухняк и панель под ним.
+    final x = g.wall.right + 17;
+    _dimV(canvas, g.fixed.top, g.fixed.bottom, x,
+        fixedHeightMm > 0 ? '$fixedHeightMm' : '?',
+        small: true, right: true);
+    _extH(canvas, g.fixed.top, g.opening.right, x);
+    _extH(canvas, g.fixed.bottom, g.opening.right, x);
+    final panelH = doorHeightMm - fixedHeightMm;
+    _dimV(canvas, g.panel.top, g.panel.bottom, x,
+        panelH > 0 ? '$panelH' : '?',
+        small: true, right: true);
+    _extH(canvas, g.panel.top, g.opening.right, x);
+    _extH(canvas, g.panel.bottom, g.opening.right, x);
+
+    // ── ПОДПИСЬ ЛИСТА ──
+    _text(canvas, 'РАЗМЕРЫ В ММ', Offset(g.wall.left, size.height - 12),
+        size: 7.5, color: const Color(0xFF7E93AC), alignLeft: true);
+  }
+
+  /// Доля ширины двери от общей ширины блока.
+  double get _doorFrac {
+    final t = doorWidthMm + fixedWidthMm;
+    if (t <= 0) return 0.5;
+    return (doorWidthMm / t).clamp(0.25, 0.75);
+  }
+
+  /// Доля высоты глухняка от высоты блока.
+  double get _fixedFrac {
+    if (doorHeightMm <= 0) return 0.25;
+    return (fixedHeightMm / doorHeightMm).clamp(0.10, 0.90);
+  }
+
+  /// Одна ячейка блока: обвязка + голубой стеклопакет + обозначение
+  /// открывания + фурнитура + буква по ГОСТ + подсветка выбранной.
+  void _leaf(Canvas canvas, Rect r, int mode,
+      {required bool hingeLeft,
+      required int hinges,
+      required bool selected}) {
+    final o = r.deflate(2.5);
+    canvas.drawRect(o, _line(_ink, 1.1));
+    final gl = o.deflate(1.6);
+    final glR = RRect.fromRectAndRadius(gl, const Radius.circular(2));
+    canvas.drawRRect(
+      glR,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFD8EDFC), Color(0xFFB6DBF4)],
+        ).createShader(gl),
+    );
+    canvas.drawRRect(glR, _line(const Color(0xFF7FB3D5), 0.9));
+    _openingMark(canvas, gl, mode, hingeLeft: hingeLeft);
+    _hardware(canvas, o, mode, hingeLeft: hingeLeft, hinges: hinges);
+    _sashLetter(canvas, gl, mode);
+    if (selected) {
+      canvas.drawRect(
+        r.deflate(1),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.4
+          ..color = AppColors.gold,
+      );
+    }
+  }
+
+  /// СЭНДВИЧ-ПАНЕЛЬ — белая, с едва заметной штриховкой и подписью.
+  void _panel(Canvas canvas, Rect r) {
+    final o = r.deflate(2.5);
+    canvas.drawRect(o, Paint()..color = const Color(0xFFFFFFFF));
+    canvas.drawRect(o, _line(_ink, 1.1));
+    canvas.save();
+    canvas.clipRect(o);
+    final p = Paint()
+      ..color = const Color(0xFFE3E9F0)
+      ..strokeWidth = 0.8;
+    for (double x = o.left - o.height; x < o.right + o.height; x += 9) {
+      canvas.drawLine(Offset(x, o.bottom), Offset(x + o.height, o.top), p);
+    }
+    canvas.restore();
+    _text(canvas, 'СЭНДВИЧ', o.center,
+        size: 7.5, color: const Color(0xFF7E93AC));
+  }
+
   // ─────────────── ОСЕВАЯ ЛИНИЯ (штрихпунктир) ───────────────
   void _axisV(Canvas canvas, double x, double y1, double y2) =>
       _dashDot(canvas, Offset(x, y1), Offset(x, y2));
