@@ -156,6 +156,12 @@ class MeasureItem {
         'sashManual': sashManual,
         'secW': secW,
         'hinges': hinges,
+        'doorW': doorW,
+        'doorH': doorH,
+        'fixedW': fixedW,
+        'fixedH': fixedH,
+        'doorMode': doorMode,
+        'fixedMode': fixedMode,
       };
 
   static MeasureItem fromJson(Map<String, dynamic> j) {
