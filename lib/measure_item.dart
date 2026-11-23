@@ -1,207 +1,175 @@
-/// ═══════════════════════════════════════════════════════════════════
-///  ИЗДЕЛИЕ ЗАМЕРА  ·  v3.4.57
-///  Один замер = один клиент + НЕСКОЛЬКО изделий (окно, балкон,
-///  откосы, отлив…). Каждое изделие — это своя цепочка дерева,
-///  своя комплектация, свои размеры, стеклопакет и створки.
-///  Класс хранит всё это и умеет сохраняться в JSON (история, сервер).
-/// ═══════════════════════════════════════════════════════════════════
-class MeasureItem {
-  MeasureItem({
-    List<String>? path,
-    List<String>? multi,
-    Map<String, Map<String, int>>? sizes,
-    this.glass = -1,
-    this.widthMm = 0,
-    this.heightMm = 0,
-    List<int>? sashModes,
-    this.sashManual = 0,
-    List<double>? secW,
-    List<int>? hinges,
-    this.doorW = 600,
-    this.doorH = 2100,
-    this.fixedW = 600,
-    this.fixedH = 500,
-    this.doorMode = 1,
-    this.fixedMode = 0,
-  })  : path = path ?? const [],
-        multi = multi ?? const [],
-        sizes = sizes ?? const {},
-        sashModes = sashModes ?? const [],
-        secW = secW ?? const [],
-        hinges = hinges ?? const [];
+import 'dart:convert';
 
-  /// Цепочка дерева: ЗАМЕР → ОКНО → вид → тип дома.
-  final List<String> path;
+/// Балконный блок: дверь + глухое окно (глухняк), выровненное по верху двери.
+/// Все размеры — в МИЛЛИМЕТРАХ.
+class BalconyBlock {
+  double doorWidth; // ширина двери, по умолчанию 600
+  double doorHeight; // высота двери, по умолчанию 2100
+  double blindWidth; // ширина глухняка, по умолчанию 600
+  double blindHeight; // высота глухняка, по умолчанию 500
+  bool blindRight; // true — глухняк справа от двери
 
-  /// Отмеченная комплектация (финальный уровень дерева, мультивыбор).
-  final List<String> multi;
+  BalconyBlock({
+    this.doorWidth = 600,
+    this.doorHeight = 2100,
+    this.blindWidth = 600,
+    this.blindHeight = 500,
+    this.blindRight = true,
+  });
 
-  /// Размеры по пунктам комплектации — уже в МИЛЛИМЕТРАХ.
-  final Map<String, Map<String, int>> sizes;
+  /// Габарит блока по ширине.
+  double get totalWidth => doorWidth + blindWidth;
 
-  /// Выбранный стеклопакет (-1 — не выбран).
-  final int glass;
+  /// Габарит блока по высоте (равен высоте двери).
+  double get totalHeight => doorHeight;
 
-  /// Габарит изделия (вводится тапом по чертежу).
-  final int widthMm;
-  final int heightMm;
+  /// Площадь блока, м².
+  double get area => (totalWidth / 1000) * (totalHeight / 1000);
 
-  /// Обозначение каждой створки (индекс в kSashModeNames).
-  final List<int> sashModes;
+  /// Площадь остекления, м² (дверь ~75% стекла + глухняк целиком).
+  double get glazingArea =>
+      (doorWidth / 1000) * (doorHeight / 1000) * 0.75 +
+      (blindWidth / 1000) * (blindHeight / 1000);
 
-  /// Ручное число створок (0 — по типу изделия из дерева).
-  final int sashManual;
+  /// Метраж уплотнителя по контурам, м.
+  double get sealLength =>
+      ((doorWidth + doorHeight) * 2 + (blindWidth + blindHeight) * 2) / 1000;
 
-  /// Доли ширины секций (пусто — секции равные).
-  final List<double> secW;
-
-  /// Число петель на каждой створке (пусто — по 2: верхняя и нижняя).
-  final List<int> hinges;
-
-  /// БАЛКОННЫЙ БЛОК: дверь + глухняк сверху боковой колонны.
-  /// Ширина двери · высота двери · ширина глухняка · высота глухняка (ММ).
-  final int doorW;
-  final int doorH;
-  final int fixedW;
-  final int fixedH;
-
-  /// Обозначения ДВЕРИ и ГЛУХНЯКА (индексы в kSashModeNames).
-  final int doorMode;
-  final int fixedMode;
-
-  /// Это БАЛКОННЫЙ БЛОК? (2-й уровень дерева — «БАЛКОННЫЙ БЛОК»).
-  bool get balconyBlock => kind.toUpperCase().contains('БАЛКОННЫЙ');
-
-  /// Общая ширина блока = ширина двери + ширина глухняка.
-  int get blockWidth => doorW + fixedW;
-
-  /// Тип изделия (2-й уровень дерева): ОКНО, БАЛКОН, ДВЕРЬ…
-  String get kind => path.length > 1 ? path[1] : '';
-
-  /// Вид изделия (3-й уровень): ОДНОСТВОРЧАТОЕ, ДВУХСТВОРЧАТОЕ…
-  String get type => path.length > 2 ? path[2] : '';
-
-  /// Тип дома (4-й уровень): КИРПИЧКА, ПАНЕЛЬКА…
-  String get house => path.length > 3 ? path[3] : '';
-
-  /// Сколько створок: ручной выбор замерщика, иначе — по типу изделия.
-  int get sashCount {
-    if (sashManual > 0) return sashManual;
-    final t = type.toUpperCase();
-    if (t.contains('ТРЁХСТВ') || t.contains('ТРЕХСТВ')) return 3;
-    if (t.contains('ДВУХСТВ') || t.contains('ДВУСТВ')) return 2;
-    return 1;
-  }
-
-  /// Обозначения створок (индексы), приведённые к числу створок.
-  List<int> get modes {
-    final n = sashCount;
-    if (sashModes.length == n) return sashModes;
-    return List<int>.filled(n, 1);
-  }
-
-  /// Доли ширины секций, приведённые к числу створок.
-  List<double> get secWidths {
-    final n = sashCount;
-    if (secW.length == n) {
-      final sum = secW.fold<double>(0, (a, b) => a + b);
-      if (sum > 0) return [for (final w in secW) w / sum];
-    }
-    return List<double>.filled(n, 1.0 / n);
-  }
-
-  /// Число петель на каждой створке.
-  List<int> get hingeCounts {
-    final n = sashCount;
-    if (hinges.length == n) return hinges;
-    return List<int>.filled(n, 2);
-  }
-
-  /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
-  int mmOf(String field) {
-    if (field == 'ШИРИНА' && widthMm > 0) return widthMm;
-    if (field == 'ВЫСОТА' && heightMm > 0) return heightMm;
-    for (final e in sizes.values) {
-      final v = e[field];
-      if (v != null && v > 0) return v;
-    }
-    return 0;
-  }
-
-  /// Изделие на балконе / лоджии: у подоконника, отлива и козырька
-  /// ДРУГИЕ надбавки к длине. Признак — балкон/лоджия в дереве либо
-  /// козырёк в комплектации (козырёк бывает только на балконе).
-  bool get balcony {
-    final all = [...path, ...multi].join(' ').toUpperCase();
-    return all.contains('БАЛКОН') ||
-        all.contains('ЛОДЖИ') ||
-        all.contains('КОЗЫР');
-  }
-
-  /// Короткая подпись изделия для карточки: «ОКНО · ДВУХСТВОРЧАТОЕ».
-  String get label {
-    final p = [...path];
-    if (p.isNotEmpty && p.first.toUpperCase().contains('ЗАМЕР')) p.removeAt(0);
-    return p.isEmpty ? 'ИЗДЕЛИЕ' : p.join(' · ');
+  void reset() {
+    doorWidth = 600;
+    doorHeight = 2100;
+    blindWidth = 600;
+    blindHeight = 500;
+    blindRight = true;
   }
 
   Map<String, dynamic> toJson() => {
-        'path': path,
-        'multi': multi,
-        'sizes': sizes,
-        'glass': glass,
-        'widthMm': widthMm,
-        'heightMm': heightMm,
-        'sashModes': sashModes,
-        'sashManual': sashManual,
-        'secW': secW,
-        'hinges': hinges,
-        'doorW': doorW,
-        'doorH': doorH,
-        'fixedW': fixedW,
-        'fixedH': fixedH,
-        'doorMode': doorMode,
-        'fixedMode': fixedMode,
+        'doorWidth': doorWidth,
+        'doorHeight': doorHeight,
+        'blindWidth': blindWidth,
+        'blindHeight': blindHeight,
+        'blindRight': blindRight,
       };
 
-  static MeasureItem fromJson(Map<String, dynamic> j) {
-    List<String> sl(dynamic v) =>
-        v is List ? [for (final e in v) '$e'] : const [];
-    List<int> il(dynamic v) =>
-        v is List ? [for (final e in v) (e is num ? e.toInt() : 0)] : const [];
-    List<double> dl(dynamic v) => v is List
-        ? [for (final e in v) (e is num ? e.toDouble() : 0.0)]
-        : const [];
-    final rawSizes = j['sizes'];
-    final sizes = <String, Map<String, int>>{};
-    if (rawSizes is Map) {
-      for (final e in rawSizes.entries) {
-        final inner = e.value;
-        if (inner is Map) {
-          sizes['${e.key}'] = {
-            for (final f in inner.entries)
-              '${f.key}': f.value is num ? (f.value as num).toInt() : 0,
-          };
-        }
-      }
-    }
-    return MeasureItem(
-      path: sl(j['path']),
-      multi: sl(j['multi']),
-      sizes: sizes,
-      glass: j['glass'] is num ? (j['glass'] as num).toInt() : -1,
-      widthMm: j['widthMm'] is num ? (j['widthMm'] as num).toInt() : 0,
-      heightMm: j['heightMm'] is num ? (j['heightMm'] as num).toInt() : 0,
-      sashModes: il(j['sashModes']),
-      sashManual: j['sashManual'] is num ? (j['sashManual'] as num).toInt() : 0,
-      secW: dl(j['secW']),
-      hinges: il(j['hinges']),
-      doorW: j['doorW'] is num ? (j['doorW'] as num).toInt() : 600,
-      doorH: j['doorH'] is num ? (j['doorH'] as num).toInt() : 2100,
-      fixedW: j['fixedW'] is num ? (j['fixedW'] as num).toInt() : 600,
-      fixedH: j['fixedH'] is num ? (j['fixedH'] as num).toInt() : 500,
-      doorMode: j['doorMode'] is num ? (j['doorMode'] as num).toInt() : 1,
-      fixedMode: j['fixedMode'] is num ? (j['fixedMode'] as num).toInt() : 0,
-    );
+  factory BalconyBlock.fromJson(Map<String, dynamic> j) => BalconyBlock(
+        doorWidth: (j['doorWidth'] ?? 600).toDouble(),
+        doorHeight: (j['doorHeight'] ?? 2100).toDouble(),
+        blindWidth: (j['blindWidth'] ?? 600).toDouble(),
+        blindHeight: (j['blindHeight'] ?? 500).toDouble(),
+        blindRight: j['blindRight'] ?? true,
+      );
+}
+
+/// Одно изделие в замере.
+class MeasureItem {
+  String id;
+  String workType;
+  String product;
+  double width;
+  double height;
+  int sashes;
+  String glazing; // Г / П / ПО / О
+  String note;
+  BalconyBlock? balcony;
+
+  MeasureItem({
+    required this.id,
+    this.workType = '',
+    this.product = '',
+    this.width = 0,
+    this.height = 0,
+    this.sashes = 1,
+    this.glazing = 'Г',
+    this.note = '',
+    this.balcony,
+  });
+
+  bool get isBalcony => product.toUpperCase().contains('БАЛКОН');
+
+  double get area {
+    if (balcony != null) return balcony!.area;
+    return (width / 1000) * (height / 1000);
   }
+
+  String get sizeText {
+    final b = balcony;
+    if (b != null) {
+      return 'Дверь ${b.doorWidth.round()}×${b.doorHeight.round()} · '
+          'Глухняк ${b.blindWidth.round()}×${b.blindHeight.round()} '
+          '(${b.blindRight ? "справа" : "слева"})';
+    }
+    return '${width.round()}×${height.round()} мм';
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'workType': workType,
+        'product': product,
+        'width': width,
+        'height': height,
+        'sashes': sashes,
+        'glazing': glazing,
+        'note': note,
+        'balcony': balcony?.toJson(),
+      };
+
+  factory MeasureItem.fromJson(Map<String, dynamic> j) => MeasureItem(
+        id: j['id'] ?? '',
+        workType: j['workType'] ?? '',
+        product: j['product'] ?? '',
+        width: (j['width'] ?? 0).toDouble(),
+        height: (j['height'] ?? 0).toDouble(),
+        sashes: j['sashes'] ?? 1,
+        glazing: j['glazing'] ?? 'Г',
+        note: j['note'] ?? '',
+        balcony: j['balcony'] == null
+            ? null
+            : BalconyBlock.fromJson(Map<String, dynamic>.from(j['balcony'])),
+      );
+}
+
+/// Полный замер (клиент + список изделий).
+class Measure {
+  String id;
+  String client;
+  String phone;
+  String address;
+  String date;
+  List<MeasureItem> items;
+
+  Measure({
+    required this.id,
+    this.client = '',
+    this.phone = '',
+    this.address = '',
+    this.date = '',
+    List<MeasureItem>? items,
+  }) : items = items ?? [];
+
+  double get totalArea => items.fold(0.0, (s, i) => s + i.area);
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'client': client,
+        'phone': phone,
+        'address': address,
+        'date': date,
+        'items': items.map((e) => e.toJson()).toList(),
+      };
+
+  factory Measure.fromJson(Map<String, dynamic> j) => Measure(
+        id: j['id'] ?? '',
+        client: j['client'] ?? '',
+        phone: j['phone'] ?? '',
+        address: j['address'] ?? '',
+        date: j['date'] ?? '',
+        items: ((j['items'] ?? []) as List)
+            .map((e) => MeasureItem.fromJson(Map<String, dynamic>.from(e)))
+            .toList(),
+      );
+
+  String encode() => jsonEncode(toJson());
+
+  static Measure decode(String s) =>
+      Measure.fromJson(Map<String, dynamic>.from(jsonDecode(s)));
 }
