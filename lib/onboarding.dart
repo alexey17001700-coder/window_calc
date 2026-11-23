@@ -808,6 +808,217 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
+  /// БАЛКОННЫЙ БЛОК: изделие из дерева — «БАЛКОННЫЙ БЛОК».
+  /// Чертёж рисуется как блок: дверь + глухняк сверху боковой колонны
+  /// (ниже глухняка — сэндвич-панель).
+  bool get _balconyBlock {
+    final t = (_picked.length > 1 ? _picked[1] : '').toUpperCase();
+    return t.contains('БАЛКОННЫЙ');
+  }
+
+  /// Общая ширина блока = ширина двери + ширина глухняка.
+  int get _bbTotalW => _bbDoorW + _bbFixedW;
+
+  /// Правка размера блока (тапом по чертежу или кнопками − / +).
+  void _setBalcony(String field, int mm) {
+    if (mm <= 0) return;
+    setState(() {
+      switch (field) {
+        case 'DOOR_W':
+          _bbDoorW = mm.clamp(300, 2000);
+          break;
+        case 'DOOR_H':
+          _bbDoorH = mm.clamp(1000, 3000);
+          break;
+        case 'FIXED_W':
+          _bbFixedW = mm.clamp(300, 2000);
+          break;
+        case 'FIXED_H':
+          _bbFixedH = mm.clamp(200, _bbDoorH - 200);
+          break;
+      }
+      // Габарит изделия для сметы — всегда общий по блоку.
+      _wMm = _bbTotalW;
+      _hMm = _bbDoorH;
+    });
+  }
+
+  /// Панель балконного блока: размеры двери и глухняка.
+  Widget _balconyControls() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.door_sliding_rounded,
+                  size: 15, color: AppColors.gold),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'БАЛКОННЫЙ БЛОК',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.3,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Text(
+                'ВСЕГО $_bbTotalW × $_bbDoorH ММ',
+                style: const TextStyle(
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: AppColors.gold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          _SectionWidthRow(
+            index: 0,
+            label: 'ДВЕРЬ · ШИРИНА',
+            mm: _bbDoorW,
+            onMinus: () => _setBalcony('DOOR_W', _bbDoorW - 50),
+            onPlus: () => _setBalcony('DOOR_W', _bbDoorW + 50),
+            onEdit: () => _askBalcony('DOOR_W', 'ШИРИНА ДВЕРИ', _bbDoorW),
+          ),
+          const SizedBox(height: 6),
+          _SectionWidthRow(
+            index: 1,
+            label: 'ГЛУХНЯК · ШИРИНА',
+            mm: _bbFixedW,
+            onMinus: () => _setBalcony('FIXED_W', _bbFixedW - 50),
+            onPlus: () => _setBalcony('FIXED_W', _bbFixedW + 50),
+            onEdit: () => _askBalcony('FIXED_W', 'ШИРИНА ГЛУХНЯКА', _bbFixedW),
+          ),
+          const SizedBox(height: 6),
+          _SectionWidthRow(
+            index: 2,
+            label: 'ГЛУХНЯК · ВЫСОТА',
+            mm: _bbFixedH,
+            onMinus: () => _setBalcony('FIXED_H', _bbFixedH - 50),
+            onPlus: () => _setBalcony('FIXED_H', _bbFixedH + 50),
+            onEdit: () => _askBalcony('FIXED_H', 'ВЫСОТА ГЛУХНЯКА', _bbFixedH),
+          ),
+          const SizedBox(height: 6),
+          _SectionWidthRow(
+            index: 3,
+            label: 'ДВЕРЬ · ВЫСОТА',
+            mm: _bbDoorH,
+            onMinus: () => _setBalcony('DOOR_H', _bbDoorH - 50),
+            onPlus: () => _setBalcony('DOOR_H', _bbDoorH + 50),
+            onEdit: () => _askBalcony('DOOR_H', 'ВЫСОТА ДВЕРИ', _bbDoorH),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'ГЛУХНЯК СТОИТ СБОКУ ОТ ДВЕРИ, ПРИЖАТ К ЕЁ ВЕРХУ. '
+            'НИЖЕ ГЛУХНЯКА — СЭНДВИЧ-ПАНЕЛЬ.',
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              height: 1.5,
+              color: Color(0xFF7E93AC),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Ручной ввод размера блока в ММ.
+  Future<void> _askBalcony(String field, String title, int cur) async {
+    final c = TextEditingController(text: cur > 0 ? '$cur' : '');
+    final v = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F1D31),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: AppColors.gold.withOpacity(0.45)),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: Colors.white,
+          ),
+        ),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          cursorColor: AppColors.gold,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+          decoration: InputDecoration(
+            hintText: '600',
+            hintStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF7E93AC),
+            ),
+            suffixText: 'ММ',
+            suffixStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gold,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF0A1220),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(13),
+              borderSide: BorderSide(color: AppColors.gold.withOpacity(0.4)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'ОТМЕНА',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final p = double.tryParse(c.text.trim().replaceAll(',', '.'));
+              Navigator.pop(ctx, p == null ? null : p.round());
+            },
+            child: const Text(
+              'ОК',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: AppColors.gold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (v != null && v > 0) _setBalcony(field, v);
+  }
+
   /// Изделие на балконе / лоджии: у подоконника, отлива и козырька
   /// ДРУГИЕ надбавки к длине. Признак — балкон/лоджия в дереве либо
   /// козырёк в комплектации (козырёк бывает только на балконе).
