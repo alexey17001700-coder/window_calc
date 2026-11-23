@@ -28,10 +28,15 @@ class MeasureSheetView extends StatefulWidget {
     required this.glass,
     required this.onBack,
     required this.onFinish,
+    this.items = const [],
     this.sashModes = const [],
     this.widthMm = 0,
     this.sectionWidths = const [],
   });
+
+  /// Все изделия замера (новый режим: один замер — несколько изделий).
+  /// Пусто — лист показывает одно изделие из одиночных полей ниже.
+  final List<MeasureItem> items;
 
   /// Данные клиента.
   final String name;
