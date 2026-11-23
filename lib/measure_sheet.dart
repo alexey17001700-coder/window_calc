@@ -284,7 +284,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   @override
   Widget build(BuildContext context) {
-    final items = widget.multi;
+    final items = _items;
 
     return Column(
       children: [
@@ -305,24 +305,10 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                       '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
                 ]),
                 const SizedBox(height: 12),
-                _block('ИЗДЕЛИЕ', [
-                  ('ЦЕПОЧКА',
-                      widget.path.isEmpty ? '—' : widget.path.join(' · ')),
-                  ('СТЕКЛОПАКЕТ',
-                      widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
-                ]),
-                const SizedBox(height: 12),
-                if (widget.sashModes.isNotEmpty) ...[
-                  _block('КОНСТРУКЦИЯ', [
-                    ('СТВОРОК', '${widget.sashModes.length}'),
-                    ('СТВОРКИ', _sashLine()),
-                    ('ПО ГОСТ', _sashLetters()),
-                    if (widget.widthMm > 0)
-                      ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
-                  ]),
-                  const SizedBox(height: 12),
+                for (var i = 0; i < items.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 14),
+                  _itemBlock(i, items[i], items.length),
                 ],
-                _sizesBlock(items),
                 const SizedBox(height: 12),
                 MeasureMediaPanel(
                   sessionKey: _mediaKey,
