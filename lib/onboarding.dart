@@ -81,6 +81,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Дополнительные петли замерщик добавляет ВРУЧНУЮ (например, на дверь).
   List<int> _hinges = const [];
 
+  /// БАЛКОННЫЙ БЛОК: дверь + глухняк сверху боковой колонны.
+  /// Размеры по умолчанию — дверь 600 × 2100, глухняк 600 × 500.
+  int _bbDoorW = 600;
+  int _bbDoorH = 2100;
+  int _bbFixedW = 600;
+  int _bbFixedH = 500;
+
+  /// Обозначения двери и глухняка блока (индексы в kSashModeNames).
+  int _doorMode = 1;
+  int _fixedMode = 0;
+
   /// СПИСОК изделий замера: один клиент — НЕСКОЛЬКО изделий
   /// (окно, балкон, откосы, отлив…). Пока изделие одно — как раньше.
   final List<MeasureItem> _items = [];
