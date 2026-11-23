@@ -266,6 +266,13 @@ class _WindowVisualState extends State<WindowVisual> {
                   heightMm: widget.heightMm,
                   sectionWidths: widget.sectionWidths,
                   hingeCounts: widget.hingeCounts,
+                  balconyBlock: widget.balconyBlock,
+                  doorMode: widget.doorMode,
+                  fixedMode: widget.fixedMode,
+                  doorWidthMm: widget.doorWidthMm,
+                  doorHeightMm: widget.doorHeightMm,
+                  fixedWidthMm: widget.fixedWidthMm,
+                  fixedHeightMm: widget.fixedHeightMm,
                 ),
               ),
             );
