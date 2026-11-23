@@ -170,10 +170,12 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     b.writeln(_dash);
 
     final items = _items;
+    b.writeln('ВСЕГО ИЗДЕЛИЙ: ${items.length}');
+    b.writeln(_dash);
     for (var n = 0; n < items.length; n++) {
       final it = items[n];
       b.writeln(
-          'ИЗДЕЛИЕ ${n + 1}: ${it.path.isEmpty ? '—' : it.path.join(' · ')}');
+          'ИЗДЕЛИЕ ${n + 1} ИЗ ${items.length}: ${it.path.isEmpty ? '—' : it.path.join(' · ')}');
       b.writeln('СТЕКЛОПАКЕТ: ${it.glass.isEmpty ? '—' : it.glass}');
       if (it.sashModes.isNotEmpty) {
         final s = <String>[];
