@@ -383,11 +383,11 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                 size: 20, color: AppColors.navy900),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'ЗАМЕРНЫЙ ЛИСТ',
                   style: TextStyle(
                     fontSize: 14,
@@ -396,10 +396,12 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
-                  'ВСЕ РАЗМЕРЫ В МИЛЛИМЕТРАХ',
-                  style: TextStyle(
+                  total > 1
+                      ? 'ВСЕГО ИЗДЕЛИЙ: $total · ВСЕ РАЗМЕРЫ В ММ'
+                      : 'ВСЕ РАЗМЕРЫ В МИЛЛИМЕТРАХ',
+                  style: const TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.3,
