@@ -74,4 +74,29 @@ class AppUi {
   static const softShadow = <BoxShadow>[
     BoxShadow(color: Color(0x99000000), blurRadius: 22, offset: Offset(0, 10)),
   ];
+
+  /// Подпись поля / мелкий заголовок с разрядкой.
+  static Widget label(String text, {Color? color, double size = 10}) => Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          fontSize: size,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.4,
+          color: color ?? AppColors.gold,
+        ),
+      );
+
+  /// Заголовок раздела.
+  static Widget sectionTitle(BuildContext context, String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Text(
+          text.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.6,
+            color: AppColors.gold,
+          ),
+        ),
+      );
 }
