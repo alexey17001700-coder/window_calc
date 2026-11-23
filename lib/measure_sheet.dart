@@ -779,8 +779,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   }
 
   /// «ШИРИНА: 1300 мм · ВЫСОТА: 1400 мм» — размеры одного пункта.
-  String _sizesLine(String item) {
-    final f = widget.sizes[item];
+  String _sizesLine(String item, Map<String, Map<String, int>> sizes) {
+    final f = sizes[item];
     if (f == null || f.isEmpty) return 'РАЗМЕРЫ НЕ ЗАПОЛНЕНЫ';
     return f.entries.map((e) => '${e.key}: ${e.value} мм').join(' · ');
   }
