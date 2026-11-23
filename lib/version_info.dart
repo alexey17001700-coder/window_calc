@@ -11,10 +11,10 @@ class AppVersion {
   const AppVersion._();
 
   /// Версия из pubspec.yaml (без номера сборки).
-  static const String version = '3.4.61';
+  static const String version = '3.4.62';
 
   /// Номер сборки из pubspec.yaml.
-  static const int build = 124;
+  static const int build = 125;
 
   /// Сколько правок накоплено после последнего поднятия версии.
   static const int edits = 0;
