@@ -221,6 +221,17 @@ class _WindowVisualState extends State<WindowVisual> {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapUp: (d) {
+                // 0) БАЛКОННЫЙ БЛОК — своя логика тапов.
+                if (widget.balconyBlock) {
+                  final f = _hitBalconyDim(size, d.localPosition);
+                  if (f != null) {
+                    _editBalcony(f);
+                    return;
+                  }
+                  final i = _hitBalcony(size, d.localPosition);
+                  if (i >= 0) _balconyTap(i);
+                  return;
+                }
                 // 1) Тап по РАЗМЕРНОЙ ЛИНИИ → ввод размера в ММ.
                 final dim = _hitDim(size, d.localPosition);
                 if (dim == 'w') {
