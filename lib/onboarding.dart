@@ -420,6 +420,145 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     });
   }
 
+  // ─────────── ШАГ 6: СПИСОК ИЗДЕЛИЙ ЗАМЕРА ───────────
+  /// Один замер = один клиент + НЕСКОЛЬКО изделий. Здесь видно все изделия:
+  /// тап по карточке — править, крестик — удалить, «+ ИЗДЕЛИЕ» — добавить.
+  Widget _itemsStep() {
+    return Column(
+      children: [
+        Expanded(
+          child: _items.isEmpty
+              ? const Center(
+                  child: Text(
+                    'ИЗДЕЛИЙ ПОКА НЕТ\nНАЖМИ «+ ИЗДЕЛИЕ»',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      height: 1.7,
+                      color: Color(0xFF7E93AC),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  itemCount: _items.length,
+                  itemBuilder: (_, i) => Padding(
+                    padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
+                    child: _ItemCard(
+                      index: i,
+                      item: _items[i],
+                      onTap: () => _editItem(i),
+                      onRemove: () => _removeItem(i),
+                    ),
+                  ),
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Row(
+            children: [
+              _GhostButton('+ ИЗДЕЛИЕ', Icons.add_rounded, _addItem),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _GoldButton('ЗАМЕРНЫЙ ЛИСТ', Icons.receipt_long_rounded,
+                    () => setState(() => _step = 6)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Собрать текущее изделие из полей мастера.
+  MeasureItem _snapshot() => MeasureItem(
+        path: List<String>.from(_picked),
+        multi: List<String>.from(_multi),
+        sizes: _sizes,
+        glass: _glass,
+        widthMm: _wMm,
+        heightMm: _hMm,
+        sashModes: List<int>.from(_sashModes),
+        sashManual: _sashManual,
+        secW: List<double>.from(_secW),
+        hinges: List<int>.from(_hinges),
+      );
+
+  /// Загрузить изделие в поля мастера.
+  void _restore(MeasureItem it) {
+    _picked = List<String>.from(it.path);
+    _multi = List<String>.from(it.multi);
+    _sizes = it.sizes;
+    _glass = it.glass;
+    _wMm = it.widthMm;
+    _hMm = it.heightMm;
+    _sashModes = List<int>.from(it.sashModes);
+    _sashManual = it.sashManual;
+    _secW = List<double>.from(it.secW);
+    _hinges = List<int>.from(it.hinges);
+  }
+
+  /// Сохранить текущее изделие в список: обновить правленое или добавить.
+  void _commitCurrent() {
+    final it = _snapshot();
+    if (_editing >= 0 && _editing < _items.length) {
+      _items[_editing] = it;
+    } else {
+      _items.add(it);
+      _editing = _items.length - 1;
+    }
+  }
+
+  /// Очистить поля мастера под следующее изделие.
+  void _clearCurrent() {
+    _picked = const [];
+    _multi = const [];
+    _sizes = const {};
+    _glass = -1;
+    _wMm = 0;
+    _hMm = 0;
+    _sashModes = const [];
+    _sashManual = 0;
+    _secW = const [];
+    _hinges = const [];
+  }
+
+  /// «+ ИЗДЕЛИЕ»: сохранить текущее, очистить поля, вернуться к дереву.
+  void _addItem() {
+    setState(() {
+      _commitCurrent();
+      _clearCurrent();
+      _editing = -1;
+      _step = 1;
+    });
+  }
+
+  /// Тап по карточке: править изделие.
+  void _editItem(int i) {
+    if (i < 0 || i >= _items.length) return;
+    setState(() {
+      _restore(_items[i]);
+      _editing = i;
+      _step = 3;
+    });
+  }
+
+  /// Крестик: удалить изделие.
+  void _removeItem(int i) {
+    if (i < 0 || i >= _items.length) return;
+    setState(() {
+      _items.removeAt(i);
+      if (_editing == i) {
+        _editing = -1;
+      } else if (_editing > i) {
+        _editing -= 1;
+      }
+    });
+  }
+
   // ─────────────── ШАГ 3: РАЗМЕРЫ ПО ПУНКТАМ ───────────────
   Widget _sizesStep() {
     return MeasureSizesView(
