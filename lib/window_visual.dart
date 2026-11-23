@@ -64,6 +64,15 @@ class WindowVisual extends StatefulWidget {
     this.onWidthEdit,
     this.onHeightEdit,
     this.onSectionEdit,
+    this.balconyBlock = false,
+    this.doorMode = 1,
+    this.fixedMode = 0,
+    this.doorWidthMm = 600,
+    this.doorHeightMm = 2100,
+    this.fixedWidthMm = 600,
+    this.fixedHeightMm = 500,
+    this.onBalconyTap,
+    this.onBalconyEdit,
   });
 
   /// Число створок: 1, 2, 3 или 4.
