@@ -542,6 +542,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _sashManual = 0;
     _secW = const [];
     _hinges = const [];
+    _doorMode = 1;
+    _fixedMode = 0;
+    _bbDoorW = 600;
+    _bbDoorH = 2100;
+    _bbFixedW = 600;
+    _bbFixedH = 500;
   }
 
   /// «+ ИЗДЕЛИЕ»: сохранить текущее, очистить поля, вернуться к дереву.
