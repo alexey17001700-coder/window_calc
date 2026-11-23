@@ -425,8 +425,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _secW = const [];
       _sashModes = const [];
       _hinges = const [];
-      _wMm = 0;
-      _hMm = 0;
+      _doorMode = 1;
+      _fixedMode = 0;
+      _bbDoorW = 600;
+      _bbDoorH = 2100;
+      _bbFixedW = 600;
+      _bbFixedH = 500;
+      // Балконный блок: габарит для сметы — общий по блоку.
+      _wMm = _balconyBlock ? _bbTotalW : 0;
+      _hMm = _balconyBlock ? _bbDoorH : 0;
       _step = 2;
     });
   }
