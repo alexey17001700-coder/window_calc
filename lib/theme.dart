@@ -13,6 +13,23 @@ class AppColors {
   static const goldDark = Color(0xFF9E7B2A);
   static const goldSoft = Color(0xFFDCBB66);
 
+  /// Бронза — тёплый тёмно-золотой акцент (орбы фона, иконки полей).
+  static const bronze = Color(0xFF8A6A2A);
+
+  /// Градиент золота: кнопки, плитки, акценты.
+  static const goldGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [goldLight, gold, goldDark],
+  );
+
+  /// Градиент шапки мастера.
+  static const navyGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [navy700, navy900],
+  );
+
   static const text = Color(0xFFE8EEF7);
   static const textDim = Color(0xFF7E93AC);
   static const textFaint = Color(0xFF44586F);
