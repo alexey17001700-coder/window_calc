@@ -541,7 +541,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   }
 
   // ─────────────────────────── БЛОК РАЗМЕРОВ ───────────────────────────
-  Widget _sizesBlock(List<String> items) {
+  Widget _sizesBlock(List<String> items, Map<String, Map<String, int>> sizes) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
