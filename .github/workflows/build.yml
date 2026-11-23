@@ -142,6 +142,8 @@ jobs:
           grep -nE "error:|Error:|FAILURE|What went wrong|Execution failed|Exception|Could not|not found|requires|не найден" build.log | tail -n 80 || true
           echo "=== ХВОСТ ЛОГА ==="
           tail -n 80 build.log || true
+          echo "=== DART-ОШИБКИ (analyze.log) ==="
+          grep -nE "error •|error:" analyze.log | head -n 60 || true
 
       - name: Get version
         id: version
