@@ -3,172 +3,102 @@ name: Build APK
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - uses: subosito/flutter-action@v2
+      - name: Flutter 3.24.5
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          channel: stable
+          flutter-version: '3.24.5'
+          cache: true
 
       - name: Версии инструментов
-        run: |
-          flutter --version
-          java -version
+        run: flutter --version
 
-      - run: flutter pub get
-
-      - name: Analyze (видно реальные ошибки в логе)
+      - name: Сгенерировать android/ (pubspec защищён)
         run: |
-          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee analyze.log || true
-          echo "=== ОШИБКИ DART (flutter analyze) ==="
-          grep -nE "error •|error:" analyze.log | head -n 40 || true
-
-      # ВАЖНО: android/ генерируется шаблоном Flutter. Шаблон НЕ должен
-      # трогать pubspec.yaml (зависимости + version) — иначе сборка падает
-      # на «Target of URI doesn't exist: package:dio/...», а релиз уходит
-      # с тегом v1.0.0+1. Поэтому pubspec сохраняем и возвращаем на место.
-      - name: Создать android-проект (pubspec защищён)
-        run: |
-          cp pubspec.yaml /tmp/pubspec.yaml.bak
-          flutter create --platforms=android .
-          cp /tmp/pubspec.yaml.bak pubspec.yaml
-          # Шаблон создаёт test/widget_test.dart с несуществующим MyApp —
-          # он засоряет analyze и прячет реальные ошибки Dart.
+          cp pubspec.yaml /tmp/pubspec.yaml
+          flutter create --platforms=android --org com.almas --project-name window_calc .
+          cp /tmp/pubspec.yaml pubspec.yaml
           rm -f test/widget_test.dart
-          grep -n '^version:' pubspec.yaml
-
-      - run: flutter pub get
 
       - name: Set Android SDK levels
         run: |
-          # Плагины (image_picker, share_plus, path_provider) требуют compileSdk 35+.
-          # AGP 8.7 официально тестируется до compileSdk 35 — берём 35, а не 36:
-          # так Gradle не ищет платформу android-36, которой может не быть на раннере.
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/' android/app/build.gradle
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' android/app/build.gradle
-          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 35/' android/app/build.gradle
-          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' android/app/build.gradle
-          sed -i 's/minSdkVersion .*/minSdkVersion 23/' android/app/build.gradle
-          sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle
-          echo "android.suppressUnsupportedCompileSdk=35" >> android/gradle.properties
-          # Платформа android-35 может отсутствовать на раннере — ставим сами,
-          # иначе Gradle падает на «Failed to install ... android-35».
-          SDKMAN="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          if [ -x "$SDKMAN" ]; then
-            yes | "$SDKMAN" --licenses > /dev/null 2>&1 || true
-            "$SDKMAN" "platforms;android-35" "build-tools;35.0.0" > /dev/null 2>&1 || true
-          fi
-          grep -nE 'compileSdk|minSdk|targetSdk' android/app/build.gradle
+          F=android/app/build.gradle
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/' $F || true
+          sed -i 's/compileSdk flutter.compileSdkVersion/compileSdk 35/' $F || true
+          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' $F || true
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' $F || true
+          sed -i 's/minSdkVersion .*/minSdkVersion 23/' $F || true
+          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 35/' $F || true
+          sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' $F || true
+          grep -E "compileSdk|minSdk|targetSdk" $F || true
 
-      - name: Modernize Android toolchain (AGP + Gradle)
+      - name: Modernize Android toolchain (AGP + Gradle + Kotlin)
         run: |
-          # compileSdk 35 требует AGP 8.6+ и Gradle 8.7+.
-          # ВАЖНО: AGP 8.7+ несовместим с gradle-плагином Flutter 3.24 — сборка
-          # падала на конфигурации проекта. Берём МИНИМУМ под compileSdk 35:
-          # AGP 8.6.0 + Gradle 8.7 (ближе всего к диапазону Flutter 3.24).
-          sed -i 's|id "com.android.application" version "[^"]*"|id "com.android.application" version "8.6.0"|' android/settings.gradle
-          sed -i 's|gradle-.*-all.zip|gradle-8.7-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
-          grep -nE 'com.android.application|distributionUrl' android/settings.gradle android/gradle/wrapper/gradle-wrapper.properties
+          sed -i 's/id "com.android.application" version "[^"]*"/id "com.android.application" version "8.6.0"/' android/settings.gradle || true
+          sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle || true
+          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-all.zip|' android/gradle/wrapper/gradle-wrapper.properties || true
+          echo 'android.suppressUnsupportedCompileSdk=35' >> android/gradle.properties || true
+          cat android/settings.gradle || true
 
-      - name: Fix Kotlin version
+      - name: Установить платформу android-35
         run: |
-          cd android
-          sed -i 's|id "org.jetbrains.kotlin.android" version ".*"|id "org.jetbrains.kotlin.android" version "1.9.24"|' settings.gradle
-          sed -i "s|ext.kotlin_version = .*|ext.kotlin_version = '1.9.24'|" build.gradle
-          cd ..
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" > /dev/null 2>&1 || true
 
-      - name: Set app name
-        run: |
-          sed -i 's|android:label="[^"]*"|android:label="Замерщик окон Almas"|' android/app/src/main/AndroidManifest.xml
+      - name: Pub get
+        run: flutter pub get
 
-      - name: Add permissions
-        run: |
-          sed -i 's|<application|<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <uses-permission android:name="android.permission.INTERNET" />\n    <application|' android/app/src/main/AndroidManifest.xml
+      - name: Analyze
+        run: flutter analyze 2>&1 | tee analyze.log || true
 
-      # Подпись НЕ должна ронять сборку: если секрет не задан — собираем
-      # debug-ключом (APK всё равно ставится и обновляется).
-      - name: Decode keystore (если задан)
-        run: |
-          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
-            echo "keystore=yes" >> $GITHUB_ENV
-            echo "Keystore получен"
-          else
-            echo "keystore=no" >> $GITHUB_ENV
-            echo "Секрет KEYSTORE_BASE64 не задан — подпишем debug-ключом"
-          fi
-
-      - name: Create key.properties
-        if: env.keystore == 'yes'
-        run: |
-          cat > android/key.properties <<EOF
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          storeFile=upload-keystore.jks
-          EOF
-
-      - name: Configure signing
-        if: env.keystore == 'yes'
-        run: |
-          cd android/app
-          sed -i 's|^android {|def keystoreProperties = new Properties()\ndef keystorePropertiesFile = rootProject.file("key.properties")\nif (keystorePropertiesFile.exists()) {\n    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n}\n\nandroid {|' build.gradle
-          sed -i 's|    buildTypes {|    signingConfigs {\n        release {\n            keyAlias = keystoreProperties["keyAlias"]\n            keyPassword = keystoreProperties["keyPassword"]\n            storeFile = keystoreProperties["storeFile"] ? file(keystoreProperties["storeFile"]) : null\n            storePassword = keystoreProperties["storePassword"]\n        }\n    }\n    buildTypes {|' build.gradle
-          sed -i 's|signingConfig = signingConfigs.debug|signingConfig = signingConfigs.release|' build.gradle
-          cd ../..
+      - name: Показать ошибки Dart
+        if: always()
+        run: grep -E "error •" analyze.log | head -40 || true
 
       - name: Build APK
-        run: |
-          set -o pipefail
-          flutter build apk --release 2>&1 | tee build.log
+        run: flutter build apk --release 2>&1 | tee build.log
 
       - name: Показать ошибки сборки
         if: failure()
         run: |
-          echo "=== ОШИБКИ СБОРКИ ==="
-          grep -nE "error:|Error:|FAILURE|What went wrong|Execution failed|Exception|Could not|not found|requires|не найден" build.log | tail -n 80 || true
-          echo "=== ХВОСТ ЛОГА ==="
-          tail -n 80 build.log || true
-          echo "=== DART-ОШИБКИ (analyze.log) ==="
-          grep -nE "error •|error:" analyze.log | head -n 60 || true
+          grep -E "error|Error|FAILURE|Exception|What went wrong" build.log | head -60 || true
+          tail -40 build.log || true
 
-      - name: Get version
-        id: version
+      - name: Read version
+        id: ver
+        if: success()
         run: |
-          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          V=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          echo "v=$V" >> $GITHUB_OUTPUT
+          echo "Версия: $V"
 
-      - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
-      - name: Remove old release/tag (если тег уже есть)
-        run: gh release delete "v${{ steps.version.outputs.version }}" --yes --cleanup-tag || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
+      - name: Release
+        if: success()
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Release v${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.ver.outputs.v }}
+          name: Almas ${{ steps.ver.outputs.v }}
+          make_latest: true
           files: build/app/outputs/flutter-apk/app-release.apk
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
