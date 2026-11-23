@@ -523,6 +523,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _sashManual = it.sashManual;
     _secW = List<double>.from(it.secW);
     _hinges = List<int>.from(it.hinges);
+    _bbDoorW = it.doorW;
+    _bbDoorH = it.doorH;
+    _bbFixedW = it.fixedW;
+    _bbFixedH = it.fixedH;
+    _doorMode = it.doorMode;
+    _fixedMode = it.fixedMode;
   }
 
   /// Сохранить текущее изделие в список: обновить правленое или добавить.
