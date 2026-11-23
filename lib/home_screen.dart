@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'onboarding.dart';
+import 'premium_bg.dart';
 import 'theme.dart';
-import 'update_checker.dart';
 
 /// Главное меню приложения.
 class HomeScreen extends StatelessWidget {
@@ -12,154 +11,179 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.navy900,
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppUi.bgGrad),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
+      body: Stack(
+        children: [
+          const Positioned.fill(child: PremiumBg()),
+          SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 8),
-                const Text(
-                  'ЗАМЕРЩИК ОКОН',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AppColors.text,
-                    fontSize: 17,
-                    letterSpacing: 4,
-                    fontWeight: FontWeight.w600,
+                _header(),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+                    children: [
+                      _tile(
+                        context,
+                        'НОВЫЙ ЗАМЕР',
+                        'Обмер объекта и замерный лист',
+                        Icons.add_box_outlined,
+                      ),
+                      _tile(
+                        context,
+                        'ИСТОРИЯ',
+                        'Прошлые замеры и база клиентов',
+                        Icons.history_rounded,
+                      ),
+                      _tile(
+                        context,
+                        'ПРАЙС',
+                        'Стоимость изделий и работ',
+                        Icons.calculate_rounded,
+                      ),
+                      _tile(
+                        context,
+                        'НАСТРОЙКИ',
+                        'Сервер, обновления приложения',
+                        Icons.settings_rounded,
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'ALMAS · ПРЕМИУМ',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.gold, fontSize: 10, letterSpacing: 3),
-                ),
-                const SizedBox(height: 26),
-                _tile(
-                  context,
-                  icon: Icons.add_circle_outline_rounded,
-                  title: 'НОВЫЙ ЗАМЕР',
-                  sub: 'Клиент · дерево · размеры · чертёж',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _tile(
-                  context,
-                  icon: Icons.system_update_alt_rounded,
-                  title: 'ПРОВЕРИТЬ ОБНОВЛЕНИЕ',
-                  sub: 'Тихо проверить новую версию',
-                  onTap: () => UpdateChecker.checkOnStart(context),
-                ),
-                const SizedBox(height: 12),
-                _tile(
-                  context,
-                  icon: Icons.info_outline_rounded,
-                  title: 'О ПРИЛОЖЕНИИ',
-                  sub: 'Версия и назначение',
-                  onTap: () => _about(context),
-                ),
-                const Spacer(),
-                const Text(
-                  'ВСЕ РАЗМЕРЫ В МИЛЛИМЕТРАХ',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textFaint, fontSize: 9.5, letterSpacing: 2),
                 ),
               ],
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _header() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.goldLight, AppColors.goldDark],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.gold.withOpacity(0.28),
+                  blurRadius: 16,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.window_rounded,
+                color: AppColors.navy900, size: 21),
+          ),
+          const SizedBox(width: 12),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ЗАМЕРЩИК ОКОН',
+                style: TextStyle(
+                  color: AppColors.text,
+                  fontSize: 14,
+                  letterSpacing: 1.8,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                'ALMAS · ГЛАВНОЕ МЕНЮ',
+                style: TextStyle(
+                  color: AppColors.textDim,
+                  fontSize: 10,
+                  letterSpacing: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _tile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String sub,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: AppUi.cardGrad,
-          borderRadius: BorderRadius.circular(AppUi.radiusSm),
-          border: Border.all(color: AppColors.line),
-          boxShadow: AppUi.softShadow,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                gradient: AppUi.goldGrad,
-                borderRadius: BorderRadius.circular(11),
+    BuildContext context,
+    String title,
+    String sub,
+    IconData icon,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppUi.radiusLg),
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$title · РАЗДЕЛ ГОТОВИТСЯ')),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppUi.radiusLg),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.card, AppColors.navy700],
               ),
-              child: Icon(icon, size: 20, color: const Color(0xFF1A1206)),
+              border: Border.all(color: AppColors.border),
+              boxShadow: const [
+                BoxShadow(color: Colors.black54, blurRadius: 22, offset: Offset(0, 10)),
+              ],
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppColors.text,
-                      fontSize: 12.5,
-                      letterSpacing: 1.6,
-                      fontWeight: FontWeight.w600,
-                    ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(13),
+                    color: AppColors.gold.withOpacity(0.12),
+                    border: Border.all(color: AppColors.gold.withOpacity(0.35)),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    sub,
-                    style: const TextStyle(color: AppColors.textDim, fontSize: 11),
+                  child: Icon(icon, color: AppColors.gold, size: 21),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: AppColors.text,
+                          fontSize: 13,
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        sub,
+                        style: const TextStyle(
+                          color: AppColors.textDim,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const Icon(Icons.chevron_right_rounded,
+                    color: AppColors.gold, size: 20),
+              ],
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.gold, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _about(BuildContext context) async {
-    final v = await UpdateChecker.currentVersion();
-    if (!context.mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.navy800,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppUi.radiusSm),
-          side: const BorderSide(color: AppColors.line),
-        ),
-        title: const Text(
-          'О ПРИЛОЖЕНИИ',
-          style: TextStyle(color: AppColors.gold, fontSize: 13, letterSpacing: 2),
-        ),
-        content: Text(
-          'Замерщик окон Almas\nВерсия $v\n\nМастер замера, дерево работ, '
-          'чертёж по ГОСТ, смета, история и замерный лист.',
-          style: const TextStyle(color: AppColors.textDim, fontSize: 12.5, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('ЗАКРЫТЬ', style: TextStyle(color: AppColors.gold)),
           ),
-        ],
+        ),
       ),
     );
   }
