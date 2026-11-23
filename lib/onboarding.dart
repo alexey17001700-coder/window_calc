@@ -520,7 +520,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return EstimateView(
       estimate: estimate,
       onBack: () => setState(() => _step = 3),
-      onNext: () => setState(() => _step = 5),
+      onNext: () => setState(() {
+        // Изделие готово — сохраняем его в список и идём к списку изделий.
+        _commitCurrent();
+        _step = 5;
+      }),
     );
   }
 
