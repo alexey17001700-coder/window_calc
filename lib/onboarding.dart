@@ -553,7 +553,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             : List<int>.filled(_sashCount, 1)))
           kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
       ],
-      onBack: () => setState(() => _step = 4),
+      onBack: () => setState(() => _step = 5),
       onFinish: () {
         _saveRecord();
         widget.onFinish();
