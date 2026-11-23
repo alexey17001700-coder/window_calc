@@ -307,15 +307,32 @@ class _WindowVisualState extends State<WindowVisual> {
         Wrap(
           spacing: 6,
           runSpacing: 6,
-          children: [
-            for (var i = 0; i < widget.sashes; i++)
-              _SashChip(
-                index: i,
-                name: kSashModeShort[modes[i].clamp(0, 3)],
-                selected: _sel == i,
-                onTap: () => _tap(i),
-              ),
-          ],
+          children: widget.balconyBlock
+              ? [
+                  _SashChip(
+                    index: 0,
+                    name:
+                        'ДВЕРЬ · ${kSashModeShort[widget.doorMode.clamp(0, 3)]}',
+                    selected: _sel == 0,
+                    onTap: () => _balconyTap(0),
+                  ),
+                  _SashChip(
+                    index: 1,
+                    name: 'ГЛУХНЯК · '
+                        '${kSashModeShort[widget.fixedMode.clamp(0, 3)]}',
+                    selected: _sel == 1,
+                    onTap: () => _balconyTap(1),
+                  ),
+                ]
+              : [
+                  for (var i = 0; i < widget.sashes; i++)
+                    _SashChip(
+                      index: i,
+                      name: kSashModeShort[modes[i].clamp(0, 3)],
+                      selected: _sel == i,
+                      onTap: () => _tap(i),
+                    ),
+                ],
         ),
         const SizedBox(height: 16),
 
