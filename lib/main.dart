@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
-import 'onboarding.dart';
+import 'premium_bg.dart';
 import 'theme.dart';
 import 'update_checker.dart';
 import 'viewer3d.dart';
 
-/// Глобальный навигатор — нужен, чтобы кнопки заставки работали
-/// после того, как сама заставка снята со стека.
+/// Глобальный навигатор — нужен для переходов из уже уничтоженных экранов.
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
-void main() {
-  runApp(const WindowCalcApp());
-}
+void main() => runApp(const AlmasApp());
 
-class WindowCalcApp extends StatelessWidget {
-  const WindowCalcApp({super.key});
+class AlmasApp extends StatelessWidget {
+  const AlmasApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +20,13 @@ class WindowCalcApp extends StatelessWidget {
       title: 'Замерщик окон Almas',
       debugShowCheckedModeBanner: false,
       navigatorKey: appNavigatorKey,
-      theme: ThemeData(
-        useMaterial3: false,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: AppColors.navy900,
-        primaryColor: AppColors.gold,
-        colorScheme: const ColorScheme.dark(
-          primary: AppColors.gold,
-          secondary: AppColors.gold,
-          surface: AppColors.navy800,
-        ),
-        inputDecorationTheme: const InputDecorationTheme(
-          filled: false,
-          fillColor: Colors.transparent,
-          border: InputBorder.none,
-        ),
-      ),
+      theme: buildAppTheme(),
       home: const SplashScreen(),
     );
   }
 }
 
-/// Заставка: 3D-сцена, живой лог загрузки, проверка обновлений.
+/// Заставка: 3D-окно, живой лог загрузки, проверка обновлений.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -56,11 +38,10 @@ class _SplashScreenState extends State<SplashScreen> {
   final List<String> _log = [];
   final ScrollController _scroll = ScrollController();
 
-  double _prog = 0;
-  String _stage = 'ЗАГРУЗКА СИСТЕМЫ';
-  bool _checking = false;
+  double _progress = 0;
   bool _ready = false;
-  bool _autoShown = false;
+  bool _checking = false;
+  String _stage = 'ЗАГРУЗКА СИСТЕМЫ';
 
   @override
   void initState() {
@@ -81,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (_scroll.hasClients) {
         _scroll.animateTo(
           _scroll.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 220),
+          duration: const Duration(milliseconds: 240),
           curve: Curves.easeOut,
         );
       }
@@ -89,113 +70,88 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _boot() async {
-    _line('ЗАПУСК СИСТЕМЫ...');
-    await Future.delayed(const Duration(milliseconds: 260));
+    _line('ЗАПУСК ЯДРА...');
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
-    setState(() => _prog = 0.10);
+    setState(() => _progress = 0.25);
 
-    _line('ЗАГРУЗКА МОДУЛЕЙ...');
-    await Future.delayed(const Duration(milliseconds: 240));
+    _line('ПРОВЕРКА КОМПОНЕНТОВ...');
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
-    setState(() => _prog = 0.25);
+    setState(() => _progress = 0.45);
 
-    _line('ИНИЦИАЛИЗАЦИЯ 3D-СЦЕНЫ...');
-    await Future.delayed(const Duration(milliseconds: 300));
+    _line('ЗАГРУЗКА ДЕРЕВА РАБОТ...');
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
-    setState(() => _prog = 0.45);
+    setState(() => _progress = 0.62);
 
-    _line('ПОДГОТОВКА ЧЕРТЕЖА ПО ГОСТ...');
-    await Future.delayed(const Duration(milliseconds: 260));
+    _line('ПОДГОТОВКА ЧЕРТЕЖА...');
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
-    setState(() => _prog = 0.62);
-
-    _line('ЗАГРУЗКА ПРАЙСА...');
-    await Future.delayed(const Duration(milliseconds: 240));
-    if (!mounted) return;
-    setState(() => _prog = 0.75);
-
-    await _doCheck(auto: true);
-    if (!mounted) return;
-
     setState(() {
-      _prog = 1.0;
-      _stage = 'СИСТЕМА ГОТОВА';
-      _ready = true;
+      _progress = 0.78;
+      _stage = 'ПРОВЕРКА ОБНОВЛЕНИЙ';
     });
-    _line('СИСТЕМА ГОТОВА');
-  }
 
-  Future<void> _doCheck({required bool auto}) async {
-    if (mounted) {
-      setState(() {
-        _checking = true;
-        _stage = 'ПРОВЕРКА ОБНОВЛЕНИЙ';
-      });
-    }
     _line('ПРОВЕРКА ОБНОВЛЕНИЙ...');
-
     final res = await UpdateChecker.check();
     if (!mounted) return;
 
-    setState(() {
-      _checking = false;
-      if (_log.isNotEmpty && _log.last.startsWith('ПРОВЕРКА')) _log.removeLast();
-    });
-
-    if (res.hasUpdate && res.latestVersion != null) {
+    if (res.error != null) {
+      _line('ОБНОВЛЕНИЯ: НЕ ПРОВЕРЕНО (сеть недоступна)');
+    } else if (res.hasUpdate) {
       _line('ДОСТУПНО ОБНОВЛЕНИЕ v${res.latestVersion}');
-    } else if (res.error != null) {
-      _line('ОБНОВЛЕНИЯ: НЕ ПРОВЕРЕНО (${res.error})');
     } else {
       _line('ОБНОВЛЕНИЙ НЕТ · ВЕРСИЯ ${res.currentVersion}');
     }
 
-    if (auto && res.hasUpdate && res.latestVersion != null && !_autoShown) {
-      _autoShown = true;
-      await Future.delayed(const Duration(milliseconds: 420));
-      if (!mounted) return;
-      await UpdateChecker.showUpdate(context, res.latestVersion!);
+    setState(() {
+      _progress = 1;
+      _stage = 'СИСТЕМА ГОТОВА';
+      _ready = true;
+    });
+
+    if (res.hasUpdate && res.latestVersion != null) {
+      await UpdateChecker.showUpdate(
+        context,
+        res.latestVersion!,
+        apkUrl: res.apkUrl,
+      );
     }
   }
 
   Future<void> _manualCheck() async {
     if (_checking) return;
+    setState(() => _checking = true);
     _line('РУЧНАЯ ПРОВЕРКА ОБНОВЛЕНИЙ...');
-    await _doCheck(auto: false);
+
+    final res = await UpdateChecker.check();
     if (!mounted) return;
-    final last = _log.isNotEmpty ? _log.last : '';
-    if (!last.startsWith('ДОСТУПНО')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.navy800,
-          content: Text(last, style: const TextStyle(color: AppColors.text, fontSize: 12)),
-        ),
-      );
+    setState(() => _checking = false);
+
+    if (res.error != null) {
+      _line('ОБНОВЛЕНИЯ: НЕ ПРОВЕРЕНО');
+      return;
     }
-  }
-
-  void _openOnboarding() {
-    appNavigatorKey.currentState?.push(
-      MaterialPageRoute(
-        builder: (_) => OnboardingScreen(
-          onBack: _backToSplash,
-          onFinish: _openHome,
-        ),
-      ),
-    );
-  }
-
-  void _backToSplash() {
-    appNavigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const SplashScreen()),
-      (r) => false,
+    if (res.hasUpdate && res.latestVersion != null) {
+      _line('ДОСТУПНО ОБНОВЛЕНИЕ v${res.latestVersion}');
+      await UpdateChecker.showUpdate(
+        context,
+        res.latestVersion!,
+        apkUrl: res.apkUrl,
+      );
+      return;
+    }
+    _line('ОБНОВЛЕНИЙ НЕТ · ВЕРСИЯ ${res.currentVersion}');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ОБНОВЛЕНИЙ НЕТ · УСТАНОВЛЕНА ПОСЛЕДНЯЯ ВЕРСИЯ')),
     );
   }
 
   void _openHome() {
     appNavigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (r) => false,
+      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+      (route) => false,
     );
   }
 
@@ -205,70 +161,38 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: AppColors.navy900,
       body: Stack(
         children: [
-          const Positioned.fill(child: _SplashBg()),
+          const Positioned.fill(child: PremiumBg()),
           SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: Stack(
-                    children: [
-                      const Positioned.fill(child: Viewer3D()),
-                      Positioned(
-                        right: 16,
-                        bottom: 10,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: AppColors.navy800.withOpacity(0.75),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.line),
-                          ),
-                          child: const Text(
-                            'ОКНО 1300 × 1400 ММ',
-                            style: TextStyle(
-                              color: AppColors.gold,
-                              fontSize: 9.5,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  _logo(),
+                  Expanded(child: const Viewer3D()),
+                  _logPanel(),
+                  const SizedBox(height: 12),
+                  _progressBar(),
+                  const SizedBox(height: 8),
+                  Text(
+                    _stage,
+                    style: const TextStyle(
+                      color: AppColors.textDim,
+                      fontSize: 10.5,
+                      letterSpacing: 1.6,
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'ЗАМЕРЩИК ОКОН',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.text,
-                          fontSize: 17,
-                          letterSpacing: 4,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      const Text(
-                        'ALMAS · ПРЕМИУМ',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.gold, fontSize: 10, letterSpacing: 3),
-                      ),
-                      const SizedBox(height: 12),
-                      _logPanel(),
-                      const SizedBox(height: 10),
-                      _progress(),
-                      const SizedBox(height: 12),
-                      _goldButton(),
-                      const SizedBox(height: 8),
-                      _ghostButton(),
-                    ],
+                  const SizedBox(height: 14),
+                  _goldButton(
+                    'НАЧАТЬ РАБОТУ',
+                    Icons.arrow_forward_rounded,
+                    _ready ? _openHome : null,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  _checkButton(),
+                  const SizedBox(height: 14),
+                ],
+              ),
             ),
           ),
         ],
@@ -276,166 +200,189 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  Widget _logPanel() {
-    return Container(
-      height: 96,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.navy900.withOpacity(0.80),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.line),
-      ),
-      child: ListView.builder(
-        controller: _scroll,
-        itemCount: _log.length + (_checking ? 1 : 0),
-        itemBuilder: (_, i) {
-          if (i >= _log.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 10,
-                    height: 10,
-                    child: CircularProgressIndicator(strokeWidth: 1.4, color: AppColors.gold),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'ПРОВЕРКА ОБНОВЛЕНИЙ...',
-                    style: TextStyle(color: AppColors.gold, fontSize: 10, letterSpacing: 1),
-                  ),
-                ],
-              ),
-            );
-          }
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2.5),
-            child: Text(
-              _log[i],
+  Widget _logo() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.goldLight, AppColors.goldDark],
+            ),
+            boxShadow: [
+              BoxShadow(color: AppColors.gold.withOpacity(0.30), blurRadius: 18),
+            ],
+          ),
+          child: const Icon(Icons.window_rounded,
+              color: AppColors.navy900, size: 18),
+        ),
+        const SizedBox(width: 10),
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ЗАМЕРЩИК ОКОН',
               style: TextStyle(
-                color: i == _log.length - 1 ? AppColors.gold : AppColors.textDim,
-                fontSize: 10,
-                letterSpacing: 0.8,
+                color: AppColors.text,
+                fontSize: 13,
+                letterSpacing: 2.0,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _progress() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          _stage,
-          style: const TextStyle(color: AppColors.textDim, fontSize: 9, letterSpacing: 2),
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: _prog,
-            minHeight: 4,
-            backgroundColor: AppColors.line,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.gold),
-          ),
+            Text(
+              'ALMAS · ПРОФЕССИОНАЛЬНЫЙ ЗАМЕР',
+              style: TextStyle(
+                color: AppColors.textDim,
+                fontSize: 9,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _goldButton() {
-    final on = _ready;
-    return GestureDetector(
-      onTap: on ? _openOnboarding : null,
-      child: AnimatedOpacity(
-        opacity: on ? 1.0 : 0.45,
-        duration: const Duration(milliseconds: 220),
-        child: Container(
-          height: AppUi.buttonH,
-          decoration: BoxDecoration(
-            gradient: AppUi.goldGrad,
-            borderRadius: BorderRadius.circular(AppUi.radiusSm),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.gold.withOpacity(0.35),
-                blurRadius: 22,
-                offset: const Offset(0, 8),
-              ),
-            ],
+  Widget _logPanel() {
+    return Container(
+      height: 96,
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: AppColors.navy800.withOpacity(0.72),
+        borderRadius: BorderRadius.circular(AppUi.radius),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: ListView.builder(
+        controller: _scroll,
+        itemCount: _log.length,
+        itemBuilder: (context, i) => Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Text(
+            '› ${_log[i]}',
+            style: TextStyle(
+              color: i == _log.length - 1 ? AppColors.goldLight : AppColors.textDim,
+              fontSize: 10.5,
+              letterSpacing: 0.6,
+            ),
           ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'НАЧАТЬ РАБОТУ',
-                style: TextStyle(
-                  color: Color(0xFF1A1206),
-                  fontSize: 13,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _progressBar() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Stack(
+        children: [
+          Container(height: 5, color: AppColors.navy700),
+          FractionallySizedBox(
+            widthFactor: _progress.clamp(0.0, 1.0),
+            child: Container(
+              height: 5,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.goldDark, AppColors.goldLight],
                 ),
               ),
-              SizedBox(width: 8),
-              Icon(Icons.play_arrow_rounded, size: 20, color: Color(0xFF1A1206)),
-            ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _goldButton(String label, IconData icon, VoidCallback? onTap) {
+    final on = onTap != null;
+    return Opacity(
+      opacity: on ? 1 : 0.45,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppUi.radius),
+          onTap: onTap,
+          child: Container(
+            height: AppUi.buttonH,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppUi.radius),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.goldLight, AppColors.gold, AppColors.goldDark],
+              ),
+              boxShadow: [
+                BoxShadow(color: AppColors.gold.withOpacity(0.30), blurRadius: 22),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppColors.navy900,
+                    fontSize: 13,
+                    letterSpacing: 1.8,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(icon, color: AppColors.navy900, size: 18),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _ghostButton() {
-    return GestureDetector(
-      onTap: _checking ? null : _manualCheck,
-      child: Container(
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppColors.navy800.withOpacity(0.70),
-          borderRadius: BorderRadius.circular(AppUi.radiusSm),
-          border: Border.all(color: AppColors.gold.withOpacity(0.40)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (_checking)
-              const SizedBox(
-                width: 13,
-                height: 13,
-                child: CircularProgressIndicator(strokeWidth: 1.5, color: AppColors.gold),
-              )
-            else
-              const Icon(Icons.refresh_rounded, size: 16, color: AppColors.gold),
-            const SizedBox(width: 8),
-            Text(
-              _checking ? 'ПРОВЕРКА...' : 'ПРОВЕРИТЬ ОБНОВЛЕНИЕ',
-              style: const TextStyle(
-                color: AppColors.gold,
-                fontSize: 10.5,
-                letterSpacing: 1.8,
-                fontWeight: FontWeight.w600,
+  Widget _checkButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppUi.radius),
+        onTap: _checking ? null : _manualCheck,
+        child: Container(
+          height: 46,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppUi.radius),
+            color: AppColors.navy800.withOpacity(0.72),
+            border: Border.all(color: AppColors.gold.withOpacity(0.35)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (_checking)
+                const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.6,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.gold),
+                  ),
+                )
+              else
+                const Icon(Icons.refresh_rounded, color: AppColors.gold, size: 17),
+              const SizedBox(width: 8),
+              Text(
+                _checking ? 'ПРОВЕРКА...' : 'ПРОВЕРИТЬ ОБНОВЛЕНИЕ',
+                style: const TextStyle(
+                  color: AppColors.gold,
+                  fontSize: 11.5,
+                  letterSpacing: 1.6,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SplashBg extends StatelessWidget {
-  const _SplashBg();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0, -0.35),
-          radius: 1.1,
-          colors: [Color(0xFF0E1A2C), AppColors.navy900],
+            ],
+          ),
         ),
       ),
     );
