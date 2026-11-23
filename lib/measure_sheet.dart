@@ -121,6 +121,40 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   String get _dash => '─' * 26;
 
+  /// Все изделия листа: из списка MeasureItem либо из одиночных полей.
+  List<_SheetItem> get _items {
+    if (widget.items.isNotEmpty) {
+      return [
+        for (final it in widget.items)
+          _SheetItem(
+            path: it.path,
+            multi: it.multi,
+            sizes: it.sizes,
+            glass: (it.glass >= 0 && it.glass < glassTypes.length)
+                ? glassTypes[it.glass].title
+                : '',
+            sashModes: [
+              for (final m in it.modes)
+                kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
+            ],
+            widthMm: it.mmOf('ШИРИНА'),
+            sectionWidths: it.secWidths,
+          ),
+      ];
+    }
+    return [
+      _SheetItem(
+        path: widget.path,
+        multi: widget.multi,
+        sizes: widget.sizes,
+        glass: widget.glass,
+        sashModes: widget.sashModes,
+        widthMm: widget.widthMm,
+        sectionWidths: widget.sectionWidths,
+      ),
+    ];
+  }
+
   /// Текст замерного листа — все размеры в миллиметрах.
   String _sheetText() {
     final b = StringBuffer();
@@ -132,71 +166,73 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     b.writeln('АДРЕС: ${_or(widget.addr, '—')}');
     b.writeln(
         'КВАРТИРА / ЭТАЖ: ${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}');
-    b.writeln(_dash);
-
-    b.writeln('ИЗДЕЛИЕ: ${widget.path.isEmpty ? '—' : widget.path.join(' · ')}');
-    b.writeln('СТЕКЛОПАКЕТ: ${widget.glass.isEmpty ? '—' : widget.glass}');
     b.writeln('ФОТО ПРОЁМА: ${_photos.isEmpty ? '—' : '${_photos.length} шт'}');
-    if (widget.sashModes.isNotEmpty) {
-      final s = <String>[];
-      for (var i = 0; i < widget.sashModes.length; i++) {
-        s.add('${i + 1}-${widget.sashModes[i]}');
-      }
-      b.writeln('СТВОРКИ: ${s.join(' · ')}');
-      b.writeln('КОНСТРУКЦИЯ: ${widget.sashModes.length} '
-          '${_sashWord(widget.sashModes.length)} · ${_sashLetters()}');
-      if (widget.widthMm > 0) {
-        b.writeln('ШИРИНА СЕКЦИЙ (ММ): ${_sectionsMm()}');
-      }
-    }
     b.writeln(_dash);
 
-    b.writeln('РАЗМЕРЫ (ММ):');
-    if (widget.multi.isEmpty) {
-      b.writeln('— НЕ ВЫБРАНО');
-    } else {
-      for (final item in widget.multi) {
-        b.writeln('• $item');
-        final f = widget.sizes[item];
-        if (f == null || f.isEmpty) {
-          b.writeln('   РАЗМЕРЫ НЕ ЗАПОЛНЕНЫ');
-        } else {
-          f.forEach((k, v) => b.writeln('   $k: $v мм'));
+    final items = _items;
+    for (var n = 0; n < items.length; n++) {
+      final it = items[n];
+      b.writeln(
+          'ИЗДЕЛИЕ ${n + 1}: ${it.path.isEmpty ? '—' : it.path.join(' · ')}');
+      b.writeln('СТЕКЛОПАКЕТ: ${it.glass.isEmpty ? '—' : it.glass}');
+      if (it.sashModes.isNotEmpty) {
+        final s = <String>[];
+        for (var i = 0; i < it.sashModes.length; i++) {
+          s.add('${i + 1}-${it.sashModes[i]}');
+        }
+        b.writeln('СТВОРКИ: ${s.join(' · ')}');
+        b.writeln('КОНСТРУКЦИЯ: ${it.sashModes.length} '
+            '${_sashWord(it.sashModes.length)} · ${_sashLettersOf(it.sashModes)}');
+        if (it.widthMm > 0) {
+          b.writeln('ШИРИНА СЕКЦИЙ (ММ): ${_sectionsMmOf(it)}');
         }
       }
+      b.writeln('РАЗМЕРЫ (ММ):');
+      if (it.multi.isEmpty) {
+        b.writeln('— НЕ ВЫБРАНО');
+      } else {
+        for (final item in it.multi) {
+          b.writeln('• $item');
+          final f = it.sizes[item];
+          if (f == null || f.isEmpty) {
+            b.writeln('   РАЗМЕРЫ НЕ ЗАПОЛНЕНЫ');
+          } else {
+            f.forEach((k, v) => b.writeln('   $k: $v мм'));
+          }
+        }
+      }
+      b.writeln(_dash);
     }
-    b.writeln(_dash);
     return b.toString();
   }
 
   /// «1-ПОВОРОТНАЯ · 2-ГЛУХАЯ» — обозначения створок по ГОСТ.
-  String _sashLine() {
+  String _sashLineOf(List<String> modes) {
     final s = <String>[];
-    for (var i = 0; i < widget.sashModes.length; i++) {
-      s.add('${i + 1} · ${widget.sashModes[i]}');
+    for (var i = 0; i < modes.length; i++) {
+      s.add('${i + 1} · ${modes[i]}');
     }
     return s.join('   ');
   }
 
   /// «Г · ПО» — буквы по ГОСТ.
-  String _sashLetters() => widget.sashModes
-      .map((m) => kSashModeLetter[_modeIndex(m)])
-      .join(' · ');
+  String _sashLettersOf(List<String> modes) =>
+      modes.map((m) => kSashModeLetter[_modeIndex(m)]).join(' · ');
 
   /// «1 · 600 мм   2 · 700 мм» — ширина каждой секции (с учётом ручной).
-  String _sectionsMm() {
-    final n = widget.sashModes.length;
+  String _sectionsMmOf(_SheetItem it) {
+    final n = it.sashModes.length;
     if (n == 0) return '—';
     final s = <String>[];
     for (var i = 0; i < n; i++) {
-      s.add('${i + 1} · ${(widget.widthMm * _secShare(i, n)).round()} мм');
+      s.add('${i + 1} · ${(it.widthMm * _secShareOf(it, i, n)).round()} мм');
     }
     return s.join('   ');
   }
 
   /// Доля ширины секции i (ручная или равная).
-  double _secShare(int i, int n) {
-    final w = widget.sectionWidths;
+  double _secShareOf(_SheetItem it, int i, int n) {
+    final w = it.sectionWidths;
     if (w.length == n) {
       final sum = w.fold<double>(0, (a, b) => a + b);
       if (sum > 0) return w[i] / sum;
