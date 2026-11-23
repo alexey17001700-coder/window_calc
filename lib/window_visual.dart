@@ -120,6 +120,36 @@ class WindowVisual extends StatefulWidget {
   /// автоматически из общего габарита.
   final void Function(int index, int mm)? onSectionEdit;
 
+  /// БАЛКОННЫЙ БЛОК: дверь + боковая колонна (сверху глухой стеклопакет,
+  /// снизу сэндвич-панель). Если true — чертёж рисуется как блок,
+  /// створки / секции / арка не используются.
+  final bool balconyBlock;
+
+  /// Обозначение ДВЕРИ блока (индекс в kSashModeNames).
+  final int doorMode;
+
+  /// Обозначение ГЛУХНЯКА блока (индекс в kSashModeNames). Обычно 0 — Г.
+  final int fixedMode;
+
+  /// Ширина двери блока, мм.
+  final int doorWidthMm;
+
+  /// Высота двери блока (= общей высоте блока), мм.
+  final int doorHeightMm;
+
+  /// Ширина глухого стеклопакета (боковой колонны), мм.
+  final int fixedWidthMm;
+
+  /// Высота глухого стеклопакета сверху колонны, мм.
+  final int fixedHeightMm;
+
+  /// Тап по двери (0) или по глухняку (1) — смена обозначения.
+  final ValueChanged<int>? onBalconyTap;
+
+  /// Ввод размера блока прямо на чертеже.
+  /// Поля: 'DOOR_W' · 'DOOR_H' · 'FIXED_W' · 'FIXED_H'.
+  final void Function(String field, int mm)? onBalconyEdit;
+
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
