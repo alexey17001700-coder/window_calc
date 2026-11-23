@@ -459,7 +459,10 @@ class _WindowVisualState extends State<WindowVisual> {
     }
 
     // ШИРИНЫ — нижний ряд: под дверью и под глухняком.
-    final y = g.wall.bottom + 17;
+    // Та же высота, на которой рисуется нижний ряд размеров.
+    final hasSill = widget.parts.contains('С ПОДОКОННИКОМ');
+    final hasDrip = widget.parts.contains('С ОТЛИВОМ');
+    final y = g.wall.bottom + (hasSill || hasDrip ? 30 : 17);
     if (p.dy > y - 14 && p.dy < y + 14) {
       if (p.dx > g.door.left - 9 && p.dx < g.door.right + 9) return 'DOOR_W';
       if (p.dx > g.side.left - 9 && p.dx < g.side.right + 9) return 'FIXED_W';
