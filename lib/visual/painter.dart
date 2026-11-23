@@ -686,6 +686,13 @@ class _GostPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _GostPainter old) =>
+      old.balconyBlock != balconyBlock ||
+      old.doorMode != doorMode ||
+      old.fixedMode != fixedMode ||
+      old.doorWidthMm != doorWidthMm ||
+      old.doorHeightMm != doorHeightMm ||
+      old.fixedWidthMm != fixedWidthMm ||
+      old.fixedHeightMm != fixedHeightMm ||
       old.sashes != sashes ||
       old.arched != arched ||
       old.selected != selected ||
