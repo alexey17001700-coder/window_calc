@@ -58,13 +58,23 @@ jobs:
           sed -i 's/minSdkVersion .*/minSdkVersion 23/' android/app/build.gradle
           sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle
           echo "android.suppressUnsupportedCompileSdk=35" >> android/gradle.properties
+          # Платформа android-35 может отсутствовать на раннере — ставим сами,
+          # иначе Gradle падает на «Failed to install ... android-35».
+          SDKMAN="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ -x "$SDKMAN" ]; then
+            yes | "$SDKMAN" --licenses > /dev/null 2>&1 || true
+            "$SDKMAN" "platforms;android-35" "build-tools;35.0.0" > /dev/null 2>&1 || true
+          fi
           grep -nE 'compileSdk|minSdk|targetSdk' android/app/build.gradle
 
       - name: Modernize Android toolchain (AGP + Gradle)
         run: |
           # compileSdk 35 требует AGP 8.6+ и Gradle 8.7+.
-          sed -i 's|id "com.android.application" version "[^"]*"|id "com.android.application" version "8.7.0"|' android/settings.gradle
-          sed -i 's|gradle-.*-all.zip|gradle-8.9-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
+          # ВАЖНО: AGP 8.7+ несовместим с gradle-плагином Flutter 3.24 — сборка
+          # падала на конфигурации проекта. Берём МИНИМУМ под compileSdk 35:
+          # AGP 8.6.0 + Gradle 8.7 (ближе всего к диапазону Flutter 3.24).
+          sed -i 's|id "com.android.application" version "[^"]*"|id "com.android.application" version "8.6.0"|' android/settings.gradle
+          sed -i 's|gradle-.*-all.zip|gradle-8.7-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
           grep -nE 'com.android.application|distributionUrl' android/settings.gradle android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Fix Kotlin version
