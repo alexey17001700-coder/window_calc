@@ -5,8 +5,14 @@ import 'measure_item.dart';
 
 /// Простой 3D-просмотр балконного блока (собственный рендерер, без WebView).
 class Viewer3D extends StatefulWidget {
-  final MeasureItem item;
-  const Viewer3D({super.key, required this.item});
+  /// Замер, из которого берётся пропорция балконного блока.
+  /// Может быть null — тогда рисуется окно 1:1 (заставка).
+  final MeasureItem? item;
+
+  /// true — только чертёж, без заголовка и карточки (для заставки).
+  final bool bare;
+
+  const Viewer3D({super.key, this.item, this.bare = false});
 
   @override
   State<Viewer3D> createState() => _Viewer3DState();
