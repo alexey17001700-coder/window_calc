@@ -118,7 +118,11 @@ class _OnboardingState extends State<Onboarding> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Замер сохранён в историю')),
     );
-    Navigator.of(context).pop();
+    if (widget.onFinish != null) {
+      widget.onFinish!.call();
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
