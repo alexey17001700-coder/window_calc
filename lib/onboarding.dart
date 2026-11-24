@@ -9,9 +9,32 @@ import 'measure_sheet.dart';
 import 'measure_media.dart';
 import 'measure_history.dart';
 
+/// Обёртка мастера с колбэками навигации (используется заставкой).
+class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({super.key, this.onBack, this.onFinish});
+
+  final VoidCallback? onBack;
+  final VoidCallback? onFinish;
+
+  @override
+  Widget build(BuildContext context) {
+    return Onboarding(onBack: onBack, onFinish: onFinish);
+  }
+}
+
 /// Мастер замера: 7 шагов.
 class Onboarding extends StatefulWidget {
-  const Onboarding({super.key});
+  const Onboarding({
+    super.key,
+    this.onBack,
+    this.onFinish,
+  });
+
+  /// Вызывается при выходе с первого шага.
+  final VoidCallback? onBack;
+
+  /// Вызывается после сохранения замера — вместо закрытия экрана.
+  final VoidCallback? onFinish;
 
   @override
   State<Onboarding> createState() => _OnboardingState();
