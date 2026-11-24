@@ -66,6 +66,16 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const Spacer(),
+                    if (onToggleTheme != null)
+                      IconButton(
+                        onPressed: () => onToggleTheme!(),
+                        tooltip: 'Светлая / тёмная тема',
+                        icon: const Icon(
+                          Icons.brightness_6_rounded,
+                          color: AppColors.gold,
+                        ),
+                      ),
                   ],
                 ),
                 const Spacer(),
