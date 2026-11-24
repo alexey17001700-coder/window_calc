@@ -101,7 +101,11 @@ class _OnboardingState extends State<Onboarding> {
   }
 
   void _back() {
-    if (_step > 0) setState(() => _step--);
+    if (_step > 0) {
+      setState(() => _step--);
+    } else {
+      widget.onBack?.call();
+    }
   }
 
   Future<void> _finish() async {
