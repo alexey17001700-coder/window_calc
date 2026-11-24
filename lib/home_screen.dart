@@ -7,7 +7,10 @@ import 'update_checker.dart';
 
 /// Главное меню приложения.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onToggleTheme});
+
+  /// Переключение светлой/тёмной темы (передаётся из заставки).
+  final Future<void> Function()? onToggleTheme;
 
   @override
   Widget build(BuildContext context) {
