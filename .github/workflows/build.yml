@@ -38,7 +38,7 @@ jobs:
       - name: Сгенерировать android/ (pubspec защищён)
         run: |
           cp pubspec.yaml /tmp/pubspec.yaml
-          flutter create --platforms=android --org com.almas --project-name window_calc .
+          flutter create --platforms=android --org com.example --project-name window_calc .
           cp /tmp/pubspec.yaml pubspec.yaml
           rm -f test/widget_test.dart
 
