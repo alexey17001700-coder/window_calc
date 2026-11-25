@@ -4,9 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'theme.dart';
 import 'viewer3d.dart';
 import 'update_checker.dart';
+import 'wizard_screen.dart';
 import 'onboarding.dart';
-import 'home_screen.dart';
-import 'measure_item.dart';
+
+part 'home_screen.dart';
 
 /// Глобальный навигатор: позволяет переключать экраны из колбэков,
 /// даже когда контекст исходного экрана уже уничтожен (pushReplacement).
@@ -89,9 +90,6 @@ class _SplashScreenState extends State<SplashScreen>
   bool _busy = false;
   bool _checking = false;
   String? _updateVersion;
-
-  /// Демонстрационное изделие для 3D-окна на заставке.
-  final MeasureItem _preview = MeasureItem(id: 'preview', product: 'ОКНО ПВХ');
 
   @override
   void initState() {
@@ -254,11 +252,7 @@ class _SplashScreenState extends State<SplashScreen>
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          Positioned.fill(
-            child: SingleChildScrollView(
-              child: Viewer3D(item: _preview),
-            ),
-          ),
+          const Positioned.fill(child: Viewer3D()),
           Positioned(
             right: 12,
             bottom: 12,
@@ -457,20 +451,37 @@ class _SplashScreenState extends State<SplashScreen>
 
   /// Открыть мастер замера. Колбэки работают через глобальный навигатор —
   /// контекст этого экрана после pushReplacement уже мёртв.
-  Future<void> _openOnboarding() async {
+  void _openOnboarding() {
     final nav = appNavigatorKey.currentState;
     if (nav == null) return;
-    await nav.push(
+    nav.push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 420),
         pageBuilder: (_, a, __) => FadeTransition(
           opacity: a,
-          child: const Onboarding(),
+          child: OnboardingScreen(
+            onBack: _backToSplash,
+            onFinish: _openHome,
+          ),
         ),
       ),
     );
-    if (!mounted) return;
-    _openHome();
+  }
+
+  /// Возврат из мастера на главный экран (заставка с проверкой обновлений).
+  void _backToSplash() {
+    final nav = appNavigatorKey.currentState;
+    if (nav == null) return;
+    nav.pushAndRemoveUntil(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 380),
+        pageBuilder: (_, a, __) => FadeTransition(
+          opacity: a,
+          child: SplashScreen(onToggleTheme: widget.onToggleTheme),
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   /// Мастер завершён → главное меню.
@@ -482,7 +493,7 @@ class _SplashScreenState extends State<SplashScreen>
         transitionDuration: const Duration(milliseconds: 380),
         pageBuilder: (_, a, __) => FadeTransition(
           opacity: a,
-          child: const HomeScreen(),
+          child: HomeScreen(onToggleTheme: widget.onToggleTheme),
         ),
       ),
       (route) => false,

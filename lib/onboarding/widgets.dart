@@ -321,7 +321,6 @@ class _SectionWidthRow extends StatelessWidget {
     required this.onMinus,
     required this.onPlus,
     required this.onEdit,
-    this.label,
   });
 
   final int index;
@@ -332,16 +331,12 @@ class _SectionWidthRow extends StatelessWidget {
   /// Тап по значению — ручной ввод ММ (остальные секции считаются сами).
   final VoidCallback onEdit;
 
-  /// Своя подпись строки (для балконного блока: «ДВЕРЬ · ШИРИНА»).
-  /// Пусто — «СЕКЦИЯ N».
-  final String? label;
-
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Text(
-          label ?? 'СЕКЦИЯ ${index + 1}',
+          'СЕКЦИЯ ${index + 1}',
           style: const TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.w800,

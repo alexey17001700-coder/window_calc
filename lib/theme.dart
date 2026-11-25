@@ -1,110 +1,316 @@
 import 'package:flutter/material.dart';
 
-/// Палитра приложения «Замерщик окон Almas».
+/// Премиальная палитра приложения.
+/// Глубокий графитово-синий + золото/бронза.
 class AppColors {
-  // ── базовые (новое поколение кода) ──
-  static const bg = Color(0xFF0E1116);
-  static const bg2 = Color(0xFF151A22);
-  static const card = Color(0xFF1B212B);
-  static const line = Color(0xFF2A323F);
-  static const text = Color(0xFFEAF0F7);
-  static const dim = Color(0xFF93A0B4);
-  static const gold = Color(0xFFD9A441);
-  static const bronze = Color(0xFFB07A3A);
-  static const green = Color(0xFF3FBF7F);
-  static const red = Color(0xFFE05B5B);
-  static const blue = Color(0xFF4A90D9);
+  // Тёмная база
+  static const navy900 = Color(0xFF0B1522);
+  static const navy800 = Color(0xFF0F1B2D);
+  static const navy700 = Color(0xFF16263D);
+  static const navy600 = Color(0xFF1E3252);
+  static const navy500 = Color(0xFF2A4468);
 
-  // ── синие уровни (заставка, мастер, шапки) ──
-  static const navy900 = Color(0xFF0E1116);
-  static const navy800 = Color(0xFF151A22);
-  static const navy700 = Color(0xFF1B2430);
+  // Золото / бронза
+  static const gold = Color(0xFFC9A227);
+  static const goldLight = Color(0xFFE0BE55);
+  static const goldDark = Color(0xFF9A7A18);
+  static const bronze = Color(0xFFB08D57);
 
-  // ── золото ──
-  static const goldLight = Color(0xFFF0C96A);
-  static const goldDark = Color(0xFFB07A3A);
+  // Светлая тема
+  static const paper = Color(0xFFF7F8FA);
+  static const paperCard = Color(0xFFFFFFFF);
+  static const ink = Color(0xFF14202E);
+  static const inkSoft = Color(0xFF5A6B80);
+  static const line = Color(0xFFE2E6EC);
 
-  // ── текст ──
-  static const textDim = Color(0xFF93A0B4);
-  static const textFaint = Color(0xFF6E819A);
-
-  // ── стекло ──
-  static const glassTop = Color(0x1AFFFFFF);
-  static const glassBottom = Color(0x0DFFFFFF);
-  static const glassLine = Color(0x33FFFFFF);
-
-  // ── статусы ──
-  static const danger = Color(0xFFE05B5B);
-  static const ok = Color(0xFF3FBF7F);
-
-  static const goldGradient = LinearGradient(
-    colors: [Color(0xFFF0C96A), Color(0xFFD9A441), Color(0xFFB07A3A)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  // Служебные
+  static const success = Color(0xFF2E9E5B);
+  static const danger = Color(0xFFC0392B);
+  static const info = Color(0xFF2D6CDF);
 
   static const navyGradient = LinearGradient(
-    colors: [Color(0xFF1B2430), Color(0xFF0E1116)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [navy800, navy900],
+  );
+
+  static const goldGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [goldLight, gold, goldDark],
   );
 }
 
-/// Общие элементы интерфейса.
-class AppUi {
-  static const double radiusSm = 10;
-  static const double radius = 16;
-  static const double radiusLg = 26;
-  static const double pad = 16;
-  static const double gap = 12;
-  static const double buttonH = 52;
-
-  static const LinearGradient cardGrad = LinearGradient(
-    colors: [Color(0xFF202834), Color(0xFF171D26)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const List<BoxShadow> cardShadow = [
-    BoxShadow(color: Color(0x66000000), blurRadius: 14, offset: Offset(0, 6)),
-  ];
-
-  static const LinearGradient goldGrad = AppColors.goldGradient;
-  static const LinearGradient bgGrad = AppColors.navyGradient;
-
-  static Widget label(String text, {Color? color, double size = 11}) {
-    return Text(
-      text.toUpperCase(),
-      style: TextStyle(
-        color: color ?? AppColors.dim,
-        fontSize: size,
-        letterSpacing: 1.4,
-        fontWeight: FontWeight.w600,
+/// Единая тема приложения.
+class AppTheme {
+  static ThemeData light() {
+    final base = ThemeData.light(useMaterial3: true);
+    return base.copyWith(
+      scaffoldBackgroundColor: AppColors.paper,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.navy800,
+        onPrimary: Colors.white,
+        secondary: AppColors.gold,
+        onSecondary: AppColors.navy900,
+        surface: AppColors.paperCard,
+        onSurface: AppColors.ink,
+        error: AppColors.danger,
       ),
+      textTheme: _text(AppColors.ink, AppColors.inkSoft),
+      cardTheme: _card(Colors.white),
+      appBarTheme: _appBar(AppColors.navy800, Colors.white),
+      inputDecorationTheme: _input(false),
+      filledButtonTheme: _filled(AppColors.navy800, Colors.white),
+      outlinedButtonTheme: _outlined(AppColors.gold),
+      chipTheme: _chip(),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.line,
+        thickness: 1,
+        space: 1,
+      ),
+      snackBarTheme: _snack(),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        ),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(builders: {
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      }),
     );
   }
 
+  static ThemeData dark() {
+    final base = ThemeData.dark(useMaterial3: true);
+    return base.copyWith(
+      scaffoldBackgroundColor: AppColors.navy900,
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.gold,
+        onPrimary: AppColors.navy900,
+        secondary: AppColors.goldLight,
+        onSecondary: AppColors.navy900,
+        surface: AppColors.navy800,
+        onSurface: Color(0xFFEAF0F8),
+        error: Color(0xFFE05A4A),
+      ),
+      textTheme: _text(const Color(0xFFEAF0F8), const Color(0xFF9FB0C6)),
+      cardTheme: _card(AppColors.navy800),
+      appBarTheme: _appBar(AppColors.navy900, Colors.white),
+      inputDecorationTheme: _input(true),
+      filledButtonTheme: _filled(AppColors.gold, AppColors.navy900),
+      outlinedButtonTheme: _outlined(AppColors.gold),
+      chipTheme: _chip(),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFF22344F),
+        thickness: 1,
+        space: 1,
+      ),
+      snackBarTheme: _snack(),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.navy800,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        ),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(builders: {
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      }),
+    );
+  }
+
+  // ── Типографика ────────────────────────────────────────────────
+  static TextTheme _text(Color main, Color soft) => TextTheme(
+        displaySmall: TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1.0,
+            color: main),
+        headlineMedium: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.8,
+            color: main),
+        headlineSmall: TextStyle(
+            fontSize: 21,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.5,
+            color: main),
+        titleLarge: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+            color: main),
+        titleMedium: TextStyle(
+            fontSize: 15.5, fontWeight: FontWeight.w700, color: main),
+        titleSmall: TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+            color: main),
+        bodyLarge: TextStyle(fontSize: 15, height: 1.35, color: main),
+        bodyMedium: TextStyle(fontSize: 13.5, height: 1.35, color: soft),
+        bodySmall: TextStyle(fontSize: 12, height: 1.3, color: soft),
+        labelLarge: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+            color: main),
+        labelMedium: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
+            color: soft),
+      );
+
+  // ── Компоненты ─────────────────────────────────────────────────
+  static CardTheme _card(Color bg) => CardTheme(
+        color: bg,
+        surfaceTintColor: Colors.transparent,
+        elevation: 6,
+        shadowColor: Colors.black.withOpacity(0.16),
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+        ),
+      );
+
+  static AppBarTheme _appBar(Color bg, Color fg) => AppBarTheme(
+        backgroundColor: bg,
+        foregroundColor: fg,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.2,
+          color: fg,
+        ),
+      );
+
+  static InputDecorationTheme _input(bool dark) => InputDecorationTheme(
+        filled: true,
+        fillColor: dark ? AppColors.navy700 : Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+        hintStyle: TextStyle(
+          fontSize: 13.5,
+          color: dark ? const Color(0xFF6E819A) : const Color(0xFF9AA8B8),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: dark ? const Color(0xFF2A3F5C) : AppColors.line,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: dark ? const Color(0xFF2A3F5C) : AppColors.line,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.gold, width: 1.6),
+        ),
+      );
+
+  static FilledButtonThemeData _filled(Color bg, Color fg) =>
+      FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: bg,
+          foregroundColor: fg,
+          minimumSize: const Size.fromHeight(56),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 14.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
+          ),
+        ),
+      );
+
+  static OutlinedButtonThemeData _outlined(Color c) =>
+      OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: c,
+          minimumSize: const Size.fromHeight(52),
+          side: BorderSide(color: c.withOpacity(0.55), width: 1.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.7,
+          ),
+        ),
+      );
+
+  static ChipThemeData _chip() => ChipThemeData(
+        backgroundColor: Colors.transparent,
+        side: const BorderSide(color: AppColors.gold, width: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        labelStyle: const TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+          color: AppColors.gold,
+        ),
+      );
+
+  static SnackBarThemeData _snack() => SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.navy800,
+        contentTextStyle: const TextStyle(
+            fontSize: 13.5, fontWeight: FontWeight.w600, color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      );
+}
+
+/// Общие премиальные элементы, используемые на всех экранах.
+class AppUi {
+  /// Заголовок раздела: золотая черта + КАПС + линия до края.
   static Widget sectionTitle(BuildContext context, String text) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 18, 4, 10),
+      padding: const EdgeInsets.only(bottom: 12, top: 4),
       child: Row(
         children: [
           Container(
-            width: 4,
-            height: 18,
-            decoration: const BoxDecoration(
+            width: 3,
+            height: 16,
+            decoration: BoxDecoration(
               gradient: AppColors.goldGradient,
-              borderRadius: BorderRadius.all(Radius.circular(2)),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(width: 10),
           Text(
             text.toUpperCase(),
-            style: const TextStyle(
-              color: AppColors.text,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.6,
+              color: dark ? AppColors.goldLight : AppColors.bronze,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: dark ? const Color(0xFF22344F) : AppColors.line,
             ),
           ),
         ],
@@ -112,99 +318,39 @@ class AppUi {
     );
   }
 
-  static BoxDecoration card({Color? border}) => BoxDecoration(
-        gradient: cardGrad,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: border ?? AppColors.line),
-        boxShadow: cardShadow,
-      );
-}
-
-/// Темы приложения: тёмная (основная) и светлая.
-class AppTheme {
-  static ThemeData light() => _build(Brightness.light);
-
-  static ThemeData dark() => _build(Brightness.dark);
-
-  static ThemeData _build(Brightness b) {
-    final dark = b == Brightness.dark;
-    final base = ThemeData(useMaterial3: true, brightness: b);
-
-    return base.copyWith(
-      scaffoldBackgroundColor: dark ? AppColors.bg : const Color(0xFFF4F6F9),
-      colorScheme: (dark
-              ? const ColorScheme.dark(
-                  primary: AppColors.gold,
-                  secondary: AppColors.bronze,
-                  surface: AppColors.card,
-                )
-              : const ColorScheme.light(
-                  primary: AppColors.goldDark,
-                  secondary: AppColors.bronze,
-                  surface: Colors.white,
-                ))
-          .copyWith(error: AppColors.danger),
-      dividerColor: AppColors.line,
-      // Поля ввода — БЕЗ заливки и рамок темы: у мастера своя подложка.
-      // Именно из-за `filled: true` + белого fillColor текст был невидим (3.3.2+55).
-      inputDecorationTheme: const InputDecorationTheme(
-        filled: false,
-        fillColor: Colors.transparent,
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        disabledBorder: InputBorder.none,
-        errorBorder: InputBorder.none,
-        focusedErrorBorder: InputBorder.none,
-        hintStyle: TextStyle(color: AppColors.textFaint),
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: dark ? AppColors.bg2 : Colors.white,
-        foregroundColor: dark ? AppColors.text : AppColors.navy900,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      cardTheme: CardTheme(
-        color: dark ? AppColors.card : Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppUi.radius),
-          side: const BorderSide(color: AppColors.line),
-        ),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.gold,
-          foregroundColor: AppColors.navy900,
-          minimumSize: const Size.fromHeight(AppUi.buttonH),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.0,
+  /// Тёмная градиентная панель (итоги, суммы).
+  static Widget darkPanel({
+    required Widget child,
+    EdgeInsetsGeometry padding =
+        const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        gradient: AppColors.navyGradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.navy900.withOpacity(0.28),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppUi.radiusSm),
-          ),
-        ),
+        ],
       ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.gold,
-          side: const BorderSide(color: AppColors.bronze),
-          minimumSize: const Size.fromHeight(AppUi.buttonH),
-          textStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.0,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppUi.radiusSm),
-          ),
-        ),
-      ),
-      textTheme: base.textTheme.apply(
-        bodyColor: dark ? AppColors.text : AppColors.navy900,
-        displayColor: dark ? AppColors.text : AppColors.navy900,
+      child: child,
+    );
+  }
+
+  /// Капс-лейбл.
+  static Widget label(String text, {Color? color, double size = 11}) {
+    return Text(
+      text.toUpperCase(),
+      style: TextStyle(
+        fontSize: size,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.5,
+        color: color ?? const Color(0xFF8FA2B8),
       ),
     );
   }

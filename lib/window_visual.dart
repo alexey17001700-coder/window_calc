@@ -1,481 +1,523 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'theme.dart';
-import 'measure_item.dart';
+import 'work_tree.dart';
 
-/// Шаг «ВИЗУАЛЬНЫЙ ЗАМЕР».
-/// Для БАЛКОННОГО БЛОКА — панель размеров двери и глухняка + живой чертёж.
-/// Для остальных изделий — панель створок.
+part 'visual/chips.dart';
+part 'visual/geo.dart';
+part 'visual/painter.dart';
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ЧЕРТЁЖ ОКНА ПО ГОСТ  ·  v3.4.56
+///  Рабочий чертёж, а не картинка:
+///   • белый лист, ТОЛЬКО тонкие чёрные линии — без заливок и градиентов;
+///   • стена со штриховкой, проём, рама двойной линией;
+///   • ОСЕВЫЕ линии штрихпунктиром (вертикальная и горизонтальная);
+///   • УГЛОВЫЕ ВЫНОСКИ 90° по четырём углам проёма;
+///   • створки — ОДНОЙ линией обвязки, БЕЗ штапика (упрощённый контур);
+///   • РАЗМЕРНЫЕ ЛИНИИ: габарит сверху и слева, промежуточные — по секциям
+///     (нижний ряд) и по высоте стеклопакета / арки (справа), с выносными
+///     линиями, стрелками и числами в мм.
+///  СТВОРКИ КЛИКАБЕЛЬНЫ: нажатие меняет обозначение открывания
+///  по кругу (глухая → поворотная → поворотно-откидная → откидная
+///  → снова глухая) — как на реальном чертеже.
+/// ═══════════════════════════════════════════════════════════════════
+
+/// Обозначения створок — циклически сменяются по нажатию.
+/// 0 — Г (глухая), 1 — П (поворотная), 2 — ПО (поворотно-откидная),
+/// 3 — О (откидная).
+const List<String> kSashModeNames = [
+  'ГЛУХАЯ',
+  'ПОВОРОТНАЯ',
+  'ПОВОРОТНО-ОТКИДНАЯ',
+  'ОТКИДНАЯ',
+];
+
+/// Буквенные обозначения по ГОСТ — рисуются прямо на створке.
+const List<String> kSashModeLetter = ['Г', 'П', 'ПО', 'О'];
+
+/// Короткие подписи для плашек под чертежом.
+const List<String> kSashModeShort = [
+  'Г · ГЛУХАЯ',
+  'П · ПОВОР.',
+  'ПО · ПОВ.-ОТКИД.',
+  'О · ОТКИД.',
+];
+
 class WindowVisual extends StatefulWidget {
-  final MeasureItem item;
-  final VoidCallback onChanged;
-
   const WindowVisual({
     super.key,
-    required this.item,
-    required this.onChanged,
+    required this.sashes,
+    required this.arched,
+    required this.selectedGlass,
+    required this.onGlass,
+    this.parts = const [],
+    this.sashModes = const [],
+    this.onSashTap,
+    this.widthMm = 0,
+    this.heightMm = 0,
+    this.sectionWidths = const [],
+    this.hingeCounts = const [],
+    this.onWidthEdit,
+    this.onHeightEdit,
+    this.onSectionEdit,
+    this.balconyBlock = false,
+    this.doorMode = 1,
+    this.fixedMode = 0,
+    this.doorWidthMm = 600,
+    this.doorHeightMm = 2100,
+    this.fixedWidthMm = 600,
+    this.fixedHeightMm = 500,
+    this.onBalconyTap,
+    this.onBalconyEdit,
   });
+
+  /// Число створок: 1, 2, 3 или 4.
+  final int sashes;
+
+  /// Фигурное окно (арочный верх).
+  final bool arched;
+
+  /// Выбранный стеклопакет (-1 — не выбран).
+  final int selectedGlass;
+
+  /// Нажатие на стеклопакет.
+  final ValueChanged<int> onGlass;
+
+  /// Отмеченная комплектация (влияет на чертёж).
+  final List<String> parts;
+
+  /// Обозначение каждой створки (индекс в kSashModeNames).
+  final List<int> sashModes;
+
+  /// Нажатие на створку — сменить обозначение.
+  final ValueChanged<int>? onSashTap;
+
+  /// Габарит по ширине, мм (0 — неизвестно).
+  final int widthMm;
+
+  /// Габарит по высоте, мм (0 — неизвестно).
+  final int heightMm;
+
+  /// Доли ширины секций (сумма ≈ 1.0). Пусто — секции равные.
+  final List<double> sectionWidths;
+
+  /// Число петель на каждой створке. По умолчанию 2 — верхняя и нижняя.
+  /// Дополнительные петли замерщик добавляет ВРУЧНУЮ (например, на дверь).
+  final List<int> hingeCounts;
+
+  /// Ввод ШИРИНЫ прямо на чертеже: тап по размерной линии сверху.
+  final ValueChanged<int>? onWidthEdit;
+
+  /// Ввод ВЫСОТЫ прямо на чертеже: тап по размерной линии слева.
+  final ValueChanged<int>? onHeightEdit;
+
+  /// Ввод ширины СЕКЦИИ прямо на чертеже: тап по её нижней размерной линии.
+  /// Передаёт номер секции и ширину в ММ. Остальные секции пересчитываются
+  /// автоматически из общего габарита.
+  final void Function(int index, int mm)? onSectionEdit;
+
+  /// БАЛКОННЫЙ БЛОК: дверь + боковая колонна (сверху глухой стеклопакет,
+  /// снизу сэндвич-панель). Если true — чертёж рисуется как блок,
+  /// створки / секции / арка не используются.
+  final bool balconyBlock;
+
+  /// Обозначение ДВЕРИ блока (индекс в kSashModeNames).
+  final int doorMode;
+
+  /// Обозначение ГЛУХНЯКА блока (индекс в kSashModeNames). Обычно 0 — Г.
+  final int fixedMode;
+
+  /// Ширина двери блока, мм.
+  final int doorWidthMm;
+
+  /// Высота двери блока (= общей высоте блока), мм.
+  final int doorHeightMm;
+
+  /// Ширина глухого стеклопакета (боковой колонны), мм.
+  final int fixedWidthMm;
+
+  /// Высота глухого стеклопакета сверху колонны, мм.
+  final int fixedHeightMm;
+
+  /// Тап по двери (0) или по глухняку (1) — смена обозначения.
+  final ValueChanged<int>? onBalconyTap;
+
+  /// Ввод размера блока прямо на чертеже.
+  /// Поля: 'DOOR_W' · 'DOOR_H' · 'FIXED_W' · 'FIXED_H'.
+  final void Function(String field, int mm)? onBalconyEdit;
 
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
 
 class _WindowVisualState extends State<WindowVisual> {
-  BalconyBlock get b => widget.item.balcony ??= BalconyBlock();
+  /// Подсвеченная створка.
+  int _sel = 0;
 
-  void _bump(String field, double delta) {
-    setState(() {
-      switch (field) {
-        case 'dw':
-          b.doorWidth = (b.doorWidth + delta).clamp(300.0, 2000.0).toDouble();
-          break;
-        case 'dh':
-          b.doorHeight = (b.doorHeight + delta).clamp(1000.0, 3000.0).toDouble();
-          break;
-        case 'bw':
-          b.blindWidth = (b.blindWidth + delta).clamp(200.0, 2000.0).toDouble();
-          break;
-        case 'bh':
-          b.blindHeight =
-              (b.blindHeight + delta).clamp(200.0, 3000.0).toDouble();
-          break;
-      }
-    });
-    widget.onChanged();
-  }
+  List<int> get _modes => widget.sashModes.length == widget.sashes
+      ? widget.sashModes
+      : List<int>.filled(widget.sashes, 1);
 
-  void _cycleGlazing() {
-    const order = ['Г', 'П', 'ПО', 'О'];
-    final i = order.indexOf(widget.item.glazing);
-    widget.item.glazing = order[(i + 1) % order.length];
-    setState(() {});
-    widget.onChanged();
+  void _tap(int i) {
+    HapticFeedback.selectionClick();
+    setState(() => _sel = i);
+    widget.onSashTap?.call(i);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.item.isBalcony) return _sashPanel();
-    return _balconyPanel();
-  }
-
-  // ---------- БАЛКОННЫЙ БЛОК ----------
-
-  Widget _balconyPanel() {
+    final modes = _modes;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppUi.sectionTitle(context, 'Балконный блок'),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: AppUi.card(),
-          child: Column(
-            children: [
-              AspectRatio(
-                aspectRatio: 1.35,
-                child: GestureDetector(
-                  onTap: _cycleGlazing,
-                  child: CustomPaint(
-                    painter: BalconyPainter(b),
-                    size: Size.infinite,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Тап по чертежу — обозначение: ${widget.item.glazing}',
-                style: const TextStyle(color: AppColors.dim, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        _row('ДВЕРЬ · ШИРИНА', b.doorWidth, 'dw'),
-        _row('ДВЕРЬ · ВЫСОТА', b.doorHeight, 'dh'),
-        _row('ГЛУХНЯК · ШИРИНА', b.blindWidth, 'bw'),
-        _row('ГЛУХНЯК · ВЫСОТА', b.blindHeight, 'bh'),
-        const SizedBox(height: 12),
+        // ── ЗАГОЛОВОК ЧЕРТЕЖА ──
         Row(
           children: [
-            Expanded(
-              child: _btn(
-                '⚡ СТАНДАРТ',
-                () {
-                  setState(() => b.reset());
-                  widget.onChanged();
-                },
+            Container(
+              width: 3,
+              height: 14,
+              decoration: BoxDecoration(
+                gradient: AppColors.goldGradient,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
+            const Text(
+              'ЧЕРТЁЖ · ГОСТ',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 8),
             Expanded(
-              child: _btn(
-                b.blindRight ? 'ГЛУХОЕ СПРАВА' : 'ГЛУХОЕ СЛЕВА',
-                () {
-                  setState(() => b.blindRight = !b.blindRight);
-                  widget.onChanged();
-                },
+              child: Text(
+                'СЕКЦИЯ ${_sel + 1} · ${kSashModeNames[modes[_sel].clamp(0, 3)]}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF7E93AC),
+                ),
+              ),
+            ),
+            const Icon(Icons.touch_app_rounded,
+                size: 13, color: Color(0xFF7E93AC)),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // ── САМ ЧЕРТЁЖ ──
+        LayoutBuilder(
+          builder: (context, c) {
+            final size = Size(c.maxWidth, c.maxWidth / 1.16);
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapUp: (d) {
+                // 1) Тап по РАЗМЕРНОЙ ЛИНИИ → ввод размера в ММ.
+                final dim = _hitDim(size, d.localPosition);
+                if (dim == 'w') {
+                  _editDim('ШИРИНА ИЗДЕЛИЯ', '1300', widget.widthMm,
+                      widget.onWidthEdit);
+                  return;
+                }
+                if (dim == 'h') {
+                  _editDim('ВЫСОТА ИЗДЕЛИЯ', '1400', widget.heightMm,
+                      widget.onHeightEdit);
+                  return;
+                }
+                // 1б) Тап по НИЖНЕЙ размерной линии секции → ввод её ширины.
+                final sec = _hitSectionDim(size, d.localPosition);
+                if (sec >= 0) {
+                  _editSection(sec);
+                  return;
+                }
+                // 2) Иначе — выбор створки (смена обозначения по ГОСТ).
+                final i = _hit(size, d.localPosition);
+                if (i >= 0) _tap(i);
+              },
+              child: CustomPaint(
+                size: size,
+                painter: _GostPainter(
+                  sashes: widget.sashes,
+                  arched: widget.arched,
+                  parts: widget.parts,
+                  modes: modes,
+                  selected: _sel,
+                  widthMm: widget.widthMm,
+                  heightMm: widget.heightMm,
+                  sectionWidths: widget.sectionWidths,
+                  hingeCounts: widget.hingeCounts,
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+
+        // ── ПОДСКАЗКА: РАЗМЕРЫ ПРАВЯТСЯ ТАПОМ ПО ЧЕРТЕЖУ ──
+        Row(
+          children: [
+            const Icon(Icons.touch_app_rounded,
+                size: 13, color: AppColors.gold),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                'ТАП: СВЕРХУ — ШИРИНА, СЛЕВА — ВЫСОТА, ПОД СЕКЦИЕЙ — ЕЁ ШИРИНА',
+                style: TextStyle(
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.7,
+                  color: AppColors.gold.withOpacity(0.9),
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: AppUi.card(border: AppColors.gold),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppUi.label('Авторасчёт', color: AppColors.gold),
-              const SizedBox(height: 8),
-              _stat('Габарит блока',
-                  '${b.totalWidth.round()} × ${b.totalHeight.round()} мм'),
-              _stat('Площадь блока', '${b.area.toStringAsFixed(2)} м²'),
-              _stat('Остекление', '${b.glazingArea.toStringAsFixed(2)} м²'),
-              _stat('Уплотнитель', '${b.sealLength.toStringAsFixed(1)} м'),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+        const SizedBox(height: 10),
 
-  Widget _row(String label, double value, String field) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: AppUi.card(),
-      child: Row(
-        children: [
-          Expanded(child: AppUi.label(label)),
-          _stepBtn('−', () => _bump(field, -50)),
-          SizedBox(
-            width: 78,
-            child: Text(
-              '${value.round()}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.text,
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          _stepBtn('+', () => _bump(field, 50)),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepBtn(String t, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.bg2,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.line),
-        ),
-        child: Text(
-          t,
-          style: const TextStyle(
-            color: AppColors.gold,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _btn(String text, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 46,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(AppUi.radiusSm),
-          border: Border.all(color: AppColors.line),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.text,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _stat(String k, String v) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(k, style: const TextStyle(color: AppColors.dim, fontSize: 12)),
-          Text(
-            v,
-            style: const TextStyle(
-              color: AppColors.text,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---------- ОБЫЧНОЕ ИЗДЕЛИЕ ----------
-
-  Widget _sashPanel() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppUi.sectionTitle(context, 'Визуальный замер'),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: AppUi.card(),
-          child: Column(
-            children: [
-              AspectRatio(
-                aspectRatio: 1.1,
-                child: GestureDetector(
-                  onTap: _cycleGlazing,
-                  child: CustomPaint(
-                    painter: SashPainter(
-                      sashes: widget.item.sashes,
-                      glazing: widget.item.glazing,
-                    ),
-                    size: Size.infinite,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Створок: ${widget.item.sashes} · обозначение: ${widget.item.glazing}',
-                style: const TextStyle(color: AppColors.dim, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        AppUi.label('Обозначение'),
-        const SizedBox(height: 8),
+        // ── ОБОЗНАЧЕНИЯ СТВОРОК ──
         Wrap(
-          spacing: 8,
-          children: ['Г', 'П', 'ПО', 'О'].map((g) {
-            final active = widget.item.glazing == g;
-            return GestureDetector(
-              onTap: () {
-                widget.item.glazing = g;
-                setState(() {});
-                widget.onChanged();
-              },
-              child: Container(
-                width: 52,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: active ? AppColors.goldGradient : null,
-                  color: active ? null : AppColors.card,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: active ? AppColors.gold : AppColors.line,
-                  ),
-                ),
-                child: Text(
-                  g,
-                  style: TextStyle(
-                    color: active ? const Color(0xFF1A1206) : AppColors.dim,
-                    fontWeight: FontWeight.w700,
-                  ),
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (var i = 0; i < widget.sashes; i++)
+              _SashChip(
+                index: i,
+                name: kSashModeShort[modes[i].clamp(0, 3)],
+                selected: _sel == i,
+                onTap: () => _tap(i),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // ── ПОДПИСЬ ──
+        Row(
+          children: [
+            Container(
+              width: 3,
+              height: 14,
+              decoration: BoxDecoration(
+                gradient: AppColors.goldGradient,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'СТЕКЛОПАКЕТ',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'выберите наполнение',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF7E93AC),
                 ),
               ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // ── ВЫБОР ПОД ЧЕРТЕЖОМ ──
+        LayoutBuilder(
+          builder: (context, c) {
+            final w = (c.maxWidth - 8) / 2;
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var i = 0; i < glassTypes.length; i++)
+                  SizedBox(
+                    width: w,
+                    child: _GlassChip(
+                      node: glassTypes[i],
+                      selected: widget.selectedGlass == i,
+                      onTap: () => widget.onGlass(i),
+                    ),
+                  ),
+              ],
             );
-          }).toList(),
+          },
         ),
       ],
     );
   }
-}
 
-/// Чертёж балконного блока: дверь + глухняк, выровненный по верху двери.
-class BalconyPainter extends CustomPainter {
-  final BalconyBlock b;
-  BalconyPainter(this.b);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const pad = 34.0;
-    final availW = size.width - pad * 2;
-    final availH = size.height - pad * 2;
-    final scale = [
-      availW / b.totalWidth,
-      availH / b.totalHeight,
-    ].reduce((a, c) => a < c ? a : c);
-
-    final w = b.totalWidth * scale;
-    final h = b.totalHeight * scale;
-    final left = (size.width - w) / 2;
-    final top = (size.height - h) / 2;
-
-    final doorW = b.doorWidth * scale;
-    final blindW = b.blindWidth * scale;
-    final blindH = b.blindHeight * scale;
-
-    final doorRect = Rect.fromLTWH(
-      b.blindRight ? left : left + blindW,
-      top,
-      doorW,
-      h,
-    );
-    final blindRect = Rect.fromLTWH(
-      b.blindRight ? left + doorW : left,
-      top,
-      blindW,
-      blindH,
-    );
-
-    final frame = Paint()
-      ..color = AppColors.gold
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4;
-    final glass = Paint()..color = AppColors.blue.withOpacity(0.16);
-    final glassLine = Paint()
-      ..color = AppColors.blue.withOpacity(0.55)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-
-    // стекло
-    canvas.drawRect(doorRect.deflate(6), glass);
-    canvas.drawRect(doorRect.deflate(6), glassLine);
-    canvas.drawRect(blindRect.deflate(6), glass);
-    canvas.drawRect(blindRect.deflate(6), glassLine);
-
-    // рамы
-    canvas.drawRect(doorRect, frame);
-    canvas.drawRect(blindRect, frame);
-
-    // ручка двери
-    final handle = Paint()
-      ..color = AppColors.gold
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    final hx = b.blindRight ? doorRect.right - 12 : doorRect.left + 12;
-    canvas.drawLine(
-      Offset(hx, doorRect.center.dy - 14),
-      Offset(hx, doorRect.center.dy + 14),
-      handle,
-    );
-
-    // размерные линии
-    final dim = Paint()
-      ..color = AppColors.dim
-      ..strokeWidth = 1;
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-
-    void label(String t, Offset at) {
-      textPainter.text = TextSpan(
-        text: t,
-        style: const TextStyle(color: AppColors.dim, fontSize: 10),
-      );
-      textPainter.layout();
-      textPainter.paint(
-        canvas,
-        at - Offset(textPainter.width / 2, textPainter.height / 2),
-      );
+  /// Какая СЕКЦИЯ под пальцем.
+  /// Секция — вся ячейка проёма целиком (рама + обвязка + штапик + стекло),
+  /// поэтому попадание считается по проёму, а не по стеклу: палец может
+  /// промахнуться мимо стекла на профиль — секция всё равно определится.
+  int _hit(Size size, Offset p) {
+    final g = _geo(size);
+    // Палец вне проёма (стена, поле листа) — не наша секция.
+    if (!_openPath(g.opening, widget.arched).contains(p)) return -1;
+    final cells =
+        _sashRects(g.opening.deflate(2), widget.sashes, widget.sectionWidths);
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i].inflate(4).contains(p)) return i;
     }
-
-    // габарит сверху
-    final yTop = top - 16;
-    canvas.drawLine(Offset(left, yTop), Offset(left + w, yTop), dim);
-    canvas.drawLine(Offset(left, yTop - 5), Offset(left, yTop + 5), dim);
-    canvas.drawLine(Offset(left + w, yTop - 5), Offset(left + w, yTop + 5), dim);
-    label('${b.totalWidth.round()}', Offset(left + w / 2, yTop - 12));
-
-    // ширина двери
-    label('${b.doorWidth.round()}', Offset(doorRect.center.dx, top + h + 14));
-    // ширина глухняка
-    label('${b.blindWidth.round()}', Offset(blindRect.center.dx, top + h + 14));
-
-    // высота двери
-    final xR = left + w + 16;
-    canvas.drawLine(Offset(xR, top), Offset(xR, top + h), dim);
-    label('${b.doorHeight.round()}', Offset(xR + 18, top + h / 2));
-
-    // высота глухняка
-    final xL = left - 16;
-    canvas.drawLine(Offset(xL, top), Offset(xL, top + blindH), dim);
-    label('${b.blindHeight.round()}', Offset(xL - 18, top + blindH / 2));
+    // Попал в проём, но между ячейками (арка) — берём ближайшую по X.
+    var best = 0;
+    var dist = double.infinity;
+    for (var i = 0; i < cells.length; i++) {
+      final d = (cells[i].center.dx - p.dx).abs();
+      if (d < dist) {
+        dist = d;
+        best = i;
+      }
+    }
+    return best;
   }
 
-  @override
-  bool shouldRepaint(covariant BalconyPainter old) => true;
-}
-
-/// Чертёж обычного окна со створками.
-class SashPainter extends CustomPainter {
-  final int sashes;
-  final String glazing;
-  SashPainter({required this.sashes, required this.glazing});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const pad = 30.0;
-    final rect = Rect.fromLTWH(
-      pad,
-      pad,
-      size.width - pad * 2,
-      size.height - pad * 2,
-    );
-    final frame = Paint()
-      ..color = AppColors.gold
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4;
-    final glass = Paint()..color = AppColors.blue.withOpacity(0.16);
-    final glassLine = Paint()
-      ..color = AppColors.blue.withOpacity(0.55)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-
-    canvas.drawRect(rect, glass);
-    canvas.drawRect(rect, glassLine);
-    canvas.drawRect(rect, frame);
-
-    final n = sashes < 1 ? 1 : sashes;
-    final sw = rect.width / n;
-    for (var i = 1; i < n; i++) {
-      canvas.drawLine(
-        Offset(rect.left + sw * i, rect.top),
-        Offset(rect.left + sw * i, rect.bottom),
-        frame,
-      );
+  /// Попадание в РАЗМЕРНУЮ ЛИНИЮ: 'w' — ширина (полоса сверху),
+  /// 'h' — высота (полоса слева). Тап по ним открывает ввод в ММ.
+  String? _hitDim(Size size, Offset p) {
+    final g = _geo(size);
+    // Ширина: полоса над стеной, по ширине проёма.
+    final wTop = g.wall.top - 15;
+    if (p.dy > wTop - 13 &&
+        p.dy < g.wall.top &&
+        p.dx > g.opening.left - 10 &&
+        p.dx < g.opening.right + 10) {
+      return 'w';
     }
+    // Высота: полоса слева от стены, по высоте проёма.
+    final hLeft = g.wall.left - 17;
+    if (p.dx > hLeft - 13 &&
+        p.dx < g.wall.left &&
+        p.dy > g.opening.top - 10 &&
+        p.dy < g.opening.bottom + 10) {
+      return 'h';
+    }
+    return null;
+  }
 
-    final tp = TextPainter(textDirection: TextDirection.ltr);
-    tp.text = TextSpan(
-      text: glazing,
-      style: const TextStyle(
-        color: AppColors.gold,
-        fontSize: 22,
-        fontWeight: FontWeight.w700,
+  /// Попадание в НИЖНЮЮ размерную линию секции → её номер (-1 — мимо).
+  int _hitSectionDim(Size size, Offset p) {
+    if (widget.onSectionEdit == null) return -1;
+    if (widget.sashes < 2) return -1;
+    final g = _geo(size);
+    final hasSill = widget.parts.contains('С ПОДОКОННИКОМ');
+    final hasDrip = widget.parts.contains('С ОТЛИВОМ');
+    // Та же высота, на которой рисуется нижний ряд размеров.
+    final y = g.wall.bottom + (hasSill || hasDrip ? 30 : 17);
+    if (p.dy < y - 14 || p.dy > y + 14) return -1;
+    final cells = _sashRects(g.glass, widget.sashes, widget.sectionWidths);
+    for (var i = 0; i < cells.length; i++) {
+      if (p.dx > cells[i].left - 9 && p.dx < cells[i].right + 9) return i;
+    }
+    return -1;
+  }
+
+  /// Ввод ширины секции: диалог в ММ, остальные секции — автоматом.
+  void _editSection(int i) {
+    final cb = widget.onSectionEdit;
+    if (cb == null) return;
+    final ws = _normWidths(widget.sashes, widget.sectionWidths);
+    final cur = widget.widthMm > 0 ? (widget.widthMm * ws[i]).round() : 0;
+    _editDim('ШИРИНА СЕКЦИИ ${i + 1}', '800', cur, (v) => cb(i, v));
+  }
+
+  /// Ввод размера: диалог с цифровой клавиатурой, значение в ММ.
+  Future<void> _editDim(
+      String title, String hint, int value, ValueChanged<int>? cb) async {
+    if (cb == null) return;
+    final c = TextEditingController(text: value > 0 ? '$value' : '');
+    HapticFeedback.lightImpact();
+    final res = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F1D31),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: AppColors.gold.withOpacity(0.45)),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: Colors.white,
+          ),
+        ),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          cursorColor: AppColors.gold,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF7E93AC),
+            ),
+            suffixText: 'ММ',
+            suffixStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gold,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF0A1220),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(13),
+              borderSide: BorderSide(color: AppColors.gold.withOpacity(0.4)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'ОТМЕНА',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final v = double.tryParse(c.text.trim().replaceAll(',', '.'));
+              Navigator.pop(ctx, v == null ? null : v.round());
+            },
+            child: const Text(
+              'ОК',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: AppColors.gold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
-    tp.layout();
-    tp.paint(
-      canvas,
-      Offset(rect.center.dx - tp.width / 2, rect.center.dy - tp.height / 2),
-    );
+    if (res != null && res > 0) cb(res);
   }
-
-  @override
-  bool shouldRepaint(covariant SashPainter old) =>
-      old.sashes != sashes || old.glazing != glazing;
 }

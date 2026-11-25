@@ -1,185 +1,226 @@
-import 'dart:convert';
 import 'dart:io';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'theme.dart';
+import 'package:path_provider/path_provider.dart';
 
-/// Владелец и репозиторий на GitHub — источник обновлений.
-/// Если репозиторий переехал, поменяй только эти две строки.
-const String kGithubOwner = 'almas';
-const String kGithubRepo = 'window_calc';
-
-/// Результат проверки обновлений.
+/// Результат проверки обновления (без показа диалога).
 class UpdateResult {
   const UpdateResult({
     required this.currentVersion,
     this.latestVersion,
+    this.hasUpdate = false,
     this.error,
   });
 
-  /// Версия, установленная на устройстве.
   final String currentVersion;
-
-  /// Версия с GitHub — только если она новее установленной.
   final String? latestVersion;
-
-  /// Текст ошибки, если проверить не удалось.
+  final bool hasUpdate;
   final String? error;
-
-  bool get hasUpdate => latestVersion != null;
 }
 
-/// Проверка версии приложения.
 class UpdateChecker {
-  static Future<String> currentVersion() async {
+  static const String owner = 'alexey17001700-coder';
+  static const String repo = 'window_calc';
+
+  /// Тихая проверка: возвращает результат, ничего не показывает.
+  static Future<UpdateResult> check() async {
+    String current = '?';
     try {
       final info = await PackageInfo.fromPlatform();
-      return '${info.version}+${info.buildNumber}';
-    } catch (_) {
-      return '—';
-    }
-  }
+      current = info.version;
+    } catch (_) {}
 
-  /// Спросить у GitHub последний релиз и сравнить с установленной версией.
-  static Future<UpdateResult> check() async {
-    final current = await currentVersion();
     try {
-      final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 8);
-      final req = await client.getUrl(Uri.parse(
-          'https://api.github.com/repos/$kGithubOwner/$kGithubRepo/releases/latest'));
-      req.headers.set('Accept', 'application/vnd.github+json');
-      req.headers.set('User-Agent', 'window_calc-app');
-      final res = await req.close();
-      final body = await res.transform(utf8.decoder).join();
-      client.close();
+      final url = Uri.parse(
+          'https://api.github.com/repos/$owner/$repo/releases/latest');
+      final resp = await http.get(url, headers: {
+        'Accept': 'application/vnd.github+json',
+      }).timeout(const Duration(seconds: 12));
 
-      if (res.statusCode != 200) {
+      if (resp.statusCode != 200) {
         return UpdateResult(
-          currentVersion: current,
-          error: 'HTTP ${res.statusCode}',
-        );
+            currentVersion: current, error: 'GitHub ${resp.statusCode}');
       }
 
-      final map = jsonDecode(body) as Map<String, dynamic>;
-      final tag = (map['tag_name'] as String? ?? '').trim();
-      if (tag.isEmpty) {
+      final match =
+          RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(resp.body);
+      if (match == null) {
         return UpdateResult(currentVersion: current, error: 'нет тега релиза');
       }
 
-      final latest = tag.replaceFirst(RegExp(r'^[vV]'), '');
-      final cur = current.split('+').first;
+      final tag = match.group(1) ?? '';
+      final latest = tag.split('+').first;
       return UpdateResult(
         currentVersion: current,
-        latestVersion: _isNewer(latest, cur) ? latest : null,
+        latestVersion: latest,
+        hasUpdate: _isNewer(latest, current),
       );
     } catch (_) {
-      return UpdateResult(currentVersion: current, error: 'нет сети');
+      return UpdateResult(currentVersion: current, error: 'сеть недоступна');
     }
   }
 
-  /// true, если [latest] новее [current] (сравнение по 3 числам).
+  /// Показать диалог обновления (публично, для заставки).
+  static void showUpdate(BuildContext context, String newVersion) {
+    _showUpdateDialog(context, newVersion);
+  }
+
+  /// Возвращает текст отчёта (для отладочного окна)
+  static Future<String> getReport() async {
+    final sb = StringBuffer();
+
+    String currentVersion = '?';
+    String buildNumber = '?';
+    try {
+      final info = await PackageInfo.fromPlatform();
+      currentVersion = info.version;
+      buildNumber = info.buildNumber;
+      sb.writeln('Текущая версия: $currentVersion+$buildNumber');
+    } catch (e) {
+      sb.writeln('Ошибка PackageInfo: $e');
+    }
+
+    String? latestVersion;
+    try {
+      final url = Uri.parse(
+          'https://api.github.com/repos/$owner/$repo/releases/latest');
+      sb.writeln('Запрос: $url');
+      final resp = await http.get(url, headers: {
+        'Accept': 'application/vnd.github+json',
+      });
+      sb.writeln('HTTP статус: ${resp.statusCode}');
+      if (resp.statusCode == 200) {
+        final data = resp.body;
+        final match = RegExp(r'"tag_name"\s*:\s*"v?([^"]+)"').firstMatch(data);
+        if (match != null) {
+          final tag = match.group(1) ?? '';
+          latestVersion = tag.split('+').first;
+          sb.writeln('Последняя на GitHub: $latestVersion');
+        } else {
+          sb.writeln('Не найден tag_name в ответе');
+        }
+      }
+    } catch (e) {
+      sb.writeln('Ошибка сети: $e');
+    }
+
+    if (latestVersion != null) {
+      final isNewer = _isNewer(latestVersion, currentVersion);
+      sb.writeln('');
+      sb.writeln(isNewer
+          ? '✅ ДОСТУПНО ОБНОВЛЕНИЕ до $latestVersion'
+          : '✅ Обновление не требуется');
+    }
+
+    return sb.toString();
+  }
+
   static bool _isNewer(String latest, String current) {
-    List<int> parts(String s) =>
-        s.split('.').map((e) => int.tryParse(e.trim()) ?? 0).toList();
-    final a = parts(latest);
-    final b = parts(current);
+    final l = latest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    final c = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
     for (var i = 0; i < 3; i++) {
-      final x = i < a.length ? a[i] : 0;
-      final y = i < b.length ? b[i] : 0;
-      if (x != y) return x > y;
+      final lv = i < l.length ? l[i] : 0;
+      final cv = i < c.length ? c[i] : 0;
+      if (lv > cv) return true;
+      if (lv < cv) return false;
     }
     return false;
   }
 
-  /// Диалог «доступно обновление» с адресом релиза.
-  static void showUpdate(BuildContext context, String version) {
-    showDialog<void>(
+  /// Скачивает и открывает APK последнего релиза
+  static Future<String> downloadAndInstall() async {
+  try {
+    // 1. Получаем точный URL из GitHub API
+    final apiUrl = Uri.parse(
+        'https://api.github.com/repos/$owner/$repo/releases/latest');
+    final resp = await http.get(apiUrl, headers: {
+      'Accept': 'application/vnd.github+json',
+    });
+    if (resp.statusCode != 200) {
+      return 'GitHub API: ${resp.statusCode}';
+    }
+
+    final body = resp.body;
+    final match = RegExp(
+            r'"browser_download_url"\s*:\s*"([^"]+app-release\.apk)"')
+        .firstMatch(body);
+    if (match == null) {
+      return 'APK не найден в Release';
+    }
+    final apkUrl = match.group(1)!;
+
+    // 2. Сохраняем в постоянную папку приложения
+    final dir = await getApplicationDocumentsDirectory();
+    final savePath = '${dir.path}/update.apk';
+
+    // 3. Скачиваем через http stream
+    final client = http.Client();
+    final request = http.Request('GET', Uri.parse(apkUrl));
+    final streamed = await client.send(request);
+    if (streamed.statusCode != 200) {
+      return 'Ошибка скачивания: ${streamed.statusCode}';
+    }
+    final file = File(savePath);
+    final sink = file.openWrite();
+    await streamed.stream.pipe(sink);
+    await sink.close();
+    client.close();
+
+    // 4. Проверка размера
+    final size = await file.length();
+    if (size < 1000000) {
+      return 'Файл недокачался: ${size} байт';
+    }
+
+    // 5. Открываем установщик
+    final result = await OpenFilex.open(savePath);
+    if (result.type != ResultType.done) {
+      return 'Открыть установщик не удалось: ${result.message}';
+    }
+    return 'Установщик открыт (${(size / 1024 / 1024).toStringAsFixed(1)} МБ)';
+  } catch (e) {
+    return 'Ошибка: $e';
+  }
+  }
+
+  /// Проверка при запуске (совместимость): тихо проверяет и показывает диалог.
+  static Future<void> checkOnStart(BuildContext context) async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (!context.mounted) return;
+
+    final res = await check();
+    if (!context.mounted) return;
+    if (res.hasUpdate && res.latestVersion != null) {
+      _showUpdateDialog(context, res.latestVersion!);
+    }
+  }
+
+  static void _showUpdateDialog(BuildContext context, String newVersion) {
+    showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
-        title: const Text(
-          'ДОСТУПНО ОБНОВЛЕНИЕ',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-            color: AppColors.gold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Версия v$version уже опубликована.',
-              style: const TextStyle(color: AppColors.text, fontSize: 14),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'github.com/$kGithubOwner/$kGithubRepo/releases/latest',
-              style: const TextStyle(color: AppColors.dim, fontSize: 11.5),
-            ),
-          ],
-        ),
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text('Доступно обновление'),
+        content: Text('Версия $newVersion доступна.\nСкачать и установить?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'ПОЗЖЕ',
-              style: TextStyle(color: AppColors.dim),
-            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Позже'),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Плитка «О приложении».
-class UpdateTile extends StatefulWidget {
-  const UpdateTile({super.key});
-
-  @override
-  State<UpdateTile> createState() => _UpdateTileState();
-}
-
-class _UpdateTileState extends State<UpdateTile> {
-  String _v = '…';
-
-  @override
-  void initState() {
-    super.initState();
-    UpdateChecker.currentVersion().then((v) {
-      if (mounted) setState(() => _v = v);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: AppUi.card(),
-      child: Row(
-        children: [
-          const Icon(Icons.info_outline, color: AppColors.gold, size: 20),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Замерщик окон Almas',
-              style: TextStyle(
-                color: AppColors.text,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Text(
-            'v$_v',
-            style: const TextStyle(color: AppColors.dim, fontSize: 12),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final msg = await downloadAndInstall();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(msg)),
+                );
+              }
+            },
+            child: const Text('Обновить'),
           ),
         ],
       ),

@@ -1,48 +1,95 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+
 import 'theme.dart';
-import 'measure_item.dart';
-import 'work_tree.dart';
-import 'measure_sizes.dart';
-import 'window_visual.dart';
-import 'price_estimate.dart';
-import 'measure_sheet.dart';
-import 'measure_media.dart';
+import 'version_info.dart';
 import 'measure_history.dart';
+import 'measure_item.dart';
+import 'measure_sizes.dart';
+import 'measure_sheet.dart';
+import 'price_estimate.dart';
+import 'window_visual.dart';
+import 'work_tree.dart';
 
-/// Обёртка мастера с колбэками навигации (используется заставкой).
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key, this.onBack, this.onFinish});
+part 'onboarding/widgets.dart';
+part 'onboarding/background.dart';
 
+/// ═══════════════════════════════════════════════════════════════════
+///  ПРЕМИАЛЬНЫЙ ЭКРАН  ·  v3.4.17
+///  Пять шагов мастера:
+///    1) «ДАННЫЕ КЛИЕНТА» — карточка с полями;
+///    2) «ЧТО ДЕЛАЕМ» — дерево НА ЭКРАНЕ + мультивыбор комплектации;
+///    3) «РАЗМЕРЫ» — по одному экрану на каждый отмеченный пункт,
+///       ввод в ММ или СМ (программа определяет сама и переводит в ММ);
+///    4) «ВИЗУАЛЬНЫЙ ЗАМЕР» — нарисованное окно + выбор стеклопакета;
+///    5) «ЗАМЕРНЫЙ ЛИСТ» — итог в ММ, копирование и отправка листа.
+/// ═══════════════════════════════════════════════════════════════════
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key, required this.onFinish, this.onBack});
+  final VoidCallback onFinish;
+
+  /// Возврат на главный экран (заставка с проверкой обновлений).
   final VoidCallback? onBack;
-  final VoidCallback? onFinish;
 
   @override
-  Widget build(BuildContext context) {
-    return Onboarding(onBack: onBack, onFinish: onFinish);
-  }
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-/// Мастер замера: 7 шагов.
-class Onboarding extends StatefulWidget {
-  const Onboarding({
-    super.key,
-    this.onBack,
-    this.onFinish,
-  });
+class _OnboardingScreenState extends State<OnboardingScreen>
+    with SingleTickerProviderStateMixin {
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _phone = TextEditingController();
+  final TextEditingController _addr = TextEditingController();
+  final TextEditingController _flat = TextEditingController();
+  final TextEditingController _floor = TextEditingController();
 
-  /// Вызывается при выходе с первого шага.
-  final VoidCallback? onBack;
+  /// Пробегающий блик по карточке.
+  late final AnimationController _shine;
 
-  /// Вызывается после сохранения замера — вместо закрытия экрана.
-  final VoidCallback? onFinish;
+  /// Шаг мастера: 0 — клиент, 1 — дерево, 2 — размеры, 3 — визуальный замер,
+  /// 4 — замерный лист (отправка).
+  int _step = 0;
 
-  @override
-  State<Onboarding> createState() => _OnboardingState();
-}
+  /// Выбранная цепочка дерева: ЗАМЕР → ОКНО → вид → тип дома.
+  List<String> _picked = const [];
 
-class _OnboardingState extends State<Onboarding> {
-  static const List<String> steps = [
-    'КЛИЕНТ',
+  /// Отмеченная комплектация (финальный уровень дерева, мультивыбор).
+  List<String> _multi = const [];
+
+  /// Размеры по пунктам комплектации — уже в МИЛЛИМЕТРАХ.
+  Map<String, Map<String, int>> _sizes = const {};
+
+  /// Выбранный стеклопакет (-1 — не выбран).
+  int _glass = -1;
+
+  /// Габарит изделия (ШИРИНА / ВЫСОТА) — вводится ТАПОМ по чертежу.
+  int _wMm = 0;
+  int _hMm = 0;
+
+  /// Обозначение каждой створки на чертеже (индекс в kSashModeNames).
+  List<int> _sashModes = const [];
+
+  /// Ручное число створок (0 — по типу изделия из дерева).
+  int _sashManual = 0;
+
+  /// Доли ширины секций (пусто — секции равные).
+  List<double> _secW = const [];
+
+  /// Число петель на каждой створке (пусто — по 2: верхняя и нижняя).
+  /// Дополнительные петли замерщик добавляет ВРУЧНУЮ (например, на дверь).
+  List<int> _hinges = const [];
+
+  /// СПИСОК изделий замера: один клиент — НЕСКОЛЬКО изделий
+  /// (окно, балкон, откосы, отлив…). Пока изделие одно — как раньше.
+  final List<MeasureItem> _items = [];
+
+  /// Индекс изделия, которое сейчас правится (-1 — новое).
+  int _editing = -1;
+
+  static const _titles = [
+    'ДАННЫЕ КЛИЕНТА',
     'ЧТО ДЕЛАЕМ',
     'РАЗМЕРЫ',
     'ВИЗУАЛЬНЫЙ ЗАМЕР',
@@ -50,344 +97,995 @@ class _OnboardingState extends State<Onboarding> {
     'ИЗДЕЛИЯ',
     'ЗАМЕРНЫЙ ЛИСТ',
   ];
+  static const _icons = [
+    Icons.person_rounded,
+    Icons.account_tree_rounded,
+    Icons.straighten_rounded,
+    Icons.window_rounded,
+    Icons.calculate_rounded,
+    Icons.view_list_rounded,
+    Icons.receipt_long_rounded,
+  ];
 
-  int _step = 0;
-  final Measure _m = Measure(
-    id: DateTime.now().millisecondsSinceEpoch.toString(),
-    date: DateTime.now().toString().substring(0, 16),
-  );
-  final List<String> _photos = [];
-
-  final _client = TextEditingController();
-  final _phone = TextEditingController();
-  final _address = TextEditingController();
-
-  String _workType = 'НОВОЕ ОКНО';
-  String _product = 'ОКНО ПВХ';
-  MeasureItem _item = MeasureItem(id: '1', product: 'ОКНО ПВХ');
-
-  void _newItem() {
-    _item = MeasureItem(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      workType: _workType,
-      product: _product,
-    );
-    if (_item.isBalcony) _item.balcony = BalconyBlock();
-  }
-
-  void _commitItem() {
-    _item.workType = _workType;
-    _item.product = _product;
-    if (_item.isBalcony && _item.balcony == null) {
-      _item.balcony = BalconyBlock();
-    }
-    final i = _m.items.indexWhere((e) => e.id == _item.id);
-    if (i >= 0) {
-      _m.items[i] = _item;
-    } else {
-      _m.items.add(_item);
-    }
-  }
-
-  void _next() {
-    if (_step == 1) _commitItem();
-    if (_step == 3) _commitItem();
-    if (_step == 5) _commitItem();
-    if (_step < steps.length - 1) {
-      setState(() => _step++);
-    } else {
-      _finish();
-    }
-  }
-
-  void _back() {
-    if (_step > 0) {
-      setState(() => _step--);
-    } else {
-      widget.onBack?.call();
-    }
-  }
-
-  Future<void> _finish() async {
-    _m.client = _client.text.trim();
-    _m.phone = _phone.text.trim();
-    _m.address = _address.text.trim();
-    _commitItem();
-    await MeasureStore.save(_m);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Замер сохранён в историю')),
-    );
-    if (widget.onFinish != null) {
-      widget.onFinish!.call();
-    } else {
-      Navigator.of(context).pop();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _shine = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 4200))
+      ..repeat();
   }
 
   @override
   void dispose() {
-    _client.dispose();
+    _shine.dispose();
+    _name.dispose();
     _phone.dispose();
-    _address.dispose();
+    _addr.dispose();
+    _flat.dispose();
+    _floor.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final h = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.bg2,
-        foregroundColor: AppColors.text,
-        title: Text(
-          steps[_step],
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.4,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(
-            value: (_step + 1) / steps.length,
-            backgroundColor: AppColors.line,
-            valueColor: const AlwaysStoppedAnimation(AppColors.gold),
-            minHeight: 4,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: _body(),
-              ),
-            ),
-            _navBar(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _body() {
-    switch (_step) {
-      case 0:
-        return _clientStep();
-      case 1:
-        return WorkTreeView(
-          workType: _workType,
-          product: _product,
-          onSelect: (w, p) {
-            setState(() {
-              _workType = w;
-              _product = p;
-              _newItem();
-            });
-          },
-        );
-      case 2:
-        return MeasureSizesView(
-          item: _item,
-          onChanged: () => setState(() {}),
-        );
-      case 3:
-        return WindowVisual(
-          item: _item,
-          onChanged: () => setState(() {}),
-        );
-      case 4:
-        return EstimateView(items: _m.items.isEmpty ? [_item] : _m.items);
-      case 5:
-        return _itemsStep();
-      default:
-        return MeasureSheetView(measure: _m);
-    }
-  }
-
-  Widget _clientStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppUi.sectionTitle(context, 'Клиент'),
-        _field('ИМЯ', _client, TextInputType.name),
-        const SizedBox(height: 12),
-        _field('ТЕЛЕФОН', _phone, TextInputType.phone),
-        const SizedBox(height: 12),
-        _field('АДРЕС', _address, TextInputType.streetAddress),
-        const SizedBox(height: 20),
-        MeasureMedia(photos: _photos),
-      ],
-    );
-  }
-
-  Widget _itemsStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppUi.sectionTitle(context, 'Изделия в замере'),
-        ..._m.items.asMap().entries.map((e) {
-          final it = e.value;
-          return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(14),
-            decoration: AppUi.card(),
-            child: Row(
+      backgroundColor: AppColors.navy900,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: _PremiumBg()),
+          SafeArea(
+            child: Column(
               children: [
+                _header(),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        it.product,
-                        style: const TextStyle(
-                          color: AppColors.text,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        it.sizeText,
-                        style: const TextStyle(
-                          color: AppColors.dim,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _step == 0
+                      ? _cardWrap(h, _cardClient())
+                      : _step == 1
+                          ? _treeStep()
+                          : _step == 2
+                              ? _sizesStep()
+                              : _step == 3
+                                  ? _visualStep()
+                                  : _step == 4
+                                      ? _estimateStep()
+                                      : _step == 5
+                                          ? _itemsStep()
+                                          : _sheetStep(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: AppColors.red),
-                  onPressed: () => setState(() => _m.items.removeAt(e.key)),
+                const SizedBox(height: 14),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────── ШАПКА ───────────────────────────
+  Widget _header() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 16, 22, 12),
+      child: Row(
+        children: [
+          _RoundButton(
+            icon: Icons.arrow_back_rounded,
+            onTap: () {
+              if (_step > 0) {
+                setState(() => _step -= 1);
+              } else {
+                widget.onBack?.call();
+              }
+            },
+          ),
+          const SizedBox(width: 10),
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: AppColors.goldGradient,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.gold.withOpacity(0.38),
+                  blurRadius: 20,
+                  offset: const Offset(0, 7),
                 ),
               ],
             ),
-          );
-        }),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => setState(() {
-            _commitItem();
-            _newItem();
-            _step = 1;
-          }),
-          child: Container(
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(AppUi.radiusSm),
-              border: Border.all(color: AppColors.gold),
-            ),
-            child: const Text(
-              '➕ ДОБАВИТЬ ИЗДЕЛИЕ',
-              style: TextStyle(
-                color: AppColors.gold,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1,
-              ),
-            ),
+            child: Icon(_icons[_step], color: AppColors.navy900, size: 23),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _field(String label, TextEditingController c, TextInputType type) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AppUi.label(label),
-        const SizedBox(height: 6),
-        TextField(
-          controller: c,
-          keyboardType: type,
-          style: const TextStyle(color: AppColors.text, fontSize: 16),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.card,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppUi.radiusSm),
-              borderSide: const BorderSide(color: AppColors.line),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppUi.radiusSm),
-              borderSide: const BorderSide(color: AppColors.line),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppUi.radiusSm),
-              borderSide: const BorderSide(color: AppColors.gold),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _navBar() {
-    final last = _step == steps.length - 1;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-      decoration: const BoxDecoration(
-        color: AppColors.bg2,
-        border: Border(top: BorderSide(color: AppColors.line)),
-      ),
-      child: Row(
-        children: [
-          if (_step > 0)
-            Expanded(
-              child: GestureDetector(
-                onTap: _back,
-                child: Container(
-                  height: 50,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(AppUi.radiusSm),
-                    border: Border.all(color: AppColors.line),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'НОВЫЙ ЗАМЕР',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                    color: Colors.white,
                   ),
-                  child: const Text(
-                    'НАЗАД',
-                    style: TextStyle(
-                      color: AppColors.dim,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  _titles[_step],
+                  style: const TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.4,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _RoundButton(
+            icon: Icons.history_rounded,
+            onTap: _openHistory,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────────────── ОБЁРТКА КАРТОЧКИ (≤50%) ─────────────────────
+  Widget _cardWrap(double screenH, Widget child) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: screenH * 0.50),
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF152740), Color(0xFF0B1524)],
+              ),
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.50),
+                  blurRadius: 34,
+                  offset: const Offset(0, 16),
+                ),
+                BoxShadow(
+                  color: AppColors.gold.withOpacity(0.08),
+                  blurRadius: 44,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              children: [
+                // Золотая линия сверху
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 2.5,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          AppColors.gold,
+                          AppColors.bronze,
+                          Colors.transparent,
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          if (_step > 0) const SizedBox(width: 10),
-          Expanded(
-            flex: 2,
-            child: GestureDetector(
-              onTap: _next,
-              child: Container(
-                height: 50,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: AppColors.goldGradient,
-                  borderRadius: BorderRadius.circular(AppUi.radiusSm),
-                ),
-                child: Text(
-                  last ? '💾 СОХРАНИТЬ' : 'ДАЛЕЕ',
-                  style: const TextStyle(
-                    color: Color(0xFF1A1206),
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
+                // Пробегающий блик
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: AnimatedBuilder(
+                      animation: _shine,
+                      builder: (_, __) => CustomPaint(
+                        painter: _ShinePainter(_shine.value),
+                      ),
+                    ),
                   ),
                 ),
+                SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  child: child,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────── КАРТОЧКА: КЛИЕНТ ───────────────────────
+  Widget _cardClient() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _cardTitle('ДАННЫЕ КЛИЕНТА', 'Кому считаем окна'),
+        const SizedBox(height: 18),
+        _PremiumField(
+          label: 'ИМЯ КЛИЕНТА',
+          hint: 'Например: Иванов Иван',
+          icon: Icons.person_rounded,
+          controller: _name,
+        ),
+        const SizedBox(height: 13),
+        _PremiumField(
+          label: 'НОМЕР ТЕЛЕФОНА',
+          hint: '+7 900 000-00-00',
+          icon: Icons.phone_rounded,
+          controller: _phone,
+          kb: TextInputType.phone,
+        ),
+        const SizedBox(height: 13),
+        _PremiumField(
+          label: 'АДРЕС ОБЪЕКТА',
+          hint: 'Улица, дом',
+          icon: Icons.location_on_rounded,
+          controller: _addr,
+        ),
+        const SizedBox(height: 13),
+        Row(
+          children: [
+            Expanded(
+              child: _PremiumField(
+                label: 'КВАРТИРА',
+                hint: '№',
+                icon: Icons.door_front_door_rounded,
+                controller: _flat,
+                kb: TextInputType.number,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _PremiumField(
+                label: 'ЭТАЖ',
+                hint: '№',
+                icon: Icons.stairs_rounded,
+                controller: _floor,
+                kb: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _GoldButton('ДАЛЕЕ', Icons.arrow_forward_rounded,
+            () => setState(() => _step = 1)),
+      ],
+    );
+  }
+
+  // ─────────────── ШАГ 2: ДЕРЕВО «ЧТО ДЕЛАЕМ» ───────────────
+  /// Дерево живёт НА ЭКРАНЕ — без карточки-обёртки, без рамки, от края до края.
+  /// Финальный уровень — комплектация: можно отметить один пункт,
+  /// несколько или все. Есть отметка → внизу появляется «ПОДТВЕРДИТЬ».
+  Widget _treeStep() {
+    final hasPick = _multi.isNotEmpty;
+    return Column(
+      children: [
+        Expanded(
+          child: WorkTreeView(
+            onPathChanged: (titles) => setState(() => _picked = titles),
+            onMultiChanged: (items) => setState(() => _multi = items),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Row(
+            children: [
+              _GhostButton('НАЗАД', Icons.arrow_back_rounded,
+                  () => setState(() => _step = 0)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: hasPick
+                    ? _GoldButton(
+                        'ПОДТВЕРДИТЬ (${_multi.length})',
+                        Icons.check_rounded,
+                        _confirmTree,
+                      )
+                    : _GoldButton(
+                        'ДАЛЕЕ', Icons.arrow_forward_rounded, widget.onFinish),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// «ПОДТВЕРДИТЬ»: выбор по дереву и по клиенту запоминается,
+  /// открывается ввод размеров — по одному экрану на каждый пункт.
+  void _confirmTree() {
+    setState(() {
+      _sizes = const {};
+      _sashManual = 0;
+      _secW = const [];
+      _sashModes = const [];
+      _hinges = const [];
+      _wMm = 0;
+      _hMm = 0;
+      _step = 2;
+    });
+  }
+
+  // ─────────── ШАГ 6: СПИСОК ИЗДЕЛИЙ ЗАМЕРА ───────────
+  /// Один замер = один клиент + НЕСКОЛЬКО изделий. Здесь видно все изделия:
+  /// тап по карточке — править, крестик — удалить, «+ ИЗДЕЛИЕ» — добавить.
+  Widget _itemsStep() {
+    return Column(
+      children: [
+        Expanded(
+          child: _items.isEmpty
+              ? const Center(
+                  child: Text(
+                    'ИЗДЕЛИЙ ПОКА НЕТ\nНАЖМИ «+ ИЗДЕЛИЕ»',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      height: 1.7,
+                      color: Color(0xFF7E93AC),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  itemCount: _items.length,
+                  itemBuilder: (_, i) => Padding(
+                    padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
+                    child: _ItemCard(
+                      index: i,
+                      item: _items[i],
+                      onTap: () => _editItem(i),
+                      onRemove: () => _removeItem(i),
+                    ),
+                  ),
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Row(
+            children: [
+              _GhostButton('+ ИЗДЕЛИЕ', Icons.add_rounded, _addItem),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _GoldButton('ЗАМЕРНЫЙ ЛИСТ', Icons.receipt_long_rounded,
+                    () => setState(() => _step = 6)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Собрать текущее изделие из полей мастера.
+  MeasureItem _snapshot() => MeasureItem(
+        path: List<String>.from(_picked),
+        multi: List<String>.from(_multi),
+        sizes: _sizes,
+        glass: _glass,
+        widthMm: _wMm,
+        heightMm: _hMm,
+        sashModes: List<int>.from(_sashModes),
+        sashManual: _sashManual,
+        secW: List<double>.from(_secW),
+        hinges: List<int>.from(_hinges),
+      );
+
+  /// Загрузить изделие в поля мастера.
+  void _restore(MeasureItem it) {
+    _picked = List<String>.from(it.path);
+    _multi = List<String>.from(it.multi);
+    _sizes = it.sizes;
+    _glass = it.glass;
+    _wMm = it.widthMm;
+    _hMm = it.heightMm;
+    _sashModes = List<int>.from(it.sashModes);
+    _sashManual = it.sashManual;
+    _secW = List<double>.from(it.secW);
+    _hinges = List<int>.from(it.hinges);
+  }
+
+  /// Сохранить текущее изделие в список: обновить правленое или добавить.
+  void _commitCurrent() {
+    final it = _snapshot();
+    if (_editing >= 0 && _editing < _items.length) {
+      _items[_editing] = it;
+    } else {
+      _items.add(it);
+      _editing = _items.length - 1;
+    }
+  }
+
+  /// Очистить поля мастера под следующее изделие.
+  void _clearCurrent() {
+    _picked = const [];
+    _multi = const [];
+    _sizes = const {};
+    _glass = -1;
+    _wMm = 0;
+    _hMm = 0;
+    _sashModes = const [];
+    _sashManual = 0;
+    _secW = const [];
+    _hinges = const [];
+  }
+
+  /// «+ ИЗДЕЛИЕ»: сохранить текущее, очистить поля, вернуться к дереву.
+  void _addItem() {
+    setState(() {
+      _commitCurrent();
+      _clearCurrent();
+      _editing = -1;
+      _step = 1;
+    });
+  }
+
+  /// Тап по карточке: править изделие.
+  void _editItem(int i) {
+    if (i < 0 || i >= _items.length) return;
+    setState(() {
+      _restore(_items[i]);
+      _editing = i;
+      _step = 3;
+    });
+  }
+
+  /// Крестик: удалить изделие.
+  void _removeItem(int i) {
+    if (i < 0 || i >= _items.length) return;
+    setState(() {
+      _items.removeAt(i);
+      if (_editing == i) {
+        _editing = -1;
+      } else if (_editing > i) {
+        _editing -= 1;
+      }
+    });
+  }
+
+  // ─────────────── ШАГ 3: РАЗМЕРЫ ПО ПУНКТАМ ───────────────
+  Widget _sizesStep() {
+    return MeasureSizesView(
+      items: _multi,
+      balcony: _balcony,
+      onBack: () => setState(() => _step = 1),
+      onDone: (mm) => setState(() {
+        _sizes = mm;
+        _step = 3;
+      }),
+    );
+  }
+
+  // ──────── ШАГ 4: ВИЗУАЛЬНОЕ ОКНО + ВЫБОР СТЕКЛОПАКЕТА ────────
+  Widget _visualStep() {
+    final windowType = _picked.length > 2 ? _picked[2] : '';
+    final house = _picked.length > 3 ? _picked[3] : '';
+    final sashes = _sashCount;
+    final arched = windowType.toUpperCase().contains('ФИГУРН');
+    // Обозначения створок: если ещё не заданы — все «поворотные».
+    final modes = _sashModes.length == sashes
+        ? _sashModes
+        : List<int>.filled(sashes, 1);
+
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _pickedBar(windowType, house),
+                const SizedBox(height: 10),
+                const VersionBadge(),
+                const SizedBox(height: 12),
+                _sashControls(sashes),
+                const SizedBox(height: 12),
+                WindowVisual(
+                  sashes: sashes,
+                  arched: arched,
+                  parts: _multi,
+                  selectedGlass: _glass,
+                  onGlass: (i) => setState(() => _glass = i),
+                  sashModes: modes,
+                  widthMm: _wMm,
+                  heightMm: _hMm,
+                  onWidthEdit: (v) => setState(() => _wMm = v),
+                  onHeightEdit: (v) => setState(() => _hMm = v),
+                  onSectionEdit: _setSectionMm,
+                  sectionWidths: _secWidths,
+                  hingeCounts: _hingeCounts,
+                  onSashTap: (i) => setState(() {
+                    final m = List<int>.from(modes);
+                    m[i] = (m[i] + 1) % kSashModeNames.length;
+                    _sashModes = m;
+                  }),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Row(
+            children: [
+              _GhostButton('НАЗАД', Icons.arrow_back_rounded,
+                  () => setState(() => _step = 2)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _GoldButton('СМЕТА', Icons.calculate_rounded,
+                    () => setState(() => _step = 4)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ──────────── ШАГ 5: СМЕТА (ПРАЙС И ИТОГ) ────────────
+  /// Считаем стоимость по площади изделия и комплектации.
+  /// Прайс — в lib/price_estimate.dart (класс PriceBook).
+  Widget _estimateStep() {
+    final glass = (_glass >= 0 && _glass < glassTypes.length)
+        ? glassTypes[_glass].title
+        : '';
+    final windowType = _picked.length > 2 ? _picked[2] : '';
+    final estimate = buildEstimate(
+      widthMm: _mmOf('ШИРИНА'),
+      heightMm: _mmOf('ВЫСОТА'),
+      windowType: windowType,
+      parts: _multi,
+      glass: glass,
+      sizes: _sizes,
+    );
+    return EstimateView(
+      estimate: estimate,
+      onBack: () => setState(() => _step = 3),
+      onNext: () => setState(() {
+        // Изделие готово — сохраняем его в список и идём к списку изделий.
+        _commitCurrent();
+        _step = 5;
+      }),
+    );
+  }
+
+  // ──────────── ШАГ 6: ЗАМЕРНЫЙ ЛИСТ (ОТПРАВКА) ────────────
+  /// Итог: клиент + цепочка дерева + комплектация + стеклопакет +
+  /// размеры (уже в МИЛЛИМЕТРАХ). Лист копируется или отправляется.
+  Widget _sheetStep() {
+    final glass = (_glass >= 0 && _glass < glassTypes.length)
+        ? glassTypes[_glass].title
+        : '';
+    return MeasureSheetView(
+      name: _name.text,
+      phone: _phone.text,
+      addr: _addr.text,
+      flat: _flat.text,
+      floor: _floor.text,
+      items: _items,
+      path: _picked,
+      multi: _multi,
+      sizes: _sizes,
+      glass: glass,
+      widthMm: _mmOf('ШИРИНА'),
+      sectionWidths: _secWidths,
+      sashModes: [
+        for (final m in (_sashModes.length == _sashCount
+            ? _sashModes
+            : List<int>.filled(_sashCount, 1)))
+          kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
+      ],
+      onBack: () => setState(() => _step = 5),
+      onFinish: () {
+        _saveRecord();
+        widget.onFinish();
+      },
+    );
+  }
+
+  /// Готовый замер уходит в историю (lib/measure_history.dart).
+  Future<void> _saveRecord() async {
+    final glass = (_glass >= 0 && _glass < glassTypes.length)
+        ? glassTypes[_glass].title
+        : '';
+    final windowType = _picked.length > 2 ? _picked[2] : '';
+    final w = _mmOf('ШИРИНА');
+    final h = _mmOf('ВЫСОТА');
+    final est = buildEstimate(
+      widthMm: w,
+      heightMm: h,
+      windowType: windowType,
+      parts: _multi,
+      glass: glass,
+      sizes: _sizes,
+    );
+    final modes = _sashModes.length == _sashCount
+        ? _sashModes
+        : List<int>.filled(_sashCount, 1);
+    await MeasureHistory.add(MeasureRecord(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      createdAt: DateTime.now(),
+      name: _name.text,
+      phone: _phone.text,
+      addr: _addr.text,
+      flat: _flat.text,
+      floor: _floor.text,
+      path: List<String>.from(_picked),
+      multi: List<String>.from(_multi),
+      sizes: _sizes,
+      glass: glass,
+      widthMm: w,
+      heightMm: h,
+      sashModes: [
+        for (final m in modes)
+          kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
+      ],
+      total: est.total.round(),
+    ));
+  }
+
+  /// Открыть историю замеров и базу клиентов.
+  void _openHistory() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const HistoryView()),
+    );
+  }
+
+  /// Изделие на балконе / лоджии: у подоконника, отлива и козырька
+  /// ДРУГИЕ надбавки к длине. Признак — балкон/лоджия в дереве либо
+  /// козырёк в комплектации (козырёк бывает только на балконе).
+  bool get _balcony {
+    final all = [..._picked, ..._multi].join(' ').toUpperCase();
+    return all.contains('БАЛКОН') ||
+        all.contains('ЛОДЖИ') ||
+        all.contains('КОЗЫР');
+  }
+
+  /// Сколько створок: ручной выбор замерщика, иначе — по типу изделия.
+  int get _sashCount {
+    if (_sashManual > 0) return _sashManual;
+    final t = (_picked.length > 2 ? _picked[2] : '').toUpperCase();
+    if (t.contains('ТРЁХСТВ') || t.contains('ТРЕХСТВ')) return 3;
+    if (t.contains('ДВУХСТВ') || t.contains('ДВУСТВ')) return 2;
+    return 1;
+  }
+
+  /// Доли ширины секций: пусто или не то число — делим поровну.
+  List<double> get _secWidths {
+    final n = _sashCount;
+    if (_secW.length == n) {
+      final sum = _secW.fold<double>(0, (a, b) => a + b);
+      if (sum > 0) return [for (final w in _secW) w / sum];
+    }
+    return List<double>.filled(n, 1.0 / n);
+  }
+
+  /// Число петель на каждой створке: пусто или не то число — по 2
+  /// (верхняя и нижняя). Дополнительные петли замерщик добавляет вручную.
+  List<int> get _hingeCounts {
+    final n = _sashCount;
+    if (_hinges.length == n) return _hinges;
+    return List<int>.filled(n, 2);
+  }
+
+  /// Изменить ширину секции i: отдаём/забираем долю у соседа.
+  void _bumpSection(int i, int dir) {
+    final n = _sashCount;
+    if (n < 2) return;
+    final ws = List<double>.from(_secWidths);
+    if (i < 0 || i >= ws.length) return;
+    final j = i == 0 ? 1 : i - 1;
+    const d = 0.05;
+    if (dir > 0) {
+      if (ws[j] - d < 0.10) return;
+      ws[i] += d;
+      ws[j] -= d;
+    } else {
+      if (ws[i] - d < 0.10) return;
+      ws[i] -= d;
+      ws[j] += d;
+    }
+    setState(() => _secW = ws);
+  }
+
+  /// Ручная ширина секции i в ММ. Остальные секции пересчитываются
+  /// автоматически из общего габарита: вписал первую — вторая уже посчитана.
+  void _setSectionMm(int i, int mm) {
+    final n = _sashCount;
+    final total = _mmOf('ШИРИНА');
+    if (n < 2 || total <= 0 || mm <= 0) return;
+    final ws = List<double>.from(_secWidths);
+    if (i < 0 || i >= ws.length) return;
+    final f = (mm / total).clamp(0.10, 0.90);
+    final rest = 1.0 - f;
+    final oldRest = 1.0 - ws[i];
+    for (var k = 0; k < n; k++) {
+      if (k == i) {
+        ws[i] = f;
+      } else {
+        ws[k] = oldRest > 0.001 ? rest * ws[k] / oldRest : rest / (n - 1);
+      }
+    }
+    setState(() => _secW = ws);
+  }
+
+  /// Диалог ручного ввода ширины секции в ММ.
+  Future<void> _askSectionMm(int i) async {
+    final total = _mmOf('ШИРИНА');
+    if (total <= 0) return;
+    final cur = (total * _secWidths[i]).round();
+    final c = TextEditingController(text: cur > 0 ? '$cur' : '');
+    final v = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F1D31),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: AppColors.gold.withOpacity(0.45)),
+        ),
+        title: Text(
+          'ШИРИНА СЕКЦИИ ${i + 1}',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: Colors.white,
+          ),
+        ),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          cursorColor: AppColors.gold,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+          decoration: InputDecoration(
+            hintText: '800',
+            hintStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF7E93AC),
+            ),
+            suffixText: 'ММ',
+            suffixStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gold,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF0A1220),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(13),
+              borderSide: BorderSide(color: AppColors.gold.withOpacity(0.4)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'ОТМЕНА',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final p = double.tryParse(c.text.trim().replaceAll(',', '.'));
+              Navigator.pop(ctx, p == null ? null : p.round());
+            },
+            child: const Text(
+              'ОК',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: AppColors.gold,
               ),
             ),
           ),
         ],
       ),
+    );
+    if (v != null && v > 0) _setSectionMm(i, v);
+  }
+
+  /// Панель створок: число створок (для ЛЮБОГО изделия) + ширина секций.
+  Widget _sashControls(int sashes) {
+    final total = _mmOf('ШИРИНА');
+    final ws = _secWidths;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.view_column_rounded,
+                  size: 15, color: AppColors.gold),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'СТВОРКИ',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.3,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              for (var n = 1; n <= 4; n++) ...[
+                if (n > 1) const SizedBox(width: 6),
+                _SashCountChip(
+                  n: n,
+                  selected: sashes == n,
+                  onTap: () => setState(() {
+                    _sashManual = n;
+                    _sashModes = List<int>.filled(n, 1);
+                    _secW = List<double>.filled(n, 1.0 / n);
+                  }),
+                ),
+              ],
+            ],
+          ),
+          if (sashes > 1) ...[
+            const SizedBox(height: 11),
+            Row(
+              children: [
+                const Text(
+                  'ШИРИНА СЕКЦИЙ',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: Color(0xFF7E93AC),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  total > 0 ? 'ВСЕГО $total ММ · ТАПНИ ЧИСЛО' : 'ВВЕДИ ШИРИНУ',
+                  style: const TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 7),
+            for (var i = 0; i < sashes; i++) ...[
+              if (i > 0) const SizedBox(height: 6),
+              _SectionWidthRow(
+                index: i,
+                mm: total > 0 ? (total * ws[i]).round() : 0,
+                onMinus: () => _bumpSection(i, -1),
+                onPlus: () => _bumpSection(i, 1),
+                onEdit: () => _askSectionMm(i),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
+  int _mmOf(String field) {
+    // Габарит изделия вводится ТАПОМ по чертежу — он в приоритете.
+    if (field == 'ШИРИНА' && _wMm > 0) return _wMm;
+    if (field == 'ВЫСОТА' && _hMm > 0) return _hMm;
+    for (final e in _sizes.values) {
+      final v = e[field];
+      if (v != null && v > 0) return v;
+    }
+    return 0;
+  }
+
+  /// Плашка выбранного: ОКНО · ДВУХСТВОРЧАТОЕ · КИРПИЧКА
+  Widget _pickedBar(String windowType, String house) {
+    final parts = <String>[
+      if (windowType.isNotEmpty) windowType,
+      if (house.isNotEmpty) house,
+      ..._multi,
+    ];
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.window_rounded, size: 16, color: AppColors.gold),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              parts.isEmpty ? 'ОКНО' : parts.join('  ·  '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────── ЭЛЕМЕНТЫ ───────────────────────────
+  Widget _cardTitle(String title, String sub) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 3,
+              height: 16,
+              decoration: BoxDecoration(
+                gradient: AppColors.goldGradient,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 9),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.6,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          sub,
+          style: const TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF7E93AC),
+          ),
+        ),
+      ],
     );
   }
 }
