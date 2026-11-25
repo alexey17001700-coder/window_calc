@@ -493,7 +493,8 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
               ),
             ),
           ),
-          _stepBtn(Icons.add_rounded, () => setState(() => set((value + 50).clamp(100, 4000)))),
+          _stepBtn(Icons.add_rounded,
+              () => setState(() => set((value + 50).clamp(100, 4000).toInt()))),
         ],
       ),
     );
