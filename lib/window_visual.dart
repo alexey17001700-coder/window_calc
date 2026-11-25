@@ -198,7 +198,7 @@ class _WindowVisualState extends State<WindowVisual> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'СЕКЦИЯ ${_sel + 1} · ${kSashModeNames[modes[_sel].clamp(0, 3)]}',
+                _headText(modes),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -221,6 +221,17 @@ class _WindowVisualState extends State<WindowVisual> {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapUp: (d) {
+                // 0) БАЛКОННЫЙ БЛОК — своя логика тапов.
+                if (widget.balconyBlock) {
+                  final f = _hitBalconyDim(size, d.localPosition);
+                  if (f != null) {
+                    _editBalcony(f);
+                    return;
+                  }
+                  final i = _hitBalcony(size, d.localPosition);
+                  if (i >= 0) _balconyTap(i);
+                  return;
+                }
                 // 1) Тап по РАЗМЕРНОЙ ЛИНИИ → ввод размера в ММ.
                 final dim = _hitDim(size, d.localPosition);
                 if (dim == 'w') {
@@ -255,6 +266,13 @@ class _WindowVisualState extends State<WindowVisual> {
                   heightMm: widget.heightMm,
                   sectionWidths: widget.sectionWidths,
                   hingeCounts: widget.hingeCounts,
+                  balconyBlock: widget.balconyBlock,
+                  doorMode: widget.doorMode,
+                  fixedMode: widget.fixedMode,
+                  doorWidthMm: widget.doorWidthMm,
+                  doorHeightMm: widget.doorHeightMm,
+                  fixedWidthMm: widget.fixedWidthMm,
+                  fixedHeightMm: widget.fixedHeightMm,
                 ),
               ),
             );
@@ -270,7 +288,9 @@ class _WindowVisualState extends State<WindowVisual> {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                'ТАП: СВЕРХУ — ШИРИНА, СЛЕВА — ВЫСОТА, ПОД СЕКЦИЕЙ — ЕЁ ШИРИНА',
+                widget.balconyBlock
+                    ? 'ТАП: ПОД ДВЕРЬЮ — ШИРИНА ДВЕРИ, ПОД ГЛУХНЯКОМ — ЕГО ШИРИНА, СЛЕВА — ВЫСОТА, СПРАВА — ВЫСОТА ГЛУХНЯКА'
+                    : 'ТАП: СВЕРХУ — ШИРИНА, СЛЕВА — ВЫСОТА, ПОД СЕКЦИЕЙ — ЕЁ ШИРИНА',
                 style: TextStyle(
                   fontSize: 8.5,
                   fontWeight: FontWeight.w800,
@@ -287,15 +307,31 @@ class _WindowVisualState extends State<WindowVisual> {
         Wrap(
           spacing: 6,
           runSpacing: 6,
-          children: [
-            for (var i = 0; i < widget.sashes; i++)
-              _SashChip(
-                index: i,
-                name: kSashModeShort[modes[i].clamp(0, 3)],
-                selected: _sel == i,
-                onTap: () => _tap(i),
-              ),
-          ],
+          children: widget.balconyBlock
+              ? [
+                  _SashChip(
+                    index: 0,
+                    name:
+                        'ДВЕРЬ · ${kSashModeShort[widget.doorMode.clamp(0, 3)]}',
+                    selected: _sel == 0,
+                    onTap: () => _balconyTap(0),
+                  ),
+                  _SashChip(
+                    index: 1,
+                    name: 'ГЛУХНЯК · ${kSashModeShort[widget.fixedMode.clamp(0, 3)]}',
+                    selected: _sel == 1,
+                    onTap: () => _balconyTap(1),
+                  ),
+                ]
+              : [
+                  for (var i = 0; i < widget.sashes; i++)
+                    _SashChip(
+                      index: i,
+                      name: kSashModeShort[modes[i].clamp(0, 3)],
+                      selected: _sel == i,
+                      onTap: () => _tap(i),
+                    ),
+                ],
         ),
         const SizedBox(height: 16),
 
@@ -358,6 +394,99 @@ class _WindowVisualState extends State<WindowVisual> {
         ),
       ],
     );
+  }
+
+  /// Подпись в шапке чертежа.
+  String _headText(List<int> modes) {
+    if (widget.balconyBlock) {
+      return _sel == 0
+          ? 'ДВЕРЬ · ${kSashModeNames[widget.doorMode.clamp(0, 3)]}'
+          : 'ГЛУХНЯК · ${kSashModeNames[widget.fixedMode.clamp(0, 3)]}';
+    }
+    return 'СЕКЦИЯ ${_sel + 1} · ${kSashModeNames[modes[_sel].clamp(0, 3)]}';
+  }
+
+  /// Тап по элементу балконного блока: 0 — дверь, 1 — глухняк.
+  void _balconyTap(int i) {
+    HapticFeedback.selectionClick();
+    setState(() => _sel = i);
+    widget.onBalconyTap?.call(i);
+  }
+
+  /// Доля ширины двери от общей ширины блока.
+  double get _doorFrac {
+    final t = widget.doorWidthMm + widget.fixedWidthMm;
+    if (t <= 0) return 0.5;
+    return (widget.doorWidthMm / t).clamp(0.25, 0.75);
+  }
+
+  /// Доля высоты глухняка от высоты блока.
+  double get _fixedFrac {
+    if (widget.doorHeightMm <= 0) return 0.25;
+    return (widget.fixedHeightMm / widget.doorHeightMm).clamp(0.10, 0.90);
+  }
+
+  /// Какая часть БАЛКОННОГО БЛОКА под пальцем: 0 — дверь, 1 — глухняк,
+  /// -1 — мимо (сэндвич-панель, стена, поле листа).
+  int _hitBalcony(Size size, Offset p) {
+    final g = _balconyGeo(size, _doorFrac, _fixedFrac);
+    if (g.door.inflate(4).contains(p)) return 0;
+    if (g.fixed.inflate(4).contains(p)) return 1;
+    return -1;
+  }
+
+  /// Попадание в размерную линию блока → имя поля (null — мимо).
+  String? _hitBalconyDim(Size size, Offset p) {
+    if (widget.onBalconyEdit == null) return null;
+    final g = _balconyGeo(size, _doorFrac, _fixedFrac);
+
+    // ВЫСОТА ДВЕРИ — полоса слева от стены.
+    final hLeft = g.wall.left - 17;
+    if (p.dx > hLeft - 13 &&
+        p.dx < g.wall.left &&
+        p.dy > g.opening.top - 10 &&
+        p.dy < g.opening.bottom + 10) {
+      return 'DOOR_H';
+    }
+
+    // ВЫСОТА ГЛУХНЯКА — полоса справа от стены, напротив глухняка.
+    final x = g.wall.right + 17;
+    if (p.dx > g.wall.right &&
+        p.dx < x + 13 &&
+        p.dy > g.fixed.top - 10 &&
+        p.dy < g.fixed.bottom + 10) {
+      return 'FIXED_H';
+    }
+
+    // ШИРИНЫ — нижний ряд: под дверью и под глухняком.
+    final y = g.wall.bottom + 17;
+    if (p.dy > y - 14 && p.dy < y + 14) {
+      if (p.dx > g.door.left - 9 && p.dx < g.door.right + 9) return 'DOOR_W';
+      if (p.dx > g.side.left - 9 && p.dx < g.side.right + 9) return 'FIXED_W';
+    }
+    return null;
+  }
+
+  /// Ввод размера блока: диалог в ММ.
+  void _editBalcony(String field) {
+    switch (field) {
+      case 'DOOR_W':
+        _editDim('ШИРИНА ДВЕРИ', '600', widget.doorWidthMm,
+            (v) => widget.onBalconyEdit?.call('DOOR_W', v));
+        break;
+      case 'DOOR_H':
+        _editDim('ВЫСОТА ДВЕРИ', '2100', widget.doorHeightMm,
+            (v) => widget.onBalconyEdit?.call('DOOR_H', v));
+        break;
+      case 'FIXED_W':
+        _editDim('ШИРИНА ГЛУХНЯКА', '600', widget.fixedWidthMm,
+            (v) => widget.onBalconyEdit?.call('FIXED_W', v));
+        break;
+      case 'FIXED_H':
+        _editDim('ВЫСОТА ГЛУХНЯКА', '500', widget.fixedHeightMm,
+            (v) => widget.onBalconyEdit?.call('FIXED_H', v));
+        break;
+    }
   }
 
   /// Какая СЕКЦИЯ под пальцем.

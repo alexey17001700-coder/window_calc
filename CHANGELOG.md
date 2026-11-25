@@ -1,30 +1,5 @@
 # Changelog
 
-## 3.5.2+130
-
-### ВОЗВРАТ КОДА ПОСЛЕ ОТКАТА + ИМЯ ПАКЕТА APK
-
-**Что сделано:**
-
-- код приложения восстановлен откатом на коммит с папкой `lib/` (15 файлов
-  на месте: `main.dart`, `theme.dart`, `onboarding.dart`, `home_screen.dart`,
-  `viewer3d.dart`, `wizard_screen.dart`, `work_tree.dart`, `measure_sizes.dart`,
-  `window_visual.dart`, `price_estimate.dart`, `measure_sheet.dart`,
-  `measure_media.dart`, `measure_history.dart`, `measure_item.dart`,
-  `update_checker.dart`)
-- **`.github/workflows/build.yml`**: `flutter create` снова идёт с
-  **`--org com.almas`** — applicationId APK = **`com.almas.window_calc`**.
-  Без `--org` шаблон ставил `com.example.window_calc`, и APK вставал на телефон
-  **отдельным приложением**, а не обновлял установленное
-- в лог сборки добавлена строка **«ИМЯ ПАКЕТА APK»** — видно фактический
-  `applicationId` прямо в Actions
-
-**Не тронуто:** весь код приложения — дерево, мастер, шаг размеров, чертёж
-по ГОСТ, визуальный замер, смета, история, фото, замерный лист, фон, кнопки,
-логика обновления приложения.
-
-`pubspec.yaml`: **3.4.62+125 → 3.5.2+130** — новый тег, чистая сборка APK.
-
 ## 3.4.62+125
 
 ### НАЙДЕНА И ИСПРАВЛЕНА ПРИЧИНА ПАДЕНИЯ ВСЕХ СБОРОК: конфликт имени `XFile`

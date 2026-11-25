@@ -43,14 +43,12 @@ jobs:
       - name: Создать android-проект (pubspec защищён)
         run: |
           cp pubspec.yaml /tmp/pubspec.yaml.bak
-          flutter create --platforms=android --org com.almas .
+          flutter create --platforms=android .
           cp /tmp/pubspec.yaml.bak pubspec.yaml
           # Шаблон создаёт test/widget_test.dart с несуществующим MyApp —
           # он засоряет analyze и прячет реальные ошибки Dart.
           rm -f test/widget_test.dart
           grep -n '^version:' pubspec.yaml
-          echo "=== ИМЯ ПАКЕТА APK ==="
-          grep -n 'applicationId' android/app/build.gradle || true
 
       - run: flutter pub get
 
