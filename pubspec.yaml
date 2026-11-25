@@ -1,7 +1,7 @@
 name: window_calc
 description: Калькулятор окон для замерщика Almas
 publish_to: 'none'
-version: 3.5.1+129
+version: 3.5.2+130
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -9,7 +9,7 @@ environment:
 # ВАЖНО: версии плагинов ЗАФИКСИРОВАНЫ (без «^»).
 # Символ «^» тянул свежие мажорные версии, которые требуют compileSdk 35
 # и AGP 8.6+ — из-за этого сборка APK падала. Точные версии собираются
-# на compileSdk 34, который поддерживает AGP из шаблона Flutter 3.24.
+# на compileSdk 35, поддерживаемом AGP 8.6 из workflow.
 dependencies:
   flutter:
     sdk: flutter
