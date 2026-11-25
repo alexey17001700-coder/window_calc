@@ -67,6 +67,127 @@ jobs:
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0" > /dev/null 2>&1 || true
 
+      # ────────────────────────────────────────────────────────────
+      #  ПОДПИСЬ RELEASE (keystore из GitHub Secrets)
+      # ────────────────────────────────────────────────────────────
+      - name: Проверка секретов подписи
+        run: |
+          [ -n "${{ secrets.KEYSTORE_BASE64 }}" ] || { echo "::error::Секрет KEYSTORE_BASE64 не задан"; exit 1; }
+          [ -n "${{ secrets.KEYSTORE_PASSWORD }}" ] || { echo "::error::Секрет KEYSTORE_PASSWORD не задан"; exit 1; }
+          [ -n "${{ secrets.KEY_ALIAS }}" ] || { echo "::error::Секрет KEY_ALIAS не задан"; exit 1; }
+          [ -n "${{ secrets.KEY_PASSWORD }}" ] || { echo "::error::Секрет KEY_PASSWORD не задан"; exit 1; }
+          echo "Все 4 секрета на месте"
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
+          ls -l android/app/upload-keystore.jks
+          keytool -list -keystore android/app/upload-keystore.jks \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" | head -6
+
+      - name: key.properties + патч build.gradle
+        run: |
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=upload-keystore.jks\n' \
+            "${{ secrets.KEYSTORE_PASSWORD }}" \
+            "${{ secrets.KEY_PASSWORD }}" \
+            "${{ secrets.KEY_ALIAS }}" > android/key.properties
+          echo "key.properties создан"
+
+          python3 - <<'PY'
+          import pathlib, sys
+
+          groovy = pathlib.Path('android/app/build.gradle')
+          kts = pathlib.Path('android/app/build.gradle.kts')
+
+          header = """
+          def keystoreProperties = new Properties()
+          def keystorePropertiesFile = rootProject.file('key.properties')
+          if (keystorePropertiesFile.exists()) {
+              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+          }
+          """
+
+          signing = """
+              signingConfigs {
+                  release {
+                      keyAlias keystoreProperties['keyAlias']
+                      keyPassword keystoreProperties['keyPassword']
+                      storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                      storePassword keystoreProperties['storePassword']
+                  }
+              }
+          """
+
+          def patch_groovy(p):
+              s = p.read_text()
+              if 'keystoreProperties' in s:
+                  print('Groovy: уже пропатчен')
+                  return True
+              i = s.find('android {')
+              if i < 0:
+                  print('Groovy: блок android { не найден')
+                  return False
+              s = s[:i] + header + s[i:]
+              i = s.find('android {') + len('android {')
+              s = s[:i] + '\n' + signing + s[i:]
+              s = s.replace('signingConfig = signingConfigs.debug',
+                            'signingConfig = signingConfigs.release')
+              s = s.replace('signingConfig signingConfigs.debug',
+                            'signingConfig signingConfigs.release')
+              p.write_text(s)
+              print('Groovy build.gradle пропатчен')
+              return True
+
+          def patch_kts(p):
+              s = p.read_text()
+              if 'keystoreProperties' in s:
+                  print('Kotlin: уже пропатчен')
+                  return True
+              head = ('import java.util.Properties\n'
+                      'import java.io.FileInputStream\n\n'
+                      'val keystoreProperties = Properties()\n'
+                      'val keystorePropertiesFile = rootProject.file("key.properties")\n'
+                      'if (keystorePropertiesFile.exists()) {\n'
+                      '    keystoreProperties.load(FileInputStream(keystorePropertiesFile))\n'
+                      '}\n\n')
+              s = head + s
+              i = s.find('android {')
+              if i < 0:
+                  print('Kotlin: блок android { не найден')
+                  return False
+              i += len('android {')
+              block = ('\n    signingConfigs {\n'
+                       '        create("release") {\n'
+                       '            keyAlias = keystoreProperties["keyAlias"] as String\n'
+                       '            keyPassword = keystoreProperties["keyPassword"] as String\n'
+                       '            storeFile = file(keystoreProperties["storeFile"] as String)\n'
+                       '            storePassword = keystoreProperties["storePassword"] as String\n'
+                       '        }\n'
+                       '    }\n')
+              s = s[:i] + block + s[i:]
+              s = s.replace('signingConfig = signingConfigs.getByName("debug")',
+                            'signingConfig = signingConfigs.getByName("release")')
+              p.write_text(s)
+              print('Kotlin build.gradle.kts пропатчен')
+              return True
+
+          if groovy.exists():
+              ok = patch_groovy(groovy)
+          elif kts.exists():
+              ok = patch_kts(kts)
+          else:
+              print('build.gradle не найден')
+              ok = False
+
+          if not ok:
+              sys.exit(1)
+          PY
+
+          echo "--- проверка патча ---"
+          grep -n "keystoreProperties\|signingConfig" android/app/build.gradle || true
+          grep -n "signingConfig" android/app/build.gradle | grep -q release \
+            || { echo "::error::signingConfig.release не прописан"; exit 1; }
+
       - name: Pub get
         run: flutter pub get
 
@@ -85,6 +206,17 @@ jobs:
         run: |
           grep -E "error|Error|FAILURE|Exception|What went wrong" build.log | head -60 || true
           tail -40 build.log || true
+
+      - name: Проверить подпись и пакет APK
+        if: success()
+        run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* 2>/dev/null | tail -1)
+          echo "build-tools: $BT"
+          echo "--- сертификат подписи ---"
+          "$BT/apksigner" verify --print-certs "$APK" | head -12
+          echo "--- пакет и версия ---"
+          "$BT/aapt2" dump badging "$APK" | grep -E "^package|application-label" || true
 
       - name: Read version
         id: ver

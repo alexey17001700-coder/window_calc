@@ -5,8 +5,14 @@ import 'measure_item.dart';
 
 /// Простой 3D-просмотр балконного блока (собственный рендерер, без WebView).
 class Viewer3D extends StatefulWidget {
-  final MeasureItem item;
-  const Viewer3D({super.key, required this.item});
+  /// Замер, из которого берётся пропорция балконного блока.
+  /// Может быть null — тогда рисуется окно 1:1 (заставка).
+  final MeasureItem? item;
+
+  /// true — только чертёж, без заголовка и карточки (для заставки).
+  final bool bare;
+
+  const Viewer3D({super.key, this.item, this.bare = false});
 
   @override
   State<Viewer3D> createState() => _Viewer3DState();
@@ -17,6 +23,24 @@ class _Viewer3DState extends State<Viewer3D> {
 
   @override
   Widget build(BuildContext context) {
+    final balcony = widget.item?.balcony;
+    final ratio =
+        balcony == null ? 1.0 : balcony.totalWidth / balcony.totalHeight;
+
+    final canvas = GestureDetector(
+      onPanUpdate: (d) => setState(() {
+        _angle += d.delta.dx * 0.01;
+      }),
+      child: CustomPaint(
+        painter: _Box3DPainter(angle: _angle, ratio: ratio),
+        size: Size.infinite,
+      ),
+    );
+
+    if (widget.bare) {
+      return SizedBox.expand(child: canvas);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -28,21 +52,7 @@ class _Viewer3DState extends State<Viewer3D> {
             children: [
               AspectRatio(
                 aspectRatio: 1.3,
-                child: GestureDetector(
-                  onPanUpdate: (d) => setState(() {
-                    _angle += d.delta.dx * 0.01;
-                  }),
-                  child: CustomPaint(
-                    painter: _Box3DPainter(
-                      angle: _angle,
-                      ratio: widget.item.balcony == null
-                          ? 1.0
-                          : widget.item.balcony!.totalWidth /
-                              widget.item.balcony!.totalHeight,
-                    ),
-                    size: Size.infinite,
-                  ),
-                ),
+                child: canvas,
               ),
               const SizedBox(height: 8),
               const Text(
