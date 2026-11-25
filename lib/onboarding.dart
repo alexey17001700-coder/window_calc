@@ -9,32 +9,9 @@ import 'measure_sheet.dart';
 import 'measure_media.dart';
 import 'measure_history.dart';
 
-/// Обёртка мастера с колбэками навигации (используется заставкой).
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key, this.onBack, this.onFinish});
-
-  final VoidCallback? onBack;
-  final VoidCallback? onFinish;
-
-  @override
-  Widget build(BuildContext context) {
-    return Onboarding(onBack: onBack, onFinish: onFinish);
-  }
-}
-
 /// Мастер замера: 7 шагов.
 class Onboarding extends StatefulWidget {
-  const Onboarding({
-    super.key,
-    this.onBack,
-    this.onFinish,
-  });
-
-  /// Вызывается при выходе с первого шага.
-  final VoidCallback? onBack;
-
-  /// Вызывается после сохранения замера — вместо закрытия экрана.
-  final VoidCallback? onFinish;
+  const Onboarding({super.key});
 
   @override
   State<Onboarding> createState() => _OnboardingState();
@@ -101,11 +78,7 @@ class _OnboardingState extends State<Onboarding> {
   }
 
   void _back() {
-    if (_step > 0) {
-      setState(() => _step--);
-    } else {
-      widget.onBack?.call();
-    }
+    if (_step > 0) setState(() => _step--);
   }
 
   Future<void> _finish() async {
@@ -118,11 +91,7 @@ class _OnboardingState extends State<Onboarding> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Замер сохранён в историю')),
     );
-    if (widget.onFinish != null) {
-      widget.onFinish!.call();
-    } else {
-      Navigator.of(context).pop();
-    }
+    Navigator.of(context).pop();
   }
 
   @override
