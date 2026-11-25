@@ -479,7 +479,8 @@ class _MeasureSizesViewState extends State<MeasureSizesView> {
       child: Row(
         children: [
           Expanded(child: AppUi.label(label)),
-          _stepBtn(Icons.remove_rounded, () => setState(() => set((value - 50).clamp(100, 4000)))),
+          _stepBtn(Icons.remove_rounded,
+              () => setState(() => set((value - 50).clamp(100, 4000).toInt()))),
           SizedBox(
             width: 74,
             child: Text(
