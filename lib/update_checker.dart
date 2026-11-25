@@ -1,188 +1,224 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+
 import 'theme.dart';
 
-/// Владелец и репозиторий на GitHub — источник обновлений.
-/// Если репозиторий переехал, поменяй только эти две строки.
-const String kGithubOwner = 'almas';
-const String kGithubRepo = 'window_calc';
-
-/// Результат проверки обновлений.
+/// Результат тихой проверки обновлений.
 class UpdateResult {
-  const UpdateResult({
+  UpdateResult({
     required this.currentVersion,
     this.latestVersion,
+    this.apkUrl,
     this.error,
   });
 
-  /// Версия, установленная на устройстве.
   final String currentVersion;
-
-  /// Версия с GitHub — только если она новее установленной.
   final String? latestVersion;
-
-  /// Текст ошибки, если проверить не удалось.
+  final String? apkUrl;
   final String? error;
 
-  bool get hasUpdate => latestVersion != null;
+  bool get hasUpdate {
+    final l = latestVersion;
+    if (l == null || l.isEmpty) return false;
+    return _cmp(l, currentVersion) > 0;
+  }
+
+  static int _cmp(String a, String b) {
+    List<int> nums(String s) {
+      final clean = s.split('+').first.split('-').first;
+      return clean
+          .split('.')
+          .map((e) => int.tryParse(e.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0)
+          .toList();
+    }
+
+    final x = nums(a);
+    final y = nums(b);
+    final n = x.length > y.length ? x.length : y.length;
+    for (var i = 0; i < n; i++) {
+      final p = i < x.length ? x[i] : 0;
+      final q = i < y.length ? y[i] : 0;
+      if (p != q) return p > q ? 1 : -1;
+    }
+    return 0;
+  }
 }
 
-/// Проверка версии приложения.
+/// Проверка версии на GitHub и установка APK.
 class UpdateChecker {
+  static const String owner = 'alexey17001700-coder';
+  static const String repo = 'window_calc';
+
+  static String get _latestUrl =>
+      'https://api.github.com/repos/$owner/$repo/releases/latest';
+
   static Future<String> currentVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      return '${info.version}+${info.buildNumber}';
+      return info.version;
     } catch (_) {
-      return '—';
+      return '0.0.0';
     }
   }
 
-  /// Спросить у GitHub последний релиз и сравнить с установленной версией.
+  /// Тихая проверка — ничего не показывает.
   static Future<UpdateResult> check() async {
-    final current = await currentVersion();
+    final cur = await currentVersion();
     try {
-      final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 8);
-      final req = await client.getUrl(Uri.parse(
-          'https://api.github.com/repos/$kGithubOwner/$kGithubRepo/releases/latest'));
-      req.headers.set('Accept', 'application/vnd.github+json');
-      req.headers.set('User-Agent', 'window_calc-app');
-      final res = await req.close();
-      final body = await res.transform(utf8.decoder).join();
-      client.close();
-
-      if (res.statusCode != 200) {
-        return UpdateResult(
-          currentVersion: current,
-          error: 'HTTP ${res.statusCode}',
-        );
-      }
-
-      final map = jsonDecode(body) as Map<String, dynamic>;
-      final tag = (map['tag_name'] as String? ?? '').trim();
-      if (tag.isEmpty) {
-        return UpdateResult(currentVersion: current, error: 'нет тега релиза');
-      }
-
-      final latest = tag.replaceFirst(RegExp(r'^[vV]'), '');
-      final cur = current.split('+').first;
-      return UpdateResult(
-        currentVersion: current,
-        latestVersion: _isNewer(latest, cur) ? latest : null,
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 12),
+          receiveTimeout: const Duration(seconds: 12),
+        ),
       );
-    } catch (_) {
-      return UpdateResult(currentVersion: current, error: 'нет сети');
+      final res = await dio.get<dynamic>(
+        _latestUrl,
+        options: Options(headers: {'Accept': 'application/vnd.github+json'}),
+      );
+      final data = res.data;
+      if (data is! Map) {
+        return UpdateResult(currentVersion: cur, error: 'НЕВЕРНЫЙ ОТВЕТ');
+      }
+      final tag = (data['tag_name'] ?? '').toString();
+      final ver = tag.replaceAll('v', '').split('+').first.trim();
+      String? apk;
+      final assets = data['assets'];
+      if (assets is List) {
+        for (final a in assets) {
+          if (a is Map) {
+            final name = (a['name'] ?? '').toString();
+            if (name.toLowerCase().endsWith('.apk')) {
+              apk = (a['browser_download_url'] ?? '').toString();
+              break;
+            }
+          }
+        }
+      }
+      return UpdateResult(
+        currentVersion: cur,
+        latestVersion: ver.isEmpty ? null : ver,
+        apkUrl: apk,
+      );
+    } catch (e) {
+      return UpdateResult(currentVersion: cur, error: e.toString());
     }
   }
 
-  /// true, если [latest] новее [current] (сравнение по 3 числам).
-  static bool _isNewer(String latest, String current) {
-    List<int> parts(String s) =>
-        s.split('.').map((e) => int.tryParse(e.trim()) ?? 0).toList();
-    final a = parts(latest);
-    final b = parts(current);
-    for (var i = 0; i < 3; i++) {
-      final x = i < a.length ? a[i] : 0;
-      final y = i < b.length ? b[i] : 0;
-      if (x != y) return x > y;
+  /// Тихая проверка при старте: нашлось — сразу диалог.
+  static Future<UpdateResult> checkOnStart(BuildContext context) async {
+    final res = await check();
+    if (res.hasUpdate && context.mounted) {
+      final l = res.latestVersion;
+      if (l != null) showUpdate(context, l);
     }
-    return false;
+    return res;
   }
 
-  /// Диалог «доступно обновление» с адресом релиза.
-  static void showUpdate(BuildContext context, String version) {
-    showDialog<void>(
+  /// Диалог «Доступно обновление».
+  static Future<void> showUpdate(BuildContext context, String version) async {
+    if (!context.mounted) return;
+    await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
-        title: const Text(
-          'ДОСТУПНО ОБНОВЛЕНИЕ',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-            color: AppColors.gold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Версия v$version уже опубликована.',
-              style: const TextStyle(color: AppColors.text, fontSize: 14),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'github.com/$kGithubOwner/$kGithubRepo/releases/latest',
-              style: const TextStyle(color: AppColors.dim, fontSize: 11.5),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'ПОЗЖЕ',
-              style: TextStyle(color: AppColors.dim),
-            ),
-          ),
-        ],
-      ),
+      barrierDismissible: true,
+      builder: (ctx) {
+        var busy = false;
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              backgroundColor: AppColors.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppUi.radius),
+                side: const BorderSide(color: Color(0x4DC9A227)),
+              ),
+              title: const Text(
+                'ДОСТУПНО ОБНОВЛЕНИЕ',
+                style: TextStyle(
+                  color: AppColors.gold,
+                  fontSize: 13,
+                  letterSpacing: 1.8,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              content: Text(
+                'Новая версия v$version.\nУстановить поверх текущей?',
+                style: const TextStyle(
+                  color: AppColors.text,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: busy ? null : () => Navigator.of(ctx).pop(),
+                  child: const Text(
+                    'ПОЗЖЕ',
+                    style: TextStyle(color: AppColors.dim, fontSize: 12),
+                  ),
+                ),
+                TextButton(
+                  onPressed: busy
+                      ? null
+                      : () async {
+                          setState(() => busy = true);
+                          final res = await check();
+                          if (!ctx.mounted) return;
+                          Navigator.of(ctx).pop();
+                          final url = res.apkUrl;
+                          if (url == null || url.isEmpty) {
+                            _toast(context, 'APK НЕ НАЙДЕН В РЕЛИЗЕ');
+                            return;
+                          }
+                          await install(context, url);
+                        },
+                  child: Text(
+                    busy ? 'ЗАГРУЗКА...' : 'УСТАНОВИТЬ',
+                    style: const TextStyle(
+                      color: AppColors.gold,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
-}
 
-/// Плитка «О приложении».
-class UpdateTile extends StatefulWidget {
-  const UpdateTile({super.key});
-
-  @override
-  State<UpdateTile> createState() => _UpdateTileState();
-}
-
-class _UpdateTileState extends State<UpdateTile> {
-  String _v = '…';
-
-  @override
-  void initState() {
-    super.initState();
-    UpdateChecker.currentVersion().then((v) {
-      if (mounted) setState(() => _v = v);
-    });
+  /// Скачать APK и открыть системный установщик.
+  static Future<void> install(BuildContext context, String url) async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final path = '${dir.path}/almas_update.apk';
+      final dio = Dio(
+        BaseOptions(
+          receiveTimeout: const Duration(minutes: 3),
+          followRedirects: true,
+        ),
+      );
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+      await dio.download(url, path);
+      final res = await OpenFilex.open(path);
+      if (res.type != ResultType.done && context.mounted) {
+        _toast(context, 'НЕ УДАЛОСЬ ОТКРЫТЬ УСТАНОВЩИК');
+      }
+    } catch (e) {
+      if (context.mounted) _toast(context, 'ЗАГРУЗКА НЕ УДАЛАСЬ');
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: AppUi.card(),
-      child: Row(
-        children: [
-          const Icon(Icons.info_outline, color: AppColors.gold, size: 20),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Замерщик окон Almas',
-              style: TextStyle(
-                color: AppColors.text,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Text(
-            'v$_v',
-            style: const TextStyle(color: AppColors.dim, fontSize: 12),
-          ),
-        ],
-      ),
+  static void _toast(BuildContext context, String text) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(text)),
     );
   }
 }
