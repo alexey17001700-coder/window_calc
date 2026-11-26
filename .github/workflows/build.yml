@@ -72,7 +72,26 @@ jobs:
           sed -i 's|    buildTypes {|    signingConfigs {\n        release {\n            keyAlias = keystoreProperties["keyAlias"]\n            keyPassword = keystoreProperties["keyPassword"]\n            storeFile = keystoreProperties["storeFile"] ? file(keystoreProperties["storeFile"]) : null\n            storePassword = keystoreProperties["storePassword"]\n        }\n    }\n    buildTypes {|' build.gradle
           sed -i 's|signingConfig = signingConfigs.debug|signingConfig = signingConfigs.release|' build.gradle
           cd ../..
-      - run: flutter build apk --release
+      - name: Build APK (3 попытки — репозитории Maven иногда отдают 404)
+        run: |
+          # Сбой «Could not find com.squareup:javawriter:2.5.0 / org.ow2.asm:asm:9.1»
+          # на шаге :gradle:compileGroovy — это сбой сети до Maven Central,
+          # а не ошибка кода: артефакты тянет встроенная сборка Gradle-плагина
+          # Flutter из самого SDK (packages/flutter_tools/gradle, AGP 7.3.0).
+          # Gradle запоминает «не найдено» на сутки — поэтому между попытками
+          # чистим кэш модулей, иначе повтор упадёт с тем же текстом.
+          for i in 1 2 3; do
+            echo "=== ПОПЫТКА СБОРКИ $i ИЗ 3 ==="
+            if flutter build apk --release; then
+              echo "СБОРКА УСПЕШНА (попытка $i)"
+              exit 0
+            fi
+            echo "Попытка $i не удалась — чищу кэш модулей Gradle и повторяю"
+            rm -rf ~/.gradle/caches/modules-2
+            sleep 20
+          done
+          echo "СБОРКА НЕ УДАЛАСЬ ПОСЛЕ 3 ПОПЫТОК"
+          exit 1
       - name: Get version
         id: version
         run: |
