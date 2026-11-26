@@ -530,7 +530,10 @@ class _HistoryViewState extends State<HistoryView> {
       child: Column(
         children: [
           InkWell(
-            onTap: () => setState(() => _open = open ? null : r.id),
+            onTap: () {
+              flashScreen();
+              setState(() => _open = open ? null : r.id);
+            },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
               child: Row(
