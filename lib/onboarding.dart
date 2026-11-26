@@ -499,10 +499,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 const SizedBox(height: 12),
                 // У балконного блока — свой чертёж и свои кнопки (этап 3),
                 // панель створок обычного окна ему не нужна.
-                if (!_isBalcony) ...[
+                if (_isBalcony) ...[
+                  _balconyControls(),
+                ] else ...[
                   _sashControls(sashes),
-                  const SizedBox(height: 12),
                 ],
+                const SizedBox(height: 12),
                 WindowVisual(
                   sashes: _isBalcony ? 1 : sashes,
                   arched: arched,
@@ -510,11 +512,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
                   sashModes: _isBalcony ? const <int>[1] : modes,
-                  widthMm: _mmOf('ШИРИНА'),
-                  heightMm: _mmOf('ВЫСОТА'),
+                  widthMm: _isBalcony ? 0 : _mmOf('ШИРИНА'),
+                  heightMm: _isBalcony ? 0 : _mmOf('ВЫСОТА'),
                   sectionWidths: _secWidths,
                   hingeCounts: _hingeCounts,
                   balcony: _isBalcony,
+                  doorOnLeft: _doorOnLeft,
+                  doorKind: _doorKind,
+                  winParts: _winParts,
+                  winCellModes: _winCellModes,
+                  winSectionWidths: _winSecWidths,
+                  onWinTap: () => setState(() {
+                    _glass = (_glass + 1 >= glassTypes.length
+                        ? 0
+                        : _glass + 1);
+                  }),
+                  onDoorTap: () => setState(
+                      () => _doorKind = (_doorKind + 1) % _doorKindNames.length),
                   onSashTap: (i) => setState(() {
                     final m = List<int>.from(modes);
                     m[i] = (m[i] + 1) % kSashModeNames.length;
