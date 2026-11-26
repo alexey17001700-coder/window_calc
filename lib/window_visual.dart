@@ -1557,19 +1557,6 @@ class _BalconyPainter extends CustomPainter {
     canvas.drawPath(to, p);
   }
 
-  // ─────────────── ШТРИХОВКА СЭНДВИЧА ───────────────
-  void _sandwich(Canvas canvas, Rect r) {
-    canvas.save();
-    canvas.clipRect(r);
-    final p = Paint()
-      ..color = const Color(0xFF9FB0C6).withOpacity(0.55)
-      ..strokeWidth = 0.8;
-    for (double x = r.left - r.height; x < r.right + r.height; x += 6) {
-      canvas.drawLine(Offset(x, r.bottom), Offset(x + r.height, r.top), p);
-    }
-    canvas.restore();
-  }
-
   // ─────────────── РУЧКА + ПЕТЛИ СТВОРКИ ОКНА ───────────────
   void _handle(Canvas canvas, Rect o, {required bool hingeLeft}) {
     final ink = Paint()..color = _ink;
