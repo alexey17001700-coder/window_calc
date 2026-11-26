@@ -1,5 +1,44 @@
 # Changelog
 
+## 3.4.77+142
+
+### СБОРКА: зеркала Maven Central — обход «Could not find javawriter / asm»
+
+**Ошибка из Actions:**
+
+```
+Execution failed for task ':gradle:compileGroovy'.
+> Could not resolve all files for configuration ':gradle:compileClasspath'.
+   > Could not find com.squareup:javawriter:2.5.0.
+   > Could not find org.ow2.asm:asm:9.1.
+     Required by: project :gradle > com.android.tools.build:gradle:7.3.0 > ...
+```
+
+**Почему автоповтор (3.4.76+141) не помог.** `project :gradle` — это встроенная
+сборка Gradle-плагина Flutter из самого SDK
+(`packages/flutter_tools/gradle`, AGP 7.3.0). Её репозитории заданы **внутри SDK**,
+а не в проекте: `sed` по `android/settings.gradle` меняет AGP только у приложения
+и до этой сборки не достаёт. Оба артефакта лежат **только на Maven Central** —
+если раннер до него не достучался, Gradle честно пишет «Could not find», и три
+повтора упираются в то же самое.
+
+**Что сделано (`.github/workflows/build.yml`) — новый шаг «Maven Central mirrors»:**
+
+- в **сам SDK** (`$FLUTTER_ROOT/packages/flutter_tools/gradle/build.gradle`
+  и `settings.gradle`) перед `mavenCentral()` вставляются **три зеркала**:
+  `maven.aliyun.com/repository/central` · `maven-central.storage-download.googleapis.com/maven2`
+  · `repo1.maven.org/maven2` — именно эта сборка тянет `javawriter` и `asm`
+- то же зеркалирование — в `android/settings.gradle` и `android/build.gradle`
+- дополнительно пишется **`~/.gradle/init.gradle`** — зеркала добавляются во
+  **все** проекты и `buildscript` любой сборки, включая вложенные
+- шаг печатает `FLUTTER_ROOT` и результат `grep -n maven` — видно, что правки
+  реально применились
+
+**Не тронуто:** Dart-код, чертёж, дерево, мастер, смета, история, версии плагинов,
+AGP 8.7.0, Gradle 8.9, Kotlin 1.9.24, подпись APK, автоповтор сборки.
+
+`pubspec.yaml`: **3.4.76+141 → 3.4.77+142** — новый тег, свежий прогон.
+
 ## 3.4.76+141
 
 ### СБОРКА: автоповтор при сбое репозиториев Maven (сбой сети, а не кода)
