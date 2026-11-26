@@ -438,7 +438,10 @@ class _HistoryViewState extends State<HistoryView> {
       final on = _tab == i;
       return Expanded(
         child: GestureDetector(
-          onTap: () => setState(() => _tab = i),
+          onTap: () {
+            flashScreen();
+            setState(() => _tab = i);
+          },
           child: Container(
             height: 40,
             margin: const EdgeInsets.symmetric(horizontal: 3),
