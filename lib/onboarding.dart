@@ -1049,7 +1049,7 @@ class _RoundButtonState extends State<_RoundButton> {
       onTapUp: (_) => setState(() => _down = false),
       onTapCancel: () => setState(() => _down = false),
       onTap: () {
-        flashScreen();
+        flashScreen(flashOriginOf(context));
         widget.onTap();
       },
       child: AnimatedScale(
