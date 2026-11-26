@@ -575,6 +575,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   }),
                   onDoorTap: () => setState(
                       () => _doorKind = (_doorKind + 1) % _doorKindNames.length),
+                  onDimTap: _askDim,
                   onSashTap: (i) => setState(() {
                     final m = List<int>.from(modes);
                     m[i] = (m[i] + 1) % kSashModeNames.length;
