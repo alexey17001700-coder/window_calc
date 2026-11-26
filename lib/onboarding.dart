@@ -834,6 +834,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ),
             ],
           ],
+          const SizedBox(height: 9),
+          const Text(
+            'ТАП ПО ЦИФРЕ НА ЧЕРТЕЖЕ — ВВОД РАЗМЕРА',
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              color: Color(0xFF7E93AC),
+            ),
+          ),
         ],
       ),
     );
