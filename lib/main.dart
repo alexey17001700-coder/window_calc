@@ -99,6 +99,10 @@ class _SplashScreenState extends State<SplashScreen>
     _c = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900))
       ..forward();
+    _capTimer = Timer.periodic(const Duration(milliseconds: 2200), (_) {
+      if (!mounted) return;
+      setState(() => _capIndex = (_capIndex + 1) % _caps.length);
+    });
     _boot();
   }
 
