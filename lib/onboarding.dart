@@ -792,6 +792,211 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
+  // ─────────── ПАНЕЛЬ БАЛКОННОГО БЛОКА (ЭТАП 3) ───────────
+  /// Зеркало · вид двери · состав оконной части · ширина частей окна.
+  /// Все настройки — кнопками, плюс тап прямо по чертежу.
+  Widget _balconyControls() {
+    final doorIdx = _doorKind.clamp(0, _doorKindNames.length - 1);
+    final preset = _winPreset;
+    final ws = _winSecWidthsNorm;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1220),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── заголовок + ЗЕРКАЛО ──
+          Row(
+            children: [
+              const Icon(Icons.window_rounded, size: 15, color: AppColors.gold),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'БАЛКОННЫЙ БЛОК',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.3,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              _MirrorBtn(
+                doorOnLeft: _doorOnLeft,
+                onTap: () => setState(() => _doorOnLeft = !_doorOnLeft),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _doorOnLeft ? 'ДВЕРЬ СЛЕВА · ОКНО СПРАВА' : 'ОКНО СЛЕВА · ДВЕРЬ СПРАВА',
+            style: const TextStyle(
+              fontSize: 8.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: AppColors.gold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ctrlLabel('ДВЕРЬ'),
+          const SizedBox(height: 7),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (var i = 0; i < _doorKindNames.length; i++)
+                _OptChip(
+                  label: _doorKindNames[i],
+                  selected: doorIdx == i,
+                  onTap: () => setState(() => _doorKind = i),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _ctrlLabel('ОКОННАЯ ЧАСТЬ'),
+          const SizedBox(height: 7),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (var i = 0; i < 3; i++)
+                _OptChip(
+                  label: const [
+                    'ГЛУХАРЬ',
+                    'ГЛУХАРЬ + СТВОРКА',
+                    'СТВОРКА + СТВОРКА',
+                  ][i],
+                  selected: preset == i,
+                  onTap: () => _setWinPreset(i),
+                ),
+            ],
+          ),
+          if (_winParts > 1) ...[
+            const SizedBox(height: 11),
+            Row(
+              children: [
+                const Text(
+                  'ШИРИНА ЧАСТЕЙ ОКНА',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: Color(0xFF7E93AC),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  _balconyWinMm > 0 ? 'ВСЕГО $_balconyWinMm ММ' : 'ВВЕДИ ШИРИНУ',
+                  style: const TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 7),
+            for (var i = 0; i < _winParts; i++) ...[
+              if (i > 0) const SizedBox(height: 6),
+              _SectionWidthRow(
+                index: i,
+                mm: _balconyWinMm > 0
+                    ? (_balconyWinMm * ws[i]).round()
+                    : 0,
+                onMinus: () => _bumpWinSection(i, -1),
+                onPlus: () => _bumpWinSection(i, 1),
+              ),
+            ],
+          ],
+          const SizedBox(height: 10),
+          const Text(
+            'ТАП ПО ЧЕРТЕЖУ: ОКНО — СТЕКЛОПАКЕТ, ДВЕРЬ — ВИД НИЗА',
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              color: Color(0xFF7E93AC),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _ctrlLabel(String s) => Text(
+        s,
+        style: const TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
+          color: Color(0xFF7E93AC),
+        ),
+      );
+
+  /// Ширина окна балконного блока в ММ (0 — ещё не задана).
+  int get _balconyWinMm => _mmOf('ШИРИНА ОКНА');
+
+  /// Доли ширины частей окна: пусто или не то число — поровну.
+  List<double> get _winSecWidthsNorm {
+    final n = _winParts.clamp(1, 2);
+    if (_winSecW.length == n) {
+      final sum = _winSecW.fold<double>(0, (a, b) => a + b);
+      if (sum > 0) return [for (final w in _winSecW) w / sum];
+    }
+    return List<double>.filled(n, 1.0 / n);
+  }
+
+  /// Изменить ширину части окна i: отдаём/забираем долю у соседа.
+  void _bumpWinSection(int i, int dir) {
+    final n = _winParts.clamp(1, 2);
+    if (n < 2) return;
+    final ws = List<double>.from(_winSecWidthsNorm);
+    if (i < 0 || i >= ws.length) return;
+    final j = i == 0 ? 1 : i - 1;
+    const d = 0.05;
+    if (dir > 0) {
+      if (ws[j] - d < 0.15) return;
+      ws[i] += d;
+      ws[j] -= d;
+    } else {
+      if (ws[i] - d < 0.15) return;
+      ws[i] -= d;
+      ws[j] += d;
+    }
+    setState(() => _winSecW = ws);
+  }
+
+  /// Выбранный состав окна: 0 — цельный глухарь, 1 — глухарь + створка,
+  /// 2 — створка + створка.
+  int get _winPreset {
+    if (_winParts < 2) return 0;
+    return _winCellModes.length > 1 && _winCellModes[1] != 0 ? 2 : 1;
+  }
+
+  void _setWinPreset(int i) {
+    setState(() {
+      if (i == 0) {
+        _winParts = 1;
+        _winCellModes = const [0];
+        _winSecW = const [];
+      } else if (i == 1) {
+        _winParts = 2;
+        _winCellModes = const [0, 1];
+        _winSecW = const [0.5, 0.5];
+      } else {
+        _winParts = 2;
+        _winCellModes = const [1, 1];
+        _winSecW = const [0.5, 0.5];
+      }
+    });
+  }
+
   /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
   int _mmOf(String field) {
     for (final e in _sizes.values) {
