@@ -43,7 +43,10 @@ class WizardHeader extends StatelessWidget {
           Row(
             children: [
               InkWell(
-                onTap: () => Navigator.of(context).maybePop(),
+                onTap: () {
+                  flashScreen();
+                  Navigator.of(context).maybePop();
+                },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   width: 40,
