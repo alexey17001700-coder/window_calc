@@ -65,6 +65,9 @@ class WindowVisual extends StatefulWidget {
     this.winWidthMm = 0,
     this.winHeightMm = 0,
     this.doorWidthMm = 0,
+    this.winSectionWidths = const [],
+    this.onWinTap,
+    this.onDoorTap,
   });
 
   /// Число створок: 1, 2, 3 или 4.
@@ -581,6 +584,9 @@ class _GostPainter extends CustomPainter {
     this.winWidthMm = 0,
     this.winHeightMm = 0,
     this.doorWidthMm = 0,
+    this.winSectionWidths = const [],
+    this.onWinTap,
+    this.onDoorTap,
   });
 
   final int sashes;
