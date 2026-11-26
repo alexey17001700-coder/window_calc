@@ -662,8 +662,12 @@ class _PressCardState extends State<_PressCard> {
 ///  ЛИНИИ-ВЕТКИ: от правого торца карточки к левому торцу подпункта
 /// ═══════════════════════════════════════════════════════════════════
 class _EdgePainter extends CustomPainter {
-  _EdgePainter(this.edges);
+  _EdgePainter(this.edges, this.t);
+
   final List<List<Rect>> edges;
+
+  /// 0…1 — фаза бега искр по линиям.
+  final double t;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -698,9 +702,62 @@ class _EdgePainter extends CustomPainter {
           p1, 2.4, Paint()..color = AppColors.gold.withOpacity(0.75));
       canvas.drawCircle(
           p2, 2.0, Paint()..color = AppColors.gold.withOpacity(0.55));
+
+      // ── ИСКРЫ, БЕГУЩИЕ ПО ЛИНИИ ──
+      _sparks(canvas, path);
+    }
+  }
+
+  /// Искры-точки: бегут от карточки к подпункту, гаснут на концах.
+  void _sparks(Canvas canvas, Path path) {
+    for (final m in path.computeMetrics()) {
+      final len = m.length;
+      if (len <= 1) continue;
+
+      for (var s = 0; s < 3; s++) {
+        final f = (t + s / 3.0) % 1.0;
+        final tan = m.getTangentForOffset(len * f);
+        if (tan == null) continue;
+
+        // затухание на концах — искры не «выскакивают» из карточки
+        final a = math.sin(math.pi * f);
+        if (a <= 0.02) continue;
+
+        final pos = tan.position;
+
+        // хвостик-комета
+        final back = m.getTangentForOffset(len * (f - 0.07).clamp(0.0, 1.0));
+        if (back != null) {
+          canvas.drawLine(
+            back.position,
+            pos,
+            Paint()
+              ..strokeWidth = 2.2
+              ..strokeCap = StrokeCap.round
+              ..color = AppColors.gold.withOpacity(0.30 * a),
+          );
+        }
+
+        // ореол
+        canvas.drawCircle(
+          pos,
+          4.6,
+          Paint()
+            ..color = AppColors.gold.withOpacity(0.20 * a)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0),
+        );
+
+        // ядро искры
+        canvas.drawCircle(
+          pos,
+          1.7,
+          Paint()..color = AppColors.goldLight.withOpacity(0.95 * a),
+        );
+      }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _EdgePainter old) => true;
+  bool shouldRepaint(covariant _EdgePainter old) =>
+      old.t != t || old.edges != edges;
 }
