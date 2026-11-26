@@ -1411,27 +1411,95 @@ class _BalconyPainter extends CustomPainter {
     final glass = inner.deflate(3.5);
     final kind = doorKind.clamp(0, 2);
 
-    // 0 — стекло во всю дверь
     if (kind == 0) {
+      // 0 — стекло во всю дверь
       canvas.drawRect(glass, _line(_ink, 0.9));
-      return;
+    } else {
+      final splitY = inner.top + inner.height * 0.62;
+      final top = Rect.fromLTWH(
+          glass.left, glass.top, glass.width, math.max(2, splitY - glass.top));
+      final bot = Rect.fromLTWH(
+          glass.left, splitY, glass.width, math.max(2, glass.bottom - splitY));
+
+      // верх — стекло
+      canvas.drawRect(top, _line(_ink, 0.9));
+
+      // низ — белый сэндвич (1) или стекло (2)
+      if (kind == 1) {
+        canvas.drawRect(bot, Paint()..color = const Color(0xFFEDF1F7));
+        _sandwich(canvas, bot);
+      }
+      canvas.drawRect(bot, _line(_ink, 0.9));
     }
 
-    final splitY = inner.top + inner.height * 0.62;
-    final top = Rect.fromLTWH(
-        glass.left, glass.top, glass.width, math.max(2, splitY - glass.top));
-    final bot = Rect.fromLTWH(
-        glass.left, splitY, glass.width, math.max(2, glass.bottom - splitY));
+    // ── ФУРНИТУРА ДВЕРИ ──
+    //  Петли — со стороны ОКНА (внутренняя сторона блока),
+    //  ручка — с внешнего края блока.
+    final hingesOnLeft = !doorOnLeft;
+    _doorRail(canvas, inner, hingesOnLeft: hingesOnLeft);
 
-    // верх — стекло
-    canvas.drawRect(top, _line(_ink, 0.9));
+    // ── ТРЕУГОЛЬНИКИ ОТКРЫВАНИЯ ──
+    //  П (поворотная) + О (откидная), ОБА растянуты НА ВСЮ ВЫСОТУ двери
+    //  и рисуются ПОВЕРХ деления стекло/сэндвич — чтобы верхняя часть
+    //  не читалась как отдельная створка, а нижняя — как вторая вставка.
+    _doorMarks(canvas, glass, hingesOnLeft: hingesOnLeft);
+  }
 
-    // низ — белый сэндвич (1) или стекло (2)
-    if (kind == 1) {
-      canvas.drawRect(bot, Paint()..color = const Color(0xFFEDF1F7));
-      _sandwich(canvas, bot);
+  // ─────────────── ФУРНИТУРА ДВЕРИ (петли + ручка) ───────────────
+  void _doorRail(Canvas canvas, Rect o, {required bool hingesOnLeft}) {
+    final ink = Paint()..color = _ink;
+
+    // петли — 3 штуки по стороне петель
+    final hx = hingesOnLeft ? o.left + 1.2 : o.right - 4.2;
+    for (final t in const [0.06, 0.50, 0.94]) {
+      canvas.drawRect(
+        Rect.fromLTWH(hx, o.top + o.height * t - 7, 3, 14),
+        ink,
+      );
     }
-    canvas.drawRect(bot, _line(_ink, 0.9));
+
+    // ручка — на высоте пояса, с противоположной петлям стороны
+    final rx = hingesOnLeft ? o.right - 6.4 : o.left + 2.4;
+    canvas.drawRect(Rect.fromLTWH(rx, o.center.dy - 5, 4.2, 10), ink);
+    canvas.drawRect(Rect.fromLTWH(rx, o.center.dy - 9, 2.4, 18), ink);
+  }
+
+  // ─────────────── ТРЕУГОЛЬНИКИ ДВЕРИ (П + О на всю высоту) ───────────────
+  void _doorMarks(Canvas canvas, Rect g, {required bool hingesOnLeft}) {
+    final p = _line(_ink, 1.15);
+
+    // ── П · ПОВОРОТНАЯ: вершина — к РУЧКЕ, основание — к ПЕТЛЯМ.
+    //    Растянут почти на всю высоту двери (34% + 34% = 68%).
+    final halfP = g.height * 0.34;
+    final hP = g.width * 0.46;
+    final Path tp;
+    if (hingesOnLeft) {
+      // петли слева → ручка справа → вершина справа
+      tp = Path()
+        ..moveTo(g.right - 5, g.center.dy)
+        ..lineTo(g.right - 5 - hP, g.center.dy - halfP)
+        ..lineTo(g.right - 5 - hP, g.center.dy + halfP)
+        ..close();
+    } else {
+      // петли справа → ручка слева → вершина слева
+      tp = Path()
+        ..moveTo(g.left + 5, g.center.dy)
+        ..lineTo(g.left + 5 + hP, g.center.dy - halfP)
+        ..lineTo(g.left + 5 + hP, g.center.dy + halfP)
+        ..close();
+    }
+    canvas.drawPath(tp, p);
+
+    // ── О · ОТКИДНАЯ: вершина ВВЕРХУ, основание ВНИЗУ —
+    //    ОТ ВЕРХНЕЙ КРОМКИ ДО НИЖНЕЙ, одним вытянутым треугольником.
+    //    Именно это убирает «призрак створки» в верхней части двери.
+    final halfO = g.width * 0.24;
+    final Path to = Path()
+      ..moveTo(g.center.dx, g.top + 4)
+      ..lineTo(g.center.dx - halfO, g.bottom - 4)
+      ..lineTo(g.center.dx + halfO, g.bottom - 4)
+      ..close();
+    canvas.drawPath(to, p);
   }
 
   // ─────────────── ШТРИХОВКА СЭНДВИЧА ───────────────
