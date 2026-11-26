@@ -3,10 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'theme.dart';
-import 'measure_item.dart';
 import 'measure_media.dart';
 import 'window_visual.dart';
-import 'work_tree.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
 ///  ШАГ «ЗАМЕРНЫЙ ЛИСТ»  ·  v3.4.25
@@ -28,15 +26,10 @@ class MeasureSheetView extends StatefulWidget {
     required this.glass,
     required this.onBack,
     required this.onFinish,
-    this.items = const [],
     this.sashModes = const [],
     this.widthMm = 0,
     this.sectionWidths = const [],
   });
-
-  /// Все изделия замера (новый режим: один замер — несколько изделий).
-  /// Пусто — лист показывает одно изделие из одиночных полей ниже.
-  final List<MeasureItem> items;
 
   /// Данные клиента.
   final String name;
@@ -76,28 +69,6 @@ class MeasureSheetView extends StatefulWidget {
   State<MeasureSheetView> createState() => _MeasureSheetViewState();
 }
 
-/// Одно изделие, разобранное для показа в листе:
-/// стеклопакет — уже текстом, створки — названиями по ГОСТ.
-class _SheetItem {
-  _SheetItem({
-    required this.path,
-    required this.multi,
-    required this.sizes,
-    required this.glass,
-    required this.sashModes,
-    required this.widthMm,
-    required this.sectionWidths,
-  });
-
-  final List<String> path;
-  final List<String> multi;
-  final Map<String, Map<String, int>> sizes;
-  final String glass;
-  final List<String> sashModes;
-  final int widthMm;
-  final List<double> sectionWidths;
-}
-
 class _MeasureSheetViewState extends State<MeasureSheetView> {
   bool _copied = false;
 
@@ -121,40 +92,6 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   String get _dash => '─' * 26;
 
-  /// Все изделия листа: из списка MeasureItem либо из одиночных полей.
-  List<_SheetItem> get _items {
-    if (widget.items.isNotEmpty) {
-      return [
-        for (final it in widget.items)
-          _SheetItem(
-            path: it.path,
-            multi: it.multi,
-            sizes: it.sizes,
-            glass: (it.glass >= 0 && it.glass < glassTypes.length)
-                ? glassTypes[it.glass].title
-                : '',
-            sashModes: [
-              for (final m in it.modes)
-                kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
-            ],
-            widthMm: it.mmOf('ШИРИНА'),
-            sectionWidths: it.secWidths,
-          ),
-      ];
-    }
-    return [
-      _SheetItem(
-        path: widget.path,
-        multi: widget.multi,
-        sizes: widget.sizes,
-        glass: widget.glass,
-        sashModes: widget.sashModes,
-        widthMm: widget.widthMm,
-        sectionWidths: widget.sectionWidths,
-      ),
-    ];
-  }
-
   /// Текст замерного листа — все размеры в миллиметрах.
   String _sheetText() {
     final b = StringBuffer();
@@ -166,76 +103,71 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     b.writeln('АДРЕС: ${_or(widget.addr, '—')}');
     b.writeln(
         'КВАРТИРА / ЭТАЖ: ${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}');
-    b.writeln('ФОТО ПРОЁМА: ${_photos.isEmpty ? '—' : '${_photos.length} шт'}');
     b.writeln(_dash);
 
-    final items = _items;
-    b.writeln('ВСЕГО ИЗДЕЛИЙ: ${items.length}');
-    b.writeln(_dash);
-    for (var n = 0; n < items.length; n++) {
-      final it = items[n];
-      b.writeln(
-          'ИЗДЕЛИЕ ${n + 1} ИЗ ${items.length}: ${it.path.isEmpty ? '—' : it.path.join(' · ')}');
-      b.writeln('СТЕКЛОПАКЕТ: ${it.glass.isEmpty ? '—' : it.glass}');
-      if (it.sashModes.isNotEmpty) {
-        final s = <String>[];
-        for (var i = 0; i < it.sashModes.length; i++) {
-          s.add('${i + 1}-${it.sashModes[i]}');
-        }
-        b.writeln('СТВОРКИ: ${s.join(' · ')}');
-        b.writeln('КОНСТРУКЦИЯ: ${it.sashModes.length} '
-            '${_sashWord(it.sashModes.length)} · ${_sashLettersOf(it.sashModes)}');
-        if (it.widthMm > 0) {
-          b.writeln('ШИРИНА СЕКЦИЙ (ММ): ${_sectionsMmOf(it)}');
-        }
+    b.writeln('ИЗДЕЛИЕ: ${widget.path.isEmpty ? '—' : widget.path.join(' · ')}');
+    b.writeln('СТЕКЛОПАКЕТ: ${widget.glass.isEmpty ? '—' : widget.glass}');
+    b.writeln('ФОТО ПРОЁМА: ${_photos.isEmpty ? '—' : '${_photos.length} шт'}');
+    if (widget.sashModes.isNotEmpty) {
+      final s = <String>[];
+      for (var i = 0; i < widget.sashModes.length; i++) {
+        s.add('${i + 1}-${widget.sashModes[i]}');
       }
-      b.writeln('РАЗМЕРЫ (ММ):');
-      if (it.multi.isEmpty) {
-        b.writeln('— НЕ ВЫБРАНО');
-      } else {
-        for (final item in it.multi) {
-          b.writeln('• $item');
-          final f = it.sizes[item];
-          if (f == null || f.isEmpty) {
-            b.writeln('   РАЗМЕРЫ НЕ ЗАПОЛНЕНЫ');
-          } else {
-            f.forEach((k, v) => b.writeln('   $k: $v мм'));
-          }
-        }
+      b.writeln('СТВОРКИ: ${s.join(' · ')}');
+      b.writeln('КОНСТРУКЦИЯ: ${widget.sashModes.length} '
+          '${_sashWord(widget.sashModes.length)} · ${_sashLetters()}');
+      if (widget.widthMm > 0) {
+        b.writeln('ШИРИНА СЕКЦИЙ (ММ): ${_sectionsMm()}');
       }
-      b.writeln(_dash);
     }
-    b.writeln('ВСЕГО ИЗДЕЛИЙ: ${items.length}');
+    b.writeln(_dash);
+
+    b.writeln('РАЗМЕРЫ (ММ):');
+    if (widget.multi.isEmpty) {
+      b.writeln('— НЕ ВЫБРАНО');
+    } else {
+      for (final item in widget.multi) {
+        b.writeln('• $item');
+        final f = widget.sizes[item];
+        if (f == null || f.isEmpty) {
+          b.writeln('   РАЗМЕРЫ НЕ ЗАПОЛНЕНЫ');
+        } else {
+          f.forEach((k, v) => b.writeln('   $k: $v мм'));
+        }
+      }
+    }
+    b.writeln(_dash);
     return b.toString();
   }
 
   /// «1-ПОВОРОТНАЯ · 2-ГЛУХАЯ» — обозначения створок по ГОСТ.
-  String _sashLineOf(List<String> modes) {
+  String _sashLine() {
     final s = <String>[];
-    for (var i = 0; i < modes.length; i++) {
-      s.add('${i + 1} · ${modes[i]}');
+    for (var i = 0; i < widget.sashModes.length; i++) {
+      s.add('${i + 1} · ${widget.sashModes[i]}');
     }
     return s.join('   ');
   }
 
   /// «Г · ПО» — буквы по ГОСТ.
-  String _sashLettersOf(List<String> modes) =>
-      modes.map((m) => kSashModeLetter[_modeIndex(m)]).join(' · ');
+  String _sashLetters() => widget.sashModes
+      .map((m) => kSashModeLetter[_modeIndex(m)])
+      .join(' · ');
 
   /// «1 · 600 мм   2 · 700 мм» — ширина каждой секции (с учётом ручной).
-  String _sectionsMmOf(_SheetItem it) {
-    final n = it.sashModes.length;
+  String _sectionsMm() {
+    final n = widget.sashModes.length;
     if (n == 0) return '—';
     final s = <String>[];
     for (var i = 0; i < n; i++) {
-      s.add('${i + 1} · ${(it.widthMm * _secShareOf(it, i, n)).round()} мм');
+      s.add('${i + 1} · ${(widget.widthMm * _secShare(i, n)).round()} мм');
     }
     return s.join('   ');
   }
 
   /// Доля ширины секции i (ручная или равная).
-  double _secShareOf(_SheetItem it, int i, int n) {
-    final w = it.sectionWidths;
+  double _secShare(int i, int n) {
+    final w = widget.sectionWidths;
     if (w.length == n) {
       final sum = w.fold<double>(0, (a, b) => a + b);
       if (sum > 0) return w[i] / sum;
@@ -287,7 +219,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   @override
   Widget build(BuildContext context) {
-    final items = _items;
+    final items = widget.multi;
 
     return Column(
       children: [
@@ -298,7 +230,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _head(items.length),
+                _head(),
                 const SizedBox(height: 12),
                 _block('КЛИЕНТ', [
                   ('ИМЯ', _or(widget.name, '—')),
@@ -308,10 +240,24 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                       '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
                 ]),
                 const SizedBox(height: 12),
-                for (var i = 0; i < items.length; i++) ...[
-                  if (i > 0) const SizedBox(height: 14),
-                  _itemBlock(i, items[i], items.length),
+                _block('ИЗДЕЛИЕ', [
+                  ('ЦЕПОЧКА',
+                      widget.path.isEmpty ? '—' : widget.path.join(' · ')),
+                  ('СТЕКЛОПАКЕТ',
+                      widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
+                ]),
+                const SizedBox(height: 12),
+                if (widget.sashModes.isNotEmpty) ...[
+                  _block('КОНСТРУКЦИЯ', [
+                    ('СТВОРОК', '${widget.sashModes.length}'),
+                    ('СТВОРКИ', _sashLine()),
+                    ('ПО ГОСТ', _sashLetters()),
+                    if (widget.widthMm > 0)
+                      ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
+                  ]),
+                  const SizedBox(height: 12),
                 ],
+                _sizesBlock(items),
                 const SizedBox(height: 12),
                 MeasureMediaPanel(
                   sessionKey: _mediaKey,
@@ -343,7 +289,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   }
 
   // ─────────────────────────── ЗАГОЛОВОК ───────────────────────────
-  Widget _head(int total) {
+  Widget _head() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
@@ -383,11 +329,11 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                 size: 20, color: AppColors.navy900),
           ),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'ЗАМЕРНЫЙ ЛИСТ',
                   style: TextStyle(
                     fontSize: 14,
@@ -396,12 +342,10 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3),
                 Text(
-                  total > 1
-                      ? 'ВСЕГО ИЗДЕЛИЙ: $total · ВСЕ РАЗМЕРЫ В ММ'
-                      : 'ВСЕ РАЗМЕРЫ В МИЛЛИМЕТРАХ',
-                  style: const TextStyle(
+                  'ВСЕ РАЗМЕРЫ В МИЛЛИМЕТРАХ',
+                  style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.3,
@@ -413,76 +357,6 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
           ),
         ],
       ),
-    );
-  }
-
-  // ─────────────────────── БЛОК ОДНОГО ИЗДЕЛИЯ ───────────────────────
-  Widget _itemBlock(int i, _SheetItem it, int total) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _itemHead(i, total),
-        const SizedBox(height: 10),
-        _block('ИЗДЕЛИЕ', [
-          ('ЦЕПОЧКА', it.path.isEmpty ? '—' : it.path.join(' · ')),
-          ('СТЕКЛОПАКЕТ', it.glass.isEmpty ? 'НЕ ВЫБРАН' : it.glass),
-        ]),
-        if (it.sashModes.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _block('КОНСТРУКЦИЯ', [
-            ('СТВОРОК', '${it.sashModes.length}'),
-            ('СТВОРКИ', _sashLineOf(it.sashModes)),
-            ('ПО ГОСТ', _sashLettersOf(it.sashModes)),
-            if (it.widthMm > 0) ('ШИРИНА СЕКЦИЙ', _sectionsMmOf(it)),
-          ]),
-        ],
-        const SizedBox(height: 12),
-        _sizesBlock(it.multi, it.sizes),
-      ],
-    );
-  }
-
-  /// Заголовок изделия: «ИЗДЕЛИЕ 2 ИЗ 3».
-  Widget _itemHead(int i, int total) {
-    return Row(
-      children: [
-        Container(
-          width: 26,
-          height: 26,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            gradient: AppColors.goldGradient,
-            borderRadius: BorderRadius.circular(9),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.gold.withOpacity(0.30),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            '${i + 1}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: AppColors.navy900,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            'ИЗДЕЛИЕ ${i + 1} ИЗ $total',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.4,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -546,7 +420,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   }
 
   // ─────────────────────────── БЛОК РАЗМЕРОВ ───────────────────────────
-  Widget _sizesBlock(List<String> items, Map<String, Map<String, int>> sizes) {
+  Widget _sizesBlock(List<String> items) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -605,15 +479,15 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
           else
             for (var i = 0; i < items.length; i++) ...[
               if (i > 0) const SizedBox(height: 12),
-              _sizeItem(items[i], sizes),
+              _sizeItem(items[i]),
             ],
         ],
       ),
     );
   }
 
-  Widget _sizeItem(String item, Map<String, Map<String, int>> sizes) {
-    final f = sizes[item];
+  Widget _sizeItem(String item) {
+    final f = widget.sizes[item];
     final rows = <MapEntry<String, int>>[
       if (f != null) ...f.entries,
     ];
@@ -750,31 +624,22 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   /// Собрать лист в HTML (с фото) и отдать на печать → PDF / отправку.
   Future<void> _exportSheet() async {
     final photos = await PhotoStore.asBase64(_photos);
-    final items = _items;
     final rows = <(String, String)>[
       ('ТЕЛЕФОН', _or(widget.phone, '—')),
       ('АДРЕС', _or(widget.addr, '—')),
       ('КВ. / ЭТАЖ', '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
-      for (var n = 0; n < items.length; n++) ...[
-        ('ИЗДЕЛИЕ ${n + 1}',
-            items[n].path.isEmpty ? '—' : items[n].path.join(' · ')),
-        ('СТЕКЛОПАКЕТ',
-            items[n].glass.isEmpty ? 'НЕ ВЫБРАН' : items[n].glass),
-        if (items[n].sashModes.isNotEmpty)
-          ('КОНСТРУКЦИЯ',
-              '${items[n].sashModes.length} СТВ. · ${_sashLettersOf(items[n].sashModes)}'),
-        if (items[n].sashModes.isNotEmpty && items[n].widthMm > 0)
-          ('ШИРИНА СЕКЦИЙ', _sectionsMmOf(items[n])),
-        for (final item in items[n].multi)
-          (item, _sizesLine(item, items[n].sizes)),
-      ],
+      ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
+      if (widget.sashModes.isNotEmpty)
+        ('КОНСТРУКЦИЯ',
+            '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
+      if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
+        ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
+      for (final item in widget.multi) (item, _sizesLine(item)),
     ];
 
     final html = SheetExport.html(
       client: _or(widget.name, '—'),
-      product: items.length > 1
-          ? 'ИЗДЕЛИЙ: ${items.length}'
-          : (items.first.path.isEmpty ? '—' : items.first.path.join(' · ')),
+      product: widget.path.isEmpty ? '—' : widget.path.join(' · '),
       rows: rows,
       photos: photos,
     );
@@ -784,8 +649,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   }
 
   /// «ШИРИНА: 1300 мм · ВЫСОТА: 1400 мм» — размеры одного пункта.
-  String _sizesLine(String item, Map<String, Map<String, int>> sizes) {
-    final f = sizes[item];
+  String _sizesLine(String item) {
+    final f = widget.sizes[item];
     if (f == null || f.isEmpty) return 'РАЗМЕРЫ НЕ ЗАПОЛНЕНЫ';
     return f.entries.map((e) => '${e.key}: ${e.value} мм').join(' · ');
   }
@@ -793,32 +658,18 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   /// Отправить замер на сервер Штаба; нет сети — замер уходит в очередь.
   Future<void> _pushToServer() async {
     setState(() => _syncBusy = true);
-    final items = _items;
-    final first = items.first;
     final payload = <String, dynamic>{
       'client': _or(widget.name, '—'),
       'phone': _or(widget.phone, '—'),
       'address': _or(widget.addr, '—'),
       'flat': _or(widget.flat, '—'),
       'floor': _or(widget.floor, '—'),
-      'product': first.path,
-      'multi': first.multi,
-      'glass': first.glass,
-      'sash': first.sashModes,
-      'widthMm': first.widthMm,
-      'sizes': first.sizes,
-      'itemsCount': items.length,
-      'items': [
-        for (final it in items)
-          {
-            'product': it.path,
-            'multi': it.multi,
-            'glass': it.glass,
-            'sash': it.sashModes,
-            'widthMm': it.widthMm,
-            'sizes': it.sizes,
-          },
-      ],
+      'product': widget.path,
+      'multi': widget.multi,
+      'glass': widget.glass,
+      'sash': widget.sashModes,
+      'widthMm': widget.widthMm,
+      'sizes': widget.sizes,
       'photos': _photos.length,
       'at': DateTime.now().millisecondsSinceEpoch,
     };

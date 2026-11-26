@@ -14,13 +14,6 @@ class _GostPainter extends CustomPainter {
     required this.heightMm,
     this.sectionWidths = const [],
     this.hingeCounts = const [],
-    this.balconyBlock = false,
-    this.doorMode = 1,
-    this.fixedMode = 0,
-    this.doorWidthMm = 600,
-    this.doorHeightMm = 2100,
-    this.fixedWidthMm = 600,
-    this.fixedHeightMm = 500,
   });
 
   final int sashes;
@@ -32,15 +25,6 @@ class _GostPainter extends CustomPainter {
   final int heightMm;
   final List<double> sectionWidths;
   final List<int> hingeCounts;
-
-  /// БАЛКОННЫЙ БЛОК: дверь + боковая колонна (глухняк сверху, панель снизу).
-  final bool balconyBlock;
-  final int doorMode;
-  final int fixedMode;
-  final int doorWidthMm;
-  final int doorHeightMm;
-  final int fixedWidthMm;
-  final int fixedHeightMm;
 
   static const _ink = Color(0xFF16233A);
   static const _paper = Color(0xFFF7F9FC);

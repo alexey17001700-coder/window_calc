@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'version_info.dart';
 import 'measure_history.dart';
-import 'measure_item.dart';
 import 'measure_sizes.dart';
 import 'measure_sheet.dart';
 import 'price_estimate.dart';
@@ -81,29 +80,20 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Дополнительные петли замерщик добавляет ВРУЧНУЮ (например, на дверь).
   List<int> _hinges = const [];
 
-  /// СПИСОК изделий замера: один клиент — НЕСКОЛЬКО изделий
-  /// (окно, балкон, откосы, отлив…). Пока изделие одно — как раньше.
-  final List<MeasureItem> _items = [];
-
-  /// Индекс изделия, которое сейчас правится (-1 — новое).
-  int _editing = -1;
-
   static const _titles = [
     'ДАННЫЕ КЛИЕНТА',
     'ЧТО ДЕЛАЕМ',
-    'РАЗМЕРЫ',
     'ВИЗУАЛЬНЫЙ ЗАМЕР',
+    'РАЗМЕРЫ',
     'СМЕТА',
-    'ИЗДЕЛИЯ',
     'ЗАМЕРНЫЙ ЛИСТ',
   ];
   static const _icons = [
     Icons.person_rounded,
     Icons.account_tree_rounded,
-    Icons.straighten_rounded,
     Icons.window_rounded,
+    Icons.straighten_rounded,
     Icons.calculate_rounded,
-    Icons.view_list_rounded,
     Icons.receipt_long_rounded,
   ];
 
@@ -149,9 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                   ? _visualStep()
                                   : _step == 4
                                       ? _estimateStep()
-                                      : _step == 5
-                                          ? _itemsStep()
-                                          : _sheetStep(),
+                                      : _sheetStep(),
                 ),
                 const SizedBox(height: 14),
               ],
@@ -420,154 +408,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     });
   }
 
-  // ─────────── ШАГ 6: СПИСОК ИЗДЕЛИЙ ЗАМЕРА ───────────
-  /// Один замер = один клиент + НЕСКОЛЬКО изделий. Здесь видно все изделия:
-  /// тап по карточке — править, крестик — удалить, «+ ИЗДЕЛИЕ» — добавить.
-  Widget _itemsStep() {
-    return Column(
-      children: [
-        Expanded(
-          child: _items.isEmpty
-              ? const Center(
-                  child: Text(
-                    'ИЗДЕЛИЙ ПОКА НЕТ\nНАЖМИ «+ ИЗДЕЛИЕ»',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
-                      height: 1.7,
-                      color: Color(0xFF7E93AC),
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                  itemCount: _items.length,
-                  itemBuilder: (_, i) => Padding(
-                    padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
-                    child: _ItemCard(
-                      index: i,
-                      item: _items[i],
-                      onTap: () => _editItem(i),
-                      onRemove: () => _removeItem(i),
-                    ),
-                  ),
-                ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          child: Row(
-            children: [
-              _GhostButton('+ ИЗДЕЛИЕ', Icons.add_rounded, _addItem),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _GoldButton('ЗАМЕРНЫЙ ЛИСТ', Icons.receipt_long_rounded,
-                    () => setState(() => _step = 6)),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Собрать текущее изделие из полей мастера.
-  MeasureItem _snapshot() => MeasureItem(
-        path: List<String>.from(_picked),
-        multi: List<String>.from(_multi),
-        sizes: _sizes,
-        glass: _glass,
-        widthMm: _wMm,
-        heightMm: _hMm,
-        sashModes: List<int>.from(_sashModes),
-        sashManual: _sashManual,
-        secW: List<double>.from(_secW),
-        hinges: List<int>.from(_hinges),
-      );
-
-  /// Загрузить изделие в поля мастера.
-  void _restore(MeasureItem it) {
-    _picked = List<String>.from(it.path);
-    _multi = List<String>.from(it.multi);
-    _sizes = it.sizes;
-    _glass = it.glass;
-    _wMm = it.widthMm;
-    _hMm = it.heightMm;
-    _sashModes = List<int>.from(it.sashModes);
-    _sashManual = it.sashManual;
-    _secW = List<double>.from(it.secW);
-    _hinges = List<int>.from(it.hinges);
-  }
-
-  /// Сохранить текущее изделие в список: обновить правленое или добавить.
-  void _commitCurrent() {
-    final it = _snapshot();
-    if (_editing >= 0 && _editing < _items.length) {
-      _items[_editing] = it;
-    } else {
-      _items.add(it);
-      _editing = _items.length - 1;
-    }
-  }
-
-  /// Очистить поля мастера под следующее изделие.
-  void _clearCurrent() {
-    _picked = const [];
-    _multi = const [];
-    _sizes = const {};
-    _glass = -1;
-    _wMm = 0;
-    _hMm = 0;
-    _sashModes = const [];
-    _sashManual = 0;
-    _secW = const [];
-    _hinges = const [];
-  }
-
-  /// «+ ИЗДЕЛИЕ»: сохранить текущее, очистить поля, вернуться к дереву.
-  void _addItem() {
-    setState(() {
-      _commitCurrent();
-      _clearCurrent();
-      _editing = -1;
-      _step = 1;
-    });
-  }
-
-  /// Тап по карточке: править изделие.
-  void _editItem(int i) {
-    if (i < 0 || i >= _items.length) return;
-    setState(() {
-      _restore(_items[i]);
-      _editing = i;
-      _step = 3;
-    });
-  }
-
-  /// Крестик: удалить изделие.
-  void _removeItem(int i) {
-    if (i < 0 || i >= _items.length) return;
-    setState(() {
-      _items.removeAt(i);
-      if (_editing == i) {
-        _editing = -1;
-      } else if (_editing > i) {
-        _editing -= 1;
-      }
-    });
-  }
-
   // ─────────────── ШАГ 3: РАЗМЕРЫ ПО ПУНКТАМ ───────────────
   Widget _sizesStep() {
     return MeasureSizesView(
       items: _multi,
       balcony: _balcony,
-      onBack: () => setState(() => _step = 1),
+      onBack: () => setState(() => _step = 2),
       onDone: (mm) => setState(() {
         _sizes = mm;
-        _step = 3;
+        _step = 4;
       }),
     );
   }
@@ -627,11 +476,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           child: Row(
             children: [
               _GhostButton('НАЗАД', Icons.arrow_back_rounded,
-                  () => setState(() => _step = 2)),
+                  () => setState(() => _step = 1)),
               const SizedBox(width: 12),
               Expanded(
-                child: _GoldButton('СМЕТА', Icons.calculate_rounded,
-                    () => setState(() => _step = 4)),
+                child: _GoldButton('РАЗМЕРЫ', Icons.straighten_rounded,
+                    () => setState(() => _step = 3)),
               ),
             ],
           ),
@@ -659,11 +508,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return EstimateView(
       estimate: estimate,
       onBack: () => setState(() => _step = 3),
-      onNext: () => setState(() {
-        // Изделие готово — сохраняем его в список и идём к списку изделий.
-        _commitCurrent();
-        _step = 5;
-      }),
+      onNext: () => setState(() => _step = 5),
     );
   }
 
@@ -680,7 +525,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       addr: _addr.text,
       flat: _flat.text,
       floor: _floor.text,
-      items: _items,
       path: _picked,
       multi: _multi,
       sizes: _sizes,
@@ -693,7 +537,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             : List<int>.filled(_sashCount, 1)))
           kSashModeNames[m.clamp(0, kSashModeNames.length - 1)],
       ],
-      onBack: () => setState(() => _step = 5),
+      onBack: () => setState(() => _step = 4),
       onFinish: () {
         _saveRecord();
         widget.onFinish();
