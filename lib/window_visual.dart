@@ -1082,7 +1082,7 @@ class _GostPainter extends CustomPainter {
 
   // ─────────────── РАЗМЕРЫ ───────────────
   void _dimH(Canvas canvas, double x1, double x2, double y, String label,
-      {bool small = false, bool below = false}) {
+      {bool small = false, bool below = false, String? field}) {
     final p = _line(_ink, 0.9);
     canvas.drawLine(Offset(x1, y), Offset(x2, y), p);
     canvas.drawLine(Offset(x1, y - 4), Offset(x1, y + 4), p);
@@ -1094,11 +1094,12 @@ class _GostPainter extends CustomPainter {
       label,
       Offset((x1 + x2) / 2, y + (below ? 9 : -8)),
       size: small ? 7.5 : 9.5,
+      chip: field != null && tappable.contains(field),
     );
   }
 
   void _dimV(Canvas canvas, double y1, double y2, double x, String label,
-      {bool small = false, bool right = false}) {
+      {bool small = false, bool right = false, String? field}) {
     final p = _line(_ink, 0.9);
     canvas.drawLine(Offset(x, y1), Offset(x, y2), p);
     canvas.drawLine(Offset(x - 4, y1), Offset(x + 4, y1), p);
@@ -1106,7 +1107,8 @@ class _GostPainter extends CustomPainter {
     _arrowV(canvas, Offset(x, y1), -1);
     _arrowV(canvas, Offset(x, y2), 1);
     _text(canvas, label, Offset(x + (right ? 9 : -9), (y1 + y2) / 2),
-        size: small ? 7.5 : 9.5, vertical: true);
+        size: small ? 7.5 : 9.5, vertical: true,
+        chip: field != null && tappable.contains(field));
   }
 
   // ─────────────── ВЫНОСНЫЕ ЛИНИИ ───────────────
@@ -1681,7 +1683,7 @@ class _BalconyPainter extends CustomPainter {
 
   // ─────────────── РАЗМЕРЫ ───────────────
   void _dimH(Canvas canvas, double x1, double x2, double y, String label,
-      {bool small = false, bool below = false}) {
+      {bool small = false, bool below = false, String? field}) {
     final p = _line(_ink, 0.9);
     canvas.drawLine(Offset(x1, y), Offset(x2, y), p);
     canvas.drawLine(Offset(x1, y - 4), Offset(x1, y + 4), p);
@@ -1693,11 +1695,12 @@ class _BalconyPainter extends CustomPainter {
       label,
       Offset((x1 + x2) / 2, y + (below ? 9 : -8)),
       size: small ? 7.5 : 9.5,
+      chip: field != null && tappable.contains(field),
     );
   }
 
   void _dimV(Canvas canvas, double y1, double y2, double x, String label,
-      {bool small = false, bool right = false}) {
+      {bool small = false, bool right = false, String? field}) {
     final p = _line(_ink, 0.9);
     canvas.drawLine(Offset(x, y1), Offset(x, y2), p);
     canvas.drawLine(Offset(x - 4, y1), Offset(x + 4, y1), p);
@@ -1705,7 +1708,8 @@ class _BalconyPainter extends CustomPainter {
     _arrowV(canvas, Offset(x, y1), -1);
     _arrowV(canvas, Offset(x, y2), 1);
     _text(canvas, label, Offset(x + (right ? 9 : -9), (y1 + y2) / 2),
-        size: small ? 7.5 : 9.5, vertical: true);
+        size: small ? 7.5 : 9.5, vertical: true,
+        chip: field != null && tappable.contains(field));
   }
 
   // ─────────────── ВЫНОСНЫЕ ЛИНИИ ───────────────
