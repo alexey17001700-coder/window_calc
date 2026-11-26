@@ -866,19 +866,6 @@ class _GostPainter extends CustomPainter {
     canvas.drawLine(c, Offset(c.dx, c.dy + sy * d), p);
   }
 
-  // ─────────────── ШТРИХОВКА СТЕНЫ ───────────────
-  void _hatch(Canvas canvas, Rect r) {
-    canvas.save();
-    canvas.clipRect(r);
-    final p = Paint()
-      ..color = const Color(0xFF8FA3BC).withOpacity(0.55)
-      ..strokeWidth = 0.9;
-    for (double x = r.left - r.height; x < r.right + r.height; x += 7) {
-      canvas.drawLine(Offset(x, r.bottom), Offset(x + r.height, r.top), p);
-    }
-    canvas.restore();
-  }
-
   // ─────────────── ОБОЗНАЧЕНИЕ ОТКРЫВАНИЯ (ГОСТ) ───────────────
   void _openingMark(Canvas canvas, Rect g, int mode,
       {required bool hingeLeft}) {
