@@ -1247,6 +1247,7 @@ class _BalconyPainter extends CustomPainter {
     required this.doorKind,
     required this.winParts,
     required this.winCellModes,
+    this.winSectionWidths = const [],
     required this.widthMm,
     required this.heightMm,
     required this.winWidthMm,
