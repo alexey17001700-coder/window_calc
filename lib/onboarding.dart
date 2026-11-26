@@ -469,19 +469,24 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               children: [
                 _pickedBar(windowType, house),
                 const SizedBox(height: 12),
-                _sashControls(sashes),
-                const SizedBox(height: 12),
+                // У балконного блока — свой чертёж и свои кнопки (этап 3),
+                // панель створок обычного окна ему не нужна.
+                if (!_isBalcony) ...[
+                  _sashControls(sashes),
+                  const SizedBox(height: 12),
+                ],
                 WindowVisual(
-                  sashes: sashes,
+                  sashes: _isBalcony ? 1 : sashes,
                   arched: arched,
                   parts: _multi,
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
-                  sashModes: modes,
+                  sashModes: _isBalcony ? const <int>[1] : modes,
                   widthMm: _mmOf('ШИРИНА'),
                   heightMm: _mmOf('ВЫСОТА'),
                   sectionWidths: _secWidths,
                   hingeCounts: _hingeCounts,
+                  balcony: _isBalcony,
                   onSashTap: (i) => setState(() {
                     final m = List<int>.from(modes);
                     m[i] = (m[i] + 1) % kSashModeNames.length;
