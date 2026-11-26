@@ -39,9 +39,10 @@ class ScreenFlash extends StatefulWidget {
 
 class ScreenFlashState extends State<ScreenFlash>
     with SingleTickerProviderStateMixin {
+  /// Медленная волна: 2.6 с от нажатия до полного растворения.
   late final AnimationController _c;
 
-  /// Плавное расширение: мягкий разгон и торможение, без рывка.
+  /// Плавное расширение: мягкий разгон и очень мягкое торможение.
   late final Animation<double> _spread;
 
   /// Последняя точка касания (глобальные координаты).
@@ -54,8 +55,8 @@ class ScreenFlashState extends State<ScreenFlash>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1500));
-    _spread = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+        vsync: this, duration: const Duration(milliseconds: 2600));
+    _spread = CurvedAnimation(parent: _c, curve: Curves.easeOutSine);
   }
 
   @override
@@ -121,16 +122,16 @@ class ScreenFlashState extends State<ScreenFlash>
     final t = _spread.value; // плавное расширение
     final life = _c.value; // линейное время для затухания
 
-    // Затухание: мягко в начале, ещё мягче в конце — волна «растворяется».
-    final fade = (1 - life) * (1 - life) * (1 - life * 0.30);
+    // Растворение: мягко в начале, ровно в ноль в конце — без обрыва.
+    final fade = math.pow(1 - life, 2.2).toDouble() * (1 - 0.25 * life);
 
-    // Расширяющееся кольцо: от кнопки наружу.
-    final double r = 0.06 + t * 1.10;
-    const double w = 0.60; // широкая мягкая полоса — граней не видно
+    // Кольцо расходится от кнопки наружу.
+    final double r = 0.05 + t * 0.95;
+    const double w = 0.28; // широкая мягкая полоса — граней не видно
     final double a = (r - w).clamp(0.0, 1.0);
     final double b = (r + w).clamp(0.0, 1.0);
 
-    const int n = 24;
+    const int n = 28;
     final stops = <double>[];
     final colors = <Color>[];
     for (var i = 0; i <= n; i++) {
@@ -138,13 +139,14 @@ class ScreenFlashState extends State<ScreenFlash>
       final s = a + (b - a) * f;
       // Плавный колокол: 0 → 1 → 0, без ступенек и линий.
       final bell = 0.5 - 0.5 * math.cos(2 * math.pi * f);
+      final soft = math.pow(bell, 1.6).toDouble();
       stops.add(s);
       colors.add(
-          AppColors.gold.withOpacity((fade * bell * 0.46).clamp(0.0, 1.0)));
+          AppColors.gold.withOpacity((fade * soft * 0.40).clamp(0.0, 1.0)));
     }
 
-    // Мягкое ядро в точке старта — гаснет быстрее волны.
-    final core = (1 - life) * (1 - life) * 0.32;
+    // Мягкое ядро в точке старта — гаснет медленнее волны.
+    final core = math.pow(1 - life, 1.6).toDouble() * 0.30;
 
     return Stack(
       fit: StackFit.expand,
@@ -153,7 +155,7 @@ class ScreenFlashState extends State<ScreenFlash>
           decoration: BoxDecoration(
             gradient: RadialGradient(
               center: align,
-              radius: 2.9,
+              radius: 1.8,
               colors: colors,
               stops: stops,
             ),
@@ -164,7 +166,7 @@ class ScreenFlashState extends State<ScreenFlash>
             decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: align,
-                radius: 0.70,
+                radius: 0.35,
                 colors: [
                   AppColors.goldLight.withOpacity(core),
                   AppColors.gold.withOpacity(core * 0.40),
