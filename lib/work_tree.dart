@@ -70,13 +70,6 @@ const List<WorkNode> windowKinds = [
   WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
 ];
 
-const List<WorkNode> balconyBlockKinds = [
-  WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТЫЙ', houseTypes),
-  WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТЫЙ', houseTypes),
-  WorkNode(Icons.door_front_door_rounded, 'С ДВЕРЬЮ', houseTypes),
-  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВОЙ', houseTypes),
-];
-
 const List<WorkNode> balconyKinds = [
   WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', houseTypes),
   WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', houseTypes),
