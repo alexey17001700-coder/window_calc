@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.4.76+141
+
+### СБОРКА: автоповтор при сбое репозиториев Maven (сбой сети, а не кода)
+
+**Ошибка из Actions:**
+
+```
+Execution failed for task ':gradle:compileGroovy'.
+> Could not resolve all files for configuration ':gradle:compileClasspath'.
+   > Could not find com.squareup:javawriter:2.5.0.
+   > Could not find org.ow2.asm:asm:9.1.
+     Required by: project :gradle > com.android.tools.build:gradle:7.3.0 > ...
+```
+
+**Почему это НЕ ошибка кода.** `project :gradle` — это встроенная сборка
+Gradle-плагина Flutter из самого SDK (`packages/flutter_tools/gradle`). Она
+тянет AGP 7.3.0, а тот — `javawriter` и `asm`. Ровно эти же артефакты успешно
+скачались в **предыдущем** прогоне (3.4.73+138): тогда сборка прошла Gradle
+и упала уже на Dart-компиляции (`_winSecWidths`). Значит репозитории Maven
+в этот раз отдали 404/таймаут — **сбой сети на раннере**, а не правка проекта.
+Ни `lib/`, ни `pubspec.yaml`, ни AGP/Gradle/Kotlin не менялись.
+
+**Что сделано (`.github/workflows/build.yml`):**
+
+- шаг `flutter build apk --release` заменён на **шаг с автоповтором** — до
+  **3 попыток** сборки
+- между попытками чистится **кэш модулей Gradle** (`~/.gradle/caches/modules-2`):
+  Gradle запоминает «не найдено» на сутки, без очистки повтор упал бы с тем же
+  текстом
+- пауза 20 с перед повтором, номер попытки печатается в лог
+
+**Не тронуто:** Dart-код, чертёж, дерево, мастер, смета, история, версии
+плагинов, AGP 8.7.0, Gradle 8.9, Kotlin 1.9.24, подпись APK.
+
+`pubspec.yaml`: **3.4.75+140 → 3.4.76+141** — новый тег, свежий прогон.
+
 ## 3.4.75+140
 
 ### УБРАНА ШТРИХОВКА НА ЧЕРТЕЖАХ (везде)
