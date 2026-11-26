@@ -355,6 +355,7 @@ class _HistoryViewState extends State<HistoryView> {
         children: [
           GestureDetector(
             onTap: () {
+              flashScreen();
               if (widget.onBack != null) {
                 widget.onBack!.call();
               } else {
