@@ -665,7 +665,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ? glassTypes[_glass].title
         : '';
     final windowType = _picked.length > 2 ? _picked[2] : '';
-    final w = _mmOf('ШИРИНА');
+    final w = _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА');
     final h = _mmOf('ВЫСОТА');
     final est = buildEstimate(
       widthMm: w,
