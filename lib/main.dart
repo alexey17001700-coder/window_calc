@@ -90,6 +90,8 @@ class _SplashScreenState extends State<SplashScreen>
   bool _busy = false;
   bool _checking = false;
   String? _updateVersion;
+  int _capIndex = 0;
+  Timer? _capTimer;
 
   @override
   void initState() {
