@@ -98,6 +98,8 @@ class _SplashScreenState extends State<SplashScreen>
   int _capIndex = 0;
   Timer? _capTimer;
   final GlobalKey<ScreenFlashState> _flashKey = GlobalKey<ScreenFlashState>();
+  final GlobalKey _startBtnKey = GlobalKey();
+  final GlobalKey _checkBtnKey = GlobalKey();
 
   @override
   void initState() {
