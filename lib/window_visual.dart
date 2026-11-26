@@ -1644,9 +1644,18 @@ class _BalconyPainter extends CustomPainter {
       old.winWidthMm != winWidthMm ||
       old.winHeightMm != winHeightMm ||
       old.doorWidthMm != doorWidthMm ||
-      !_sameInt(old.winCellModes, winCellModes);
+      !_sameInt(old.winCellModes, winCellModes) ||
+      !_sameD(old.winSectionWidths, winSectionWidths);
 
   bool _sameInt(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  bool _sameD(List<double> a, List<double> b) {
     if (a.length != b.length) return false;
     for (var i = 0; i < a.length; i++) {
       if (a[i] != b[i]) return false;
