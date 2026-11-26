@@ -114,9 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final h = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: AppColors.navy900,
-      body: ScreenFlash(
-        key: appFlashKey,
-        child: Stack(
+      body: Stack(
         children: [
           const Positioned.fill(child: _PremiumBg()),
           SafeArea(
