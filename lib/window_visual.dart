@@ -1457,7 +1457,7 @@ class _BalconyPainter extends CustomPainter {
     final dimBot = g.wall.bottom + 15;
     _dimH(canvas, g.winOuter.left, g.winOuter.right, dimBot,
         winWidthMm > 0 ? '$winWidthMm' : '?',
-        small: true, below: true);
+        small: true, below: true, field: 'ШИРИНА ОКНА');
     _extV(canvas, g.winOuter.left, g.winOuter.bottom, dimBot);
     _extV(canvas, g.winOuter.right, g.winOuter.bottom, dimBot);
 
