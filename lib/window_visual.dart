@@ -803,7 +803,7 @@ class _GostPainter extends CustomPainter {
     // Габарит по высоте — слева, с выносными линиями.
     final dimLeft = g.wall.left - 17;
     _dimV(canvas, g.opening.top, g.opening.bottom, dimLeft,
-        heightMm > 0 ? '$heightMm' : '?');
+        heightMm > 0 ? '$heightMm' : '?', field: 'ВЫСОТА');
     _extH(canvas, g.opening.top, g.opening.left, dimLeft);
     _extH(canvas, g.opening.bottom, g.opening.left, dimLeft);
 
