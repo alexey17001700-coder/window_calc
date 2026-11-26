@@ -699,7 +699,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      body: Column(
+      body: ScreenFlash(
+        key: _flashKey,
+        child: Column(
         children: [
           _header(dark),
           Expanded(
