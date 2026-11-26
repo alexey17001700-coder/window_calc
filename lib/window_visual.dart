@@ -1259,6 +1259,7 @@ class _BalconyPainter extends CustomPainter {
   final int doorKind;
   final int winParts;
   final List<int> winCellModes;
+  final List<double> winSectionWidths;
   final int widthMm;
   final int heightMm;
   final int winWidthMm;
