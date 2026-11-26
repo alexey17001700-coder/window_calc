@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.4.73+138
+
+### ИСПРАВЛЕНА СБОРКА APK: не хватало поля `_winSecW`
+
+**Ошибка из Actions:**
+
+```
+lib/onboarding.dart:570:37: Error: The getter '_winSecWidths' isn't defined
+for the class '_OnboardingScreenState'.
+                  winSectionWidths: _winSecWidths,
+```
+
+**Причина:** в `_visualStepOld()` в чертёж передавался `winSectionWidths:
+_winSecWidths`, но в состоянии мастера такого геттера **нет** — доли ширины
+частей оконной части балконного блока хранятся в поле **`_winSecW`**,
+а нормализованные доли даёт геттер **`_winSecWidthsNorm`**.
+
+**Исправление (`lib/onboarding.dart`, одна строка):**
+
+- `winSectionWidths: _winSecWidths` → **`winSectionWidths: _winSecW`**
+  (чертёж сам нормализует доли через `_normWidths`)
+
+**Предупреждение NDK (не ошибка):** Gradle пишет, что плагины
+(`image_picker_android`, `open_filex`, `share_plus`, `package_info_plus`,
+`path_provider_android`, `shared_preferences_android`,
+`flutter_plugin_android_lifecycle`) ждут **NDK 27.0.12077973**, а проект
+собран на **23.1.7779620**. Это **предупреждение**, сборку оно не роняет —
+компиляция остановилась именно на Dart-ошибке выше.
+
+**Не тронуто:** чертёж балконного блока, кнопки (зеркало · вид двери · состав
+окна · ширина частей), треугольники П и О, размеры тапом по цифре, автозазор,
+обычное окно и его створки, дерево и искры, мастер, смета, замерный лист,
+история, фон.
+
+`pubspec.yaml`: **3.4.72+137 → 3.4.73+138** — новый тег, чистая сборка.
+
 ## 3.4.72+137
 
 ### ИСПРАВЛЕНА СБОРКА APK: лишние параметры в `_GostPainter`
