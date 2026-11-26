@@ -1313,7 +1313,7 @@ class _StepBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        flashScreen();
+        flashScreen(flashOriginOf(context));
         onTap();
       },
       behavior: HitTestBehavior.opaque,
