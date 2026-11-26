@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.4.78+143
+
+### СБОРКА: все репозитории перенесены в `settings.gradle` + зеркала для `.gradle.kts`
+
+**Ошибка из Actions:**
+
+```
+Execution failed for task ':gradle:compileGroovy'.
+> Could not find com.squareup:javawriter:2.5.0.
+> Could not find org.ow2.asm:asm:9.1.
+  Required by: project :gradle > com.android.tools.build:gradle:7.3.0 > ...
+```
+
+**Что сделано (`.github/workflows/build.yml`):**
+
+- **новый шаг «Repositories → settings.gradle (PREFER_SETTINGS)»** — по схеме Босса:
+  - в `pluginManagement.repositories` перед `mavenCentral()` вставляются три зеркала
+    (`maven.aliyun.com/repository/central` · `maven-central.storage-download.googleapis.com/maven2`
+    · `repo1.maven.org/maven2`)
+  - добавляется блок **`dependencyResolutionManagement`** с
+    `repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)` и теми же зеркалами —
+    вставляется **перед `include`**, чтобы Gradle не ругался на порядок
+  - из **`android/build.gradle`** блок `allprojects { … }` с кастомными maven
+    **удаляется** (подсчёт скобок, не regex — не режет лишнее)
+- **шаг «Maven Central mirrors» усилен:**
+  - `find` теперь берёт и **`.gradle.kts`** — раньше искались только `*.gradle`,
+    и если сборка плагина описана в Kotlin DSL, правка **до неё не доходила**
+  - если `mavenCentral()` в файле нет — блок `repositories` **дописывается**
+    (для `build.gradle` · `build.gradle.kts` · `settings.gradle` · `settings.gradle.kts`)
+  - проверка `grep -rq aliyun` по папке плагина осталась — молчаливого промаха нет
+
+**Не тронуто:** Dart-код, чертёж, дерево, мастер, смета, история, версии плагинов,
+AGP 8.7.0, Gradle 8.9, Kotlin 1.9.24, подпись APK, автоповтор сборки.
+
+`pubspec.yaml`: **3.4.77+142 → 3.4.78+143** — новый тег, свежий прогон.
+
 ## 3.4.77+142
 
 ### СБОРКА: зеркала Maven Central — обход «Could not find javawriter / asm»
