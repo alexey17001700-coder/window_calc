@@ -223,7 +223,11 @@ class _WindowVisualState extends State<WindowVisual> {
                   final g = _balconyGeo(
                       size, widget.doorOnLeft, _bWinFrac, _bWinHFrac);
                   final p = d.localPosition;
-                  if (g.winOuter.inflate(3).contains(p)) {
+                  final f = _dimHit(size, p);
+                  if (f != null) {
+                    HapticFeedback.selectionClick();
+                    widget.onDimTap?.call(f);
+                  } else if (g.winOuter.inflate(3).contains(p)) {
                     HapticFeedback.selectionClick();
                     widget.onWinTap?.call();
                   } else if (g.doorOuter.inflate(3).contains(p)) {
