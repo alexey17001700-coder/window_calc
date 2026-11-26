@@ -443,10 +443,15 @@ class _WorkTreeViewState extends State<WorkTreeView>
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      // ── ЛИНИИ-ВЕТКИ ──
+                      // ── ЛИНИИ-ВЕТКИ + ИСКРЫ ──
                       Positioned.fill(
                         child: IgnorePointer(
-                          child: CustomPaint(painter: _EdgePainter(edges)),
+                          child: AnimatedBuilder(
+                            animation: _spark,
+                            builder: (_, __) => CustomPaint(
+                              painter: _EdgePainter(edges, _spark.value),
+                            ),
+                          ),
                         ),
                       ),
                       // ── КАРТОЧКИ ВСЕХ УРОВНЕЙ ──
