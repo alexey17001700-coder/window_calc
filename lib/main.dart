@@ -65,6 +65,10 @@ class _AlmasAppState extends State<AlmasApp> {
       darkTheme: AppTheme.dark(),
       themeMode: _mode,
       navigatorKey: appNavigatorKey,
+      builder: (context, child) => ScreenFlash(
+        key: appFlashKey,
+        child: child ?? const SizedBox.shrink(),
+      ),
       home: SplashScreen(onToggleTheme: toggleTheme),
     );
   }
