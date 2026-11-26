@@ -1166,6 +1166,17 @@ class _GostPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
+    // ЗОЛОТАЯ ПЛАШКА под размерным числом — подсказка «по цифре можно тапнуть».
+    if (chip) {
+      final bw = (vertical ? tp.height : tp.width) + 11;
+      final bh = (vertical ? tp.width : tp.height) + 6;
+      final rr = RRect.fromRectAndRadius(
+        Rect.fromCenter(center: center, width: bw, height: bh),
+        const Radius.circular(4),
+      );
+      canvas.drawRRect(rr, Paint()..color = const Color(0xFFFFF4D6));
+      canvas.drawRRect(rr, _line(AppColors.gold, 1.0));
+    }
     if (vertical) {
       canvas.save();
       canvas.translate(center.dx, center.dy);
@@ -1766,6 +1777,17 @@ class _BalconyPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
+    // ЗОЛОТАЯ ПЛАШКА под размерным числом — подсказка «по цифре можно тапнуть».
+    if (chip) {
+      final bw = (vertical ? tp.height : tp.width) + 11;
+      final bh = (vertical ? tp.width : tp.height) + 6;
+      final rr = RRect.fromRectAndRadius(
+        Rect.fromCenter(center: center, width: bw, height: bh),
+        const Radius.circular(4),
+      );
+      canvas.drawRRect(rr, Paint()..color = const Color(0xFFFFF4D6));
+      canvas.drawRRect(rr, _line(AppColors.gold, 1.0));
+    }
     if (vertical) {
       canvas.save();
       canvas.translate(center.dx, center.dy);
