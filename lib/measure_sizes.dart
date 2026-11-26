@@ -704,7 +704,7 @@ class _SizeGhostState extends State<_SizeGhost> {
       onTapUp: (_) => setState(() => _down = false),
       onTapCancel: () => setState(() => _down = false),
       onTap: () {
-        flashScreen();
+        flashScreen(flashOriginOf(context));
         widget.onTap();
       },
       child: AnimatedScale(
