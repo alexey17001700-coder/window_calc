@@ -293,6 +293,10 @@ class _WorkTreeViewState extends State<WorkTreeView>
   void _select(int level, int index) {
     final node = _nodeAt(level, index);
 
+    // Искры побежали заново — от нажатой карточки по её линиям.
+    _spark.value = 0;
+    _spark.repeat();
+
     // ── ФИНАЛЬНЫЙ УРОВЕНЬ (комплектация): мультивыбор ──
     if (node.children.isEmpty) {
       setState(() {
