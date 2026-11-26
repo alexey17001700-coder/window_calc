@@ -242,21 +242,23 @@ class _WindowVisualState extends State<WindowVisual> {
         ),
         const SizedBox(height: 10),
 
-        // ── ОБОЗНАЧЕНИЯ СТВОРОК ──
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            for (var i = 0; i < widget.sashes; i++)
-              _SashChip(
-                index: i,
-                name: kSashModeShort[modes[i].clamp(0, 3)],
-                selected: _sel == i,
-                onTap: () => _tap(i),
-              ),
-          ],
-        ),
-        const SizedBox(height: 16),
+        // ── ОБОЗНАЧЕНИЯ СТВОРОК (у балконного блока — свои кнопки) ──
+        if (!widget.balcony) ...[
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (var i = 0; i < widget.sashes; i++)
+                _SashChip(
+                  index: i,
+                  name: kSashModeShort[modes[i].clamp(0, 3)],
+                  selected: _sel == i,
+                  onTap: () => _tap(i),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
 
         // ── ПОДПИСЬ ──
         Row(
