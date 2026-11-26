@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'price_estimate.dart';
 import 'theme.dart';
+import 'screen_flash.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
 ///  ИСТОРИЯ ЗАМЕРОВ И БАЗА КЛИЕНТОВ  ·  v3.4.28
