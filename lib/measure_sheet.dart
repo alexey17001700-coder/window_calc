@@ -564,7 +564,10 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   // ─────────────────────────── КОПИРОВАТЬ ───────────────────────────
   Widget _sheetButton() {
     return GestureDetector(
-      onTap: _copy,
+      onTap: () {
+        flashScreen();
+        _copy();
+      },
       child: Container(
         width: double.infinity,
         height: 46,
