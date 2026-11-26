@@ -1096,3 +1096,510 @@ class _GostPainter extends CustomPainter {
     return true;
   }
 }
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ГЕОМЕТРИЯ БАЛКОННОГО БЛОКА
+///  Проём Г-образный: дверь во всю высоту + окно сверху.
+///  Под окном — простенок (стена), а не стекло.
+/// ═══════════════════════════════════════════════════════════════════
+class _BalconyGeo {
+  const _BalconyGeo({
+    required this.wall,
+    required this.opening,
+    required this.winOuter,
+    required this.winInner,
+    required this.doorOuter,
+    required this.doorInner,
+    required this.voidRect,
+    required this.openPath,
+  });
+  final Rect wall;
+  final Rect opening;
+  final Rect winOuter;
+  final Rect winInner;
+  final Rect doorOuter;
+  final Rect doorInner;
+  final Rect voidRect;
+  final Path openPath;
+}
+
+_BalconyGeo _balconyGeo(
+    Size s, bool doorOnLeft, double winFrac, double winHFrac) {
+  final wall = Rect.fromLTWH(
+    44,
+    30,
+    math.max(20, s.width - 62),
+    math.max(20, s.height - 70),
+  );
+  final opening = wall.deflate(11);
+  final winW = opening.width * winFrac;
+  final winH = opening.height * winHFrac;
+  final Rect winOuter;
+  final Rect doorOuter;
+  final Rect voidRect;
+  if (doorOnLeft) {
+    doorOuter = Rect.fromLTWH(
+        opening.left, opening.top, opening.width - winW, opening.height);
+    winOuter = Rect.fromLTWH(
+        opening.left + doorOuter.width, opening.top, winW, winH);
+    voidRect = Rect.fromLTWH(opening.left + doorOuter.width,
+        opening.top + winH, winW, opening.height - winH);
+  } else {
+    winOuter = Rect.fromLTWH(opening.left, opening.top, winW, winH);
+    doorOuter = Rect.fromLTWH(
+        opening.left + winW, opening.top, opening.width - winW, opening.height);
+    voidRect = Rect.fromLTWH(
+        opening.left, opening.top + winH, winW, opening.height - winH);
+  }
+  final Path openPath;
+  if (doorOnLeft) {
+    openPath = Path()
+      ..moveTo(opening.left, opening.top)
+      ..lineTo(opening.right, opening.top)
+      ..lineTo(opening.right, opening.top + winH)
+      ..lineTo(opening.left + doorOuter.width, opening.top + winH)
+      ..lineTo(opening.left + doorOuter.width, opening.bottom)
+      ..lineTo(opening.left, opening.bottom)
+      ..close();
+  } else {
+    openPath = Path()
+      ..moveTo(opening.left, opening.top)
+      ..lineTo(opening.right, opening.top)
+      ..lineTo(opening.right, opening.bottom)
+      ..lineTo(opening.left + winW, opening.bottom)
+      ..lineTo(opening.left + winW, opening.top + winH)
+      ..lineTo(opening.left, opening.top + winH)
+      ..close();
+  }
+  return _BalconyGeo(
+    wall: wall,
+    opening: opening,
+    winOuter: winOuter,
+    winInner: winOuter.deflate(5),
+    doorOuter: doorOuter,
+    doorInner: doorOuter.deflate(5),
+    voidRect: voidRect,
+    openPath: openPath,
+  );
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ХУДОЖНИК БАЛКОННОГО БЛОКА · v3.4.70
+///   • дверь — во всю высоту проёма, окно — сверху, стык боком и по верху;
+///   • под окном — простенок (стена), а не стекло;
+///   • дверь: стекло в пол / стекло + белый сэндвич / стекло + стекло;
+///   • окно: 1 или 2 части (глухарь / глухарь + створка / створка + створка);
+///   • размеры: габарит, высота двери, ширина и высота окна,
+///     и АВТО-зазор от низа окна до пола (только показ, не менять).
+/// ═══════════════════════════════════════════════════════════════════
+class _BalconyPainter extends CustomPainter {
+  _BalconyPainter({
+    required this.doorOnLeft,
+    required this.doorKind,
+    required this.winParts,
+    required this.winCellModes,
+    required this.widthMm,
+    required this.heightMm,
+    required this.winWidthMm,
+    required this.winHeightMm,
+    required this.doorWidthMm,
+  });
+
+  final bool doorOnLeft;
+  final int doorKind;
+  final int winParts;
+  final List<int> winCellModes;
+  final int widthMm;
+  final int heightMm;
+  final int winWidthMm;
+  final int winHeightMm;
+  final int doorWidthMm;
+
+  static const _ink = Color(0xFF16233A);
+  static const _paper = Color(0xFFF7F9FC);
+  static const _axis = Color(0xFF5B6B80);
+
+  /// Доля ширины окна в общем габарите.
+  double get _winFrac {
+    if (winWidthMm > 0 && doorWidthMm > 0) {
+      return winWidthMm / (winWidthMm + doorWidthMm);
+    }
+    return 0.58;
+  }
+
+  /// Доля высоты окна в высоте двери.
+  double get _winHFrac {
+    if (winHeightMm > 0 && heightMm > 0) {
+      return (winHeightMm / heightMm).clamp(0.25, 0.85);
+    }
+    return 0.62;
+  }
+
+  Paint _line(Color c, double w) => Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = w
+    ..color = c;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final g = _balconyGeo(size, doorOnLeft, _winFrac, _winHFrac);
+
+    // ── ЛИСТ ──
+    final sheet = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(14),
+    );
+    canvas.drawRRect(sheet, Paint()..color = _paper);
+    canvas.drawRRect(sheet, _line(const Color(0xFFC9D4E2), 1));
+
+    // ── СТЕНА ──
+    _hatch(canvas, g.wall);
+    canvas.drawRect(g.wall, _line(_ink, 1.2));
+
+    // ── ПРОСТЕНОК ПОД ОКНОМ (стена, не стекло) ──
+    _hatch(canvas, g.voidRect);
+    canvas.drawRect(g.voidRect, _line(_ink, 1.1));
+
+    // ── ПРОЁМ (Г-образный) ──
+    canvas.drawPath(g.openPath, _line(_ink, 1.3));
+
+    // ── РАМЫ ──
+    canvas.drawRect(g.winOuter, _line(_ink, 1.2));
+    canvas.drawRect(g.winInner, _line(_ink, 1.0));
+    canvas.drawRect(g.doorOuter, _line(_ink, 1.2));
+    canvas.drawRect(g.doorInner, _line(_ink, 1.0));
+
+    // ── ОКОННАЯ ЧАСТЬ ──
+    _windowCells(canvas, g);
+
+    // ── ДВЕРЬ ──
+    _door(canvas, g);
+
+    // ── ОСЕВЫЕ ──
+    _axisV(canvas, g.doorOuter.center.dx, g.wall.top - 18, g.wall.bottom + 18);
+    _axisH(canvas, g.winOuter.center.dy, g.wall.left - 18, g.wall.right + 18);
+
+    // ── УГЛОВЫЕ ВЫНОСКИ 90° ──
+    _corner90(canvas, g.opening.topLeft, 1, 1);
+    _corner90(canvas, g.opening.topRight, -1, 1);
+    _corner90(canvas, g.opening.bottomLeft, 1, -1);
+    _corner90(canvas, g.opening.bottomRight, -1, -1);
+
+    // ── РАЗМЕРЫ ──
+    final winOnRight = doorOnLeft;
+
+    // габарит по ширине — сверху
+    final dimTop = g.wall.top - 15;
+    _dimH(canvas, g.opening.left, g.opening.right, dimTop,
+        widthMm > 0 ? '$widthMm' : '?');
+    _extV(canvas, g.opening.left, g.opening.top, dimTop);
+    _extV(canvas, g.opening.right, g.opening.top, dimTop);
+
+    // высота двери — на стороне двери
+    final doorX = winOnRight ? g.wall.left - 17 : g.wall.right + 17;
+    final doorEdge = winOnRight ? g.doorOuter.left : g.doorOuter.right;
+    _dimV(canvas, g.doorOuter.top, g.doorOuter.bottom, doorX,
+        heightMm > 0 ? '$heightMm' : '?');
+    _extH(canvas, g.doorOuter.top, doorEdge, doorX);
+    _extH(canvas, g.doorOuter.bottom, doorEdge, doorX);
+
+    // высота окна и АВТО-зазор — на стороне окна
+    final winX = winOnRight ? g.wall.right + 17 : g.wall.left - 17;
+    final winEdge = winOnRight ? g.winOuter.right : g.winOuter.left;
+    _dimV(canvas, g.winOuter.top, g.winOuter.bottom, winX,
+        winHeightMm > 0 ? '$winHeightMm' : '?',
+        small: true, right: winOnRight);
+    _extH(canvas, g.winOuter.top, winEdge, winX);
+    _extH(canvas, g.winOuter.bottom, winEdge, winX);
+
+    final gap = (heightMm > 0 && winHeightMm > 0) ? heightMm - winHeightMm : 0;
+    _dimV(canvas, g.winOuter.bottom, g.opening.bottom, winX,
+        gap > 0 ? '$gap' : '?',
+        small: true, right: winOnRight);
+    _extH(canvas, g.opening.bottom, winEdge, winX);
+
+    // ширина окна и ширина двери — снизу
+    final dimBot = g.wall.bottom + 15;
+    _dimH(canvas, g.winOuter.left, g.winOuter.right, dimBot,
+        winWidthMm > 0 ? '$winWidthMm' : '?',
+        small: true, below: true);
+    _extV(canvas, g.winOuter.left, g.winOuter.bottom, dimBot);
+    _extV(canvas, g.winOuter.right, g.winOuter.bottom, dimBot);
+
+    _dimH(canvas, g.doorOuter.left, g.doorOuter.right, dimBot,
+        doorWidthMm > 0 ? '$doorWidthMm' : '?',
+        small: true, below: true);
+    _extV(canvas, g.doorOuter.left, g.opening.bottom, dimBot);
+    _extV(canvas, g.doorOuter.right, g.opening.bottom, dimBot);
+
+    // ── ПОДПИСЬ ЛИСТА ──
+    _text(canvas, 'РАЗМЕРЫ В ММ', Offset(g.wall.left, size.height - 6),
+        size: 7.5, color: const Color(0xFF7E93AC), alignLeft: true);
+  }
+
+  // ─────────────── ОКОННАЯ ЧАСТЬ (1 или 2 части) ───────────────
+  void _windowCells(Canvas canvas, _BalconyGeo g) {
+    final n = winParts.clamp(1, 2);
+    final rects = _sashRects(g.winInner, n, const []);
+    for (var i = 0; i < rects.length; i++) {
+      final o = rects[i].deflate(2.5);
+      canvas.drawRect(o, _line(_ink, 1.1));
+      final gl = o.deflate(3.5);
+      canvas.drawRect(gl, _line(_ink, 0.9));
+      final mode = i < winCellModes.length ? winCellModes[i].clamp(0, 3) : 0;
+      if (mode != 0) {
+        _openingMark(canvas, gl, mode, hingeLeft: i == 0);
+        _handle(canvas, o, hingeLeft: i == 0);
+      }
+    }
+  }
+
+  // ─────────────── БАЛКОННАЯ ДВЕРЬ ───────────────
+  void _door(Canvas canvas, _BalconyGeo g) {
+    final inner = g.doorInner;
+    final glass = inner.deflate(3.5);
+    final kind = doorKind.clamp(0, 2);
+
+    // 0 — стекло во всю дверь
+    if (kind == 0) {
+      canvas.drawRect(glass, _line(_ink, 0.9));
+      return;
+    }
+
+    final splitY = inner.top + inner.height * 0.62;
+    final top = Rect.fromLTWH(
+        glass.left, glass.top, glass.width, math.max(2, splitY - glass.top));
+    final bot = Rect.fromLTWH(
+        glass.left, splitY, glass.width, math.max(2, glass.bottom - splitY));
+
+    // верх — стекло
+    canvas.drawRect(top, _line(_ink, 0.9));
+
+    // низ — белый сэндвич (1) или стекло (2)
+    if (kind == 1) {
+      canvas.drawRect(bot, Paint()..color = const Color(0xFFEDF1F7));
+      _sandwich(canvas, bot);
+    }
+    canvas.drawRect(bot, _line(_ink, 0.9));
+  }
+
+  // ─────────────── ШТРИХОВКА СЭНДВИЧА ───────────────
+  void _sandwich(Canvas canvas, Rect r) {
+    canvas.save();
+    canvas.clipRect(r);
+    final p = Paint()
+      ..color = const Color(0xFF9FB0C6).withOpacity(0.55)
+      ..strokeWidth = 0.8;
+    for (double x = r.left - r.height; x < r.right + r.height; x += 6) {
+      canvas.drawLine(Offset(x, r.bottom), Offset(x + r.height, r.top), p);
+    }
+    canvas.restore();
+  }
+
+  // ─────────────── РУЧКА + ПЕТЛИ СТВОРКИ ОКНА ───────────────
+  void _handle(Canvas canvas, Rect o, {required bool hingeLeft}) {
+    final ink = Paint()..color = _ink;
+    final hx = hingeLeft ? o.left : o.right - 3;
+    for (final t in const [0.10, 0.90]) {
+      canvas.drawRect(Rect.fromLTWH(hx, o.top + o.height * t - 5, 3, 10), ink);
+    }
+    final rx = hingeLeft ? o.right - 5.4 : o.left + 1.6;
+    canvas.drawRect(Rect.fromLTWH(rx, o.center.dy - 4, 3.8, 8), ink);
+    canvas.drawRect(Rect.fromLTWH(rx, o.center.dy - 7.5, 2.2, 15), ink);
+  }
+
+  // ─────────────── ОБОЗНАЧЕНИЕ ОТКРЫВАНИЯ (ГОСТ) ───────────────
+  void _openingMark(Canvas canvas, Rect g, int mode,
+      {required bool hingeLeft}) {
+    final p = _line(_ink, 1.2);
+    final cy = g.center.dy;
+
+    if (mode == 1 || mode == 2) {
+      final h = g.width * 0.60;
+      final half = g.height * 0.24;
+      final Path t;
+      if (hingeLeft) {
+        t = Path()
+          ..moveTo(g.right - 3, cy)
+          ..lineTo(g.right - 3 - h, cy - half)
+          ..lineTo(g.right - 3 - h, cy + half)
+          ..close();
+      } else {
+        t = Path()
+          ..moveTo(g.left + 3, cy)
+          ..lineTo(g.left + 3 + h, cy - half)
+          ..lineTo(g.left + 3 + h, cy + half)
+          ..close();
+      }
+      canvas.drawPath(t, p);
+    }
+
+    if (mode == 2 || mode == 3) {
+      final half = g.width * 0.22;
+      final t = Path()
+        ..moveTo(g.center.dx, g.top + 3)
+        ..lineTo(g.center.dx - half, g.bottom - 3)
+        ..lineTo(g.center.dx + half, g.bottom - 3)
+        ..close();
+      canvas.drawPath(t, p);
+    }
+  }
+
+  // ─────────────── ОСЕВАЯ ЛИНИЯ (штрихпунктир) ───────────────
+  void _axisV(Canvas canvas, double x, double y1, double y2) =>
+      _dashDot(canvas, Offset(x, y1), Offset(x, y2));
+
+  void _axisH(Canvas canvas, double y, double x1, double x2) =>
+      _dashDot(canvas, Offset(x1, y), Offset(x2, y));
+
+  void _dashDot(Canvas canvas, Offset a, Offset b) {
+    final total = (b - a).distance;
+    if (total <= 0) return;
+    final dir = (b - a) / total;
+    final p = _line(_axis, 0.8);
+    double t = 0;
+    while (t < total) {
+      final dash = math.min(9.0, total - t);
+      canvas.drawLine(a + dir * t, a + dir * (t + dash), p);
+      t += dash + 3;
+      if (t >= total) break;
+      final dot = math.min(1.6, total - t);
+      canvas.drawLine(a + dir * t, a + dir * (t + dot), p);
+      t += dot + 3;
+    }
+  }
+
+  // ─────────────── УГЛОВАЯ ВЫНОСКА 90° ───────────────
+  void _corner90(Canvas canvas, Offset c, int sx, int sy) {
+    const d = 9.0;
+    final p = _line(_ink, 0.9);
+    canvas.drawLine(c, Offset(c.dx + sx * d, c.dy), p);
+    canvas.drawLine(c, Offset(c.dx, c.dy + sy * d), p);
+  }
+
+  // ─────────────── ШТРИХОВКА СТЕНЫ ───────────────
+  void _hatch(Canvas canvas, Rect r) {
+    canvas.save();
+    canvas.clipRect(r);
+    final p = Paint()
+      ..color = const Color(0xFF8FA3BC).withOpacity(0.55)
+      ..strokeWidth = 0.9;
+    for (double x = r.left - r.height; x < r.right + r.height; x += 7) {
+      canvas.drawLine(Offset(x, r.bottom), Offset(x + r.height, r.top), p);
+    }
+    canvas.restore();
+  }
+
+  // ─────────────── РАЗМЕРЫ ───────────────
+  void _dimH(Canvas canvas, double x1, double x2, double y, String label,
+      {bool small = false, bool below = false}) {
+    final p = _line(_ink, 0.9);
+    canvas.drawLine(Offset(x1, y), Offset(x2, y), p);
+    canvas.drawLine(Offset(x1, y - 4), Offset(x1, y + 4), p);
+    canvas.drawLine(Offset(x2, y - 4), Offset(x2, y + 4), p);
+    _arrow(canvas, Offset(x1, y), -1);
+    _arrow(canvas, Offset(x2, y), 1);
+    _text(
+      canvas,
+      label,
+      Offset((x1 + x2) / 2, y + (below ? 9 : -8)),
+      size: small ? 7.5 : 9.5,
+    );
+  }
+
+  void _dimV(Canvas canvas, double y1, double y2, double x, String label,
+      {bool small = false, bool right = false}) {
+    final p = _line(_ink, 0.9);
+    canvas.drawLine(Offset(x, y1), Offset(x, y2), p);
+    canvas.drawLine(Offset(x - 4, y1), Offset(x + 4, y1), p);
+    canvas.drawLine(Offset(x - 4, y2), Offset(x + 4, y2), p);
+    _arrowV(canvas, Offset(x, y1), -1);
+    _arrowV(canvas, Offset(x, y2), 1);
+    _text(canvas, label, Offset(x + (right ? 9 : -9), (y1 + y2) / 2),
+        size: small ? 7.5 : 9.5, vertical: true);
+  }
+
+  // ─────────────── ВЫНОСНЫЕ ЛИНИИ ───────────────
+  void _extV(Canvas canvas, double x, double fromY, double toY) {
+    final p = _line(const Color(0xFF8FA3BC), 0.7);
+    final dir = toY < fromY ? -1.0 : 1.0;
+    canvas.drawLine(Offset(x, fromY), Offset(x, toY + dir * 3), p);
+  }
+
+  void _extH(Canvas canvas, double y, double fromX, double toX) {
+    final p = _line(const Color(0xFF8FA3BC), 0.7);
+    final dir = toX < fromX ? -1.0 : 1.0;
+    canvas.drawLine(Offset(fromX, y), Offset(toX + dir * 3, y), p);
+  }
+
+  void _arrow(Canvas canvas, Offset tip, int dir) {
+    canvas.drawPath(
+      Path()
+        ..moveTo(tip.dx, tip.dy)
+        ..lineTo(tip.dx + dir * 7, tip.dy - 2.6)
+        ..lineTo(tip.dx + dir * 7, tip.dy + 2.6)
+        ..close(),
+      Paint()..color = _ink,
+    );
+  }
+
+  void _arrowV(Canvas canvas, Offset tip, int dir) {
+    canvas.drawPath(
+      Path()
+        ..moveTo(tip.dx, tip.dy)
+        ..lineTo(tip.dx - 2.6, tip.dy + dir * 7)
+        ..lineTo(tip.dx + 2.6, tip.dy + dir * 7)
+        ..close(),
+      Paint()..color = _ink,
+    );
+  }
+
+  void _text(Canvas canvas, String s, Offset center,
+      {double size = 9.5,
+      Color color = _ink,
+      bool vertical = false,
+      bool alignLeft = false}) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: s,
+        style: TextStyle(
+          fontSize: size,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.2,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    if (vertical) {
+      canvas.save();
+      canvas.translate(center.dx, center.dy);
+      canvas.rotate(-math.pi / 2);
+      tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
+      canvas.restore();
+      return;
+    }
+    final dx = alignLeft ? center.dx : center.dx - tp.width / 2;
+    tp.paint(canvas, Offset(dx, center.dy - tp.height / 2));
+  }
+
+  @override
+  bool shouldRepaint(covariant _BalconyPainter old) =>
+      old.doorOnLeft != doorOnLeft ||
+      old.doorKind != doorKind ||
+      old.winParts != winParts ||
+      old.widthMm != widthMm ||
+      old.heightMm != heightMm ||
+      old.winWidthMm != winWidthMm ||
+      old.winHeightMm != winHeightMm ||
+      old.doorWidthMm != doorWidthMm ||
+      !_sameInt(old.winCellModes, winCellModes);
+
+  bool _sameInt(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+}
