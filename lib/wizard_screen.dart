@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'theme.dart';
+import 'screen_flash.dart';
 
 /// Модель клиента для мастера замера.
 class ClientData {
