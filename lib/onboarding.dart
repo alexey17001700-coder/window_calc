@@ -413,6 +413,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return visual.contains(_picked[1].toUpperCase());
   }
 
+  /// Балконный блок — окно + балконная дверь в ОДНОЙ раме.
+  /// Рисуется отдельным чертежом: окно сверху, дверь во всю высоту,
+  /// под окном простенок.
+  bool get _isBalcony =>
+      _picked.length > 1 && _picked[1].toUpperCase() == 'БАЛКОННЫЙ БЛОК';
+
   /// Шаг назад: у изделий с визуалкой шаг «РАЗМЕРЫ» пропущен,
   /// поэтому с чертежа возвращаемся сразу к дереву.
   void _goBack() {
