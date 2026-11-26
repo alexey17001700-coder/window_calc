@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme.dart';
+import 'screen_flash.dart';
 import 'viewer3d.dart';
 import 'update_checker.dart';
 import 'wizard_screen.dart';
