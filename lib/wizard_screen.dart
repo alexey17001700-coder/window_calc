@@ -206,6 +206,7 @@ class _WizardStep1ScreenState extends State<WizardStep1Screen> {
   }
 
   void _next() {
+    flashScreen();
     if (_name.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Введите имя клиента')),
