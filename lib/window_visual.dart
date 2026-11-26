@@ -1483,7 +1483,6 @@ class _BalconyPainter extends CustomPainter {
       // низ — белый сэндвич (1) или стекло (2)
       if (kind == 1) {
         canvas.drawRect(bot, Paint()..color = const Color(0xFFEDF1F7));
-        _sandwich(canvas, bot);
       }
       canvas.drawRect(bot, _line(_ink, 0.9));
     }
