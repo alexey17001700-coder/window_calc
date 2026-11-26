@@ -214,19 +214,36 @@ class _WindowVisualState extends State<WindowVisual> {
           builder: (context, c) {
             final size = Size(c.maxWidth, c.maxWidth / 1.16);
             // Балконный блок рисуется СВОИМ чертежом (окно + дверь).
+            // ТАП по окну — смена стеклопакета, тап по двери — вид низа.
             if (widget.balcony) {
-              return CustomPaint(
-                size: size,
-                painter: _BalconyPainter(
-                  doorOnLeft: widget.doorOnLeft,
-                  doorKind: widget.doorKind,
-                  winParts: widget.winParts,
-                  winCellModes: widget.winCellModes,
-                  widthMm: widget.widthMm,
-                  heightMm: widget.heightMm,
-                  winWidthMm: widget.winWidthMm,
-                  winHeightMm: widget.winHeightMm,
-                  doorWidthMm: widget.doorWidthMm,
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapUp: (d) {
+                  final g = _balconyGeo(
+                      size, widget.doorOnLeft, _bWinFrac, _bWinHFrac);
+                  final p = d.localPosition;
+                  if (g.winOuter.inflate(3).contains(p)) {
+                    HapticFeedback.selectionClick();
+                    widget.onWinTap?.call();
+                  } else if (g.doorOuter.inflate(3).contains(p)) {
+                    HapticFeedback.selectionClick();
+                    widget.onDoorTap?.call();
+                  }
+                },
+                child: CustomPaint(
+                  size: size,
+                  painter: _BalconyPainter(
+                    doorOnLeft: widget.doorOnLeft,
+                    doorKind: widget.doorKind,
+                    winParts: widget.winParts,
+                    winCellModes: widget.winCellModes,
+                    winSectionWidths: widget.winSectionWidths,
+                    widthMm: widget.widthMm,
+                    heightMm: widget.heightMm,
+                    winWidthMm: widget.winWidthMm,
+                    winHeightMm: widget.winHeightMm,
+                    doorWidthMm: widget.doorWidthMm,
+                  ),
                 ),
               );
             }
