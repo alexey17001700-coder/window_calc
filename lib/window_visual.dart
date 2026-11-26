@@ -200,6 +200,23 @@ class _WindowVisualState extends State<WindowVisual> {
         LayoutBuilder(
           builder: (context, c) {
             final size = Size(c.maxWidth, c.maxWidth / 1.16);
+            // Балконный блок рисуется СВОИМ чертежом (окно + дверь).
+            if (widget.balcony) {
+              return CustomPaint(
+                size: size,
+                painter: _BalconyPainter(
+                  doorOnLeft: widget.doorOnLeft,
+                  doorKind: widget.doorKind,
+                  winParts: widget.winParts,
+                  winCellModes: widget.winCellModes,
+                  widthMm: widget.widthMm,
+                  heightMm: widget.heightMm,
+                  winWidthMm: widget.winWidthMm,
+                  winHeightMm: widget.winHeightMm,
+                  doorWidthMm: widget.doorWidthMm,
+                ),
+              );
+            }
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapUp: (d) {
