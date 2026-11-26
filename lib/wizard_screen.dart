@@ -372,7 +372,10 @@ class WizardStep2Screen extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  flashScreen();
+                  Navigator.of(context).pop();
+                },
                 child: const Text('НАЗАД'),
               ),
             ),
