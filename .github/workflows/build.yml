@@ -138,13 +138,16 @@ jobs:
               mavenCentral()'
 
           # 1) Все gradle-файлы встроенного плагина Flutter — там и живёт :gradle
-          mapfile -t FILES < <(find "$PLUGIN_DIR" -name "*.gradle" 2>/dev/null)
+          mapfile -t FILES < <(find "$PLUGIN_DIR" \( -name "*.gradle" -o -name "*.gradle.kts" \) 2>/dev/null)
           echo "Файлов плагина найдено: ${#FILES[@]}"
           for F in "${FILES[@]}"; do
             if grep -q "mavenCentral()" "$F"; then
               perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS}/g' "$F"
-            elif [ "$(basename "$F")" = "build.gradle" ]; then
-              printf '\nrepositories {\n    %s\n}\n' "$REPOS" >> "$F"
+            else
+              case "$(basename "$F")" in
+                build.gradle|build.gradle.kts|settings.gradle|settings.gradle.kts)
+                  printf '\nrepositories {\n    %s\n}\n' "$REPOS" >> "$F" ;;
+              esac
             fi
             echo "--- $F"
             grep -n "aliyun\|mavenCentral\|^repositories" "$F" || true
