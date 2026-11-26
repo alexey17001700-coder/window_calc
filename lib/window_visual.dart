@@ -1273,7 +1273,11 @@ class _BalconyPainter extends CustomPainter {
     required this.winWidthMm,
     required this.winHeightMm,
     required this.doorWidthMm,
+    this.tappable = const {},
   });
+
+  /// Поля размеров, которые можно менять тапом по цифре на чертеже.
+  final Set<String> tappable;
 
   final bool doorOnLeft;
   final int doorKind;
