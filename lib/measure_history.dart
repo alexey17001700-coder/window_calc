@@ -403,7 +403,10 @@ class _HistoryViewState extends State<HistoryView> {
           ),
           if (_records.isNotEmpty)
             GestureDetector(
-              onTap: _clearAll,
+              onTap: () {
+                flashScreen();
+                _clearAll();
+              },
               child: Container(
                 height: 44,
                 padding: const EdgeInsets.symmetric(horizontal: 13),
