@@ -48,6 +48,43 @@ jobs:
           sed -i 's|id "org.jetbrains.kotlin.android" version ".*"|id "org.jetbrains.kotlin.android" version "1.9.24"|' settings.gradle
           sed -i "s|ext.kotlin_version = .*|ext.kotlin_version = '1.9.24'|" build.gradle
           cd ..
+      - name: Maven Central mirrors (обход 404 на repo.maven.apache.org)
+        run: |
+          # Сбой «Could not find com.squareup:javawriter:2.5.0 / org.ow2.asm:asm:9.1»
+          # на шаге :gradle:compileGroovy — это НЕ ошибка кода: артефакты тянет
+          # встроенная сборка Gradle-плагина Flutter из самого SDK
+          # (packages/flutter_tools/gradle, AGP 7.3.0). Оба артефакта лежат
+          # ТОЛЬКО на Maven Central, и если runner до него не достучался —
+          # Gradle отдаёт «Could not find». Добавляем зеркала Maven Central
+          # во ВСЕ сборки, включая встроенную (:gradle).
+          FLUTTER_ROOT="$(dirname "$(dirname "$(command -v flutter)")")"
+          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
+          MIRRORS='maven { url "https://maven.aliyun.com/repository/central" }\n        maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }\n        maven { url "https://repo1.maven.org/maven2/" }\n        mavenCentral()'
+          for F in "$FLUTTER_ROOT/packages/flutter_tools/gradle/build.gradle" \
+                   "$FLUTTER_ROOT/packages/flutter_tools/gradle/settings.gradle"; do
+            [ -f "$F" ] || continue
+            sed -i "s|mavenCentral()|$MIRRORS|g" "$F"
+            echo "--- $F"; grep -n "maven" "$F" || true
+          done
+          sed -i "s|mavenCentral()|$MIRRORS|g" android/settings.gradle android/build.gradle
+          mkdir -p ~/.gradle
+          cat > ~/.gradle/init.gradle <<'EOF'
+          allprojects {
+              buildscript {
+                  repositories {
+                      maven { url "https://maven.aliyun.com/repository/central" }
+                      maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+                      maven { url "https://repo1.maven.org/maven2/" }
+                  }
+              }
+              repositories {
+                  maven { url "https://maven.aliyun.com/repository/central" }
+                  maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+                  maven { url "https://repo1.maven.org/maven2/" }
+              }
+          }
+          EOF
+          echo "init.gradle готов"
       - name: Set app name
         run: |
           sed -i 's|android:label="[^"]*"|android:label="Замерщик окон Almas"|' android/app/src/main/AndroidManifest.xml
