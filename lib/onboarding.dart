@@ -567,7 +567,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   doorKind: _doorKind,
                   winParts: _winParts,
                   winCellModes: _winCellModes,
-                  winSectionWidths: _winSecWidths,
+                  winSectionWidths: _winSecW,
                   onWinTap: () => setState(() {
                     _glass = (_glass + 1 >= glassTypes.length
                         ? 0
