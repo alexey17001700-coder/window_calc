@@ -1443,7 +1443,7 @@ class _BalconyPainter extends CustomPainter {
     final winEdge = winOnRight ? g.winOuter.right : g.winOuter.left;
     _dimV(canvas, g.winOuter.top, g.winOuter.bottom, winX,
         winHeightMm > 0 ? '$winHeightMm' : '?',
-        small: true, right: winOnRight);
+        small: true, right: winOnRight, field: 'ВЫСОТА ОКНА');
     _extH(canvas, g.winOuter.top, winEdge, winX);
     _extH(canvas, g.winOuter.bottom, winEdge, winX);
 
