@@ -132,6 +132,16 @@ class WindowVisual extends StatefulWidget {
   /// Ширина двери, мм (0 — неизвестно).
   final int doorWidthMm;
 
+  /// Доли ширины ЧАСТЕЙ ОКОННОЙ ЧАСТИ балконного блока
+  /// (2 части — можно менять ширину каждой, как у створок окна).
+  final List<double> winSectionWidths;
+
+  /// ТАП ПО ОКНУ балконного блока — сменить стеклопакет.
+  final VoidCallback? onWinTap;
+
+  /// ТАП ПО ДВЕРИ балконного блока — сменить вид низа (стекло/сэндвич).
+  final VoidCallback? onDoorTap;
+
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
