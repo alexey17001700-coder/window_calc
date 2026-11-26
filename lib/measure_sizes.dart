@@ -639,7 +639,7 @@ class _SizeGoldState extends State<_SizeGold> {
       onTapUp: (_) => setState(() => _down = false),
       onTapCancel: () => setState(() => _down = false),
       onTap: () {
-        flashScreen();
+        flashScreen(flashOriginOf(context));
         widget.onTap();
       },
       child: AnimatedScale(
