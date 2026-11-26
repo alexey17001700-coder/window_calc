@@ -150,6 +150,9 @@ class _WindowVisualState extends State<WindowVisual> {
   @override
   Widget build(BuildContext context) {
     final modes = _modes;
+    final modeLabel = widget.balcony
+        ? 'БАЛКОННЫЙ БЛОК'
+        : 'СЕКЦИЯ ${_sel + 1} · ${kSashModeNames[modes[_sel].clamp(0, 3)]}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
