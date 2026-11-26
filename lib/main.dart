@@ -542,6 +542,7 @@ class _SplashScreenState extends State<SplashScreen>
   /// Открыть мастер замера. Колбэки работают через глобальный навигатор —
   /// контекст этого экрана после pushReplacement уже мёртв.
   void _openOnboarding() {
+    _flashKey.currentState?.fire();
     final nav = appNavigatorKey.currentState;
     if (nav == null) return;
     nav.push(
