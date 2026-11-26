@@ -187,7 +187,9 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.navy900,
-      body: SafeArea(
+      body: ScreenFlash(
+        key: _flashKey,
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
           child: Column(
