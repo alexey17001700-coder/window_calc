@@ -1016,3 +1016,31 @@ class _RevealState extends State<_Reveal>
     );
   }
 }
+
+/// Возможность приложения — строка на заставке.
+class _Capability {
+  const _Capability(this.icon, this.title, this.sub);
+  final IconData icon;
+  final String title;
+  final String sub;
+}
+
+/// Что умеет приложение — показывается на заставке по кругу.
+const List<_Capability> _caps = [
+  _Capability(Icons.view_in_ar_rounded, '3D-ПРОСМОТР ОКНА',
+      'Модель вращается пальцем'),
+  _Capability(Icons.architecture_rounded, 'ЧЕРТЁЖ ПО ГОСТ',
+      'Створки Г · П · ПО · О'),
+  _Capability(Icons.account_tree_rounded, 'ДЕРЕВО ИЗДЕЛИЙ',
+      'Окно · балкон · дверь · фасад'),
+  _Capability(Icons.straighten_rounded, 'РАЗМЕРЫ В ММ И СМ',
+      'Проверка допусков'),
+  _Capability(Icons.calculate_rounded, 'СМЕТА НА МЕСТЕ',
+      'Цена считается сама'),
+  _Capability(Icons.history_rounded, 'ИСТОРИЯ И КЛИЕНТЫ',
+      'До 300 замеров в памяти'),
+  _Capability(Icons.photo_camera_rounded, 'ФОТО И PDF-ЛИСТ',
+      'Отправка клиенту'),
+  _Capability(Icons.system_update_rounded, 'ОБНОВЛЕНИЕ ПО ВОЗДУХУ',
+      'Проверка версии'),
+];
