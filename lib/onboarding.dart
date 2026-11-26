@@ -973,7 +973,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ],
           const SizedBox(height: 10),
           const Text(
-            'ТАП ПО ЧЕРТЕЖУ: ОКНО — СТЕКЛОПАКЕТ, ДВЕРЬ — ВИД НИЗА',
+            'ТАП ПО ЧЕРТЕЖУ: ОКНО — СТЕКЛОПАКЕТ, ДВЕРЬ — ВИД НИЗА, ЦИФРЫ — РАЗМЕР',
             style: TextStyle(
               fontSize: 8,
               fontWeight: FontWeight.w700,
