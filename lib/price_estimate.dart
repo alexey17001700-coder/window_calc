@@ -476,7 +476,10 @@ class _EsGoldState extends State<_EsGold> {
       onTapDown: (_) => setState(() => _down = true),
       onTapUp: (_) => setState(() => _down = false),
       onTapCancel: () => setState(() => _down = false),
-      onTap: widget.onTap,
+      onTap: () {
+        flashScreen();
+        widget.onTap?.call();
+      },
       child: AnimatedScale(
         scale: _down ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 120),
