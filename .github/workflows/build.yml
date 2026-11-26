@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  GRADLE_OPTS: "-Djava.net.preferIPv4Stack=true -Dorg.gradle.internal.http.connectionTimeout=120000 -Dorg.gradle.internal.http.socketTimeout=120000"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -55,36 +58,62 @@ jobs:
           # встроенная сборка Gradle-плагина Flutter из самого SDK
           # (packages/flutter_tools/gradle, AGP 7.3.0). Оба артефакта лежат
           # ТОЛЬКО на Maven Central, и если runner до него не достучался —
-          # Gradle отдаёт «Could not find». Добавляем зеркала Maven Central
-          # во ВСЕ сборки, включая встроенную (:gradle).
+          # Gradle отдаёт «Could not find».
           FLUTTER_ROOT="$(dirname "$(dirname "$(command -v flutter)")")"
           echo "FLUTTER_ROOT=$FLUTTER_ROOT"
-          MIRRORS='maven { url "https://maven.aliyun.com/repository/central" }\n        maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }\n        maven { url "https://repo1.maven.org/maven2/" }\n        mavenCentral()'
-          for F in "$FLUTTER_ROOT/packages/flutter_tools/gradle/build.gradle" \
-                   "$FLUTTER_ROOT/packages/flutter_tools/gradle/settings.gradle"; do
-            [ -f "$F" ] || continue
-            sed -i "s|mavenCentral()|$MIRRORS|g" "$F"
-            echo "--- $F"; grep -n "maven" "$F" || true
+          PLUGIN_DIR="$FLUTTER_ROOT/packages/flutter_tools/gradle"
+          ls -la "$PLUGIN_DIR" || true
+
+          export REPOS='maven { url "https://maven.aliyun.com/repository/central" }
+              maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+              maven { url "https://repo1.maven.org/maven2/" }
+              mavenCentral()'
+
+          # 1) Все gradle-файлы встроенного плагина Flutter — там и живёт :gradle
+          mapfile -t FILES < <(find "$PLUGIN_DIR" -name "*.gradle" 2>/dev/null)
+          echo "Файлов плагина найдено: ${#FILES[@]}"
+          for F in "${FILES[@]}"; do
+            if grep -q "mavenCentral()" "$F"; then
+              perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS}/g' "$F"
+            elif [ "$(basename "$F")" = "build.gradle" ]; then
+              printf '\nrepositories {\n    %s\n}\n' "$REPOS" >> "$F"
+            fi
+            echo "--- $F"
+            grep -n "aliyun\|mavenCentral\|^repositories" "$F" || true
           done
-          sed -i "s|mavenCentral()|$MIRRORS|g" android/settings.gradle android/build.gradle
+
+          # 2) Файлы проекта
+          for F in android/settings.gradle android/build.gradle; do
+            [ -f "$F" ] || continue
+            if grep -q "mavenCentral()" "$F"; then
+              perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS}/g' "$F"
+            fi
+          done
+
+          # 3) init.gradle — зеркала во ВСЕ проекты, включая included build :gradle
           mkdir -p ~/.gradle
           cat > ~/.gradle/init.gradle <<'EOF'
-          allprojects {
-              buildscript {
-                  repositories {
-                      maven { url "https://maven.aliyun.com/repository/central" }
-                      maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
-                      maven { url "https://repo1.maven.org/maven2/" }
-                  }
-              }
-              repositories {
-                  maven { url "https://maven.aliyun.com/repository/central" }
-                  maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
-                  maven { url "https://repo1.maven.org/maven2/" }
-              }
+          def mirrors = {
+              maven { url "https://maven.aliyun.com/repository/central" }
+              maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+              maven { url "https://repo1.maven.org/maven2/" }
+          }
+          gradle.beforeProject { p ->
+              p.buildscript.repositories mirrors
+              p.repositories mirrors
+          }
+          gradle.allprojects { p ->
+              p.buildscript.repositories mirrors
+              p.repositories mirrors
           }
           EOF
-          echo "init.gradle готов"
+
+          # 4) Проверка: зеркало обязано появиться в файлах плагина
+          if ! grep -rq "aliyun" "$PLUGIN_DIR" 2>/dev/null; then
+            echo "!!! ЗЕРКАЛА НЕ ПРИМЕНИЛИСЬ К ПЛАГИНУ FLUTTER — смотри вывод выше"
+            exit 1
+          fi
+          echo "Зеркала Maven Central применены"
       - name: Set app name
         run: |
           sed -i 's|android:label="[^"]*"|android:label="Замерщик окон Almas"|' android/app/src/main/AndroidManifest.xml
@@ -109,14 +138,12 @@ jobs:
           sed -i 's|    buildTypes {|    signingConfigs {\n        release {\n            keyAlias = keystoreProperties["keyAlias"]\n            keyPassword = keystoreProperties["keyPassword"]\n            storeFile = keystoreProperties["storeFile"] ? file(keystoreProperties["storeFile"]) : null\n            storePassword = keystoreProperties["storePassword"]\n        }\n    }\n    buildTypes {|' build.gradle
           sed -i 's|signingConfig = signingConfigs.debug|signingConfig = signingConfigs.release|' build.gradle
           cd ../..
-      - name: Build APK (3 попытки — репозитории Maven иногда отдают 404)
+      - name: Build APK (3 попытки — Maven Central иногда отдаёт 404)
         run: |
-          # Сбой «Could not find com.squareup:javawriter:2.5.0 / org.ow2.asm:asm:9.1»
-          # на шаге :gradle:compileGroovy — это сбой сети до Maven Central,
-          # а не ошибка кода: артефакты тянет встроенная сборка Gradle-плагина
-          # Flutter из самого SDK (packages/flutter_tools/gradle, AGP 7.3.0).
-          # Gradle запоминает «не найдено» на сутки — поэтому между попытками
-          # чистим кэш модулей, иначе повтор упадёт с тем же текстом.
+          # Gradle запоминает «не найдено» на сутки — поэтому перед первой
+          # попыткой и между попытками чистим кэш модулей, иначе повтор
+          # упадёт с тем же текстом.
+          rm -rf ~/.gradle/caches/modules-2
           for i in 1 2 3; do
             echo "=== ПОПЫТКА СБОРКИ $i ИЗ 3 ==="
             if flutter build apk --release; then
