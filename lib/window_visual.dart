@@ -1391,7 +1391,7 @@ class _BalconyPainter extends CustomPainter {
   // ─────────────── ОКОННАЯ ЧАСТЬ (1 или 2 части) ───────────────
   void _windowCells(Canvas canvas, _BalconyGeo g) {
     final n = winParts.clamp(1, 2);
-    final rects = _sashRects(g.winInner, n, const []);
+    final rects = _sashRects(g.winInner, n, winSectionWidths);
     for (var i = 0; i < rects.length; i++) {
       final o = rects[i].deflate(2.5);
       canvas.drawRect(o, _line(_ink, 1.1));
