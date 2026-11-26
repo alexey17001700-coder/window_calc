@@ -618,7 +618,10 @@ class _PressCardState extends State<_PressCard> {
       onTapDown: (_) => _set(true),
       onTapUp: (_) => _set(false),
       onTapCancel: () => _set(false),
-      onTap: widget.onTap,
+      onTap: () {
+        flashScreen();
+        widget.onTap();
+      },
       child: AnimatedScale(
         scale: _down ? 0.93 : 1.0,
         duration: Duration(milliseconds: _down ? 90 : 190),
