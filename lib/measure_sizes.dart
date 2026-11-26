@@ -486,7 +486,10 @@ class _SizeFieldState extends State<_SizeField> {
             ),
             // Переключатель единицы: тап меняет ММ ↔ СМ.
             GestureDetector(
-              onTap: widget.onToggleUnit,
+              onTap: () {
+                flashScreen();
+                widget.onToggleUnit();
+              },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 padding:
