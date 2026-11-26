@@ -338,7 +338,10 @@ class _MeasureMediaPanelState extends State<MeasureMediaPanel> {
               ),
               if (ph.isNotEmpty)
                 GestureDetector(
-                  onTap: _clear,
+                  onTap: () {
+                    flashScreen();
+                    _clear();
+                  },
                   child: const Text(
                     'ОЧИСТИТЬ',
                     style: TextStyle(
