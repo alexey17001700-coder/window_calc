@@ -476,15 +476,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   // ──────── ШАГ 4: ВИЗУАЛЬНОЕ ОКНО + ВЫБОР СТЕКЛОПАКЕТА ────────
-  Widget _visualStep() {
-    if (!_isBalcony) return _visualStepOld();
-    return Column(
-      children: [
-        Expanded(child: _visualStepOld()),
-        _balconyBar(),
-      ],
-    );
-  }
+  Widget _visualStep() => _visualStepOld();
 
   // ─────────── ПАНЕЛЬ УПРАВЛЕНИЯ БАЛКОННЫМ БЛОКОМ ───────────
   Widget _balconyBar() {
