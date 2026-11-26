@@ -287,6 +287,7 @@ class _WindowVisualState extends State<WindowVisual> {
                   heightMm: widget.heightMm,
                   sectionWidths: widget.sectionWidths,
                   hingeCounts: widget.hingeCounts,
+                  tappable: const {'ШИРИНА', 'ВЫСОТА'},
                 ),
               ),
             );
