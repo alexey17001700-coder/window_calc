@@ -558,7 +558,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
                   sashModes: _isBalcony ? const <int>[1] : modes,
-                  widthMm: _mmOf('ШИРИНА'),
+                  widthMm: _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА'),
                   heightMm: _mmOf('ВЫСОТА'),
                   sectionWidths: _secWidths,
                   hingeCounts: _hingeCounts,
