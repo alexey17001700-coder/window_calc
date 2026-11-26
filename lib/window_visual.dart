@@ -680,17 +680,6 @@ class _GostPainter extends CustomPainter {
     required this.heightMm,
     this.sectionWidths = const [],
     this.hingeCounts = const [],
-    this.balcony = false,
-    this.doorOnLeft = false,
-    this.doorKind = 1,
-    this.winParts = 1,
-    this.winCellModes = const [],
-    this.winWidthMm = 0,
-    this.winHeightMm = 0,
-    this.doorWidthMm = 0,
-    this.winSectionWidths = const [],
-    this.onWinTap,
-    this.onDoorTap,
     this.tappable = const {},
   });
 
