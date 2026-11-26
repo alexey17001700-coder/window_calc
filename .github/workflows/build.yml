@@ -51,6 +51,74 @@ jobs:
           sed -i 's|id "org.jetbrains.kotlin.android" version ".*"|id "org.jetbrains.kotlin.android" version "1.9.24"|' settings.gradle
           sed -i "s|ext.kotlin_version = .*|ext.kotlin_version = '1.9.24'|" build.gradle
           cd ..
+      - name: Repositories → settings.gradle (PREFER_SETTINGS)
+        run: |
+          # Все репозитории — ТОЛЬКО в settings.gradle, из android/build.gradle
+          # кастомные maven удаляем. Плюс зеркала Maven Central.
+          python3 - <<'PY'
+          import re, pathlib
+
+          MIRRORS = (
+              '        maven { url "https://maven.aliyun.com/repository/central" }\n'
+              '        maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }\n'
+              '        maven { url "https://repo1.maven.org/maven2/" }\n'
+              '        mavenCentral()'
+          )
+
+          p = pathlib.Path("android/settings.gradle")
+          s = p.read_text()
+
+          # 1) pluginManagement.repositories — зеркала перед mavenCentral()
+          s = s.replace("        mavenCentral()\n        gradlePluginPortal()",
+                        MIRRORS + "\n        gradlePluginPortal()", 1)
+
+          # 2) dependencyResolutionManagement — если нет, вставляем перед include
+          if "dependencyResolutionManagement" not in s:
+              block = (
+                  "dependencyResolutionManagement {\n"
+                  "    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)\n"
+                  "    repositories {\n"
+                  "        google()\n"
+                  + MIRRORS + "\n"
+                  "    }\n"
+                  "}\n\n"
+              )
+              if "include " in s:
+                  i = s.index("include ")
+                  s = s[:i] + block + s[i:]
+              else:
+                  s = s.rstrip() + "\n\n" + block
+          p.write_text(s)
+          print("=== settings.gradle ===")
+          print(s)
+
+          # 3) android/build.gradle — кастомные maven убираем
+          b = pathlib.Path("android/build.gradle")
+          if b.exists():
+              t = b.read_text()
+              out, i = [], 0
+              while True:
+                  m = re.search(r'allprojects\s*\{', t[i:])
+                  if not m:
+                      out.append(t[i:])
+                      break
+                  start = i + m.start()
+                  j = i + m.end() - 1
+                  depth = 0
+                  while j < len(t):
+                      if t[j] == '{':
+                          depth += 1
+                      elif t[j] == '}':
+                          depth -= 1
+                          if depth == 0:
+                              break
+                      j += 1
+                  out.append(t[i:start])
+                  i = j + 1
+              b.write_text("".join(out))
+              print("=== build.gradle ===")
+              print(b.read_text())
+          PY
       - name: Maven Central mirrors (обход 404 на repo.maven.apache.org)
         run: |
           # Сбой «Could not find com.squareup:javawriter:2.5.0 / org.ow2.asm:asm:9.1»
