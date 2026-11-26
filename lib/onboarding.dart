@@ -151,13 +151,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         children: [
           _RoundButton(
             icon: Icons.arrow_back_rounded,
-            onTap: () {
-              if (_step > 0) {
-                setState(() => _step -= 1);
-              } else {
-                widget.onBack?.call();
-              }
-            },
+            onTap: _goBack,
           ),
           const SizedBox(width: 10),
           Container(
