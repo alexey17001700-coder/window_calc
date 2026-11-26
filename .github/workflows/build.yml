@@ -164,18 +164,18 @@ jobs:
           # 3) init.gradle — зеркала во ВСЕ проекты, включая included build :gradle
           mkdir -p ~/.gradle
           cat > ~/.gradle/init.gradle <<'EOF'
-          def mirrors = {
-              maven { url "https://maven.aliyun.com/repository/central" }
-              maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
-              maven { url "https://repo1.maven.org/maven2/" }
+          def addMirrors = { RepositoryHandler repos ->
+              repos.maven { url "https://maven.aliyun.com/repository/central" }
+              repos.maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+              repos.maven { url "https://repo1.maven.org/maven2/" }
           }
           gradle.beforeProject { p ->
-              p.buildscript.repositories mirrors
-              p.repositories mirrors
+              addMirrors(p.buildscript.repositories)
+              addMirrors(p.repositories)
           }
           gradle.allprojects { p ->
-              p.buildscript.repositories mirrors
-              p.repositories mirrors
+              addMirrors(p.buildscript.repositories)
+              addMirrors(p.repositories)
           }
           EOF
 
