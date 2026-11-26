@@ -706,6 +706,11 @@ class _EdgePainter extends CustomPainter {
       // ── ИСКРЫ, БЕГУЩИЕ ПО ЛИНИИ ──
       _sparks(canvas, path);
     }
+
+    // ── ИСКРЫ ДОЛЕТЕЛИ → ОБВОДЯТ КОНТУР ПОДПУНКТА ──
+    for (final e in edges) {
+      _contour(canvas, e[1]);
+    }
   }
 
   /// Искры-точки: бегут от карточки к подпункту, гаснут на концах.
