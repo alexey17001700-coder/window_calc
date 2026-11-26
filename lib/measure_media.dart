@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme.dart';
+import 'screen_flash.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
 ///  ЭТАП 5 · ФОТО ПРОЁМА + PDF-ЛИСТ + ОТПРАВКА НА СЕРВЕР
