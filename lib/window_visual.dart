@@ -1375,12 +1375,10 @@ class _BalconyPainter extends CustomPainter {
     canvas.drawRRect(sheet, Paint()..color = _paper);
     canvas.drawRRect(sheet, _line(const Color(0xFFC9D4E2), 1));
 
-    // ── СТЕНА ──
-    _hatch(canvas, g.wall);
+    // ── СТЕНА (чистый контур, без штриховки) ──
     canvas.drawRect(g.wall, _line(_ink, 1.2));
 
     // ── ПРОСТЕНОК ПОД ОКНОМ (стена, не стекло) ──
-    _hatch(canvas, g.voidRect);
     canvas.drawRect(g.voidRect, _line(_ink, 1.1));
 
     // ── ПРОЁМ (Г-образный) ──
