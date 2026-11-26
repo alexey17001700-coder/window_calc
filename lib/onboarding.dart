@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'theme.dart';
+import 'screen_flash.dart';
 import 'measure_history.dart';
 import 'measure_sizes.dart';
 import 'measure_sheet.dart';
