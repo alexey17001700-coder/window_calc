@@ -456,7 +456,12 @@ class _MeasureMediaPanelState extends State<MeasureMediaPanel> {
 
   Widget _mediaBtn(String text, IconData icon, VoidCallback? onTap) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap == null
+          ? null
+          : () {
+              flashScreen();
+              onTap();
+            },
       child: Opacity(
         opacity: onTap == null ? 0.45 : 1.0,
         child: Container(
