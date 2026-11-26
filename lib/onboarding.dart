@@ -58,6 +58,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Размеры по пунктам комплектации — уже в МИЛЛИМЕТРАХ.
   Map<String, Map<String, int>> _sizes = const {};
 
+  /// Размеры, введённые ТАПОМ ПО ЦИФРЕ прямо на чертеже (ММ).
+  /// Ключ — имя поля: ШИРИНА, ВЫСОТА, ШИРИНА ОКНА, ВЫСОТА ОКНА,
+  /// ШИРИНА ДВЕРИ.
+  Map<String, int> _visSizes = const {};
+
   /// Выбранный стеклопакет (-1 — не выбран).
   int _glass = -1;
 
