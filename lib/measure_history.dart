@@ -673,7 +673,10 @@ class _HistoryViewState extends State<HistoryView> {
           line('ИТОГО', r.total > 0 ? money(r.total) : '—'),
           const SizedBox(height: 6),
           GestureDetector(
-            onTap: () => _delete(r),
+            onTap: () {
+              flashScreen();
+              _delete(r);
+            },
             child: Container(
               height: 40,
               decoration: BoxDecoration(
