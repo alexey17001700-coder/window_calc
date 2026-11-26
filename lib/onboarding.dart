@@ -1492,6 +1492,103 @@ class _BgPainter extends CustomPainter {
 }
 
 /// ═══════════════════════════════════════════════════════════════════
+///  ЧИП ВАРИАНТА (текстовая плашка с золотой рамкой)
+/// ═══════════════════════════════════════════════════════════════════
+class _OptChip extends StatelessWidget {
+  const _OptChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        flashScreen(flashOriginOf(context));
+        onTap();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF12233A) : const Color(0xFF0B1524),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? AppColors.gold.withOpacity(0.80)
+                : const Color(0xFF1B2C44),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+            color: selected ? AppColors.gold : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  КНОПКА «ОТЗЕРКАЛИТЬ» (окно ⇄ дверь)
+/// ═══════════════════════════════════════════════════════════════════
+class _MirrorBtn extends StatelessWidget {
+  const _MirrorBtn({required this.doorOnLeft, required this.onTap});
+
+  final bool doorOnLeft;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        flashScreen(flashOriginOf(context));
+        onTap();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF12233A),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.gold.withOpacity(0.70)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Transform.flip(
+              flipX: doorOnLeft,
+              child: const Icon(Icons.compare_arrows_rounded,
+                  size: 14, color: AppColors.gold),
+            ),
+            const SizedBox(width: 5),
+            const Text(
+              'ЗЕРКАЛО',
+              style: TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.7,
+                color: AppColors.gold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
 ///  ЧИП ЧИСЛА СТВОРОК (1..4)
 /// ═══════════════════════════════════════════════════════════════════
 class _SashCountChip extends StatelessWidget {
