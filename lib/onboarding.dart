@@ -1780,3 +1780,135 @@ class _StepBtn extends StatelessWidget {
     );
   }
 }
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ДИАЛОГ ВВОДА РАЗМЕРА (тап по цифре на чертеже)
+///  Замерщик вводит свой размер в ММ — чертёж перерисовывается,
+///  авто-зазор пересчитывается сам.
+/// ═══════════════════════════════════════════════════════════════════
+class _DimDialog extends StatefulWidget {
+  const _DimDialog({required this.field, required this.controller});
+
+  final String field;
+  final TextEditingController controller;
+
+  @override
+  State<_DimDialog> createState() => _DimDialogState();
+}
+
+class _DimDialogState extends State<_DimDialog> {
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: const Color(0xFF0B1524),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: AppColors.gold.withOpacity(0.45)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 3,
+                  height: 15,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.goldGradient,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.field,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.3,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'ВВЕДИ РАЗМЕР В ММ',
+              style: TextStyle(
+                fontSize: 9.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.0,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A1220),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.gold.withOpacity(0.55)),
+              ),
+              child: TextField(
+                controller: widget.controller,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                cursorColor: AppColors.gold,
+                cursorWidth: 1.6,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+                decoration: const InputDecoration(
+                  filled: false,
+                  hintText: '0',
+                  hintStyle: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF3A4C66),
+                  ),
+                  suffixText: 'ММ',
+                  suffixStyle: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.gold,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: _GhostButton('ОТМЕНА', Icons.close_rounded,
+                      () => Navigator.of(context).pop()),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _GoldButton('ОК', Icons.check_rounded, () {
+                    final v =
+                        int.tryParse(widget.controller.text.trim()) ?? 0;
+                    Navigator.of(context).pop(v);
+                  }),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
