@@ -1463,7 +1463,7 @@ class _BalconyPainter extends CustomPainter {
 
     _dimH(canvas, g.doorOuter.left, g.doorOuter.right, dimBot,
         doorWidthMm > 0 ? '$doorWidthMm' : '?',
-        small: true, below: true);
+        small: true, below: true, field: 'ШИРИНА ДВЕРИ');
     _extV(canvas, g.doorOuter.left, g.opening.bottom, dimBot);
     _extV(canvas, g.doorOuter.right, g.opening.bottom, dimBot);
 
