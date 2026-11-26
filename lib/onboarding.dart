@@ -424,8 +424,46 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _winCellModes = const [0];
       _winSecW = const [];
       // У изделий с визуалкой шаг «РАЗМЕРЫ» пропускаем — сразу чертёж.
+      // Размеры-заглушки подставляем сразу: замерщик тапает по цифре
+      // на чертеже и меняет на свои.
+      _visSizes = _hasVisual ? _defaultSizes() : const {};
       _step = _hasVisual ? 3 : 2;
     });
+  }
+
+  /// Стандартные размеры-заглушки для чертежа (ММ).
+  Map<String, int> _defaultSizes() {
+    final t = (_picked.length > 1 ? _picked[1] : '').toUpperCase();
+    if (t == 'БАЛКОННЫЙ БЛОК') {
+      return const {
+        'ШИРИНА ОКНА': 1300,
+        'ШИРИНА ДВЕРИ': 700,
+        'ВЫСОТА': 2100,
+        'ВЫСОТА ОКНА': 1400,
+      };
+    }
+    if (t == 'ДВЕРЬ') return const {'ШИРИНА': 900, 'ВЫСОТА': 2100};
+    if (t == 'БАЛКОН' || t == 'ЛОДЖИЯ') {
+      return const {'ШИРИНА': 3000, 'ВЫСОТА': 1500};
+    }
+    if (t == 'ФАСАДНОЕ ОСТЕКЛЕНИЕ') {
+      return const {'ШИРИНА': 2000, 'ВЫСОТА': 2000};
+    }
+    return const {'ШИРИНА': 1300, 'ВЫСОТА': 1400};
+  }
+
+  /// Тап по размерному числу на чертеже — ввод своего размера в ММ.
+  Future<void> _askDim(String field) async {
+    final cur = _mmOf(field);
+    final ctrl = TextEditingController(text: cur > 0 ? '$cur' : '');
+    final res = await showDialog<int>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.72),
+      builder: (_) => _DimDialog(field: field, controller: ctrl),
+    );
+    if (res != null && res > 0) {
+      setState(() => _visSizes = {..._visSizes, field: res});
+    }
   }
 
   /// Есть ли у выбранного изделия визуальный чертёж.
