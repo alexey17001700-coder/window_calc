@@ -646,8 +646,11 @@ class _GostPainter extends CustomPainter {
     this.winSectionWidths = const [],
     this.onWinTap,
     this.onDoorTap,
-    this.onDimTap,
+    this.tappable = const {},
   });
+
+  /// Поля размеров, которые можно менять тапом по цифре на чертеже.
+  final Set<String> tappable;
 
   final int sashes;
   final bool arched;
