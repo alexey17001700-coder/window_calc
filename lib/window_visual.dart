@@ -255,6 +255,12 @@ class _WindowVisualState extends State<WindowVisual> {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapUp: (d) {
+                final f = _dimHit(size, d.localPosition);
+                if (f != null) {
+                  HapticFeedback.selectionClick();
+                  widget.onDimTap?.call(f);
+                  return;
+                }
                 final i = _hit(size, d.localPosition);
                 if (i >= 0) _tap(i);
               },
