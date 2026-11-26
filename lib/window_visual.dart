@@ -1434,7 +1434,7 @@ class _BalconyPainter extends CustomPainter {
     final doorX = winOnRight ? g.wall.left - 17 : g.wall.right + 17;
     final doorEdge = winOnRight ? g.doorOuter.left : g.doorOuter.right;
     _dimV(canvas, g.doorOuter.top, g.doorOuter.bottom, doorX,
-        heightMm > 0 ? '$heightMm' : '?');
+        heightMm > 0 ? '$heightMm' : '?', field: 'ВЫСОТА');
     _extH(canvas, g.doorOuter.top, doorEdge, doorX);
     _extH(canvas, g.doorOuter.bottom, doorEdge, doorX);
 
