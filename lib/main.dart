@@ -293,6 +293,79 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
+  /// Карточка «ЧТО УМЕЕТ» — возможности приложения, меняются по кругу.
+  Widget _capabilityCard() {
+    final c = _caps[_capIndex];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: const Color(0xFF000000).withOpacity(0.74),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.gold.withOpacity(0.45)),
+      ),
+      child: Row(
+        children: [
+          Icon(c.icon, size: 16, color: AppColors.gold),
+          const SizedBox(width: 9),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 340),
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.35),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
+                ),
+              ),
+              child: Column(
+                key: ValueKey<int>(_capIndex),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    c.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    c.sub,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                      color: Color(0xFF9FB0C6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${_capIndex + 1}/${_caps.length}',
+            style: const TextStyle(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _logo() {
     return Container(
       width: 58,
