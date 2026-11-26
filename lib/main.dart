@@ -916,7 +916,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            _flashKey.currentState?.fire();
+            onTap();
+          },
           borderRadius: BorderRadius.circular(22),
           child: Ink(
             decoration: BoxDecoration(
