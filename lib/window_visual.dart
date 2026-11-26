@@ -1152,7 +1152,8 @@ class _GostPainter extends CustomPainter {
       {double size = 9.5,
       Color color = _ink,
       bool vertical = false,
-      bool alignLeft = false}) {
+      bool alignLeft = false,
+      bool chip = false}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
@@ -1751,7 +1752,8 @@ class _BalconyPainter extends CustomPainter {
       {double size = 9.5,
       Color color = _ink,
       bool vertical = false,
-      bool alignLeft = false}) {
+      bool alignLeft = false,
+      bool chip = false}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
