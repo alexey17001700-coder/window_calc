@@ -989,6 +989,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Ширина окна балконного блока в ММ (0 — ещё не задана).
   int get _balconyWinMm => _mmOf('ШИРИНА ОКНА');
 
+  /// Общий габарит балконного блока по ширине = окно + дверь.
+  /// Считается САМ, вручную не задаётся.
+  int get _balconyTotalW => _mmOf('ШИРИНА ОКНА') + _mmOf('ШИРИНА ДВЕРИ');
+
   /// Доли ширины частей окна: пусто или не то число — поровну.
   List<double> get _winSecWidthsNorm {
     final n = _winParts.clamp(1, 2);
