@@ -401,8 +401,7 @@ class _WindowVisualState extends State<WindowVisual> {
       final winOnRight = widget.doorOnLeft;
       // высота двери — на стороне двери
       final doorX = winOnRight ? g.wall.left - 17 : g.wall.right + 17;
-      if (_near(p, Offset(doorX + (winOnRight ? -9 : 9),
-          g.doorOuter.center.dy))) {
+      if (_near(p, Offset(doorX - 9, g.doorOuter.center.dy))) {
         return 'ВЫСОТА';
       }
       // высота окна — на стороне окна
