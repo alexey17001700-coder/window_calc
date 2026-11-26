@@ -250,7 +250,18 @@ class _WorkTreeViewState extends State<WorkTreeView>
   List<double> _ws = const [];
 
   @override
+  void initState() {
+    super.initState();
+    // Искры бегут по линиям непрерывно.
+    _spark = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+  }
+
+  @override
   void dispose() {
+    _spark.dispose();
     _h.dispose();
     _v.dispose();
     super.dispose();
