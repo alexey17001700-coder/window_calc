@@ -1043,8 +1043,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     });
   }
 
-  /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
+  /// Габарит в ММ по названию поля: сначала размеры с чертежа (тап по цифре),
+  /// затем — размеры по пунктам комплектации.
   int _mmOf(String field) {
+    final v = _visSizes[field];
+    if (v != null && v > 0) return v;
     for (final e in _sizes.values) {
       final v = e[field];
       if (v != null && v > 0) return v;
