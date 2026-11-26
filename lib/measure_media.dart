@@ -433,7 +433,10 @@ class _MeasureMediaPanelState extends State<MeasureMediaPanel> {
           top: 3,
           right: 3,
           child: GestureDetector(
-            onTap: () => _delete(i),
+            onTap: () {
+              flashScreen();
+              _delete(i);
+            },
             child: Container(
               width: 22,
               height: 22,
