@@ -644,8 +644,8 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   /// Ручная проверка обновлений: пишет в лог, при находке открывает диалог.
-  Future<void> _manualCheck() async {
-    _flashKey.currentState?.fire();
+  Future<void> _manualCheck([Offset? origin]) async {
+    _flashKey.currentState?.fire(origin);
     setState(() => _checking = true);
     _push('РУЧНАЯ ПРОВЕРКА ОБНОВЛЕНИЙ...',
         _progress < 0.64 ? 0.64 : _progress,
