@@ -7,10 +7,28 @@ import 'theme.dart';
 /// Глобальный ключ вспышки: любой экран может вызвать flashScreen().
 final GlobalKey<ScreenFlashState> appFlashKey = GlobalKey<ScreenFlashState>();
 
-/// Запустить мягкую золотую вспышку на весь экран.
-void flashScreen() => appFlashKey.currentState?.fire();
+/// Запустить мягкую золотую волну.
+/// [origin] — глобальная точка старта (обычно центр кнопки).
+/// Если не задана — берётся последняя точка касания.
+void flashScreen([Offset? origin]) => appFlashKey.currentState?.fire(origin);
 
-/// Мягкая золотая волна: расходится от точки нажатия и растворяется.
+/// Центр виджета в глобальных координатах — волна идёт «прямо от кнопки».
+Offset? flashOriginOf(BuildContext context) {
+  final ro = context.findRenderObject();
+  if (ro is RenderBox && ro.hasSize) {
+    return ro.localToGlobal(ro.size.center(Offset.zero));
+  }
+  return null;
+}
+
+/// Центр виджета по его ключу — то же самое, но без доступа к контексту.
+Offset? flashOriginOfKey(GlobalKey key) {
+  final ctx = key.currentContext;
+  if (ctx == null) return null;
+  return flashOriginOf(ctx);
+}
+
+/// Мягкая золотая волна: расходится от кнопки и растворяется без граней.
 class ScreenFlash extends StatefulWidget {
   const ScreenFlash({super.key, required this.child});
   final Widget child;
@@ -23,6 +41,9 @@ class ScreenFlashState extends State<ScreenFlash>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
 
+  /// Плавное расширение: мягкий разгон и торможение, без рывка.
+  late final Animation<double> _spread;
+
   /// Последняя точка касания (глобальные координаты).
   Offset? _lastPos;
 
@@ -33,7 +54,8 @@ class ScreenFlashState extends State<ScreenFlash>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 720));
+        vsync: this, duration: const Duration(milliseconds: 1500));
+    _spread = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
   }
 
   @override
@@ -42,9 +64,9 @@ class ScreenFlashState extends State<ScreenFlash>
     super.dispose();
   }
 
-  /// Запустить волну от последней точки нажатия.
-  void fire() {
-    _fireOrigin = _lastPos;
+  /// Запустить волну от центра кнопки (или от последнего касания).
+  void fire([Offset? origin]) {
+    _fireOrigin = origin ?? _lastPos;
     _c.forward(from: 0);
   }
 
@@ -96,16 +118,19 @@ class ScreenFlashState extends State<ScreenFlash>
 
   /// Мягкая волна без резких граней: плавный «колокол» яркости.
   Widget _wave(Alignment align) {
-    final t = _c.value;
-    final fade = (1 - t) * (1 - t);
+    final t = _spread.value; // плавное расширение
+    final life = _c.value; // линейное время для затухания
 
-    // Расширяющееся кольцо: от точки нажатия наружу.
-    final double r = 0.10 + t * 0.95;
-    const double w = 0.42;
+    // Затухание: мягко в начале, ещё мягче в конце — волна «растворяется».
+    final fade = (1 - life) * (1 - life) * (1 - life * 0.30);
+
+    // Расширяющееся кольцо: от кнопки наружу.
+    final double r = 0.06 + t * 1.10;
+    const double w = 0.60; // широкая мягкая полоса — граней не видно
     final double a = (r - w).clamp(0.0, 1.0);
     final double b = (r + w).clamp(0.0, 1.0);
 
-    const int n = 16;
+    const int n = 24;
     final stops = <double>[];
     final colors = <Color>[];
     for (var i = 0; i <= n; i++) {
@@ -115,11 +140,11 @@ class ScreenFlashState extends State<ScreenFlash>
       final bell = 0.5 - 0.5 * math.cos(2 * math.pi * f);
       stops.add(s);
       colors.add(
-          AppColors.gold.withOpacity((fade * bell * 0.55).clamp(0.0, 1.0)));
+          AppColors.gold.withOpacity((fade * bell * 0.46).clamp(0.0, 1.0)));
     }
 
-    // Мягкое ядро в точке нажатия — гаснет быстрее волны.
-    final core = (1 - t) * (1 - t) * (1 - t) * 0.30;
+    // Мягкое ядро в точке старта — гаснет быстрее волны.
+    final core = (1 - life) * (1 - life) * 0.32;
 
     return Stack(
       fit: StackFit.expand,
@@ -128,7 +153,7 @@ class ScreenFlashState extends State<ScreenFlash>
           decoration: BoxDecoration(
             gradient: RadialGradient(
               center: align,
-              radius: 2.6,
+              radius: 2.9,
               colors: colors,
               stops: stops,
             ),
@@ -139,13 +164,13 @@ class ScreenFlashState extends State<ScreenFlash>
             decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: align,
-                radius: 0.55,
+                radius: 0.70,
                 colors: [
                   AppColors.goldLight.withOpacity(core),
-                  AppColors.gold.withOpacity(core * 0.45),
+                  AppColors.gold.withOpacity(core * 0.40),
                   AppColors.gold.withOpacity(0),
                 ],
-                stops: const [0.0, 0.45, 1.0],
+                stops: const [0.0, 0.42, 1.0],
               ),
             ),
           ),
