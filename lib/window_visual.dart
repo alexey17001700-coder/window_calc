@@ -796,7 +796,7 @@ class _GostPainter extends CustomPainter {
     // Габарит по ширине — сверху, с выносными линиями от углов проёма.
     final dimTop = g.wall.top - 15;
     _dimH(canvas, g.opening.left, g.opening.right, dimTop,
-        widthMm > 0 ? '$widthMm' : '?');
+        widthMm > 0 ? '$widthMm' : '?', field: 'ШИРИНА');
     _extV(canvas, g.opening.left, g.opening.top, dimTop);
     _extV(canvas, g.opening.right, g.opening.top, dimTop);
 
@@ -1426,7 +1426,7 @@ class _BalconyPainter extends CustomPainter {
     // габарит по ширине — сверху
     final dimTop = g.wall.top - 15;
     _dimH(canvas, g.opening.left, g.opening.right, dimTop,
-        widthMm > 0 ? '$widthMm' : '?');
+        widthMm > 0 ? '$widthMm' : '?', field: 'ШИРИНА');
     _extV(canvas, g.opening.left, g.opening.top, dimTop);
     _extV(canvas, g.opening.right, g.opening.top, dimTop);
 
