@@ -720,8 +720,7 @@ class _GostPainter extends CustomPainter {
       _line(const Color(0xFFC9D4E2), 1),
     );
 
-    // ── СТЕНА СО ШТРИХОВКОЙ ──
-    _hatch(canvas, g.wall);
+    // ── СТЕНА (чистый контур, без штриховки) ──
     canvas.drawRect(g.wall, _line(_ink, 1.2));
 
     // ── ПРОЁМ ──
