@@ -762,6 +762,89 @@ class _EdgePainter extends CustomPainter {
     }
   }
 
+  /// Искра долетела до подпункта → обводит его КОНТУР.
+  /// Две искры бегут от левого центра вверх и вниз и встречаются справа.
+  void _contour(Canvas canvas, Rect card) {
+    final r = card.inflate(3.0);
+    final rr = RRect.fromRectAndRadius(r, const Radius.circular(16));
+    final path = Path()
+      ..moveTo(rr.left, rr.center.dy)
+      ..lineTo(rr.left, rr.top + rr.tlRadiusY)
+      ..arcToPoint(Offset(rr.left + rr.tlRadiusX, rr.top),
+          radius: Radius.circular(rr.tlRadiusX), clockwise: true)
+      ..lineTo(rr.right - rr.trRadiusX, rr.top)
+      ..arcToPoint(Offset(rr.right, rr.top + rr.trRadiusY),
+          radius: Radius.circular(rr.trRadiusX), clockwise: true)
+      ..lineTo(rr.right, rr.bottom - rr.brRadiusY)
+      ..arcToPoint(Offset(rr.right - rr.brRadiusX, rr.bottom),
+          radius: Radius.circular(rr.brRadiusX), clockwise: true)
+      ..lineTo(rr.left + rr.blRadiusX, rr.bottom)
+      ..arcToPoint(Offset(rr.left, rr.bottom - rr.blRadiusY),
+          radius: Radius.circular(rr.blRadiusX), clockwise: true)
+      ..close();
+
+    // мягкое свечение по контуру — «отзывается» на прилёт искры
+    final pulse = math.sin(math.pi * t).clamp(0.0, 1.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.0
+        ..color = AppColors.gold.withOpacity(0.10 + 0.22 * pulse)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.2),
+    );
+
+    // бегущие по контуру искры — с двух сторон
+    for (final m in path.computeMetrics()) {
+      final len = m.length;
+      if (len <= 1) continue;
+
+      final p = (t / 0.55).clamp(0.0, 1.0);
+      final a = math.sin(math.pi * p);
+      if (a <= 0.02) continue;
+
+      final half = len * 0.5;
+      for (final dir in const [1.0, -1.0]) {
+        final off = dir > 0 ? half * p : len - half * p;
+        final tan = m.getTangentForOffset(off);
+        if (tan == null) continue;
+        final pos = tan.position;
+
+        // хвостик-комета
+        final backOff = dir > 0
+            ? (off - 10).clamp(0.0, len)
+            : (off + 10).clamp(0.0, len);
+        final back = m.getTangentForOffset(backOff);
+        if (back != null) {
+          canvas.drawLine(
+            back.position,
+            pos,
+            Paint()
+              ..strokeWidth = 2.4
+              ..strokeCap = StrokeCap.round
+              ..color = AppColors.gold.withOpacity(0.35 * a),
+          );
+        }
+
+        // ореол
+        canvas.drawCircle(
+          pos,
+          5.0,
+          Paint()
+            ..color = AppColors.gold.withOpacity(0.22 * a)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.4),
+        );
+
+        // ядро
+        canvas.drawCircle(
+          pos,
+          1.9,
+          Paint()..color = AppColors.goldLight.withOpacity(0.95 * a),
+        );
+      }
+    }
+  }
+
   @override
   bool shouldRepaint(covariant _EdgePainter old) =>
       old.t != t || old.edges != edges;
