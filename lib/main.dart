@@ -261,6 +261,12 @@ class _SplashScreenState extends State<SplashScreen>
         children: [
           const Positioned.fill(child: Viewer3D()),
           Positioned(
+            left: 12,
+            top: 12,
+            right: 12,
+            child: _capabilityCard(),
+          ),
+          Positioned(
             right: 12,
             bottom: 12,
             child: Container(
