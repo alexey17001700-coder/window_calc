@@ -143,6 +143,11 @@ class WindowVisual extends StatefulWidget {
   /// ТАП ПО ДВЕРИ балконного блока — сменить вид низа (стекло/сэндвич).
   final VoidCallback? onDoorTap;
 
+  /// ТАП ПО РАЗМЕРНОМУ ЧИСЛУ на чертеже — ввод своего размера.
+  /// Передаётся имя поля: ШИРИНА, ВЫСОТА, ШИРИНА ОКНА, ВЫСОТА ОКНА,
+  /// ШИРИНА ДВЕРИ.
+  final ValueChanged<String>? onDimTap;
+
   @override
   State<WindowVisual> createState() => _WindowVisualState();
 }
