@@ -991,7 +991,7 @@ class _GhostButtonState extends State<_GhostButton> {
       onTapUp: (_) => setState(() => _down = false),
       onTapCancel: () => setState(() => _down = false),
       onTap: () {
-        flashScreen();
+        flashScreen(flashOriginOf(context));
         widget.onTap();
       },
       child: AnimatedScale(
