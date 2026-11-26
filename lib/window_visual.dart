@@ -351,6 +351,22 @@ class _WindowVisualState extends State<WindowVisual> {
     );
   }
 
+  /// Доля ширины окна в габарите балконного блока — как в художнике.
+  double get _bWinFrac {
+    if (widget.winWidthMm > 0 && widget.doorWidthMm > 0) {
+      return widget.winWidthMm / (widget.winWidthMm + widget.doorWidthMm);
+    }
+    return 0.58;
+  }
+
+  /// Доля высоты окна в высоте двери — как в художнике.
+  double get _bWinHFrac {
+    if (widget.winHeightMm > 0 && widget.heightMm > 0) {
+      return (widget.winHeightMm / widget.heightMm).clamp(0.25, 0.85);
+    }
+    return 0.62;
+  }
+
   /// Какая СЕКЦИЯ под пальцем.
   /// Секция — вся ячейка проёма целиком (рама + обвязка + штапик + стекло),
   /// поэтому попадание считается по проёму, а не по стеклу: палец может
