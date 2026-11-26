@@ -540,7 +540,8 @@ class _SplashScreenState extends State<SplashScreen>
             letterSpacing: 1.0,
           ),
         ),
-        onPressed: _openOnboarding,
+        key: _startBtnKey,
+        onPressed: () => _openOnboarding(flashOriginOfKey(_startBtnKey)),
         child: const Text('НАЧАТЬ РАБОТУ'),
       ),
     );
