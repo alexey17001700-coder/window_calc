@@ -383,6 +383,45 @@ class _WindowVisualState extends State<WindowVisual> {
     return 0.62;
   }
 
+  /// Палец рядом с точкой (радиус захвата вокруг размерного числа).
+  bool _near(Offset p, Offset c, {double r = 17}) => (p - c).distance <= r;
+
+  /// Какое РАЗМЕРНОЕ ЧИСЛО под пальцем (null — не по цифре).
+  /// Тап по цифре открывает ввод своего размера.
+  String? _dimHit(Size size, Offset p) {
+    if (widget.balcony) {
+      final g = _balconyGeo(size, widget.doorOnLeft, _bWinFrac, _bWinHFrac);
+      final winOnRight = widget.doorOnLeft;
+      // высота двери — на стороне двери
+      final doorX = winOnRight ? g.wall.left - 17 : g.wall.right + 17;
+      if (_near(p, Offset(doorX + (winOnRight ? -9 : 9),
+          g.doorOuter.center.dy))) {
+        return 'ВЫСОТА';
+      }
+      // высота окна — на стороне окна
+      final winX = winOnRight ? g.wall.right + 17 : g.wall.left - 17;
+      if (_near(p, Offset(winX + (winOnRight ? 9 : -9),
+          g.winOuter.center.dy))) {
+        return 'ВЫСОТА ОКНА';
+      }
+      // ширины окна и двери — снизу
+      final dimBot = g.wall.bottom + 15;
+      if (_near(p, Offset(g.winOuter.center.dx, dimBot + 9))) {
+        return 'ШИРИНА ОКНА';
+      }
+      if (_near(p, Offset(g.doorOuter.center.dx, dimBot + 9))) {
+        return 'ШИРИНА ДВЕРИ';
+      }
+      return null;
+    }
+    final g = _geo(size);
+    final dimTop = g.wall.top - 15;
+    if (_near(p, Offset(g.opening.center.dx, dimTop - 8))) return 'ШИРИНА';
+    final dimLeft = g.wall.left - 17;
+    if (_near(p, Offset(dimLeft - 9, g.opening.center.dy))) return 'ВЫСОТА';
+    return null;
+  }
+
   /// Какая СЕКЦИЯ под пальцем.
   /// Секция — вся ячейка проёма целиком (рама + обвязка + штапик + стекло),
   /// поэтому попадание считается по проёму, а не по стеклу: палец может
