@@ -412,6 +412,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _secW = const [];
       _sashModes = const [];
       _hinges = const [];
+      _doorOnLeft = false;
+      _doorKind = 1;
+      _winParts = 1;
+      _winCellModes = const [0];
+      _winSecW = const [];
       // У изделий с визуалкой шаг «РАЗМЕРЫ» пропускаем — сразу чертёж.
       _step = _hasVisual ? 3 : 2;
     });
