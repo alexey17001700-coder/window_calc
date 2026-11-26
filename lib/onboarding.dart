@@ -389,7 +389,43 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _secW = const [];
       _sashModes = const [];
       _hinges = const [];
-      _step = 2;
+      // У изделий с визуалкой шаг «РАЗМЕРЫ» пропускаем — сразу чертёж.
+      _step = _hasVisual ? 3 : 2;
+    });
+  }
+
+  /// Есть ли у выбранного изделия визуальный чертёж.
+  /// Изделия с визуалкой (окно, балконный блок, балкон, лоджия, дверь,
+  /// фасад) идут СРАЗУ на чертёж — размеры вводятся на нём.
+  /// Комплектующие (откосы, отлив, подоконники) и работы (монтаж, ремонт,
+  /// рекламации) визуалки не имеют — у них шаг «РАЗМЕРЫ» остаётся.
+  bool get _hasVisual {
+    if (_picked.length < 2) return false;
+    if (_picked[0].toUpperCase() != 'ЗАМЕР') return false;
+    const visual = {
+      'ОКНО',
+      'БАЛКОННЫЙ БЛОК',
+      'БАЛКОН',
+      'ЛОДЖИЯ',
+      'ДВЕРЬ',
+      'ФАСАДНОЕ ОСТЕКЛЕНИЕ',
+    };
+    return visual.contains(_picked[1].toUpperCase());
+  }
+
+  /// Шаг назад: у изделий с визуалкой шаг «РАЗМЕРЫ» пропущен,
+  /// поэтому с чертежа возвращаемся сразу к дереву.
+  void _goBack() {
+    if (_step == 0) {
+      widget.onBack?.call();
+      return;
+    }
+    setState(() {
+      if (_step == 3 && _hasVisual) {
+        _step = 1;
+      } else {
+        _step -= 1;
+      }
     });
   }
 
