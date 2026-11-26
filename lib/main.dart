@@ -680,6 +680,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _measureCount = 0;
+  final GlobalKey<ScreenFlashState> _flashKey = GlobalKey<ScreenFlashState>();
 
   @override
   void initState() {
