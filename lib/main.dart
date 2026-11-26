@@ -617,7 +617,10 @@ class _SplashScreenState extends State<SplashScreen>
             letterSpacing: 1.0,
           ),
         ),
-        onPressed: _checking ? null : _manualCheck,
+        key: _checkBtnKey,
+        onPressed: _checking
+            ? null
+            : () => _manualCheck(flashOriginOfKey(_checkBtnKey)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
