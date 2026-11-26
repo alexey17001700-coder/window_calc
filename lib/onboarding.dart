@@ -1223,10 +1223,7 @@ class _SashCountChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        flashScreen();
-        onTap();
-      },
+      onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
@@ -1315,7 +1312,10 @@ class _StepBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        flashScreen();
+        onTap();
+      },
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: 30,
