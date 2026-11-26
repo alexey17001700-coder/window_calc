@@ -87,12 +87,8 @@ class Estimate {
   /// Итог сметы.
   double get total => _round2(lines.fold(0.0, (a, l) => a + l.sum));
 
-  /// Есть ли что считать. Габарит изделия может быть не задан —
-  /// тогда считаем только комплектацию (подоконник · отлив · откосы).
-  bool get isEmpty => lines.isEmpty;
-
-  /// Задан ли габарит изделия (ширина × высота).
-  bool get hasSize => widthMm > 0 && heightMm > 0;
+  /// Есть ли что считать.
+  bool get isEmpty => widthMm <= 0 || heightMm <= 0 || lines.isEmpty;
 }
 
 double _round2(double v) => (v * 100).roundToDouble() / 100;
@@ -135,7 +131,6 @@ Estimate buildEstimate({
   required String windowType,
   required List<String> parts,
   required String glass,
-  Map<String, Map<String, int>> sizes = const {},
 }) {
   final lines = <EstimateLine>[];
 
@@ -144,16 +139,8 @@ Estimate buildEstimate({
   final area = _round2(w * h);
   final perim = _round2(2 * (w + h));
 
-  /// Длина пункта комплектации в метрах: берём ВВЕДЁННЫЙ размер
-  /// (ДЛИНА …), а если его нет — габарит изделия.
-  double partLen(String item, String field, double fallback) {
-    final v = sizes[item]?[field];
-    if (v != null && v > 0) return _round2(v / 1000.0);
-    return fallback;
-  }
-
-  // ── Изделие ───────────────────────────────────────────────
   if (area > 0) {
+    // ── Изделие ───────────────────────────────────────────────
     final base = windowPerM2For(windowType);
     var perM2 = base + glassPerM2(glass);
     final figured =
@@ -166,64 +153,37 @@ Estimate buildEstimate({
       'м²',
       _round2(perM2),
     ));
-  }
 
-  // ── Комплектация ──────────────────────────────────────────
-  // Считается и без габарита изделия: у подоконника, отлива и откосов
-  // свои ДЛИНА и ГЛУБИНА, они мерятся отдельно.
-  for (final p in parts) {
-    switch (p) {
-      case 'С ОТЛИВОМ':
-        final len = partLen('С ОТЛИВОМ', 'ДЛИНА ОТЛИВА', w);
-        if (len > 0) {
-          lines.add(EstimateLine('Отлив', len, 'м.п.', PriceBook.ebbPerM));
-        }
-        break;
-      case 'С ПОДОКОННИКОМ':
-        final len = partLen('С ПОДОКОННИКОМ', 'ДЛИНА ПОДОКОННИКА', w);
-        if (len > 0) {
-          lines.add(
-              EstimateLine('Подоконник', len, 'м.п.', PriceBook.sillPerM));
-        }
-        break;
-      case 'С ОТКОСАМИ':
-        final len = partLen('С ОТКОСАМИ', 'ДЛИНА ОТКОСА', perim);
-        if (len > 0) {
-          lines.add(
-              EstimateLine('Откосы', len, 'м.п.', PriceBook.slopePerM));
-        }
-        break;
-      case 'ОТКОСЫ С ДВУХ СТОРОН':
-        final len = partLen('ОТКОСЫ С ДВУХ СТОРОН', 'ДЛИНА ОТКОСА', perim);
-        if (len > 0) {
-          lines.add(EstimateLine('Откосы, 2 стороны', len, 'м.п.',
-              PriceBook.slopePerM * 2));
-        }
-        break;
-      case 'ПСУЛ':
-        if (perim > 0) {
+    // ── Комплектация ──────────────────────────────────────────
+    for (final p in parts) {
+      switch (p) {
+        case 'С ОТЛИВОМ':
+          lines.add(EstimateLine('Отлив', w, 'м.п.', PriceBook.ebbPerM));
+          break;
+        case 'С ПОДОКОННИКОМ':
+          lines.add(EstimateLine('Подоконник', w, 'м.п.', PriceBook.sillPerM));
+          break;
+        case 'С ОТКОСАМИ':
+          lines.add(EstimateLine('Откосы (периметр)', perim, 'м.п.',
+              PriceBook.slopePerM));
+          break;
+        case 'ПСУЛ':
           lines.add(EstimateLine('ПСУЛ', perim, 'м.п.', PriceBook.psuPerM));
-        }
-        break;
-      case 'ОТМАЗКА':
-        if (area > 0) {
-          lines.add(EstimateLine(
-              'Отмазка, 1 сторона', area, 'м²', PriceBook.strippingPerM2));
-        }
-        break;
-      case 'ОТМАЗКА С ДВУХ СТОРОН':
-        if (area > 0) {
+          break;
+        case 'ОТМАЗКА':
+          lines.add(
+              EstimateLine('Отмазка, 1 сторона', area, 'м²', PriceBook.strippingPerM2));
+          break;
+        case 'ОТМАЗКА С ДВУХ СТОРОН':
           lines.add(EstimateLine('Отмазка, 2 стороны', area, 'м²',
               PriceBook.strippingPerM2 * 2));
-        }
-        break;
-      default:
-        break;
+          break;
+        default:
+          break;
+      }
     }
-  }
 
-  // ── Монтаж и доставка ────────────────────────────────────
-  if (area > 0) {
+    // ── Монтаж и доставка ────────────────────────────────────
     final install = _round2(area * PriceBook.installPerM2);
     lines.add(EstimateLine(
       'Монтаж',
@@ -326,10 +286,8 @@ class EstimateView extends StatelessWidget {
             child: Text(
               estimate.isEmpty
                   ? 'НЕТ РАЗМЕРОВ'
-                  : estimate.hasSize
-                      ? '${estimate.widthMm} × ${estimate.heightMm} ММ  ·  '
-                          '${estimate.areaM2.toStringAsFixed(2).replaceAll('.', ',')} М²'
-                      : 'КОМПЛЕКТАЦИЯ · ГАБАРИТ ИЗДЕЛИЯ НЕ ЗАДАН',
+                  : '${estimate.widthMm} × ${estimate.heightMm} ММ  ·  '
+                      '${estimate.areaM2.toStringAsFixed(2).replaceAll('.', ',')} М²',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(

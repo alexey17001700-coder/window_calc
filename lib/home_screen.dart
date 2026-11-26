@@ -1,128 +1,74 @@
-part of 'main.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// ═══════════════════════════════════════════════════════════════════
-//  ГЛАВНОЕ МЕНЮ
-// ═══════════════════════════════════════════════════════════════════
+import 'theme.dart';
+import 'main.dart';
+import 'wizard_screen.dart';
+import 'update_checker.dart';
+
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.onToggleTheme});
-  final Future<void> Function() onToggleTheme;
+  final SharedPreferences prefs;
+  final VoidCallback onToggleTheme;
+  final bool isDark;
+  const HomeScreen({
+    super.key,
+    required this.prefs,
+    required this.onToggleTheme,
+    required this.isDark,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _measureCount = 0;
+  int _count = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadCount();
+    _count = (widget.prefs.getStringList('measurements_v4') ?? []).length;
   }
 
-  Future<void> _loadCount() async {
-    final p = await SharedPreferences.getInstance();
-    final raw = p.getString('measurements_v4');
-    if (!mounted) return;
-    setState(() => _measureCount = raw == null ? 0 : 1);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: Column(
-        children: [
-          _header(dark),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 32),
-              children: [
-                AppUi.sectionTitle(context, 'Работа'),
-                _card(
-                  index: 0,
-                  icon: Icons.add_rounded,
-                  title: 'Создать замер',
-                  subtitle: 'Новый расчёт по шагам',
-                  accent: AppColors.gold,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => const WizardStep1Screen()),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _card(
-                  index: 1,
-                  icon: Icons.folder_rounded,
-                  title: 'Сохранённые замеры',
-                  subtitle: '$_measureCount в архиве',
-                  accent: AppColors.info,
-                  onTap: () => _soon('Сохранённые замеры'),
-                ),
-                const SizedBox(height: 12),
-                _card(
-                  index: 2,
-                  icon: Icons.tune_rounded,
-                  title: 'Настройки прайса',
-                  subtitle: 'Цены и коэффициенты',
-                  accent: AppColors.bronze,
-                  onTap: () => _soon('Настройки прайса'),
-                ),
-                const SizedBox(height: 24),
-                AppUi.sectionTitle(context, 'Сервис'),
-                _card(
-                  index: 3,
-                  icon: Icons.build_rounded,
-                  title: 'Сервис и ремонт',
-                  subtitle: 'Заявки и работы',
-                  accent: AppColors.success,
-                  onTap: () => _soon('Сервис и ремонт'),
-                ),
-                const SizedBox(height: 12),
-                _card(
-                  index: 4,
-                  icon: Icons.system_update_rounded,
-                  title: 'Проверить обновление',
-                  subtitle: 'Версия и обновления',
-                  accent: AppColors.gold,
-                  onTap: _checkUpdate,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _soon(String name) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$name — в разработке')),
-    );
+  void _open(Widget page) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => page))
+        .then((_) => setState(() {
+              _count =
+                  (widget.prefs.getStringList('measurements_v4') ?? []).length;
+            }));
   }
 
   Future<void> _checkUpdate() async {
-    final report = await UpdateChecker.getReport();
-    if (!mounted) return;
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Обновление'),
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    final report = await UpdateChecker.getReport();
+    if (!mounted) return;
+    Navigator.pop(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Проверка обновления'),
         content: SingleChildScrollView(
-          child: Text(report, style: const TextStyle(fontSize: 12.5)),
+          child: Text(report,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12.5)),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Закрыть'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(ctx);
               final msg = await UpdateChecker.downloadAndInstall();
-              if (!mounted) return;
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(msg)));
+              if (mounted) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(msg)));
+              }
             },
             child: const Text('Обновить'),
           ),
@@ -131,14 +77,115 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 32),
+          children: [
+            _header(dark),
+            const SectionTitle('Работа'),
+            Reveal(
+              index: 0,
+              child: _MenuCard(
+                icon: Icons.add_circle_outline_rounded,
+                title: 'Создать замер',
+                subtitle: 'Новый расчёт по шагам',
+                accent: AppColors.gold,
+                onTap: () => _open(const WizardStep1Screen()),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Reveal(
+              index: 1,
+              child: _MenuCard(
+                icon: Icons.folder_copy_outlined,
+                title: 'Сохранённые замеры',
+                subtitle: 'Архив расчётов и отправка',
+                accent: const Color(0xFF3B82F6),
+                onTap: () => _open(const PlaceholderScreen(
+                  title: 'Сохранённые замеры',
+                  subtitle: 'Здесь появится архив замеров с отправкой на завод, клиенту и дилеру.',
+                  icon: Icons.folder_copy_outlined,
+                )),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Reveal(
+              index: 2,
+              child: _MenuCard(
+                icon: Icons.tune_rounded,
+                title: 'Настройки прайса',
+                subtitle: 'Цены и коэффициенты расчёта',
+                accent: const Color(0xFF8B5CF6),
+                onTap: () => _open(const PlaceholderScreen(
+                  title: 'Настройки прайса',
+                  subtitle: 'Здесь появятся категории цен и коэффициентов расчёта.',
+                  icon: Icons.tune_rounded,
+                )),
+              ),
+            ),
+            const SectionTitle('Сервис'),
+            Reveal(
+              index: 3,
+              child: _MenuCard(
+                icon: Icons.build_circle_outlined,
+                title: 'Сервис и ремонт',
+                subtitle: 'Заказы на регулировку и замену',
+                accent: const Color(0xFFF97316),
+                onTap: () => _open(const PlaceholderScreen(
+                  title: 'Сервис и ремонт',
+                  subtitle: 'Здесь появятся сервисные заказы: регулировка, замена ручек, резинок, стеклопакетов.',
+                  icon: Icons.build_circle_outlined,
+                )),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Reveal(
+              index: 4,
+              child: _MenuCard(
+                icon: Icons.system_update_alt_rounded,
+                title: 'Проверить обновление',
+                subtitle: 'Версия, статус и установка APK',
+                accent: AppColors.ok,
+                onTap: _checkUpdate,
+              ),
+            ),
+            const SizedBox(height: 26),
+            Center(
+              child: Text(
+                'ALMAS · ЗАМЕРЩИК ОКОН v1.9.2',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.4,
+                  color: dark
+                      ? Colors.white.withOpacity(0.35)
+                      : AppColors.inkSoft.withOpacity(0.7),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _header(bool dark) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(
-          20, MediaQuery.of(context).padding.top + 18, 20, 24),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
         gradient: AppColors.navyGradient,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.navyDeep.withOpacity(0.30),
+            blurRadius: 26,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,16 +200,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.gold.withOpacity(0.35),
+                      color: AppColors.gold.withOpacity(0.40),
                       blurRadius: 18,
-                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
                 child: const Icon(Icons.window_rounded,
-                    color: AppColors.navy900, size: 24),
+                    color: AppColors.navyDeep, size: 24),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 13),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,20 +216,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       'ЗАМЕРЩИК ОКОН',
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 16.5,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
+                        letterSpacing: 0.3,
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    SizedBox(height: 3),
                     Text(
-                      'ALMAS',
+                      'ALMAS · ПРЕМИУМ РАСЧЁТ',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: 2.2,
-                        color: AppColors.gold,
+                        letterSpacing: 1.6,
+                        color: AppColors.goldLight,
                       ),
                     ),
                   ],
@@ -192,166 +238,175 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 onPressed: widget.onToggleTheme,
                 icon: Icon(
-                  dark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  widget.isDark
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
                   color: Colors.white,
-                  size: 21,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Container(
-            width: 44,
-            height: 3,
+            width: 46,
+            height: 2,
             decoration: BoxDecoration(
               gradient: AppColors.goldGradient,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Панель замерщика',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.8,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Расчёт, архив и сервис в одном месте',
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF9FB0C6),
-            ),
+          Row(
+            children: [
+              _pill('v1.9.2', Icons.verified_outlined),
+              const SizedBox(width: 8),
+              _pill('$_count замеров', Icons.description_outlined),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _card({
-    required int index,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color accent,
-    required VoidCallback onTap,
-  }) {
-    return _Reveal(
-      delay: Duration(milliseconds: 55 * index),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(22),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color,
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.07),
-                  blurRadius: 22,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: accent.withOpacity(0.13),
-                      borderRadius: BorderRadius.circular(17),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accent.withOpacity(0.22),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Icon(icon, color: accent, size: 27),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title,
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 3),
-                        Text(subtitle,
-                            style: Theme.of(context).textTheme.bodySmall),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: accent.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.arrow_forward_rounded,
-                        size: 16, color: accent),
-                  ),
-                ],
-              ),
+  Widget _pill(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white.withOpacity(0.14)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppColors.goldLight),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+              color: Colors.white,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-/// Каскадное появление элемента.
-class _Reveal extends StatefulWidget {
-  const _Reveal({required this.child, this.delay = Duration.zero});
-  final Widget child;
-  final Duration delay;
+class _MenuCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color accent;
+  final VoidCallback onTap;
 
-  @override
-  State<_Reveal> createState() => _RevealState();
-}
-
-class _RevealState extends State<_Reveal>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
-  late final Animation<double> _fade;
-  late final Animation<Offset> _slide;
-
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 420));
-    _fade = CurvedAnimation(parent: _c, curve: Curves.easeOut);
-    _slide = Tween(begin: const Offset(0, 0.12), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
-    Future.delayed(widget.delay, () {
-      if (mounted) _c.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
+  const _MenuCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.accent,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fade,
-      child: SlideTransition(position: _slide, child: widget.child),
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: dark ? AppColors.navy : AppColors.paperCard,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: dark
+                  ? Colors.white.withOpacity(0.07)
+                  : AppColors.ink.withOpacity(0.06),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.navyDeep
+                    .withOpacity(dark ? 0.30 : 0.08),
+                blurRadius: 22,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: accent.withOpacity(0.14),
+                    borderRadius: BorderRadius.circular(17),
+                    border: Border.all(color: accent.withOpacity(0.30)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: accent.withOpacity(0.22),
+                        blurRadius: 16,
+                      ),
+                    ],
+                  ),
+                  child: Icon(icon, color: accent, size: 26),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.2,
+                          color: dark ? Colors.white : AppColors.ink,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                          color: dark
+                              ? Colors.white.withOpacity(0.55)
+                              : AppColors.inkSoft,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: dark
+                        ? Colors.white.withOpacity(0.06)
+                        : AppColors.paper,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: dark ? AppColors.goldLight : AppColors.navy,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

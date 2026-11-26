@@ -4,16 +4,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'theme.dart';
-import 'version_info.dart';
 import 'measure_history.dart';
 import 'measure_sizes.dart';
 import 'measure_sheet.dart';
 import 'price_estimate.dart';
 import 'window_visual.dart';
 import 'work_tree.dart';
-
-part 'onboarding/widgets.dart';
-part 'onboarding/background.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
 ///  ПРЕМИАЛЬНЫЙ ЭКРАН  ·  v3.4.17
@@ -63,10 +59,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Выбранный стеклопакет (-1 — не выбран).
   int _glass = -1;
 
-  /// Габарит изделия (ШИРИНА / ВЫСОТА) — вводится ТАПОМ по чертежу.
-  int _wMm = 0;
-  int _hMm = 0;
-
   /// Обозначение каждой створки на чертеже (индекс в kSashModeNames).
   List<int> _sashModes = const [];
 
@@ -83,16 +75,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   static const _titles = [
     'ДАННЫЕ КЛИЕНТА',
     'ЧТО ДЕЛАЕМ',
-    'ВИЗУАЛЬНЫЙ ЗАМЕР',
     'РАЗМЕРЫ',
+    'ВИЗУАЛЬНЫЙ ЗАМЕР',
     'СМЕТА',
     'ЗАМЕРНЫЙ ЛИСТ',
   ];
   static const _icons = [
     Icons.person_rounded,
     Icons.account_tree_rounded,
-    Icons.window_rounded,
     Icons.straighten_rounded,
+    Icons.window_rounded,
     Icons.calculate_rounded,
     Icons.receipt_long_rounded,
   ];
@@ -402,8 +394,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _secW = const [];
       _sashModes = const [];
       _hinges = const [];
-      _wMm = 0;
-      _hMm = 0;
       _step = 2;
     });
   }
@@ -412,11 +402,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _sizesStep() {
     return MeasureSizesView(
       items: _multi,
-      balcony: _balcony,
-      onBack: () => setState(() => _step = 2),
+      onBack: () => setState(() => _step = 1),
       onDone: (mm) => setState(() {
         _sizes = mm;
-        _step = 4;
+        _step = 3;
       }),
     );
   }
@@ -442,8 +431,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _pickedBar(windowType, house),
-                const SizedBox(height: 10),
-                const VersionBadge(),
                 const SizedBox(height: 12),
                 _sashControls(sashes),
                 const SizedBox(height: 12),
@@ -454,11 +441,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   selectedGlass: _glass,
                   onGlass: (i) => setState(() => _glass = i),
                   sashModes: modes,
-                  widthMm: _wMm,
-                  heightMm: _hMm,
-                  onWidthEdit: (v) => setState(() => _wMm = v),
-                  onHeightEdit: (v) => setState(() => _hMm = v),
-                  onSectionEdit: _setSectionMm,
+                  widthMm: _mmOf('ШИРИНА'),
+                  heightMm: _mmOf('ВЫСОТА'),
                   sectionWidths: _secWidths,
                   hingeCounts: _hingeCounts,
                   onSashTap: (i) => setState(() {
@@ -476,11 +460,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           child: Row(
             children: [
               _GhostButton('НАЗАД', Icons.arrow_back_rounded,
-                  () => setState(() => _step = 1)),
+                  () => setState(() => _step = 2)),
               const SizedBox(width: 12),
               Expanded(
-                child: _GoldButton('РАЗМЕРЫ', Icons.straighten_rounded,
-                    () => setState(() => _step = 3)),
+                child: _GoldButton('СМЕТА', Icons.calculate_rounded,
+                    () => setState(() => _step = 4)),
               ),
             ],
           ),
@@ -503,7 +487,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       windowType: windowType,
       parts: _multi,
       glass: glass,
-      sizes: _sizes,
     );
     return EstimateView(
       estimate: estimate,
@@ -559,7 +542,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       windowType: windowType,
       parts: _multi,
       glass: glass,
-      sizes: _sizes,
     );
     final modes = _sashModes.length == _sashCount
         ? _sashModes
@@ -591,16 +573,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const HistoryView()),
     );
-  }
-
-  /// Изделие на балконе / лоджии: у подоконника, отлива и козырька
-  /// ДРУГИЕ надбавки к длине. Признак — балкон/лоджия в дереве либо
-  /// козырёк в комплектации (козырёк бывает только на балконе).
-  bool get _balcony {
-    final all = [..._picked, ..._multi].join(' ').toUpperCase();
-    return all.contains('БАЛКОН') ||
-        all.contains('ЛОДЖИ') ||
-        all.contains('КОЗЫР');
   }
 
   /// Сколько створок: ручной выбор замерщика, иначе — по типу изделия.
@@ -648,113 +620,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       ws[j] += d;
     }
     setState(() => _secW = ws);
-  }
-
-  /// Ручная ширина секции i в ММ. Остальные секции пересчитываются
-  /// автоматически из общего габарита: вписал первую — вторая уже посчитана.
-  void _setSectionMm(int i, int mm) {
-    final n = _sashCount;
-    final total = _mmOf('ШИРИНА');
-    if (n < 2 || total <= 0 || mm <= 0) return;
-    final ws = List<double>.from(_secWidths);
-    if (i < 0 || i >= ws.length) return;
-    final f = (mm / total).clamp(0.10, 0.90);
-    final rest = 1.0 - f;
-    final oldRest = 1.0 - ws[i];
-    for (var k = 0; k < n; k++) {
-      if (k == i) {
-        ws[i] = f;
-      } else {
-        ws[k] = oldRest > 0.001 ? rest * ws[k] / oldRest : rest / (n - 1);
-      }
-    }
-    setState(() => _secW = ws);
-  }
-
-  /// Диалог ручного ввода ширины секции в ММ.
-  Future<void> _askSectionMm(int i) async {
-    final total = _mmOf('ШИРИНА');
-    if (total <= 0) return;
-    final cur = (total * _secWidths[i]).round();
-    final c = TextEditingController(text: cur > 0 ? '$cur' : '');
-    final v = await showDialog<int>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F1D31),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: AppColors.gold.withOpacity(0.45)),
-        ),
-        title: Text(
-          'ШИРИНА СЕКЦИИ ${i + 1}',
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-            color: Colors.white,
-          ),
-        ),
-        content: TextField(
-          controller: c,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          cursorColor: AppColors.gold,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-          ),
-          decoration: InputDecoration(
-            hintText: '800',
-            hintStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF7E93AC),
-            ),
-            suffixText: 'ММ',
-            suffixStyle: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: AppColors.gold,
-            ),
-            filled: true,
-            fillColor: const Color(0xFF0A1220),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(13),
-              borderSide: BorderSide(color: AppColors.gold.withOpacity(0.4)),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'ОТМЕНА',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF7E93AC),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              final p = double.tryParse(c.text.trim().replaceAll(',', '.'));
-              Navigator.pop(ctx, p == null ? null : p.round());
-            },
-            child: const Text(
-              'ОК',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: AppColors.gold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (v != null && v > 0) _setSectionMm(i, v);
   }
 
   /// Панель створок: число створок (для ЛЮБОГО изделия) + ширина секций.
@@ -817,7 +682,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 ),
                 const Spacer(),
                 Text(
-                  total > 0 ? 'ВСЕГО $total ММ · ТАПНИ ЧИСЛО' : 'ВВЕДИ ШИРИНУ',
+                  total > 0 ? 'ВСЕГО $total ММ' : 'ВВЕДИ ШИРИНУ',
                   style: const TextStyle(
                     fontSize: 8.5,
                     fontWeight: FontWeight.w800,
@@ -835,7 +700,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 mm: total > 0 ? (total * ws[i]).round() : 0,
                 onMinus: () => _bumpSection(i, -1),
                 onPlus: () => _bumpSection(i, 1),
-                onEdit: () => _askSectionMm(i),
               ),
             ],
           ],
@@ -846,9 +710,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   /// Габарит в ММ по названию поля (ищем по всем отмеченным пунктам).
   int _mmOf(String field) {
-    // Габарит изделия вводится ТАПОМ по чертежу — он в приоритете.
-    if (field == 'ШИРИНА' && _wMm > 0) return _wMm;
-    if (field == 'ВЫСОТА' && _hMm > 0) return _hMm;
     for (final e in _sizes.values) {
       final v = e[field];
       if (v != null && v > 0) return v;
@@ -930,6 +791,527 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ),
         ),
       ],
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ПОЛЕ ВВОДА С ЗОЛОТЫМ СВЕЧЕНИЕМ ПРИ ФОКУСЕ
+/// ═══════════════════════════════════════════════════════════════════
+class _PremiumField extends StatefulWidget {
+  const _PremiumField({
+    required this.label,
+    required this.hint,
+    required this.icon,
+    required this.controller,
+    this.kb,
+  });
+
+  final String label;
+  final String hint;
+  final IconData icon;
+  final TextEditingController controller;
+  final TextInputType? kb;
+
+  @override
+  State<_PremiumField> createState() => _PremiumFieldState();
+}
+
+class _PremiumFieldState extends State<_PremiumField> {
+  final FocusNode _fn = FocusNode();
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fn.addListener(() {
+      if (_focused != _fn.hasFocus) setState(() => _focused = _fn.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _fn.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppUi.label(widget.label,
+            color: _focused ? AppColors.gold : const Color(0xFF7E93AC),
+            size: 9),
+        const SizedBox(height: 6),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A1220),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _focused
+                  ? AppColors.gold.withOpacity(0.75)
+                  : const Color(0xFF1B2C44),
+            ),
+            boxShadow: _focused
+                ? [
+                    BoxShadow(
+                      color: AppColors.gold.withOpacity(0.18),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: TextField(
+            controller: widget.controller,
+            focusNode: _fn,
+            keyboardType: widget.kb,
+            cursorColor: AppColors.gold,
+            cursorWidth: 1.6,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            decoration: InputDecoration(
+              // ВАЖНО: гасим глобальную заливку темы (в светлой теме она белая
+              // и «съедала» белый текст). Фон даёт сам контейнер — тёмный.
+              filled: false,
+              fillColor: Colors.transparent,
+              hintText: widget.hint,
+              hintStyle: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF7E93AC),
+              ),
+              prefixIcon: Icon(widget.icon, size: 17, color: AppColors.gold),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 15),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ЗОЛОТАЯ КНОПКА С АНИМАЦИЕЙ НАЖАТИЯ
+/// ═══════════════════════════════════════════════════════════════════
+class _GoldButton extends StatefulWidget {
+  const _GoldButton(this.text, this.icon, this.onTap);
+  final String text;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  State<_GoldButton> createState() => _GoldButtonState();
+}
+
+class _GoldButtonState extends State<_GoldButton> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          width: double.infinity,
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: AppColors.goldGradient,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.gold.withOpacity(_down ? 0.20 : 0.38),
+                blurRadius: _down ? 12 : 22,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                widget.text,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                  color: AppColors.navy900,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(widget.icon, size: 18, color: AppColors.navy900),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ПРОЗРАЧНАЯ КНОПКА «НАЗАД» (стеклянная, с золотой рамкой)
+/// ═══════════════════════════════════════════════════════════════════
+class _GhostButton extends StatefulWidget {
+  const _GhostButton(this.text, this.icon, this.onTap);
+  final String text;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  State<_GhostButton> createState() => _GhostButtonState();
+}
+
+class _GhostButtonState extends State<_GhostButton> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A1220),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: AppColors.gold.withOpacity(0.42)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(widget.icon, size: 17, color: AppColors.gold),
+              const SizedBox(width: 7),
+              Text(
+                widget.text,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.9,
+                  color: AppColors.gold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  КРУГЛАЯ КНОПКА-ИКОНКА (назад на главный экран)
+/// ═══════════════════════════════════════════════════════════════════
+class _RoundButton extends StatefulWidget {
+  const _RoundButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  State<_RoundButton> createState() => _RoundButtonState();
+}
+
+class _RoundButtonState extends State<_RoundButton> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.92 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A1220),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.gold.withOpacity(0.42)),
+          ),
+          child: Icon(widget.icon, size: 19, color: AppColors.gold),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ПРОБЕГАЮЩИЙ БЛИК ПО КАРТОЧКЕ
+/// ═══════════════════════════════════════════════════════════════════
+class _ShinePainter extends CustomPainter {
+  _ShinePainter(this.t);
+  final double t;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final x = (t * 1.6 - 0.3) * size.width;
+    final w = size.width * 0.22;
+    final rect = Rect.fromLTWH(x, 0, w, size.height);
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(x, 0),
+          Offset(x + w, size.height),
+          [
+            Colors.white.withOpacity(0.0),
+            Colors.white.withOpacity(0.045),
+            Colors.white.withOpacity(0.0),
+          ],
+        ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ShinePainter old) => old.t != t;
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ПРЕМИАЛЬНЫЙ ФОН — тёмный градиент, золотые орбы, парящие частицы
+/// ═══════════════════════════════════════════════════════════════════
+class _PremiumBg extends StatefulWidget {
+  const _PremiumBg();
+
+  @override
+  State<_PremiumBg> createState() => _PremiumBgState();
+}
+
+class _PremiumBgState extends State<_PremiumBg>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+        vsync: this, duration: const Duration(seconds: 22))
+      ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (_, __) => CustomPaint(painter: _BgPainter(_c.value)),
+      ),
+    );
+  }
+}
+
+class _BgPainter extends CustomPainter {
+  _BgPainter(this.t);
+  final double t;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    // База — глубокий графитово-синий
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0B1522), Color(0xFF060C16)],
+        ).createShader(rect),
+    );
+
+    // Три медленно плывущих орба
+    _orb(canvas, size, 0.22, 0.18, 0.55, AppColors.gold, 0.16, 0.0);
+    _orb(canvas, size, 0.82, 0.72, 0.62, const Color(0xFF2E6FB8), 0.18, 0.33);
+    _orb(canvas, size, 0.50, 0.95, 0.48, AppColors.bronze, 0.12, 0.66);
+
+    // Парящие частицы
+    final p = Paint();
+    for (var i = 0; i < 46; i++) {
+      final seed = i * 7.13;
+      final bx = (math.sin(seed) * 0.5 + 0.5);
+      final by = (math.cos(seed * 1.7) * 0.5 + 0.5);
+      final drift = math.sin(t * math.pi * 2 + seed) * 0.035;
+      final x = (bx + drift) * size.width;
+      final y = ((by - t * 0.06) % 1.0) * size.height;
+      final r = 0.7 + (i % 4) * 0.55;
+      final a = 0.10 + (i % 5) * 0.055;
+      p.color = (i % 3 == 0 ? AppColors.gold : const Color(0xFF9FB0C6))
+          .withOpacity(a);
+      canvas.drawCircle(Offset(x, y), r, p);
+    }
+  }
+
+  void _orb(Canvas canvas, Size size, double cx, double cy, double r,
+      Color color, double alpha, double phase) {
+    final ang = t * math.pi * 2 + phase * math.pi * 2;
+    final ox = cx + math.sin(ang) * 0.06;
+    final oy = cy + math.cos(ang * 0.8) * 0.05;
+    final center = Offset(ox * size.width, oy * size.height);
+    final radius = r * size.width;
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..shader = ui.Gradient.radial(center, radius, [
+          color.withOpacity(alpha),
+          color.withOpacity(0.0),
+        ]),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BgPainter old) => old.t != t;
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ЧИП ЧИСЛА СТВОРОК (1..4)
+/// ═══════════════════════════════════════════════════════════════════
+class _SashCountChip extends StatelessWidget {
+  const _SashCountChip({
+    required this.n,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final int n;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 34,
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF12233A) : const Color(0xFF0B1524),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? AppColors.gold.withOpacity(0.80)
+                : const Color(0xFF1B2C44),
+          ),
+        ),
+        child: Text(
+          '$n',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: selected ? AppColors.gold : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  СТРОКА ШИРИНЫ СЕКЦИИ: номер · мм · − / +
+/// ═══════════════════════════════════════════════════════════════════
+class _SectionWidthRow extends StatelessWidget {
+  const _SectionWidthRow({
+    required this.index,
+    required this.mm,
+    required this.onMinus,
+    required this.onPlus,
+  });
+
+  final int index;
+  final int mm;
+  final VoidCallback onMinus;
+  final VoidCallback onPlus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          'СЕКЦИЯ ${index + 1}',
+          style: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+            color: Color(0xFF7E93AC),
+          ),
+        ),
+        const Spacer(),
+        _StepBtn(icon: Icons.remove_rounded, onTap: onMinus),
+        SizedBox(
+          width: 74,
+          child: Text(
+            mm > 0 ? '$mm ММ' : '—',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        _StepBtn(icon: Icons.add_rounded, onTap: onPlus),
+      ],
+    );
+  }
+}
+
+/// ═══════════════════════════════════════════════════════════════════
+///  КНОПКА ШАГА (− / +)
+/// ═══════════════════════════════════════════════════════════════════
+class _StepBtn extends StatelessWidget {
+  const _StepBtn({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 30,
+        height: 30,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B1524),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: AppColors.gold.withOpacity(0.42)),
+        ),
+        child: Icon(icon, size: 15, color: AppColors.gold),
+      ),
     );
   }
 }
