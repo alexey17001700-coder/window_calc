@@ -499,6 +499,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   bool get _isBalcony =>
       _picked.length > 1 && _picked[1].toUpperCase() == 'БАЛКОННЫЙ БЛОК';
 
+  /// Простая ДВЕРЬ ПВХ (не балконный блок) — у неё есть кнопка «ПЕТЛИ»
+  /// с выпадающим меню: количество 2..4 и режим открывания.
+  bool get _isDoor =>
+      _picked.length > 1 && _picked[1].toUpperCase() == 'ДВЕРЬ';
+
   /// Шаг назад: у изделий с визуалкой шаг «РАЗМЕРЫ» пропущен,
   /// поэтому с чертежа возвращаемся сразу к дереву.
   void _goBack() {
