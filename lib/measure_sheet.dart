@@ -113,6 +113,16 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   String get _dash => '─' * 26;
 
+  /// Стеклопакет одной строкой: «2-КАМ · 32 ММ · РАМА 70 ММ».
+  /// Камерность и толщина — ОДНИ на всё изделие (все стеклопакеты сразу).
+  String get _glassLine {
+    final g = widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass;
+    final parts = <String>[g];
+    if (widget.glassThk > 0) parts.add('${widget.glassThk} ММ');
+    if (widget.frameMm > 0) parts.add('РАМА ${widget.frameMm} ММ');
+    return parts.join(' · ');
+  }
+
   /// Текст замерного листа — все размеры в миллиметрах.
   String _sheetText() {
     final b = StringBuffer();
