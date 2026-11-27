@@ -1210,6 +1210,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ],
           const SizedBox(height: 10),
           const Text(
+            'СВАЙП ВВЕРХ ПО СТЕКЛУ — КАМЕРНОСТЬ · ВНИЗ — ТОЛЩИНА\n'
             'ТАП ПО ЧЕРТЕЖУ: ОКНО — СТЕКЛОПАКЕТ, ДВЕРЬ — ВИД НИЗА, ЦИФРЫ — РАЗМЕР',
             style: TextStyle(
               fontSize: 8,
