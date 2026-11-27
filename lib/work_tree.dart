@@ -58,24 +58,45 @@ const List<WorkNode> houseTypes = [
   WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', finishingTypes),
 ];
 
-/// ─── ПРОФИЛЬ (толщина рамы) — уровень ПОСЛЕ типа дома ───
-/// Только у БАЛКОННОГО БЛОКА. Две кнопки: 60 мм (стандарт) и 70 мм
-/// (тёплый профиль). После выбора профиля идёт комплектация.
-/// Толщина профиля участвует в расчёте сметы (lib/price_estimate.dart).
-const List<WorkNode> profileTypes = [
-  WorkNode(Icons.straighten_rounded, 'ПРОФИЛЬ 60 ММ', finishingTypes),
-  WorkNode(Icons.straighten_rounded, 'ПРОФИЛЬ 70 ММ', finishingTypes),
+/// ─── МАРКИ ПВХ-ПРОФИЛЯ (заглушки) ───
+/// Часто используемые марки. Один список на дерево и на смету.
+const List<String> brandNames = [
+  'REHAU',
+  'VEKA',
+  'KBE',
+  'SALAMANDER',
+  'NOVOTEX',
+  'ALUPLAST',
+  'МОНБЛАН',
+  'ПРОПЛЕКС',
+  'ПЛАФЕН',
+  'КАЛЕВА',
 ];
 
-/// Типы дома БАЛКОННОГО БЛОКА: после дома идёт выбор ПРОФИЛЯ (60/70),
-/// а уже после профиля — комплектация (мультивыбор).
-const List<WorkNode> balconyHouseTypes = [
-  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА', profileTypes),
-  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА', profileTypes),
-  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА', profileTypes),
-  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА', profileTypes),
-  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ', profileTypes),
-  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', profileTypes),
+/// ─── НАЗВАНИЕ ПРОФИЛЯ (марка) — уровень ПОСЛЕ толщины профиля ───
+/// После марки идёт тип дома, а после дома — комплектация (мультивыбор).
+/// Цены по маркам пока заглушки (lib/price_estimate.dart).
+const List<WorkNode> brandTypes = [
+  WorkNode(Icons.branding_watermark_rounded, 'REHAU', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'VEKA', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'KBE', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'SALAMANDER', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'NOVOTEX', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'ALUPLAST', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'МОНБЛАН', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'ПРОПЛЕКС', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'ПЛАФЕН', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'КАЛЕВА', houseTypes),
+];
+
+/// ─── ПРОФИЛЬ (толщина рамы) — уровень СРАЗУ ПОСЛЕ изделия ───
+/// У ВСЕХ ПВХ-изделий: окно, балкон, лоджия, балконный блок.
+/// Две кнопки: 60 мм (стандарт) и 70 мм (тёплый профиль).
+/// Дальше — название профиля (марка), потом тип дома, потом комплектация.
+/// Толщина профиля участвует в расчёте сметы (lib/price_estimate.dart).
+const List<WorkNode> profileTypes = [
+  WorkNode(Icons.straighten_rounded, 'ПРОФИЛЬ 60 ММ', brandTypes),
+  WorkNode(Icons.straighten_rounded, 'ПРОФИЛЬ 70 ММ', brandTypes),
 ];
 
 /// ─── ВИДЫ ИЗДЕЛИЙ (3-й уровень дерева) ───
