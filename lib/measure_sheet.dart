@@ -1078,14 +1078,22 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       case SheetRecipient.measurer:
         return _allRows();
       case SheetRecipient.factory:
-        return [for (final item in widget.multi) (item, _sizesLine(item))];
+        return [
+          ..._visRows(),
+          for (final item in widget.multi)
+            if ((widget.sizes[item] ?? const <String, int>{}).isNotEmpty)
+              (item, _sizesLine(item)),
+        ];
       case SheetRecipient.installer:
         return [
           ('АДРЕС', _or(widget.addr, '—')),
           ('КВ. / ЭТАЖ',
               '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
           ('ТЕЛЕФОН', _or(widget.phone, '—')),
-          for (final item in widget.multi) (item, _sizesLine(item)),
+          ..._visRows(),
+          for (final item in widget.multi)
+            if ((widget.sizes[item] ?? const <String, int>{}).isNotEmpty)
+              (item, _sizesLine(item)),
         ];
       case SheetRecipient.client:
         return [];
