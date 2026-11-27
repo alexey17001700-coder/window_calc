@@ -509,6 +509,7 @@ class SheetExport {
     required String product,
     required List<(String, String)> rows,
     required List<(MeasurePhoto, String)> photos,
+    String order = '',
     String footer = 'Сформировано в Window Measure Pro',
   }) {
     final b = StringBuffer();
