@@ -43,6 +43,9 @@ jobs:
           grep -nE 'compileSdk|minSdk|targetSdk' android/app/build.gradle
           echo "--- AGP / Gradle (должны быть родные, из шаблона Flutter) ---"
           grep -nE 'com.android.application|distributionUrl' android/settings.gradle android/gradle/wrapper/gradle-wrapper.properties
+          echo "--- gradle.properties (aapt2 / android-35.jar) ---"
+          echo "android.suppressUnsupportedCompileSdk=35" >> android/gradle.properties
+          cat android/gradle.properties
 
       - name: Fix Kotlin version
         run: |
