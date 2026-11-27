@@ -132,32 +132,49 @@ jobs:
           PLUGIN_DIR="$FLUTTER_ROOT/packages/flutter_tools/gradle"
           ls -la "$PLUGIN_DIR" || true
 
-          export REPOS='maven { url "https://maven.aliyun.com/repository/central" }
+          # ВАЖНО: Groovy (.gradle) и Kotlin DSL (.gradle.kts) — РАЗНЫЙ синтаксис.
+          # В .kts нельзя писать maven { url "..." } — только maven("...").
+          # Именно на этом падало: settings.gradle.kts:5 Unexpected tokens.
+          REPOS_GROOVY='maven { url "https://maven.aliyun.com/repository/central" }
               maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
               maven { url "https://repo1.maven.org/maven2/" }
               mavenCentral()'
+          REPOS_KTS='maven("https://maven.aliyun.com/repository/central")
+              maven("https://maven-central.storage-download.googleapis.com/maven2/")
+              maven("https://repo1.maven.org/maven2/")
+              mavenCentral()'
+          export REPOS_GROOVY REPOS_KTS
 
           # 1) Все gradle-файлы встроенного плагина Flutter — там и живёт :gradle
           mapfile -t FILES < <(find "$PLUGIN_DIR" \( -name "*.gradle" -o -name "*.gradle.kts" \) 2>/dev/null)
           echo "Файлов плагина найдено: ${#FILES[@]}"
           for F in "${FILES[@]}"; do
-            if grep -q "mavenCentral()" "$F"; then
-              perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS}/g' "$F"
-            else
-              case "$(basename "$F")" in
-                build.gradle|build.gradle.kts|settings.gradle|settings.gradle.kts)
-                  printf '\nrepositories {\n    %s\n}\n' "$REPOS" >> "$F" ;;
-              esac
-            fi
+            case "$F" in
+              *.gradle.kts)
+                # Kotlin DSL: ТОЛЬКО замена mavenCentral() на mavenCentral() + maven("...")
+                # Никаких repositories { } и url "..." — иначе снова Unexpected tokens.
+                if grep -q "mavenCentral()" "$F"; then
+                  perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS_KTS}/g' "$F"
+                fi ;;
+              *)
+                if grep -q "mavenCentral()" "$F"; then
+                  perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS_GROOVY}/g' "$F"
+                else
+                  case "$(basename "$F")" in
+                    build.gradle|settings.gradle)
+                      printf '\nrepositories {\n    %s\n}\n' "$REPOS_GROOVY" >> "$F" ;;
+                  esac
+                fi ;;
+            esac
             echo "--- $F"
             grep -n "aliyun\|mavenCentral\|^repositories" "$F" || true
           done
 
-          # 2) Файлы проекта
+          # 2) Файлы проекта (Groovy)
           for F in android/settings.gradle android/build.gradle; do
             [ -f "$F" ] || continue
             if grep -q "mavenCentral()" "$F"; then
-              perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS}/g' "$F"
+              perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS_GROOVY}/g' "$F"
             fi
           done
 
