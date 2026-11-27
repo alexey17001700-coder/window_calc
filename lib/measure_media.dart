@@ -570,34 +570,50 @@ class SheetExport {
         'text-align:center;letter-spacing:1px}');
     b.writeln('@media print{body{padding:0}}');
     b.writeln('</style></head><body>');
-    b.writeln('<h1>ЗАМЕРНЫЙ ЛИСТ</h1>');
+    b.writeln('<h1>${_esc(title)}</h1>');
     if (order.isNotEmpty) {
       b.writeln('<div class="ord">ЗАКАЗ № ${_esc(order)}</div>');
     }
     b.writeln('<div class="sub">ВСЕ РАЗМЕРЫ В МИЛЛИМЕТРАХ</div>');
 
-    b.writeln('<div class="card"><div class="t">КЛИЕНТ</div>'
-        '<table><tr><td class="k">ИМЯ</td><td class="v">${_esc(client)}</td></tr>'
-        '</table></div>');
-
-    b.writeln('<div class="card"><div class="t">ИЗДЕЛИЕ</div>'
-        '<table><tr><td class="k">ЦЕПОЧКА</td>'
-        '<td class="v">${_esc(product)}</td></tr></table></div>');
-
-    // ── ГЛАВНЫЙ БЛОК A4: слева ЧЕРТЁЖ изделия, справа СПЕЦИФИКАЦИЯ ──
-    if (visual.isNotEmpty || spec.isNotEmpty) {
-      b.writeln('<div class="main">');
-      b.writeln('<div class="left">$visual</div>');
-      b.writeln('<div class="right"><div class="spec">'
-          '<div class="t">ИЗДЕЛИЕ И КОМПЛЕКТУЮЩИЕ</div><table>');
-      for (final r in spec) {
-        b.writeln('<tr><td class="k">${_esc(r.$1)}</td>'
-            '<td class="v">${_esc(r.$2)}</td></tr>');
-      }
-      b.writeln('</table></div></div></div>');
+    if (showClient) {
+      b.writeln('<div class="card"><div class="t">КЛИЕНТ</div>'
+          '<table><tr><td class="k">ИМЯ</td>'
+          '<td class="v">${_esc(client)}</td></tr>'
+          '</table></div>');
     }
 
-    if (rows.isNotEmpty) {
+    if (showRows) {
+      b.writeln('<div class="card"><div class="t">ИЗДЕЛИЕ</div>'
+          '<table><tr><td class="k">ЦЕПОЧКА</td>'
+          '<td class="v">${_esc(product)}</td></tr></table></div>');
+    }
+
+    // ── ГЛАВНЫЙ БЛОК A4: слева ЧЕРТЁЖ изделия, справа СПЕЦИФИКАЦИЯ ──
+    final left = showVisual && visual.isNotEmpty;
+    final right = showSpec && spec.isNotEmpty;
+    if (left || right) {
+      b.writeln('<div class="main${left ? '' : ' solo'}">');
+      if (left) b.writeln('<div class="left">$visual</div>');
+      if (right) {
+        b.writeln('<div class="right"><div class="spec">'
+            '<div class="t">${_esc(specTitle)}</div><table>');
+        for (final r in spec) {
+          b.writeln('<tr><td class="k">${_esc(r.$1)}</td>'
+              '<td class="v">${_esc(r.$2)}</td></tr>');
+        }
+        b.writeln('</table></div></div>');
+      }
+      b.writeln('</div>');
+    }
+
+    if (price.isNotEmpty) {
+      b.writeln('<div class="price"><span class="pl">'
+          '${_esc(priceLabel)}</span><span class="pv">'
+          '${_esc(price)}</span></div>');
+    }
+
+    if (showRows && rows.isNotEmpty) {
       b.writeln('<div class="card"><div class="t">ДАННЫЕ ЗАМЕРА</div><table>');
       for (final r in rows) {
         b.writeln('<tr><td class="k">${_esc(r.$1)}</td>'
@@ -606,7 +622,7 @@ class SheetExport {
       b.writeln('</table></div>');
     }
 
-    if (photos.isNotEmpty) {
+    if (showPhotos && photos.isNotEmpty) {
       b.writeln('<div class="card"><div class="t">ФОТО ПРОЁМА</div>'
           '<div class="ph">');
       for (final p in photos) {
