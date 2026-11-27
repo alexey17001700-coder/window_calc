@@ -87,6 +87,7 @@ const List<WorkNode> brandTypes = [
   WorkNode(Icons.branding_watermark_rounded, 'МОНБЛАН', houseTypes),
   WorkNode(Icons.branding_watermark_rounded, 'ПРОПЛЕКС', houseTypes),
   WorkNode(Icons.branding_watermark_rounded, 'ПЛАФЕН', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'INNOVA D-LINE', houseTypes),
   WorkNode(Icons.branding_watermark_rounded, 'КАЛЕВА', houseTypes),
 ];
 
