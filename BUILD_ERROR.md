@@ -1,20 +1,47 @@
 # Ошибка сборки window_calc
 
-Прогон: 45997504287
-Дата: 2026-11-27 12:22 UTC
+Прогон: 45999895421
+Дата: 2026-11-27 12:43 UTC
 
 ```
 
 Running Gradle task 'assembleRelease'...                        
+Your project is configured with Android NDK 23.1.7779620, but the following plugin(s) depend on a different Android NDK version:
+- flutter_plugin_android_lifecycle requires Android NDK 27.0.12077973
+- image_picker_android requires Android NDK 27.0.12077973
+- open_filex requires Android NDK 27.0.12077973
+- package_info_plus requires Android NDK 27.0.12077973
+- path_provider_android requires Android NDK 27.0.12077973
+- share_plus requires Android NDK 27.0.12077973
+- shared_preferences_android requires Android NDK 27.0.12077973
+Fix this issue by using the highest Android NDK version (they are backward compatible).
+Add the following to /home/runner/work/window_calc/window_calc/android/app/build.gradle:
+
+    android {
+        ndkVersion = "27.0.12077973"
+        ...
+    }
+
+Checking the license for package Android SDK Platform 33 in /usr/local/lib/android/sdk/licenses
+License for package Android SDK Platform 33 accepted.
+Preparing "Install Android SDK Platform 33 (revision 3)".
+"Install Android SDK Platform 33 (revision 3)" ready.
+Installing Android SDK Platform 33 in /usr/local/lib/android/sdk/platforms/android-33
+"Install Android SDK Platform 33 (revision 3)" complete.
+"Install Android SDK Platform 33 (revision 3)" finished.
+lib/screen_flash.dart:104:36: Error: The argument type 'Offset' can't be assigned to the parameter type 'Alignment'.
+ - 'Offset' is from 'dart:ui'.
+ - 'Alignment' is from 'package:flutter/src/painting/alignment.dart' ('/opt/hostedtoolcache/flutter/stable-3.24.0-x64/flutter/packages/flutter/lib/src/painting/alignment.dart').
+                      return _wave(origin);
+                                   ^
+Target kernel_snapshot_program failed: Exception
+
 
 FAILURE: Build failed with an exception.
 
-* Where:
-Settings file '/home/runner/work/window_calc/window_calc/android/settings.gradle' line: 20
-
 * What went wrong:
-Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
-> Build was configured to prefer settings repositories over project repositories but repository 'maven' was added by settings file 'settings.gradle'
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command '/opt/hostedtoolcache/flutter/stable-3.24.0-x64/flutter/bin/flutter'' finished with non-zero exit value 1
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -22,20 +49,40 @@ Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 17s
-Running Gradle task 'assembleRelease'...                           18.0s
+BUILD FAILED in 2m 1s
+Running Gradle task 'assembleRelease'...                          121.6s
 Gradle task assembleRelease failed with exit code 1
 
 Running Gradle task 'assembleRelease'...                        
+Your project is configured with Android NDK 23.1.7779620, but the following plugin(s) depend on a different Android NDK version:
+- flutter_plugin_android_lifecycle requires Android NDK 27.0.12077973
+- image_picker_android requires Android NDK 27.0.12077973
+- open_filex requires Android NDK 27.0.12077973
+- package_info_plus requires Android NDK 27.0.12077973
+- path_provider_android requires Android NDK 27.0.12077973
+- share_plus requires Android NDK 27.0.12077973
+- shared_preferences_android requires Android NDK 27.0.12077973
+Fix this issue by using the highest Android NDK version (they are backward compatible).
+Add the following to /home/runner/work/window_calc/window_calc/android/app/build.gradle:
+
+    android {
+        ndkVersion = "27.0.12077973"
+        ...
+    }
+
+lib/screen_flash.dart:104:36: Error: The argument type 'Offset' can't be assigned to the parameter type 'Alignment'.
+ - 'Offset' is from 'dart:ui'.
+ - 'Alignment' is from 'package:flutter/src/painting/alignment.dart' ('/opt/hostedtoolcache/flutter/stable-3.24.0-x64/flutter/packages/flutter/lib/src/painting/alignment.dart').
+                      return _wave(origin);
+                                   ^
+Target kernel_snapshot_program failed: Exception
+
 
 FAILURE: Build failed with an exception.
 
-* Where:
-Settings file '/home/runner/work/window_calc/window_calc/android/settings.gradle' line: 20
-
 * What went wrong:
-Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
-> Build was configured to prefer settings repositories over project repositories but repository 'maven' was added by settings file 'settings.gradle'
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command '/opt/hostedtoolcache/flutter/stable-3.24.0-x64/flutter/bin/flutter'' finished with non-zero exit value 1
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -43,20 +90,40 @@ Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 14s
-Running Gradle task 'assembleRelease'...                           14.7s
+BUILD FAILED in 1m 42s
+Running Gradle task 'assembleRelease'...                          103.5s
 Gradle task assembleRelease failed with exit code 1
 
 Running Gradle task 'assembleRelease'...                        
+Your project is configured with Android NDK 23.1.7779620, but the following plugin(s) depend on a different Android NDK version:
+- flutter_plugin_android_lifecycle requires Android NDK 27.0.12077973
+- image_picker_android requires Android NDK 27.0.12077973
+- open_filex requires Android NDK 27.0.12077973
+- package_info_plus requires Android NDK 27.0.12077973
+- path_provider_android requires Android NDK 27.0.12077973
+- share_plus requires Android NDK 27.0.12077973
+- shared_preferences_android requires Android NDK 27.0.12077973
+Fix this issue by using the highest Android NDK version (they are backward compatible).
+Add the following to /home/runner/work/window_calc/window_calc/android/app/build.gradle:
+
+    android {
+        ndkVersion = "27.0.12077973"
+        ...
+    }
+
+lib/screen_flash.dart:104:36: Error: The argument type 'Offset' can't be assigned to the parameter type 'Alignment'.
+ - 'Offset' is from 'dart:ui'.
+ - 'Alignment' is from 'package:flutter/src/painting/alignment.dart' ('/opt/hostedtoolcache/flutter/stable-3.24.0-x64/flutter/packages/flutter/lib/src/painting/alignment.dart').
+                      return _wave(origin);
+                                   ^
+Target kernel_snapshot_program failed: Exception
+
 
 FAILURE: Build failed with an exception.
 
-* Where:
-Settings file '/home/runner/work/window_calc/window_calc/android/settings.gradle' line: 20
-
 * What went wrong:
-Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
-> Build was configured to prefer settings repositories over project repositories but repository 'maven' was added by settings file 'settings.gradle'
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command '/opt/hostedtoolcache/flutter/stable-3.24.0-x64/flutter/bin/flutter'' finished with non-zero exit value 1
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -64,7 +131,7 @@ Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 13s
-Running Gradle task 'assembleRelease'...                           14.1s
+BUILD FAILED in 1m 42s
+Running Gradle task 'assembleRelease'...                          102.9s
 Gradle task assembleRelease failed with exit code 1
 ```
