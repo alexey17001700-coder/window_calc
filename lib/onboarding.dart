@@ -442,6 +442,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _winParts = 1;
       _winCellModes = const [0];
       _winSecW = const [];
+      _glassCam = 1;
+      _glassThk = 32;
       // У изделий с визуалкой шаг «РАЗМЕРЫ» пропускаем — сразу чертёж.
       // Размеры-заглушки подставляем сразу: замерщик тапает по цифре
       // на чертеже и меняет на свои.
