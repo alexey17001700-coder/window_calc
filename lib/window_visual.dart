@@ -259,6 +259,7 @@ class _WindowVisualState extends State<WindowVisual> {
                     winHeightMm: widget.winHeightMm,
                     doorWidthMm: widget.doorWidthMm,
                     tappable: const {
+                      'ШИРИНА',
                       'ВЫСОТА',
                       'ВЫСОТА ОКНА',
                       'ШИРИНА ОКНА',
