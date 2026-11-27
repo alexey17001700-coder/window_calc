@@ -853,6 +853,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ),
             ],
           ],
+          // ── ПЕТЛИ: только у ПРОСТОЙ ДВЕРИ ПВХ ──
+          if (_isDoor) ...[
+            const SizedBox(height: 12),
+            _hingeBox(),
+          ],
           const SizedBox(height: 9),
           const Text(
             'ТАП ПО ЦИФРЕ НА ЧЕРТЕЖЕ — ВВОД РАЗМЕРА',
@@ -866,6 +871,81 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ],
       ),
     );
+  }
+
+  // ─────────── ПЕТЛИ ПРОСТОЙ ДВЕРИ ПВХ (кнопка + меню) ───────────
+  /// Кнопка с выпадающим меню: количество петель 2..4 и режим открывания.
+  /// 2 петли — стандартные (поворотно-откидной или поворотный);
+  /// 3 и более — только поворотный, петли усиленные.
+  Widget _hingeBox() {
+    final modeName = _doorHinges >= 3
+        ? 'ПОВОРОТНЫЙ · УСИЛЕННЫЕ'
+        : (_doorMode == 2 ? 'ПОВОРОТНО-ОТКИДНОЙ' : 'ПОВОРОТНЫЙ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'ПЕТЛИ',
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: Color(0xFF7E93AC),
+          ),
+        ),
+        const SizedBox(height: 7),
+        GestureDetector(
+          onTap: _pickHinges,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B1524),
+              borderRadius: BorderRadius.circular(11),
+              border: Border.all(color: AppColors.gold.withOpacity(0.70)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.hardware_rounded,
+                    size: 15, color: AppColors.gold),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '$_doorHinges ШТ · $modeName',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.expand_more_rounded,
+                    size: 18, color: AppColors.gold),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Выпадающее меню петель: количество 2..4 + режим открывания.
+  Future<void> _pickHinges() async {
+    final res = await showModalBottomSheet<List<int>>(
+      context: context,
+      backgroundColor: const Color(0xFF0B1524),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _HingeSheet(count: _doorHinges, mode: _doorMode),
+    );
+    if (res == null || res.length < 2) return;
+    setState(() {
+      _doorHinges = res[0].clamp(2, 4);
+      // 3 и более — только поворотный (петли усиленные).
+      _doorMode = _doorHinges >= 3 ? 1 : res[1].clamp(1, 2);
+    });
   }
 
   // ─────────── ПАНЕЛЬ БАЛКОННОГО БЛОКА (ЭТАП 3) ───────────
