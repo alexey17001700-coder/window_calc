@@ -701,14 +701,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final glass = (_glass >= 0 && _glass < glassTypes.length)
         ? glassTypes[_glass].title
         : '';
-    final windowType = _picked.length > 2 ? _picked[2] : '';
     final estimate = buildEstimate(
       widthMm: _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА'),
       heightMm: _mmOf('ВЫСОТА'),
-      windowType: windowType,
+      windowType: _windowType,
       parts: _multi,
       glass: glass,
       profile: _profile,
+      brand: _brand,
     );
     return EstimateView(
       estimate: estimate,
