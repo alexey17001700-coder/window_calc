@@ -1,7 +1,7 @@
 # Ошибка сборки window_calc
 
-Прогон: 45992354859
-Дата: 2026-11-27 11:42 UTC
+Прогон: 45997504287
+Дата: 2026-11-27 12:22 UTC
 
 ```
 
@@ -9,21 +9,12 @@ Running Gradle task 'assembleRelease'...
 
 FAILURE: Build failed with an exception.
 
+* Where:
+Settings file '/home/runner/work/window_calc/window_calc/android/settings.gradle' line: 20
+
 * What went wrong:
-Execution failed for task ':gradle:compileGroovy'.
-> Could not resolve all files for configuration ':gradle:compileClasspath'.
-   > Could not find com.squareup:javawriter:2.5.0.
-     Searched in the following locations:
-       - https://dl.google.com/dl/android/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
-       - https://repo.maven.apache.org/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
-     Required by:
-         project :gradle > com.android.tools.build:gradle:7.3.0 > com.android.tools.build:builder:7.3.0
-   > Could not find org.ow2.asm:asm:9.1.
-     Searched in the following locations:
-       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm/9.1/asm-9.1.pom
-       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.1/asm-9.1.pom
-     Required by:
-         project :gradle > com.android.tools.build:gradle:7.3.0 > com.android.tools.build:gradle-api:7.3.0
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> Build was configured to prefer settings repositories over project repositories but repository 'maven' was added by settings file 'settings.gradle'
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -31,29 +22,20 @@ Execution failed for task ':gradle:compileGroovy'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 22s
-Running Gradle task 'assembleRelease'...                           23.3s
+BUILD FAILED in 17s
+Running Gradle task 'assembleRelease'...                           18.0s
 Gradle task assembleRelease failed with exit code 1
 
 Running Gradle task 'assembleRelease'...                        
 
 FAILURE: Build failed with an exception.
 
+* Where:
+Settings file '/home/runner/work/window_calc/window_calc/android/settings.gradle' line: 20
+
 * What went wrong:
-Execution failed for task ':gradle:compileGroovy'.
-> Could not resolve all files for configuration ':gradle:compileClasspath'.
-   > Could not find com.squareup:javawriter:2.5.0.
-     Searched in the following locations:
-       - https://dl.google.com/dl/android/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
-       - https://repo.maven.apache.org/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
-     Required by:
-         project :gradle > com.android.tools.build:gradle:7.3.0 > com.android.tools.build:builder:7.3.0
-   > Could not find org.ow2.asm:asm:9.1.
-     Searched in the following locations:
-       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm/9.1/asm-9.1.pom
-       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.1/asm-9.1.pom
-     Required by:
-         project :gradle > com.android.tools.build:gradle:7.3.0 > com.android.tools.build:gradle-api:7.3.0
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> Build was configured to prefer settings repositories over project repositories but repository 'maven' was added by settings file 'settings.gradle'
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -61,29 +43,20 @@ Execution failed for task ':gradle:compileGroovy'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 955ms
-Running Gradle task 'assembleRelease'...                         1,075ms
+BUILD FAILED in 14s
+Running Gradle task 'assembleRelease'...                           14.7s
 Gradle task assembleRelease failed with exit code 1
 
 Running Gradle task 'assembleRelease'...                        
 
 FAILURE: Build failed with an exception.
 
+* Where:
+Settings file '/home/runner/work/window_calc/window_calc/android/settings.gradle' line: 20
+
 * What went wrong:
-Execution failed for task ':gradle:compileGroovy'.
-> Could not resolve all files for configuration ':gradle:compileClasspath'.
-   > Could not find com.squareup:javawriter:2.5.0.
-     Searched in the following locations:
-       - https://dl.google.com/dl/android/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
-       - https://repo.maven.apache.org/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
-     Required by:
-         project :gradle > com.android.tools.build:gradle:7.3.0 > com.android.tools.build:builder:7.3.0
-   > Could not find org.ow2.asm:asm:9.1.
-     Searched in the following locations:
-       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm/9.1/asm-9.1.pom
-       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.1/asm-9.1.pom
-     Required by:
-         project :gradle > com.android.tools.build:gradle:7.3.0 > com.android.tools.build:gradle-api:7.3.0
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> Build was configured to prefer settings repositories over project repositories but repository 'maven' was added by settings file 'settings.gradle'
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -91,7 +64,7 @@ Execution failed for task ':gradle:compileGroovy'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 943ms
-Running Gradle task 'assembleRelease'...                         1,049ms
+BUILD FAILED in 13s
+Running Gradle task 'assembleRelease'...                           14.1s
 Gradle task assembleRelease failed with exit code 1
 ```
