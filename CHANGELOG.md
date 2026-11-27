@@ -1,5 +1,40 @@
 # Changelog
 
+## 3.4.82+147
+
+### СБОРКА: Groovy-синтаксис больше не попадает в Kotlin DSL (`.gradle.kts`)
+
+**Ошибка из Actions:**
+
+```
+e: .../flutter_tools/gradle/settings.gradle.kts:5:17: Unexpected tokens
+  Line 5:  maven { url "https://maven.aliyun.com/repository/central" }
+```
+
+**Причина — моя правка 3.4.81+146.** Шаг «Maven Central mirrors» вставлял
+**Groovy-синтаксис** `maven { url "..." }` во **все** найденные файлы, включая
+`settings.gradle.kts` встроенного плагина Flutter. В **Kotlin DSL** такой
+синтаксис недопустим — нужен `maven("...")`. Скрипт падал на компиляции
+самого settings-файла, ещё до сборки.
+
+**Что сделано (`.github/workflows/build.yml`):**
+
+- **два набора зеркал:** `REPOS_GROOVY` (`maven { url "..." }`) и
+  `REPOS_KTS` (`maven("...")`). Синтаксис выбирается **по расширению файла**:
+  `*.gradle.kts` → Kotlin DSL, остальные → Groovy
+- **в `.kts` больше не дописывается** блок `repositories { }` — только замена
+  `mavenCentral()` на `mavenCentral()` + `maven("...")`. Никаких `url "..."`,
+  иначе снова `Unexpected tokens`
+- **страховка:** перед сборкой шаг ищет `url "` в `*.gradle.kts` плагина и,
+  если находит, **откатывает правку файлов плагина** (`git checkout --`) —
+  зеркала всё равно остаются работать через `init.gradle`
+- `init.gradle` не тронут: он на **Groovy**, там `url "..."` корректен
+
+**Не тронуто:** Dart-код, чертёж, дерево, мастер, смета, история, версии
+плагинов, AGP 8.7.0, Gradle 8.9, Kotlin 1.9.24, подпись APK, автоповтор сборки.
+
+`pubspec.yaml`: **3.4.81+146 → 3.4.82+147** — новый тег, свежий прогон.
+
 ## 3.4.81+146
 
 ### СБОРКА: шаг зеркал больше не валит прогон + репозитории на уровне SETTINGS
