@@ -70,6 +70,7 @@ const List<String> brandNames = [
   'МОНБЛАН',
   'ПРОПЛЕКС',
   'ПЛАФЕН',
+  'INNOVA D-LINE',
   'КАЛЕВА',
 ];
 
