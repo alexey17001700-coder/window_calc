@@ -1668,7 +1668,7 @@ class _BalconyPainter extends CustomPainter {
 
     if (kind == 0) {
       // 0 — стекло во всю дверь, БЕЗ импоста
-      _glassPanel(canvas, glass);
+      _glassPanel(canvas, glass, label: _mark);
     } else {
       // ИМПОСТ — реальный профиль, а не тонкая палочка.
       final splitY = inner.top + inner.height * 0.62;
