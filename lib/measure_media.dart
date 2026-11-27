@@ -521,6 +521,7 @@ class SheetExport {
     bool showClient = true,
     String price = '',
     String priceLabel = 'ИТОГО',
+    List<(String, String)> priceLines = const [],
     String footer = 'Сформировано в Window Measure Pro',
   }) {
     final b = StringBuffer();
