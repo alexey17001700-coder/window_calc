@@ -1474,10 +1474,19 @@ class _BalconyPainter extends CustomPainter {
     required this.winHeightMm,
     required this.doorWidthMm,
     this.tappable = const {},
+    this.glassLabel = '2-КАМ',
+    this.glassThk = 32,
   });
 
   /// Поля размеров, которые можно менять тапом по цифре на чертеже.
   final Set<String> tappable;
+
+  /// Подпись стеклопакета («2-КАМ») и его толщина в ММ.
+  final String glassLabel;
+  final int glassThk;
+
+  /// Подпись, которая рисуется в углу КАЖДОГО стеклопакета.
+  String get _mark => glassLabel.isEmpty ? '' : '$glassLabel · $glassThk';
 
   final bool doorOnLeft;
   final int doorKind;
