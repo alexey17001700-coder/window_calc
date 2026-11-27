@@ -667,6 +667,65 @@ Path _openPath(Rect r, bool arched) {
 }
 
 /// ═══════════════════════════════════════════════════════════════════
+///  ЗАЛИВКИ ЗАПОЛНЕНИЙ · v3.4.78
+///   • СТЕКЛО — ГОЛУБОЕ, в центре ПЛЮСИК (обозначение «это стекло»);
+///   • СЭНДВИЧ — белая «сгущёнка», в центре буква S.
+/// ═══════════════════════════════════════════════════════════════════
+const Color _kGlassFill = Color(0xFFD9EAF8);
+const Color _kSandwichFill = Color(0xFFFCFCF8);
+const Color _kInk = Color(0xFF16233A);
+
+/// Толщина ИМПОСТА двери балконного блока — реальный профиль, не палочка.
+const double _kImpostW = 7.0;
+
+Paint _fillPaint(Color c) => Paint()..color = c;
+
+Paint _inkLine(double w) => Paint()
+  ..style = PaintingStyle.stroke
+  ..strokeWidth = w
+  ..color = _kInk;
+
+/// Плюсик в центре стекла — обозначение «это стекло».
+void _plusMark(Canvas canvas, Rect r) {
+  final d = math.min(r.width, r.height) * 0.22;
+  if (d < 3) return;
+  final c = r.center;
+  final p = _inkLine(0.9);
+  canvas.drawLine(Offset(c.dx - d, c.dy), Offset(c.dx + d, c.dy), p);
+  canvas.drawLine(Offset(c.dx, c.dy - d), Offset(c.dx, c.dy + d), p);
+}
+
+/// Буква в центре панели (S — сэндвич).
+void _letterMark(Canvas canvas, Rect r, String s) {
+  final tp = TextPainter(
+    text: TextSpan(
+      text: s,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w900,
+        color: _kInk,
+      ),
+    ),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  tp.paint(canvas, r.center - Offset(tp.width / 2, tp.height / 2));
+}
+
+/// СТЕКЛО: голубая заливка + контур + плюсик.
+void _glassPanel(Canvas canvas, Rect r) {
+  canvas.drawRect(r, _fillPaint(_kGlassFill));
+  canvas.drawRect(r, _inkLine(0.9));
+  _plusMark(canvas, r);
+}
+
+/// СЭНДВИЧ: белая «сгущёнка» + контур + буква S.
+void _sandwichPanel(Canvas canvas, Rect r) {
+  canvas.drawRect(r, _fillPaint(_kSandwichFill));
+  canvas.drawRect(r, _inkLine(0.9));
+  _letterMark(canvas, r, 'S');
+}
+
+/// ═══════════════════════════════════════════════════════════════════
 ///  ХУДОЖНИК ЧЕРТЕЖА
 /// ═══════════════════════════════════════════════════════════════════
 class _GostPainter extends CustomPainter {
