@@ -198,6 +198,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   /// ГАБАРИТ ПО ШИРИНЕ, ММ: из дерева, иначе — из размеров пунктов.
   int get _widthMm {
     if (widget.widthMm > 0) return widget.widthMm;
+    final v = widget.visSizes['ШИРИНА'] ?? 0;
+    if (v > 0) return v;
     var best = 0;
     for (final f in widget.sizes.values) {
       f.forEach((k, v) {
