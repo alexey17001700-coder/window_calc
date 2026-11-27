@@ -42,8 +42,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   final TextEditingController _flat = TextEditingController();
   final TextEditingController _floor = TextEditingController();
 
-  /// Пробегающий блик по карточке.
+  /// Пробегающий блик по карточке (медленный и мягкий).
   late final AnimationController _shine;
+
+  /// Плавный ход блика: разгон и торможение без рывков.
+  late final Animation<double> _shineT;
 
   /// Шаг мастера: 0 — клиент, 1 — дерево, 2 — размеры, 3 — визуальный замер,
   /// 4 — замерный лист (отправка).
