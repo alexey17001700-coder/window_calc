@@ -424,6 +424,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _secW = const [];
       _sashModes = const [];
       _hinges = const [];
+      _doorHinges = 2;
+      _doorMode = 2;
       _doorOnLeft = false;
       _doorKind = 1;
       _winParts = 1;
