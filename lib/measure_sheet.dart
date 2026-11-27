@@ -399,6 +399,46 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
               ],
             ),
           ),
+          if (widget.orderNo.trim().isNotEmpty) ...[
+            const SizedBox(width: 10),
+            _orderChip(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Плашка НОМЕРА ЗАКАЗА в шапке листа («ЗАКАЗ · ЗК-0001»).
+  Widget _orderChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: AppColors.gold.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(color: AppColors.gold.withOpacity(0.55)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text(
+            'ЗАКАЗ',
+            style: TextStyle(
+              fontSize: 7.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              color: Color(0xFF7E93AC),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            widget.orderNo.trim(),
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
+              color: AppColors.gold,
+            ),
+          ),
         ],
       ),
     );
