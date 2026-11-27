@@ -88,6 +88,28 @@ Flutter-приложение под Android (APK). Сборка — GitHub Actio
 > Подтверждено словом Босса: «сборка прошла успешно». Сам прогон я не читал.
 > Предыдущая зелёная — 3.4.95+160 (планка 2 мм). Откат по умолчанию — на 3.4.96+161.
 
+### 3.4.104+169 — замерный лист: НОМЕР ЗАКАЗА + шапка листа (ЭТАП 1 из 4)
+- ФАЙЛЫ: новый `lib/order_number.dart` — класс `OrderNumber` (счётчик на
+  `shared_preferences`, ключ `window_calc_order_seq`): `next()` · `current()` ·
+  `format(n)` · `prefix = 'ЗК'`.
+  `lib/measure_sheet.dart` — у `MeasureSheetView` новый параметр `orderNo = ''`
+  (+ поле); новый виджет `_orderChip()` (плашка «ЗАКАЗ · ЗК-0001» в шапке);
+  в `_sheetText()` добавлена строка «ЗАКАЗ № …»; в `_exportSheet()` в
+  `SheetExport.html` добавлен `order: widget.orderNo.trim()`; в `_pushToServer()`
+  payload дополнен `'order'`.
+  `lib/measure_media.dart` — `SheetExport.html(...)` получил параметр `order = ''`;
+  в HTML-шапке строка «ЗАКАЗ № …» (класс `.ord`), новый стиль в `<style>`.
+  `lib/onboarding.dart` — новое поле `_orderNo = ''`; новый метод `_assignOrder()`;
+  `_confirmTree()` вызывает `_assignOrder()`; в `MeasureSheetView` (`_sheetStep()`)
+  добавлено `orderNo: _orderNo`.
+  `pubspec.yaml` — 3.4.103+168 → 3.4.104+169. `CHANGELOG.md` — новая запись сверху.
+- КАК: номер заказа присваивается ОДИН раз на замер — при подтверждении дерева
+  (`_confirmTree`), поэтому возврат по шагам номер не меняет. Счётчик растёт от 1
+  вверх, формат «ЗК-0001». Номер виден в шапке листа на экране, в тексте листа,
+  в PDF-листе и уходит на сервер.
+- СБОРКА: ⏳ идёт — после коммита не проверяю, жду слова Босса.
+- ОТКАТ: ⬅ **3.4.96+161** (последняя зелёная)
+
 ### 3.4.103+168 — замерный лист: профиль · марка · серия · стеклопакет с толщиной (ЭТАП 4 из 4)
 - ФАЙЛЫ: `lib/measure_sheet.dart` — у `MeasureSheetView` новые параметры
   `profile = ''` · `brand = ''` · `series = ''` · `glassThk = 0` · `frameMm = 0`
