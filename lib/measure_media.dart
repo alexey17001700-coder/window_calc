@@ -519,6 +519,20 @@ class SheetExport {
     b.writeln('<title>Замерный лист</title><style>');
     b.writeln('*{box-sizing:border-box}body{margin:0;padding:24px;'
         'font-family:-apple-system,Roboto,Arial,sans-serif;color:#0B1524}');
+    b.writeln('@page{size:A4;margin:12mm}');
+    b.writeln('.main{display:flex;gap:16px;align-items:flex-start;'
+        'margin-bottom:14px}');
+    b.writeln('.main .left{flex:1 1 58%;max-width:58%}');
+    b.writeln('.main .right{flex:1 1 42%}');
+    b.writeln('.main svg{width:100%;height:auto;display:block}');
+    b.writeln('.spec{border:1px solid #D8C98F;border-radius:12px;'
+        'padding:12px 14px}');
+    b.writeln('.spec .t{font-size:10px;letter-spacing:1.6px;'
+        'font-weight:800;color:#8A7A45;margin-bottom:8px}');
+    b.writeln('.spec table{width:100%;border-collapse:collapse}');
+    b.writeln('.spec td{padding:3px 0;font-size:11.5px;vertical-align:top}');
+    b.writeln('.spec td.k{width:44%;color:#5B6B80;font-weight:600}');
+    b.writeln('.spec td.v{font-weight:700}');
     b.writeln('h1{font-size:20px;letter-spacing:1px;margin:0 0 4px}');
     b.writeln('.sub{font-size:11px;letter-spacing:1.6px;color:#8A7A45;'
         'font-weight:700;margin-bottom:18px}');
