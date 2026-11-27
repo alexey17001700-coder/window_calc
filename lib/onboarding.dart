@@ -775,9 +775,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Итог: клиент + цепочка дерева + комплектация + стеклопакет +
   /// размеры (уже в МИЛЛИМЕТРАХ). Лист копируется или отправляется.
   Widget _sheetStep() {
-    final glass = (_glass >= 0 && _glass < glassTypes.length)
-        ? glassTypes[_glass].title
-        : '';
+    final glass = glassTypes[_glassCam.clamp(0, glassTypes.length - 1)].title;
     return MeasureSheetView(
       name: _name.text,
       phone: _phone.text,
