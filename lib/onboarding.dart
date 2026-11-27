@@ -1261,11 +1261,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return 0;
   }
 
-  /// Плашка выбранного: ОКНО · ДВУХСТВОРЧАТОЕ · КИРПИЧКА
-  Widget _pickedBar(String windowType, String house) {
+  /// Плашка выбранного: вся цепочка дерева без «ЗАМЕР» + комплектация.
+  /// ОКНО · ДВУХСТВОРЧАТОЕ · ПРОФИЛЬ 60 ММ · REHAU · КИРПИЧКА · С ОТЛИВОМ
+  Widget _pickedBar() {
     final parts = <String>[
-      if (windowType.isNotEmpty) windowType,
-      if (house.isNotEmpty) house,
+      for (var i = 1; i < _picked.length; i++) _picked[i],
       ..._multi,
     ];
     return Container(
