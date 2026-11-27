@@ -252,7 +252,9 @@ class _WorkTreeViewState extends State<WorkTreeView>
     // Искры бегут по линиям непрерывно.
     _spark = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      // Замедлено по просьбе Босса: искры бегут по линиям мягко,
+      // без спешки (было 1500 мс).
+      duration: const Duration(milliseconds: 3200),
     )..repeat();
   }
 
