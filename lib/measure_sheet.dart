@@ -256,6 +256,9 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   /// ПЕТЛИ, ШТ — по створкам: по 2 на открывающуюся, если не задано иначе.
   int get _hingesTotal {
+    // Балконный блок: по 2 петли на дверь и на каждую открывающуюся
+    // часть окна.
+    if (_balcony) return _openingSashes * 2;
     final n = widget.sashModes.length;
     if (n == 0) return 0;
     final h = widget.hinges;
