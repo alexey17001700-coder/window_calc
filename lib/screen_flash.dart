@@ -101,7 +101,7 @@ class ScreenFlashState extends State<ScreenFlash>
                         return const SizedBox.shrink();
                       }
                       final origin = _localOrigin(size);
-                      return _wave(origin);
+                      return _wave(origin, size);
                     },
                   );
                 },
