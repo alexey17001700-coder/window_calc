@@ -1,5 +1,44 @@
 # Changelog
 
+## 3.4.83+148
+
+### СБОРКА: Google-репозитории добавлены во ВСЕ наборы зеркал (PREFER_SETTINGS перекрывал settings)
+
+**Что было в логе Actions:**
+
+```
+The project declares repositories, effectively ignoring the repositories
+you have declared in the settings.
+  project :app > project :package_info_plus
+  project :app > project :path_provider_android
+  project :app > project :share_plus
+  project :app > project :shared_preferences_android
+BUILD FAILED in 4m 39s
+```
+
+**Причина — моя правка 3.4.81+146.** `init.gradle` добавлял зеркала
+**в репозитории каждого проекта** (`gradle.beforeProject` / `gradle.allprojects`
+→ `p.repositories`). Под `RepositoriesMode.PREFER_SETTINGS` это значит:
+проект «объявил репозитории» → **settings-репозитории игнорируются**, работают
+только проектные. А в проектные я клал **только три зеркала Maven Central —
+без Google**. Поэтому `androidx` / Google-артефакты перестали находиться,
+и сборка падала на разрешении зависимостей плагинов.
+
+**Что сделано (`.github/workflows/build.yml`):**
+
+- в `addMirrors` (init.gradle) **добавлены Google-репозитории явными URL**:
+  `https://dl.google.com/dl/android/maven2/` и `https://maven.google.com`.
+  Именно URL, а не `google()` — в `init.gradle` AGP ещё не применён, метода нет
+- добавлено зеркало Google и в Maven Central-наборы: `MIRRORS` (python-шаг
+  `settings.gradle`) и `REPOS_GROOVY` / `REPOS_KTS` (шаг зеркал плагина)
+- теперь **любой** режим репозиториев безопасен: если работают проектные —
+  в них есть Google + Maven Central + зеркала; если settings — там тоже всё есть
+
+**Не тронуто:** Dart-код, чертёж, дерево, мастер, смета, история, версии
+плагинов, AGP 8.7.0, Gradle 8.9, Kotlin 1.9.24, подпись APK, автоповтор сборки.
+
+`pubspec.yaml`: **3.4.82+147 → 3.4.83+148** — новый тег, свежий прогон.
+
 ## 3.4.82+147
 
 ### СБОРКА: Groovy-синтаксис больше не попадает в Kotlin DSL (`.gradle.kts`)
