@@ -479,7 +479,7 @@ class _WorkTreeViewState extends State<WorkTreeView>
   WorkNode _nodeAt(int level, int index) {
     var nodes = workTree;
     for (var i = 0; i < level; i++) {
-      nodes = nodes[_path[i]].children;
+      nodes = _kids(nodes, _path[i]);
     }
     return nodes[index];
   }
