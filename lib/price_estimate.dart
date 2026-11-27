@@ -37,6 +37,11 @@ class PriceBook {
   static const double glassMulti = 2400;
   static const double glassSun = 2200;
 
+  /// Надбавка за ТОЛЩИНУ ПРОФИЛЯ (рамы), ₽/м².
+  /// 60 мм — стандарт (надбавки нет), 70 мм — тёплый профиль.
+  static const double profile60PerM2 = 0;
+  static const double profile70PerM2 = 1200;
+
   /// Комплектация.
   static const double sillPerM = 1400; // подоконник, ₽/м.п.
   static const double ebbPerM = 1200; // отлив, ₽/м.п.
