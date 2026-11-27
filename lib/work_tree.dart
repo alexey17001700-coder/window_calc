@@ -58,6 +58,26 @@ const List<WorkNode> houseTypes = [
   WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', finishingTypes),
 ];
 
+/// ─── ПРОФИЛЬ (толщина рамы) — уровень ПОСЛЕ типа дома ───
+/// Только у БАЛКОННОГО БЛОКА. Две кнопки: 60 мм (стандарт) и 70 мм
+/// (тёплый профиль). После выбора профиля идёт комплектация.
+/// Толщина профиля участвует в расчёте сметы (lib/price_estimate.dart).
+const List<WorkNode> profileTypes = [
+  WorkNode(Icons.straighten_rounded, 'ПРОФИЛЬ 60 ММ', finishingTypes),
+  WorkNode(Icons.straighten_rounded, 'ПРОФИЛЬ 70 ММ', finishingTypes),
+];
+
+/// Типы дома БАЛКОННОГО БЛОКА: после дома идёт выбор ПРОФИЛЯ (60/70),
+/// а уже после профиля — комплектация (мультивыбор).
+const List<WorkNode> balconyHouseTypes = [
+  WorkNode(Icons.grid_on_rounded, 'КИРПИЧКА', profileTypes),
+  WorkNode(Icons.view_module_rounded, 'ПАНЕЛЬКА', profileTypes),
+  WorkNode(Icons.holiday_village_rounded, 'ХРУЩЁВКА', profileTypes),
+  WorkNode(Icons.account_balance_rounded, 'СТАЛИНКА', profileTypes),
+  WorkNode(Icons.cottage_rounded, 'ДЕРЕВЯННЫЙ ДОМ', profileTypes),
+  WorkNode(Icons.widgets_rounded, 'ИЗ БЛОКА', profileTypes),
+];
+
 /// ─── ВИДЫ ИЗДЕЛИЙ (3-й уровень дерева) ───
 /// У КАЖДОГО изделия СВОЁ дерево: вид изделия → тип дома → комплектация.
 /// Пустых веток нет — галочка-квадратик появляется ТОЛЬКО на финальном
