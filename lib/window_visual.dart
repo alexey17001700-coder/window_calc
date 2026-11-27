@@ -1331,6 +1331,8 @@ class _GostPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _GostPainter old) =>
+      old.glassLabel != glassLabel ||
+      old.glassThk != glassThk ||
       old.sashes != sashes ||
       old.arched != arched ||
       old.selected != selected ||
