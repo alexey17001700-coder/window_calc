@@ -88,6 +88,24 @@ Flutter-приложение под Android (APK). Сборка — GitHub Actio
 > Подтверждено словом Босса: «сборка прошла успешно». Сам прогон я не читал.
 > Предыдущая зелёная — 3.4.95+160 (планка 2 мм). Откат по умолчанию — на 3.4.96+161.
 
+### 3.4.100+165 — дерево: СЕРИИ профиля после марки (фильтр по 60/70)
+- ФАЙЛЫ: `lib/work_tree.dart` — `WorkNode` (добавлено 4-е поле `mm`:
+  `const WorkNode(this.icon, this.title, [this.children = const [], this.mm = 0])`);
+  новые константы-серии `rehauSeries` · `vekaSeries` · `kbeSeries` ·
+  `salamanderSeries` · `novotexSeries` · `aluplastSeries` · `monblanSeries` ·
+  `proplexSeries` · `plafenSeries` · `innovaSeries`; `brandTypes` (дети: было
+  `houseTypes` → стало серии своей марки); новый `allSeriesNames`; новые методы
+  `_profileMm()` и `_kids(nodes, idx)`; `_level()` / `_nodeAt()` / `_titles()`
+  (ходят через `_kids`). `lib/price_estimate.dart` — новый `PriceBook.seriesPerM2`
+  (пустая заглушка); `buildEstimate(...)` получил параметр `series = ''`; строка
+  «Серия <серия>» только если надбавка > 0. `lib/onboarding.dart` — новый геттер
+  `_series`; `series: _series` в оба вызова `buildEstimate`.
+- КАК: цепочка стала ИЗДЕЛИЕ → ПРОФИЛЬ 60/70 → МАРКА → СЕРИЯ → ТИП ДОМА →
+  комплектация. Серии фильтруются по толщине: 60 → `mm <= 60`, 70 → `mm >= 70`.
+  Цены по сериям — заглушки (0), как просил Босс.
+- СБОРКА: ⏳ идёт — после коммита не проверяю, жду слова Босса.
+- ОТКАТ: ⬅ **3.4.96+161** (последняя зелёная)
+
 ### 3.4.99+164 — убрана выдуманная марка КАЛЕВА
 - ФАЙЛЫ: `lib/work_tree.dart` — `brandNames` (было `'ПЛАФЕН', 'INNOVA D-LINE',
   'КАЛЕВА'`, стало `'ПЛАФЕН', 'INNOVA D-LINE'`); `brandTypes` (удалена карточка
