@@ -447,8 +447,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Map<String, int> _defaultSizes() {
     final t = (_picked.length > 1 ? _picked[1] : '').toUpperCase();
     if (t == 'БАЛКОННЫЙ БЛОК') {
+      // Общая ширина — ВЕДУЩАЯ. Окно + планка (2 мм) + дверь = всего.
       return const {
-        'ШИРИНА ОКНА': 1300,
+        'ШИРИНА': 2000,
+        'ШИРИНА ОКНА': 1298,
         'ШИРИНА ДВЕРИ': 700,
         'ВЫСОТА': 2100,
         'ВЫСОТА ОКНА': 1400,
