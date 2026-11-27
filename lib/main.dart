@@ -9,6 +9,7 @@ import 'viewer3d.dart';
 import 'update_checker.dart';
 import 'wizard_screen.dart';
 import 'onboarding.dart';
+import 'measure_history.dart';
 
 /// Глобальный навигатор: позволяет переключать экраны из колбэков,
 /// даже когда контекст исходного экрана уже уничтожен (pushReplacement).
