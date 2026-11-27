@@ -389,13 +389,13 @@ class _WindowVisualState extends State<WindowVisual> {
               ),
             ),
             const SizedBox(width: 8),
-            const Expanded(
+            Expanded(
               child: Text(
-                'выберите наполнение',
-                style: TextStyle(
+                '${widget.glassLabel} · ${widget.glassThk} ММ',
+                style: const TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF7E93AC),
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.gold,
                 ),
               ),
             ),
@@ -403,26 +403,32 @@ class _WindowVisualState extends State<WindowVisual> {
         ),
         const SizedBox(height: 10),
 
-        // ── ВЫБОР ПОД ЧЕРТЕЖОМ ──
-        LayoutBuilder(
-          builder: (context, c) {
-            final w = (c.maxWidth - 8) / 2;
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (var i = 0; i < glassTypes.length; i++)
-                  SizedBox(
-                    width: w,
-                    child: _GlassChip(
-                      node: glassTypes[i],
-                      selected: widget.selectedGlass == i,
-                      onTap: () => widget.onGlass(i),
-                    ),
+        // ── СВАЙП ПО СТЕКЛУ (плашки выбора убраны приказом Босса) ──
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A1220),
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.swipe_vertical_rounded, size: 16, color: AppColors.gold),
+              SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  'СВАЙП ВВЕРХ — КАМЕРНОСТЬ · СВАЙП ВНИЗ — ТОЛЩИНА',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                    color: Color(0xFF7E93AC),
                   ),
-              ],
-            );
-          },
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
