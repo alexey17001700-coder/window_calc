@@ -1681,7 +1681,7 @@ class _BalconyPainter extends CustomPainter {
           glass.left, splitY - half, glass.width, _kImpostW);
 
       // верх — стекло
-      _glassPanel(canvas, top);
+      _glassPanel(canvas, top, label: _mark);
 
       // низ — белый сэндвич (1) или стекло (2)
       if (kind == 1) {
