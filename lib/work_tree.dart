@@ -118,10 +118,10 @@ const List<WorkNode> balconyKinds = [
 ];
 
 const List<WorkNode> loggiaKinds = [
-  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', houseTypes),
-  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', houseTypes),
-  WorkNode(Icons.swap_horiz_rounded, 'РАЗДВИЖНАЯ', houseTypes),
-  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВАЯ', houseTypes),
+  WorkNode(Icons.window_rounded, 'ОСТЕКЛЕНИЕ', profileTypes),
+  WorkNode(Icons.open_in_full_rounded, 'С ВЫНОСОМ', profileTypes),
+  WorkNode(Icons.swap_horiz_rounded, 'РАЗДВИЖНАЯ', profileTypes),
+  WorkNode(Icons.crop_landscape_rounded, 'УГЛОВАЯ', profileTypes),
 ];
 
 const List<WorkNode> doorKinds = [
