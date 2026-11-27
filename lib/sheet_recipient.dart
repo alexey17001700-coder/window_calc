@@ -44,7 +44,7 @@ extension SheetRecipientInfo on SheetRecipient {
   String get hint => switch (this) {
         SheetRecipient.measurer => 'ПОЛНЫЙ ЛИСТ · ВСЁ · ЦЕНА',
         SheetRecipient.client => 'ИЗДЕЛИЕ · КОМПЛЕКТУЮЩИЕ · ЦЕНА',
-        SheetRecipient.factory => 'ПРОФИЛЬ · СТЕКЛОПАКЕТ · АРМИРОВКА',
+        SheetRecipient.factory => 'РАЗМЕРЫ · ФУРНИТУРА · СТЕКЛОПАКЕТЫ',
         SheetRecipient.installer => 'РАЗМЕРЫ · ПРОЁМ · ФОТО · ЦЕНА',
       };
 
