@@ -626,7 +626,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _pickedBar(windowType, house),
+                _pickedBar(),
                 const SizedBox(height: 12),
                 // У балконного блока — свой чертёж и свои кнопки (этап 3),
                 // панель створок обычного окна ему не нужна.
