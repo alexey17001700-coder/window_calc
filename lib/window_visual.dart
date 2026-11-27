@@ -1955,6 +1955,8 @@ class _BalconyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _BalconyPainter old) =>
+      old.glassLabel != glassLabel ||
+      old.glassThk != glassThk ||
       old.doorOnLeft != doorOnLeft ||
       old.doorKind != doorKind ||
       old.winParts != winParts ||
