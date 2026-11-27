@@ -212,6 +212,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   /// ГАБАРИТ ПО ВЫСОТЕ, ММ: переданный явно, иначе — из размеров пунктов.
   int get _heightMm {
     if (widget.heightMm > 0) return widget.heightMm;
+    final v = widget.visSizes['ВЫСОТА'] ?? 0;
+    if (v > 0) return v;
     var best = 0;
     for (final f in widget.sizes.values) {
       f.forEach((k, v) {
