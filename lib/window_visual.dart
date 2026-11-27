@@ -1687,7 +1687,7 @@ class _BalconyPainter extends CustomPainter {
       if (kind == 1) {
         _sandwichPanel(canvas, bot);
       } else {
-        _glassPanel(canvas, bot);
+        _glassPanel(canvas, bot, label: _mark);
       }
 
       // сам импост поверх — толстая планка профиля
