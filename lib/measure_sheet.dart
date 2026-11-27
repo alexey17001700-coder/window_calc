@@ -365,12 +365,10 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
               '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
         if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
         if (_heightMm > 0) ('ВЫСОТА', '$_heightMm ММ'),
-        if (_balcony && widget.winWidthMm > 0)
-          ('ШИРИНА ОКНА', '${widget.winWidthMm} ММ'),
-        if (_balcony && widget.winHeightMm > 0)
-          ('ВЫСОТА ОКНА', '${widget.winHeightMm} ММ'),
-        if (_balcony && widget.doorWidthMm > 0)
-          ('ШИРИНА ДВЕРИ', '${widget.doorWidthMm} ММ'),
+        if (_balcony) ('ЧЕРТЁЖ', 'БАЛКОННЫЙ БЛОК · ОКНО + ДВЕРЬ'),
+        if (_balcony && _winW > 0) ('ШИРИНА ОКНА', '$_winW ММ'),
+        if (_balcony && _winH > 0) ('ВЫСОТА ОКНА', '$_winH ММ'),
+        if (_balcony && _doorW > 0) ('ШИРИНА ДВЕРИ', '$_doorW ММ'),
       ];
 
   /// Текст замерного листа — все размеры в миллиметрах.
