@@ -434,6 +434,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// «ПОДТВЕРДИТЬ»: выбор по дереву и по клиенту запоминается,
   /// открывается ввод размеров — по одному экрану на каждый пункт.
   void _confirmTree() {
+    _assignOrder();
     setState(() {
       _sizes = const {};
       _sashManual = 0;
