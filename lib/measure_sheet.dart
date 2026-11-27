@@ -128,6 +128,42 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     return parts.join(' · ');
   }
 
+  /// ГАБАРИТ ПО ШИРИНЕ, ММ: из дерева, иначе — из размеров пунктов.
+  int get _widthMm {
+    if (widget.widthMm > 0) return widget.widthMm;
+    var best = 0;
+    for (final f in widget.sizes.values) {
+      f.forEach((k, v) {
+        if (k.toUpperCase().contains('ШИРИН') && v > best) best = v;
+      });
+    }
+    return best;
+  }
+
+  /// ГАБАРИТ ПО ВЫСОТЕ, ММ — из размеров пунктов.
+  int get _heightMm {
+    var best = 0;
+    for (final f in widget.sizes.values) {
+      f.forEach((k, v) {
+        if (k.toUpperCase().contains('ВЫСОТ') && v > best) best = v;
+      });
+    }
+    return best;
+  }
+
+  /// Строки СПЕЦИФИКАЦИИ для правой колонки A4-листа.
+  List<(String, String)> get _specRows => [
+        ('ПРОФИЛЬ', _or(widget.profile, '—')),
+        ('МАРКА', _or(widget.brand, '—')),
+        ('СЕРИЯ', _or(widget.series, '—')),
+        ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
+        if (widget.sashModes.isNotEmpty)
+          ('КОНСТРУКЦИЯ',
+              '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
+        if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
+        if (_heightMm > 0) ('ВЫСОТА', '$_heightMm ММ'),
+      ];
+
   /// Текст замерного листа — все размеры в миллиметрах.
   String _sheetText() {
     final b = StringBuffer();
