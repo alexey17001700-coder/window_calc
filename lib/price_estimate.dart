@@ -176,6 +176,12 @@ Estimate buildEstimate({
       ));
     }
 
+    // ── Название профиля (марка): пока ЗАГЛУШКА, надбавок нет ──
+    final brandMarkup = PriceBook.brandPerM2[brand.toUpperCase()] ?? 0;
+    if (brandMarkup > 0) {
+      lines.add(EstimateLine('Профиль $brand', area, 'м²', brandMarkup));
+    }
+
     // ── Комплектация ──────────────────────────────────────────
     for (final p in parts) {
       switch (p) {
