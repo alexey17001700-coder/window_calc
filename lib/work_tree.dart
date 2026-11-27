@@ -104,10 +104,10 @@ const List<WorkNode> profileTypes = [
 /// Пустых веток нет — галочка-квадратик появляется ТОЛЬКО на финальном
 /// уровне (комплектация), а не на изделии.
 const List<WorkNode> windowKinds = [
-  WorkNode(Icons.crop_portrait_rounded, 'ОДНОСТВОРЧАТОЕ', houseTypes),
-  WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТОЕ', houseTypes),
-  WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТОЕ', houseTypes),
-  WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', houseTypes),
+  WorkNode(Icons.crop_portrait_rounded, 'ОДНОСТВОРЧАТОЕ', profileTypes),
+  WorkNode(Icons.splitscreen_rounded, 'ДВУХСТВОРЧАТОЕ', profileTypes),
+  WorkNode(Icons.view_column_rounded, 'ТРЁХСТВОРЧАТОЕ', profileTypes),
+  WorkNode(Icons.polyline_rounded, 'ФИГУРНОЕ', profileTypes),
 ];
 
 const List<WorkNode> balconyKinds = [
