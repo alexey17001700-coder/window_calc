@@ -164,18 +164,24 @@ jobs:
           # 3) init.gradle — зеркала во ВСЕ проекты, включая included build :gradle
           mkdir -p ~/.gradle
           cat > ~/.gradle/init.gradle <<'EOF'
-          def addMirrors = { RepositoryHandler repos ->
+          def addMirrors = { repos ->
               repos.maven { url "https://maven.aliyun.com/repository/central" }
               repos.maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
               repos.maven { url "https://repo1.maven.org/maven2/" }
           }
+          // Gradle 8.9: репозитории на уровне SETTINGS — покрывают
+          // и included build :gradle (встроенный плагин Flutter).
+          gradle.beforeSettings { s ->
+              try { addMirrors(s.pluginManagement.repositories) } catch (e) {}
+              try { addMirrors(s.dependencyResolutionManagement.repositories) } catch (e) {}
+          }
           gradle.beforeProject { p ->
-              addMirrors(p.buildscript.repositories)
-              addMirrors(p.repositories)
+              try { addMirrors(p.buildscript.repositories) } catch (e) {}
+              try { addMirrors(p.repositories) } catch (e) {}
           }
           gradle.allprojects { p ->
-              addMirrors(p.buildscript.repositories)
-              addMirrors(p.repositories)
+              try { addMirrors(p.buildscript.repositories) } catch (e) {}
+              try { addMirrors(p.repositories) } catch (e) {}
           }
           EOF
 
