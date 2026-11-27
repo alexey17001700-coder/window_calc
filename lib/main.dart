@@ -739,7 +739,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: 'Сохранённые замеры',
                   subtitle: '$_measureCount в архиве',
                   accent: AppColors.info,
-                  onTap: () => _soon('Сохранённые замеры'),
+                  onTap: () => Navigator.of(context)
+                      .push(
+                        MaterialPageRoute(
+                            builder: (_) => const HistoryView()),
+                      )
+                      .then((_) => _loadCount()),
                 ),
                 const SizedBox(height: 12),
                 _card(
