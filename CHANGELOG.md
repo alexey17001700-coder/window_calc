@@ -1,5 +1,35 @@
 # Changelog
 
+## 3.4.92+157 — сборка: init.gradle больше не добавляет project-репозитории
+
+**Причина падения прогона 45997504287 (прочитан `BUILD_ERROR.md`):**
+
+```
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> Build was configured to prefer settings repositories over project repositories
+  but repository 'maven' was added by settings file 'settings.gradle'
+```
+
+**Это моя правка 3.4.91+156, а не код приложения.** `init.gradle` добавлял
+зеркала в `p.repositories` (репозитории КАЖДОГО проекта). Flutter-шаблон
+`settings.gradle` ставит `RepositoriesMode.FAIL_ON_PROJECT_REPOS` — любая
+попытка добавить project-репозиторий роняет сборку ещё на разрешении плагина.
+
+**Что исправлено в `build.yml`:**
+
+- из `init.gradle` **убран блок `p.repositories { … }`** — project-репозитории
+  больше не добавляются вообще
+- зеркала остались **только на уровне settings**: `pluginManagement.repositories`
+  и `dependencyResolutionManagement.repositories` (обёрнуто в `try/catch`)
+- `buildscript.repositories` оставлен — он под `FAIL_ON_PROJECT_REPOS` не попадает
+- всё остальное (таймауты, повторы HTTP, `daemon=false`, жёсткая чистка между
+  попытками) — без изменений
+
+**Проверка:** `flutter analyze` в прогоне 45997504287 прошёл чисто — ошибок
+Dart нет, правки анимаций и балконного блока ни при чём.
+
+`pubspec.yaml`: **3.4.91+156 → 3.4.92+157** — новый тег, свежая сборка.
+
 ## 3.4.91+156 — сборка: живучесть Gradle при сбоях Maven
 
 **Причина падения прогона 45992354859:** не код, а Maven.
