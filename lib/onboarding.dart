@@ -1540,8 +1540,9 @@ class _ShinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final x = (t * 1.6 - 0.3) * size.width;
-    final w = size.width * 0.22;
+    // Блик идёт мягко: широкая полоса, слабая яркость, без рывков.
+    final x = (t * 1.7 - 0.35) * size.width;
+    final w = size.width * 0.34;
     final rect = Rect.fromLTWH(x, 0, w, size.height);
     canvas.drawRect(
       rect,
@@ -1551,9 +1552,12 @@ class _ShinePainter extends CustomPainter {
           Offset(x + w, size.height),
           [
             Colors.white.withOpacity(0.0),
-            Colors.white.withOpacity(0.045),
+            Colors.white.withOpacity(0.020),
+            Colors.white.withOpacity(0.038),
+            Colors.white.withOpacity(0.020),
             Colors.white.withOpacity(0.0),
           ],
+          const [0.0, 0.28, 0.5, 0.72, 1.0],
         ),
     );
   }
