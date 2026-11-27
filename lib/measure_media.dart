@@ -533,6 +533,13 @@ class SheetExport {
         'margin-bottom:14px}');
     b.writeln('.main .left{flex:1 1 58%;max-width:58%}');
     b.writeln('.main .right{flex:1 1 42%}');
+    b.writeln('.main.solo .right{flex:1 1 100%;max-width:100%}');
+    b.writeln('.price{display:flex;justify-content:space-between;'
+        'align-items:center;border:1px solid #D8C98F;border-radius:12px;'
+        'padding:12px 16px;margin-bottom:14px}');
+    b.writeln('.price .pl{font-size:11px;letter-spacing:1.6px;'
+        'font-weight:800;color:#8A7A45}');
+    b.writeln('.price .pv{font-size:19px;font-weight:800;color:#0B1524}');
     b.writeln('.main svg{width:100%;height:auto;display:block}');
     b.writeln('.spec{border:1px solid #D8C98F;border-radius:12px;'
         'padding:12px 14px}');
