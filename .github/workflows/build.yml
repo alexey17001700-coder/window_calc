@@ -88,14 +88,22 @@ jobs:
           def MIRRORS = ['https://repo1.maven.org/maven2',
                          'https://dl.google.com/dl/android/maven2',
                          'https://plugins.gradle.org/m2']
+          // ВАЖНО: НЕ добавляем репозитории в p.repositories (project-level).
+          // Flutter settings.gradle ставит RepositoriesMode.FAIL_ON_PROJECT_REPOS,
+          // и любая попытка добавить project-репозиторий роняет сборку:
+          //   "prefer settings repositories over project repositories but
+          //    repository 'maven' was added by settings file 'settings.gradle'"
+          // Поэтому зеркала добавляем ТОЛЬКО на уровне settings.
           gradle.projectsLoaded {
               gradle.rootProject.allprojects { p ->
                   p.buildscript.repositories { MIRRORS.each { u -> maven { url u } } }
-                  p.repositories { MIRRORS.each { u -> maven { url u } } }
               }
           }
           gradle.settingsEvaluated { s ->
               s.pluginManagement.repositories { MIRRORS.each { u -> maven { url u } } }
+              try {
+                  s.dependencyResolutionManagement.repositories { MIRRORS.each { u -> maven { url u } } }
+              } catch (Exception ignored) {}
           }
           EOF
       - name: Build APK (3 попытки — репозитории Maven иногда отдают 404)
