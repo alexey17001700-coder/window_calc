@@ -93,6 +93,36 @@ jobs:
           done
           echo "СБОРКА НЕ УДАЛАСЬ ПОСЛЕ 3 ПОПЫТОК"
           exit 1
+      - name: Save error log (только при падении)
+        if: failure()
+        run: |
+          {
+            echo "# Ошибка сборки window_calc"
+            echo ""
+            echo "Прогон: ${{ github.run_id }}"
+            echo "Дата: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo ""
+            echo '```'
+            cat /tmp/build_*.log 2>/dev/null | tail -n 400 || echo "лог не найден"
+            echo '```'
+          } > BUILD_ERROR.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add BUILD_ERROR.md
+          git commit -m "build error log [skip ci]" || true
+          git pull --rebase --autostash || true
+          git push || true
+      - name: Clear error log (сборка прошла)
+        if: success()
+        run: |
+          if [ -f BUILD_ERROR.md ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git rm -f BUILD_ERROR.md
+            git commit -m "clear build error log [skip ci]" || true
+            git pull --rebase --autostash || true
+            git push || true
+          fi
       - name: Get version
         id: version
         run: |
