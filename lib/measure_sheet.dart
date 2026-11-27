@@ -845,45 +845,127 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   void _noop() {}
 
-  /// Собрать лист в HTML (с фото) и отдать на печать → PDF / отправку.
-  Future<void> _exportSheet() async {
-    final photos = await PhotoStore.asBase64(_photos);
-    final rows = <(String, String)>[
-      ('ТЕЛЕФОН', _or(widget.phone, '—')),
-      ('АДРЕС', _or(widget.addr, '—')),
-      ('КВ. / ЭТАЖ', '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
-      ('ПРОФИЛЬ', _or(widget.profile, '—')),
-      ('МАРКА', _or(widget.brand, '—')),
-      ('СЕРИЯ', _or(widget.series, '—')),
-      ('АРМИРОВКА', _or(widget.armirovka, '—')),
-      ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
-      if (widget.sashModes.isNotEmpty)
-        ('КОНСТРУКЦИЯ',
-            '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
-      if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
-        ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
-      for (final item in widget.multi) (item, _sizesLine(item)),
-    ];
+  /// Полный лист замерщика — все блоки, все данные.
+  Future<void> _exportSheet() => _exportFor(SheetRecipient.measurer);
 
-    final visual = SheetVisual.svg(
-      sashes: widget.sashModes.isEmpty ? 1 : widget.sashModes.length,
-      modes: [for (final m in widget.sashModes) _modeIndex(m)],
-      sectionWidths: widget.sectionWidths,
+  /// Все строки «ДАННЫЕ ЗАМЕРА» (полный лист).
+  List<(String, String)> _allRows() => [
+        ('ТЕЛЕФОН', _or(widget.phone, '—')),
+        ('АДРЕС', _or(widget.addr, '—')),
+        ('КВ. / ЭТАЖ', '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
+        ('ПРОФИЛЬ', _or(widget.profile, '—')),
+        ('МАРКА', _or(widget.brand, '—')),
+        ('СЕРИЯ', _or(widget.series, '—')),
+        ('АРМИРОВКА', _or(widget.armirovka, '—')),
+        ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
+        if (widget.sashModes.isNotEmpty)
+          ('КОНСТРУКЦИЯ',
+              '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
+        if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
+          ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
+        for (final item in widget.multi) (item, _sizesLine(item)),
+      ];
+
+  /// Спецификация под адресата — что показываем в правой колонке A4.
+  List<(String, String)> _specFor(SheetRecipient r) {
+    switch (r) {
+      case SheetRecipient.measurer:
+      case SheetRecipient.factory:
+        return _specRows;
+      case SheetRecipient.client:
+        return [
+          ('ИЗДЕЛИЕ', widget.path.isEmpty ? '—' : widget.path.join(' · ')),
+          ('ПРОФИЛЬ', _or(widget.series, _or(widget.brand, '—'))),
+          ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
+          if (widget.sashModes.isNotEmpty)
+            ('КОНСТРУКЦИЯ',
+                '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
+          if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
+          if (_heightMm > 0) ('ВЫСОТА', '$_heightMm ММ'),
+          ('КОМПЛЕКТАЦИЯ',
+              widget.multi.isEmpty ? '—' : widget.multi.join(' · ')),
+        ];
+      case SheetRecipient.installer:
+        return [
+          if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
+          if (_heightMm > 0) ('ВЫСОТА', '$_heightMm ММ'),
+          if (widget.sashModes.isNotEmpty)
+            ('КОНСТРУКЦИЯ',
+                '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
+          if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
+            ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
+        ];
+    }
+  }
+
+  /// Строки «ДАННЫЕ ЗАМЕРА» под адресата.
+  List<(String, String)> _rowsFor(SheetRecipient r) {
+    switch (r) {
+      case SheetRecipient.measurer:
+        return _allRows();
+      case SheetRecipient.factory:
+        return [for (final item in widget.multi) (item, _sizesLine(item))];
+      case SheetRecipient.installer:
+        return [
+          ('АДРЕС', _or(widget.addr, '—')),
+          ('КВ. / ЭТАЖ',
+              '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
+          ('ТЕЛЕФОН', _or(widget.phone, '—')),
+          for (final item in widget.multi) (item, _sizesLine(item)),
+        ];
+      case SheetRecipient.client:
+        return [];
+    }
+  }
+
+  /// ИТОГО по смете ('' — считать нечего).
+  String _estimateTotal() {
+    final e = buildEstimate(
       widthMm: _widthMm,
       heightMm: _heightMm,
-      glassLabel: widget.glass.isEmpty ? '' : widget.glass,
-      glassThk: widget.glassThk,
+      windowType: widget.path.join(' · '),
+      parts: widget.multi,
+      glass: widget.glass,
+      profile: widget.profile,
+      brand: widget.brand,
+      series: widget.series,
     );
+    return e.isEmpty ? '' : money(e.total);
+  }
+
+  /// Собрать лист ПОД АДРЕСАТА и отдать на печать → PDF / отправку.
+  Future<void> _exportFor(SheetRecipient r) async {
+    final photos = r.showPhotos
+        ? await PhotoStore.asBase64(_photos)
+        : <(MeasurePhoto, String)>[];
+    final visual = r.showVisual
+        ? SheetVisual.svg(
+            sashes: widget.sashModes.isEmpty ? 1 : widget.sashModes.length,
+            modes: [for (final m in widget.sashModes) _modeIndex(m)],
+            sectionWidths: widget.sectionWidths,
+            widthMm: _widthMm,
+            heightMm: _heightMm,
+            glassLabel: widget.glass.isEmpty ? '' : widget.glass,
+            glassThk: widget.glassThk,
+          )
+        : '';
     final html = SheetExport.html(
       client: _or(widget.name, '—'),
       product: widget.path.isEmpty ? '—' : widget.path.join(' · '),
-      order: widget.orderNo.trim(),
+      order: r.showOrder ? widget.orderNo.trim() : '',
+      title: r.sheetTitle,
       visual: visual,
-      spec: _specRows,
-      rows: rows,
+      spec: _specFor(r),
+      rows: _rowsFor(r),
       photos: photos,
+      showVisual: r.showVisual,
+      showSpec: r.showSpec,
+      showRows: r.showRows,
+      showPhotos: r.showPhotos,
+      showClient: r.showClient,
+      price: r.showPrice ? _estimateTotal() : '',
     );
-    final path = await SheetExport.save(html, 'zamer');
+    final path = await SheetExport.save(html, 'zamer_${r.name}');
     if (!mounted) return;
     await SheetExport.share(path, _sheetText());
   }
