@@ -161,6 +161,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
         ('ПРОФИЛЬ', _or(widget.profile, '—')),
         ('МАРКА', _or(widget.brand, '—')),
         ('СЕРИЯ', _or(widget.series, '—')),
+        ('АРМИРОВКА', _or(widget.armirovka, '—')),
         ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
         if (widget.sashModes.isNotEmpty)
           ('КОНСТРУКЦИЯ',
