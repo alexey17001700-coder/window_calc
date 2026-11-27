@@ -1511,7 +1511,7 @@ class _BalconyPainter extends CustomPainter {
       final o = rects[i].deflate(2.5);
       canvas.drawRect(o, _line(_ink, 1.1));
       final gl = o.deflate(3.5);
-      canvas.drawRect(gl, _line(_ink, 0.9));
+      _glassPanel(canvas, gl);
       final mode = i < winCellModes.length ? winCellModes[i].clamp(0, 3) : 0;
       if (mode != 0) {
         _openingMark(canvas, gl, mode, hingeLeft: i == 0);
