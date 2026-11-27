@@ -910,7 +910,7 @@ class _GostPainter extends CustomPainter {
       final o = s.deflate(2.5);
       canvas.drawRect(o, _line(_ink, 1.1));
       final gl = o.deflate(3.5);
-      _glassPanel(canvas, gl);
+      _glassPanel(canvas, gl, label: _mark);
 
       _openingMark(canvas, gl, modes[i].clamp(0, 3), hingeLeft: i == 0);
       _hardware(canvas, o, modes[i].clamp(0, 3),
