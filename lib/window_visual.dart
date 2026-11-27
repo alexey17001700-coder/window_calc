@@ -780,11 +780,40 @@ void _letterMark(Canvas canvas, Rect r, String s) {
   tp.paint(canvas, r.center - Offset(tp.width / 2, tp.height / 2));
 }
 
-/// СТЕКЛО: голубая заливка + контур + плюсик.
-void _glassPanel(Canvas canvas, Rect r) {
+/// СТЕКЛО: голубая заливка + контур + плюсик + подпись стеклопакета.
+/// Подпись («2-КАМ · 32») рисуется в ПРАВОМ ВЕРХНЕМ углу панели, чтобы
+/// не мешать обозначению створки Г/П/ПО/О в левом верхнем углу.
+void _glassPanel(Canvas canvas, Rect r, {String? label}) {
   canvas.drawRect(r, _fillPaint(_kGlassFill));
   canvas.drawRect(r, _inkLine(0.9));
   _plusMark(canvas, r);
+  if (label != null && label.isNotEmpty) _glassMark(canvas, r, label);
+}
+
+/// Подпись стеклопакета в правом верхнем углу панели.
+void _glassMark(Canvas canvas, Rect r, String s) {
+  final tp = TextPainter(
+    text: TextSpan(
+      text: s,
+      style: const TextStyle(
+        fontSize: 7.0,
+        fontWeight: FontWeight.w800,
+        color: _kInk,
+        letterSpacing: 0.1,
+      ),
+    ),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  if (r.width < tp.width + 12 || r.height < 20) return;
+  final box = Rect.fromLTWH(
+    r.right - tp.width - 9,
+    r.top + 3,
+    tp.width + 5,
+    tp.height + 3,
+  );
+  canvas.drawRect(box, Paint()..color = const Color(0xFFF7F9FC));
+  canvas.drawRect(box, _inkLine(0.7));
+  tp.paint(canvas, Offset(box.left + 2.5, box.top + 1.5));
 }
 
 /// СЭНДВИЧ: белая «сгущёнка» + контур + буква S.
