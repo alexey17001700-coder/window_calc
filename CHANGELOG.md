@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.4.85+150
+
+### СБОРКА: фикс Kotlin 1.7 → 1.9.22 (падение `:shared_preferences_android:compileReleaseKotlin`)
+
+**Ошибка из Actions:**
+
+```
+shared_preferences_android-2.4.7: Class 'kotlin.Unit' was compiled with
+incompatible version of Kotlin. binary 1.9.0, expected 1.7.1.
+Execution failed for task ':shared_preferences_android:compileReleaseKotlin'
+```
+
+**Причина:** `android/settings.gradle` после `flutter create` содержит
+`org.jetbrains.kotlin.android` версии **1.7.x**, а плагины
+(`shared_preferences_android` 2.4.7 с `kotlin-stdlib` 1.9.22, `share_plus`,
+`path_provider`) собраны на **Kotlin 1.9.x**. Пин `shared_preferences: 2.2.2`
+в `pubspec.yaml` **не фиксирует транзитивный** `shared_preferences_android` —
+он уплыл до 2.4.7.
+
+**Что сделано (`.github/workflows/build.yml`):**
+
+- новый шаг **«Fix Kotlin version»** — строго **после** `flutter create`
+  и рядом с шагом «Set Android SDK levels»:
+  ```
+  sed -i 's/org.jetbrains.kotlin.android" version "[^"]*"/org.jetbrains.kotlin.android" version "1.9.22"/' android/settings.gradle
+  grep -n kotlin android/settings.gradle
+  ```
+  в `android/settings.gradle` становится
+  `id "org.jetbrains.kotlin.android" version "1.9.22" apply false`
+
+**Не тронуто:** Android-стек — AGP и Gradle родные из шаблона Flutter 3.24,
+compileSdk 34 / minSdk 23 / targetSdk 34, Java 17. Зеркал Maven и `init.gradle`
+нет. Зависимости `pubspec.yaml` не менялись.
+
+`pubspec.yaml`: **3.4.84+149 → 3.4.85+150** — новый тег, свежий прогон.
+
 ## 3.4.84+149
 
 ### СБОРКА: workflow переписан начисто — все зеркала убраны
