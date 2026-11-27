@@ -1039,24 +1039,25 @@ class _GostPainter extends CustomPainter {
     final cy = g.center.dy;
 
     // ── ПОВОРОТНАЯ (П) и ПОВОРОТНО-ОТКИДНАЯ (ПО):
-    //    УЗКАЯ ВЕРШИНА — К РУЧКЕ, два угла основания — К ПЕТЛЯМ.
+    //    ВЕРШИНА — К РУЧКЕ, два угла основания — К ПЕТЛЯМ
+    //    (верхняя и нижняя петля створки), на всю высоту створки.
     if (mode == 1 || mode == 2) {
-      final h = g.width * 0.60;
-      final half = g.height * 0.24;
+      final topY = g.top + g.height * 0.10;
+      final botY = g.top + g.height * 0.90;
       final Path t;
       if (hingeLeft) {
         // петли слева → ручка справа → вершина справа
         t = Path()
           ..moveTo(g.right - 3, cy)
-          ..lineTo(g.right - 3 - h, cy - half)
-          ..lineTo(g.right - 3 - h, cy + half)
+          ..lineTo(g.left + 3, topY)
+          ..lineTo(g.left + 3, botY)
           ..close();
       } else {
         // петли справа → ручка слева → вершина слева
         t = Path()
           ..moveTo(g.left + 3, cy)
-          ..lineTo(g.left + 3 + h, cy - half)
-          ..lineTo(g.left + 3 + h, cy + half)
+          ..lineTo(g.right - 3, topY)
+          ..lineTo(g.right - 3, botY)
           ..close();
       }
       canvas.drawPath(t, p);
