@@ -43,6 +43,11 @@ const List<String> kSashModeShort = [
   'О · ОТКИД.',
 ];
 
+/// СОЕДИНИТЕЛЬНАЯ ПЛАНКА балконного блока (окно + дверь), ММ.
+/// Общая ширина блока = ширина окна + планка + ширина двери.
+/// Планка стоит между окном и дверью и «съедает» 2 мм из общей ширины.
+const int kBalconyPlankMm = 2;
+
 class WindowVisual extends StatefulWidget {
   const WindowVisual({
     super.key,
