@@ -137,6 +137,7 @@ Estimate buildEstimate({
   required String windowType,
   required List<String> parts,
   required String glass,
+  String profile = '',
 }) {
   final lines = <EstimateLine>[];
 
