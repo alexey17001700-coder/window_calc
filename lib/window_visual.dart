@@ -74,7 +74,27 @@ class WindowVisual extends StatefulWidget {
     this.onWinTap,
     this.onDoorTap,
     this.onDimTap,
+    this.glassLabel = '2-КАМ',
+    this.glassThk = 32,
+    this.onGlassSwipeUp,
+    this.onGlassSwipeDown,
   });
+
+  /// Подпись стеклопакета на чертеже: «1-КАМ» или «2-КАМ».
+  /// Рисуется в правом верхнем углу КАЖДОГО стеклопакета изделия.
+  final String glassLabel;
+
+  /// Толщина стеклопакета, ММ (24 / 32 / 40). Допустимые значения
+  /// зависят от толщины рамы.
+  final int glassThk;
+
+  /// СВАЙП ВВЕРХ по стеклопакету — камерность (одна ⇄ две камеры).
+  /// Один выбор действует на ВСЕ стеклопакеты изделия.
+  final VoidCallback? onGlassSwipeUp;
+
+  /// СВАЙП ВНИЗ по стеклопакету — толщина стеклопакета из допустимых
+  /// для толщины рамы.
+  final VoidCallback? onGlassSwipeDown;
 
   /// Число створок: 1, 2, 3 или 4.
   final int sashes;
