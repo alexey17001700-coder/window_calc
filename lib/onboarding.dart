@@ -753,9 +753,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Считаем стоимость по площади изделия и комплектации.
   /// Прайс — в lib/price_estimate.dart (класс PriceBook).
   Widget _estimateStep() {
-    final glass = (_glass >= 0 && _glass < glassTypes.length)
-        ? glassTypes[_glass].title
-        : '';
+    final glass = glassTypes[_glassCam.clamp(0, glassTypes.length - 1)].title;
     final estimate = buildEstimate(
       widthMm: _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА'),
       heightMm: _mmOf('ВЫСОТА'),
