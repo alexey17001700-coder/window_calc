@@ -50,10 +50,16 @@ jobs:
           # (shared_preferences_android 2.4.7, share_plus, path_provider)
           # собраны на Kotlin 1.9.x -> ':shared_preferences_android:compileReleaseKotlin'
           # падал с "binary 1.9.0, expected 1.7.1". Поднимаем только Kotlin.
-          sed -i 's/org\.jetbrains\.kotlin\.android" version "[^"]*"/org.jetbrains.kotlin.android" version "1.9.22"/' android/settings.gradle
-          sed -i "s/org\.jetbrains\.kotlin\.android' version '[^']*'/org.jetbrains.kotlin.android' version '1.9.22'/" android/settings.gradle
+          # Схема plugins {} (Flutter 3.24)
+          sed -i 's/org\.jetbrains\.kotlin\.android" version "[^"]*"/org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
+          sed -i "s/org\.jetbrains\.kotlin\.android' version '[^']*'/org.jetbrains.kotlin.android' version '1.9.24'/" android/settings.gradle
+          # Старая схема ext.kotlin_version (на случай, если шаблон её использует)
+          sed -i "s/ext\.kotlin_version = '[^']*'/ext.kotlin_version = '1.9.24'/" android/build.gradle
+          sed -i 's/ext\.kotlin_version = "[^"]*"/ext.kotlin_version = "1.9.24"/' android/build.gradle
           echo "--- android/settings.gradle ---"
           cat android/settings.gradle
+          echo "--- android/build.gradle ---"
+          cat android/build.gradle
 
       - name: Set app name
         run: |
