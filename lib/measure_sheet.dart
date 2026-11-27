@@ -1130,7 +1130,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     // Иначе в PDF выходило одностворчатое окно: у блока створок в замере
     // одна, и обычный чертёж рисовал её как целое изделие.
     final visual = r.showVisual
-        ? (widget.balcony
+        ? (_balcony
             ? SheetVisual.balconySvg(
                 widthMm: _widthMm,
                 heightMm: _heightMm,
