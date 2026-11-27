@@ -223,12 +223,33 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     return best;
   }
 
-  /// СТВОРОК ВСЕГО, ШТ.
-  int get _sashTotal => widget.sashModes.length;
+  /// БАЛКОННЫЙ БЛОК — окно + дверь в ОДНОЙ раме.
+  /// Флаг из мастера, а если он не дошёл — определяем по цепочке дерева:
+  /// так чертёж в PDF всё равно будет балконным блоком, а не окном.
+  bool get _balcony =>
+      widget.balcony ||
+      (widget.path.length > 1 &&
+          widget.path[1].toUpperCase() == 'БАЛКОННЫЙ БЛОК');
 
-  /// ОТКРЫВАЮЩИХСЯ створок (не глухих) — по обозначениям ГОСТ.
-  int get _openingSashes =>
-      widget.sashModes.where((m) => _modeIndex(m) != 0).length;
+  /// Вид низа балконной двери: 0 — стекло в пол, 1 — стекло + сэндвич,
+  /// 2 — стекло + стекло.
+  String get _doorKindName =>
+      const ['СТЕКЛО В ПОЛ', 'СТЕКЛО + СЭНДВИЧ', 'СТЕКЛО + СТЕКЛО']
+          [widget.doorKind.clamp(0, 2)];
+
+  /// Частей в оконной части балконного блока (1 или 2).
+  int get _winParts => widget.winParts.clamp(1, 2);
+
+  /// «ОКНО 1 ЧАСТ. · ДВЕРЬ СТЕКЛО + СЭНДВИЧ» — состав балконного блока.
+  String get _balconyLine => 'ОКНО $_winParts ЧАСТ. · ДВЕРЬ $_doorKindName';
+
+  /// СТВОРОК ВСЕГО, ШТ. У балконного блока — дверь + части окна.
+  int get _sashTotal => _balcony ? _winParts + 1 : widget.sashModes.length;
+
+  /// ОТКРЫВАЮЩИХСЯ створок: у блока — дверь + открывающиеся части окна.
+  int get _openingSashes => _balcony
+      ? 1 + widget.winCellModes.where((m) => m != 0).length
+      : widget.sashModes.where((m) => _modeIndex(m) != 0).length;
 
   /// РУЧКИ, ШТ — по одной на каждую ОТКРЫВАЮЩУЮСЯ створку (авто).
   int get _handles => _openingSashes;
