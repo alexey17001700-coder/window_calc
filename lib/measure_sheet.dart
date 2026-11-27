@@ -460,7 +460,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
               _SheetGhost('НАЗАД', Icons.arrow_back_rounded, widget.onBack),
               const SizedBox(width: 12),
               Expanded(
-                child: _SheetGold('ОТПРАВИТЬ', Icons.send_rounded, _share),
+                child: _SheetGold(
+                    'ОТПРАВИТЬ', Icons.send_rounded, _pickRecipient),
               ),
             ],
           ),
