@@ -161,6 +161,16 @@ Estimate buildEstimate({
       _round2(perM2),
     ));
 
+    // ── Толщина профиля (рамы): 70 мм — тёплый, надбавка ──
+    if (profile.contains('70')) {
+      lines.add(EstimateLine(
+        'Профиль 70 мм · тёплый',
+        area,
+        'м²',
+        PriceBook.profile70PerM2,
+      ));
+    }
+
     // ── Комплектация ──────────────────────────────────────────
     for (final p in parts) {
       switch (p) {
