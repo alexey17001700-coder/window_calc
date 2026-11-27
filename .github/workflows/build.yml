@@ -63,6 +63,8 @@ jobs:
           cat android/settings.gradle
           echo "--- android/build.gradle ---"
           cat android/build.gradle
+          # чистая сборка после смены версии Kotlin
+          flutter clean
 
       - name: Set app name
         run: |
