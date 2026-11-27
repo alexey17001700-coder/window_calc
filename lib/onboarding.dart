@@ -815,6 +815,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       sectionWidths: _secWidths,
       hinges: _hingeCounts,
       sandwich: _isBalcony && _doorKind == 1 ? 1 : 0,
+      heightMm: _mmOf('ВЫСОТА'),
+      balcony: _isBalcony,
+      doorOnLeft: _doorOnLeft,
+      doorKind: _doorKind,
+      winParts: _winParts,
+      winCellModes: _winCellModes,
+      winSectionWidths: _winSecW,
+      winWidthMm: _mmOf('ШИРИНА ОКНА'),
+      winHeightMm: _mmOf('ВЫСОТА ОКНА'),
+      doorWidthMm: _mmOf('ШИРИНА ДВЕРИ'),
       sashModes: [
         for (final m in (_sashModes.length == _sashCount
             ? _sashModes
