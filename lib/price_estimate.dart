@@ -260,12 +260,13 @@ int seriesMm(String series) {
 /// 58/60/70 — база (0): толщина профиля уже учтена в profile70PerM2.
 /// 75 мм и толще — премиум: premiumPerMm за каждый мм свыше 70.
 /// ⚠️ ЗАГЛУШКА.
-double seriesPerM2(String series) {
+double seriesPerM2(String series, [PriceBookData? book]) {
+  final bk = book ?? PriceBookData.standard;
   final mm = seriesMm(series);
   final over = mm - 70;
   if (over <= 0) return 0; // 58…70 — без надбавки
-  if (mm < PriceBook.premiumFromMm) return 0;
-  return over * PriceBook.premiumPerMm;
+  if (mm < bk.premiumFromMm) return 0;
+  return over * bk.premiumPerMm;
 }
 
 /// АРМИРОВАНИЕ (армировка) профиля — по толщине серии, мм.
