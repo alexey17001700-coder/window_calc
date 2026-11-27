@@ -19,10 +19,16 @@ import 'screen_flash.dart';
 
 /// Ветка дерева: иконка + название + подпункты.
 class WorkNode {
-  const WorkNode(this.icon, this.title, [this.children = const []]);
+  const WorkNode(this.icon, this.title,
+      [this.children = const [], this.mm = 0]);
   final IconData icon;
   final String title;
   final List<WorkNode> children;
+
+  /// Толщина профиля серии в ММ (0 — не серия / универсальная).
+  /// По ней серии фильтруются кнопкой ПРОФИЛЬ 60/70:
+  /// 60 → серии до 60 мм, 70 → серии от 70 мм.
+  final int mm;
 }
 
 /// Стеклопакет — выбор СВАЙПОМ по стеклу на чертеже (в дерево не входит).
