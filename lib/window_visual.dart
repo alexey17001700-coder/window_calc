@@ -1556,9 +1556,9 @@ class _BalconyPainter extends CustomPainter {
     }
 
     // ── ФУРНИТУРА ДВЕРИ ──
-    //  Петли — со стороны ОКНА (внутренняя сторона блока),
-    //  ручка — с внешнего края блока.
-    final hingesOnLeft = !doorOnLeft;
+    //  Петли — НАПРОТИВ стыка с окном: стык справа → петли слева,
+    //  стык слева → петли справа (Босс). Ручка — с внешнего края блока.
+    final hingesOnLeft = doorOnLeft;
     _doorRail(canvas, inner, hingesOnLeft: hingesOnLeft);
 
     // ── ТРЕУГОЛЬНИКИ ОТКРЫВАНИЯ ──
