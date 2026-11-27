@@ -925,7 +925,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             spacing: 6,
             runSpacing: 6,
             children: [
-              for (var i = 0; i < _doorKindNames.length; i++)
+              // Порядок как просил Босс: сэндвич → стекло+стекло → в пол.
+              for (final i in const [1, 2, 0])
                 _OptChip(
                   label: _doorKindNames[i],
                   selected: doorIdx == i,
