@@ -330,6 +330,8 @@ class _WindowVisualState extends State<WindowVisual> {
               child: CustomPaint(
                 size: size,
                 painter: _GostPainter(
+                  glassLabel: widget.glassLabel,
+                  glassThk: widget.glassThk,
                   sashes: widget.sashes,
                   arched: widget.arched,
                   parts: widget.parts,
