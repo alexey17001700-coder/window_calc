@@ -156,7 +156,7 @@ const List<WorkNode> workTree = [
     // С ДВЕРЬЮ / УГЛОВОЙ» убраны — состав блока задаётся кнопками
     // на чертеже (зеркало, вид двери, части окна).
     // Сразу после выбора идёт тип дома: КИРПИЧКА, ПАНЕЛЬКА и т.д.
-    WorkNode(Icons.door_sliding_rounded, 'БАЛКОННЫЙ БЛОК', houseTypes),
+    WorkNode(Icons.door_sliding_rounded, 'БАЛКОННЫЙ БЛОК', balconyHouseTypes),
     WorkNode(Icons.roofing_rounded, 'БАЛКОН', balconyKinds),
     WorkNode(Icons.deck_rounded, 'ЛОДЖИЯ', loggiaKinds),
     WorkNode(Icons.door_front_door_rounded, 'ДВЕРЬ', doorKinds),
