@@ -1085,6 +1085,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       'armirovka': widget.armirovka,
       'order': widget.orderNo.trim(),
       'sash': widget.sashModes,
+      'hinges': widget.hinges,
+      'sandwich': widget.sandwich,
       'widthMm': widget.widthMm,
       'sizes': widget.sizes,
       'photos': _photos.length,
