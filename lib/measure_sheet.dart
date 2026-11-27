@@ -271,7 +271,10 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   }
 
   /// СТЕКЛОПАКЕТОВ, ШТ — по одному на каждую створку.
-  int get _glassUnits => widget.sashModes.isEmpty ? 0 : widget.sashModes.length;
+  /// У балконного блока — части окна + дверь (в двери стекло всегда).
+  int get _glassUnits => _balcony
+      ? _winParts + 1
+      : (widget.sashModes.isEmpty ? 0 : widget.sashModes.length);
 
   /// СПЕЦИФИКАЦИЯ ДЛЯ ЗАВОДА — всё, что завод изготавливает и поставляет:
   /// название изделия, размеры, профиль, армировка, стеклопакеты,
