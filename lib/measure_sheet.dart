@@ -5,6 +5,7 @@ import 'theme.dart';
 import 'screen_flash.dart';
 import 'measure_media.dart';
 import 'price_estimate.dart';
+import 'price_settings.dart';
 import 'sheet_recipient.dart';
 import 'sheet_visual.dart';
 import 'window_visual.dart';
