@@ -512,6 +512,15 @@ class SheetExport {
     String order = '',
     String visual = '',
     List<(String, String)> spec = const [],
+    String title = 'ЗАМЕРНЫЙ ЛИСТ',
+    String specTitle = 'ИЗДЕЛИЕ И КОМПЛЕКТУЮЩИЕ',
+    bool showVisual = true,
+    bool showSpec = true,
+    bool showRows = true,
+    bool showPhotos = true,
+    bool showClient = true,
+    String price = '',
+    String priceLabel = 'ИТОГО',
     String footer = 'Сформировано в Window Measure Pro',
   }) {
     final b = StringBuffer();
