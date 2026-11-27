@@ -45,7 +45,7 @@ extension SheetRecipientInfo on SheetRecipient {
         SheetRecipient.measurer => 'ПОЛНЫЙ ЛИСТ · ВСЁ · ЦЕНА',
         SheetRecipient.client => 'ИЗДЕЛИЕ · КОМПЛЕКТУЮЩИЕ · ЦЕНА',
         SheetRecipient.factory => 'ПРОФИЛЬ · СТЕКЛОПАКЕТ · АРМИРОВКА',
-        SheetRecipient.installer => 'РАЗМЕРЫ · ПРОЁМ · ФОТО',
+        SheetRecipient.installer => 'РАЗМЕРЫ · ПРОЁМ · ФОТО · ЦЕНА',
       };
 
   /// Чертёж изделия — нужен всем.
