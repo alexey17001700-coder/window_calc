@@ -541,9 +541,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final sashes = _sashCount;
     final arched = windowType.toUpperCase().contains('ФИГУРН');
     // Обозначения створок: если ещё не заданы — все «поворотные».
-    final modes = _sashModes.length == sashes
-        ? _sashModes
-        : List<int>.filled(sashes, 1);
+    // Простая дверь ПВХ: режим задаётся кнопкой «ПЕТЛИ» — 2 петли
+    // (стандартные, с выбором режима) или 3+ (только поворотный).
+    final modes = _isDoor
+        ? List<int>.filled(sashes, _doorHinges >= 3 ? 1 : _doorMode)
+        : (_sashModes.length == sashes
+            ? _sashModes
+            : List<int>.filled(sashes, 1));
 
     return Column(
       children: [
