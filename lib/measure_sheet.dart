@@ -932,8 +932,9 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   List<(String, String)> _specFor(SheetRecipient r) {
     switch (r) {
       case SheetRecipient.measurer:
-      case SheetRecipient.factory:
         return _specRows;
+      case SheetRecipient.factory:
+        return _factorySpec;
       case SheetRecipient.client:
         return [
           ('ИЗДЕЛИЕ', widget.path.isEmpty ? '—' : widget.path.join(' · ')),
