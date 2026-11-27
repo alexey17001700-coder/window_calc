@@ -230,14 +230,15 @@ class Estimate {
 double _round2(double v) => (v * 100).roundToDouble() / 100;
 
 /// Надбавка за стеклопакет по его названию, ₽/м².
-double glassPerM2(String glass) {
+double glassPerM2(String glass, [PriceBookData? book]) {
+  final bk = book ?? PriceBookData.standard;
   final g = glass.toLowerCase();
-  if (g.contains('мульти')) return PriceBook.glassMulti;
+  if (g.contains('мульти')) return bk.glassMulti;
   if (g.contains('солнц') || g.contains('тонир') || g.contains('sun')) {
-    return PriceBook.glassSun;
+    return bk.glassSun;
   }
   if (g.contains('энерг') || g.contains('тепл') || g.contains('i-стек')) {
-    return PriceBook.glassEnergy;
+    return bk.glassEnergy;
   }
   return PriceBook.glassDouble;
 }
