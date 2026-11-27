@@ -510,6 +510,8 @@ class SheetExport {
     required List<(String, String)> rows,
     required List<(MeasurePhoto, String)> photos,
     String order = '',
+    String visual = '',
+    List<(String, String)> spec = const [],
     String footer = 'Сформировано в Window Measure Pro',
   }) {
     final b = StringBuffer();
