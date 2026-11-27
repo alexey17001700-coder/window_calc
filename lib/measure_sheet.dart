@@ -31,6 +31,7 @@ class MeasureSheetView extends StatefulWidget {
     this.profile = '',
     this.brand = '',
     this.series = '',
+    this.armirovka = '',
     this.glassThk = 0,
     this.frameMm = 0,
     this.orderNo = '',
