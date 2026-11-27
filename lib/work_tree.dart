@@ -79,21 +79,101 @@ const List<String> brandNames = [
   'INNOVA D-LINE',
 ];
 
+/// ─── СЕРИИ ПРОФИЛЯ (по маркам) — уровень ПОСЛЕ марки ───
+/// У каждой марки свои серии. Цифра в названии — толщина, мм.
+/// По ней серии фильтруются кнопкой ПРОФИЛЬ 60/70:
+/// 60 → серии до 60 мм, 70 → серии от 70 мм.
+/// Цены по сериям пока ЗАГЛУШКИ (lib/price_estimate.dart).
+const List<WorkNode> rehauSeries = [
+  WorkNode(Icons.window_rounded, 'BLITZ NEW · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'GRAZIO · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'DELIGHT · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'INTELIO 80', houseTypes, 80),
+];
+
+const List<WorkNode> vekaSeries = [
+  WorkNode(Icons.window_rounded, 'EUROLINE · 58', houseTypes, 58),
+  WorkNode(Icons.window_rounded, 'PROLINE · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'SOFTLINE 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'SWINGLINE · 70', houseTypes, 70),
+];
+
+const List<WorkNode> kbeSeries = [
+  WorkNode(Icons.window_rounded, 'ETALON · 58', houseTypes, 58),
+  WorkNode(Icons.window_rounded, 'ENGINE · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'EXPERT · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'KBE 76', houseTypes, 76),
+];
+
+const List<WorkNode> salamanderSeries = [
+  WorkNode(Icons.window_rounded, '2D · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'STREAM · 60-70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'STREAMLINE 76', houseTypes, 76),
+  WorkNode(Icons.window_rounded, 'BLUEVOLUTION 92', houseTypes, 92),
+];
+
+const List<WorkNode> novotexSeries = [
+  WorkNode(Icons.window_rounded, 'CLASSIC · 58', houseTypes, 58),
+  WorkNode(Icons.window_rounded, 'TECHNO 58', houseTypes, 58),
+  WorkNode(Icons.window_rounded, 'TECHNO 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'TERMO · 70', houseTypes, 70),
+];
+
+const List<WorkNode> aluplastSeries = [
+  WorkNode(Icons.window_rounded, 'IDEAL 2000 · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'IDEAL 4000 · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'IDEAL 8000 · 85', houseTypes, 85),
+];
+
+const List<WorkNode> monblanSeries = [
+  WorkNode(Icons.window_rounded, 'ECO · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'TERMO 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'NORD · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'GRAND 80', houseTypes, 80),
+];
+
+const List<WorkNode> proplexSeries = [
+  WorkNode(Icons.window_rounded, 'OPTIMA · 58', houseTypes, 58),
+  WorkNode(Icons.window_rounded, 'COMFORT · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'PREMIUM · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'LUX 80', houseTypes, 80),
+];
+
+const List<WorkNode> plafenSeries = [
+  WorkNode(Icons.window_rounded, 'C-LINE · 58', houseTypes, 58),
+  WorkNode(Icons.window_rounded, 'L-LINE · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'E-LINE · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'T-LINE · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'S-LINE · 75', houseTypes, 75),
+];
+
+const List<WorkNode> innovaSeries = [
+  WorkNode(Icons.window_rounded, 'D-LINE · 60', houseTypes, 60),
+  WorkNode(Icons.window_rounded, 'G-LINE · 70', houseTypes, 70),
+  WorkNode(Icons.window_rounded, 'S-LINE · 75', houseTypes, 75),
+];
+
 /// ─── НАЗВАНИЕ ПРОФИЛЯ (марка) — уровень ПОСЛЕ толщины профиля ───
-/// После марки идёт тип дома, а после дома — комплектация (мультивыбор).
+/// После марки идёт СЕРИЯ, потом тип дома, потом комплектация.
 /// Цены по маркам пока заглушки (lib/price_estimate.dart).
 const List<WorkNode> brandTypes = [
-  WorkNode(Icons.branding_watermark_rounded, 'REHAU', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'VEKA', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'KBE', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'SALAMANDER', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'NOVOTEX', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'ALUPLAST', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'МОНБЛАН', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'ПРОПЛЕКС', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'ПЛАФЕН', houseTypes),
-  WorkNode(Icons.branding_watermark_rounded, 'INNOVA D-LINE', houseTypes),
+  WorkNode(Icons.branding_watermark_rounded, 'REHAU', rehauSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'VEKA', vekaSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'KBE', kbeSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'SALAMANDER', salamanderSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'NOVOTEX', novotexSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'ALUPLAST', aluplastSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'МОНБЛАН', monblanSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'ПРОПЛЕКС', proplexSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'ПЛАФЕН', plafenSeries),
+  WorkNode(Icons.branding_watermark_rounded, 'INNOVA D-LINE', innovaSeries),
 ];
+
+/// Все названия серий — для распознавания серии в цепочке замера.
+final Set<String> allSeriesNames = {
+  for (final b in brandTypes)
+    for (final s in b.children) s.title,
+};
 
 /// ─── ПРОФИЛЬ (толщина рамы) — уровень СРАЗУ ПОСЛЕ изделия ───
 /// У ВСЕХ ПВХ-изделий: окно, балкон, лоджия, балконный блок.
