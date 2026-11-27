@@ -764,10 +764,21 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       for (final item in widget.multi) (item, _sizesLine(item)),
     ];
 
+    final visual = SheetVisual.svg(
+      sashes: widget.sashModes.isEmpty ? 1 : widget.sashModes.length,
+      modes: [for (final m in widget.sashModes) _modeIndex(m)],
+      sectionWidths: widget.sectionWidths,
+      widthMm: _widthMm,
+      heightMm: _heightMm,
+      glassLabel: widget.glass.isEmpty ? '' : widget.glass,
+      glassThk: widget.glassThk,
+    );
     final html = SheetExport.html(
       client: _or(widget.name, '—'),
       product: widget.path.isEmpty ? '—' : widget.path.join(' · '),
       order: widget.orderNo.trim(),
+      visual: visual,
+      spec: _specRows,
       rows: rows,
       photos: photos,
     );
