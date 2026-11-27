@@ -147,6 +147,7 @@ Estimate buildEstimate({
   required String glass,
   String profile = '',
   String brand = '',
+  String series = '',
 }) {
   final lines = <EstimateLine>[];
 
