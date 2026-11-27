@@ -135,6 +135,31 @@ double glassPerM2(String glass) {
   return PriceBook.glassDouble;
 }
 
+/// Толщина серии в мм, вытащенная из её названия.
+/// «GRAZIO · 70» → 70, «IDEAL 8000 · 85» → 85, «STREAM · 60-70» → 70.
+/// Берём максимальное число в диапазоне 55…110 — цифры артикулов
+/// (2000, 4000, 8000) отсекаются.
+int seriesMm(String series) {
+  var best = 0;
+  for (final m in RegExp(r'\d{2,4}').allMatches(series)) {
+    final v = int.tryParse(m.group(0) ?? '') ?? 0;
+    if (v >= 55 && v <= 110 && v > best) best = v;
+  }
+  return best;
+}
+
+/// Надбавка за серию по её толщине, ₽/м².
+/// 58/60/70 — база (0): толщина профиля уже учтена в profile70PerM2.
+/// 75 мм и толще — премиум: premiumPerMm за каждый мм свыше 70.
+/// ⚠️ ЗАГЛУШКА.
+double seriesPerM2(String series) {
+  final mm = seriesMm(series);
+  final over = mm - 70;
+  if (over <= 0) return 0; // 58…70 — без надбавки
+  if (mm < PriceBook.premiumFromMm) return 0;
+  return over * PriceBook.premiumPerMm;
+}
+
 /// Цена изделия за м² по названию типа из дерева.
 /// Устойчиво к формулировкам: «ДВУХСТВОРЧАТОЕ», «ДВУХСТВОРЧАТЫЙ» и т.п.
 double windowPerM2For(String type) {
