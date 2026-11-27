@@ -755,16 +755,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final glass = (_glass >= 0 && _glass < glassTypes.length)
         ? glassTypes[_glass].title
         : '';
-    final windowType = _picked.length > 2 ? _picked[2] : '';
     final w = _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА');
     final h = _mmOf('ВЫСОТА');
     final est = buildEstimate(
       widthMm: w,
       heightMm: h,
-      windowType: windowType,
+      windowType: _windowType,
       parts: _multi,
       glass: glass,
       profile: _profile,
+      brand: _brand,
     );
     final modes = _sashModes.length == _sashCount
         ? _sashModes
