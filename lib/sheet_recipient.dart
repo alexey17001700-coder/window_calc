@@ -66,9 +66,13 @@ extension SheetRecipientInfo on SheetRecipient {
   bool get showClient =>
       this == SheetRecipient.measurer || this == SheetRecipient.client;
 
-  /// Общая цена — замерщику и клиенту (завод и монтажник её не видят).
+  /// Общая цена — замерщику, клиенту и монтажнику.
+  /// Завод цену НЕ видит: он сам присылает цены на комплектующие.
+  /// У каждого адресата своя цена — берётся из его прайса в настройках.
   bool get showPrice =>
-      this == SheetRecipient.measurer || this == SheetRecipient.client;
+      this == SheetRecipient.measurer ||
+      this == SheetRecipient.client ||
+      this == SheetRecipient.installer;
 
   /// Номер заказа в шапке (монтажнику он не нужен).
   bool get showOrder => this != SheetRecipient.installer;
