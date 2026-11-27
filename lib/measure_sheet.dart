@@ -1019,12 +1019,16 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
         ('СЕРИЯ', _or(widget.series, '—')),
         ('АРМИРОВКА', _or(widget.armirovka, '—')),
         ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
-        if (widget.sashModes.isNotEmpty)
+        if (_balcony) ('КОНСТРУКЦИЯ', _balconyLine),
+        if (!_balcony && widget.sashModes.isNotEmpty)
           ('КОНСТРУКЦИЯ',
               '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
-        if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
+        if (!_balcony && widget.sashModes.isNotEmpty && widget.widthMm > 0)
           ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
-        for (final item in widget.multi) (item, _sizesLine(item)),
+        ..._visRows(),
+        for (final item in widget.multi)
+          if ((widget.sizes[item] ?? const <String, int>{}).isNotEmpty)
+            (item, _sizesLine(item)),
       ];
 
   /// Спецификация под адресата — что показываем в правой колонке A4.
