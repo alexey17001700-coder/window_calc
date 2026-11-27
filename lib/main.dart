@@ -701,10 +701,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadCount() async {
-    final p = await SharedPreferences.getInstance();
-    final raw = p.getString('measurements_v4');
+    // Реальный источник архива — MeasureHistory (ключ window_calc_history).
+    final list = await MeasureHistory.load();
     if (!mounted) return;
-    setState(() => _measureCount = raw == null ? 0 : 1);
+    setState(() => _measureCount = list.length);
   }
 
   @override
