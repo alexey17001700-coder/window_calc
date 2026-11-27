@@ -1734,22 +1734,22 @@ class _BalconyPainter extends CustomPainter {
 
     // ── П · ПОВОРОТНАЯ: вершина — к РУЧКЕ, основание — к ПЕТЛЯМ.
     //    Растянут почти на всю высоту двери (34% + 34% = 68%).
-    final halfP = g.height * 0.34;
-    final hP = g.width * 0.46;
+    final topY = g.top + g.height * 0.06;
+    final botY = g.top + g.height * 0.94;
     final Path tp;
     if (hingesOnLeft) {
       // петли слева → ручка справа → вершина справа
       tp = Path()
         ..moveTo(g.right - 5, g.center.dy)
-        ..lineTo(g.right - 5 - hP, g.center.dy - halfP)
-        ..lineTo(g.right - 5 - hP, g.center.dy + halfP)
+        ..lineTo(g.left + 5, topY)
+        ..lineTo(g.left + 5, botY)
         ..close();
     } else {
       // петли справа → ручка слева → вершина слева
       tp = Path()
         ..moveTo(g.left + 5, g.center.dy)
-        ..lineTo(g.left + 5 + hP, g.center.dy - halfP)
-        ..lineTo(g.left + 5 + hP, g.center.dy + halfP)
+        ..lineTo(g.right - 5, topY)
+        ..lineTo(g.right - 5, botY)
         ..close();
     }
     canvas.drawPath(tp, p);
