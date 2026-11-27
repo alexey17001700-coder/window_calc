@@ -5,9 +5,6 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-env:
-  GRADLE_OPTS: "-Djava.net.preferIPv4Stack=true -Dorg.gradle.internal.http.connectionTimeout=120000 -Dorg.gradle.internal.http.socketTimeout=120000"
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,228 +12,50 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
+
       - run: flutter pub get
+
       - name: Analyze (видно реальные ошибки в логе)
         run: flutter analyze --no-fatal-infos --no-fatal-warnings || true
+
       - run: flutter create --platforms=android .
+
       - name: Set Android SDK levels
         run: |
-          # Плагины (image_picker, share_plus, path_provider) требуют compileSdk 35+.
-          # Без этого Gradle падает: "requires a higher Android SDK version".
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle
+          # Плагины (image_picker, share_plus, path_provider, package_info_plus)
+          # требуют compileSdk 34. AGP из шаблона Flutter 3.24 (8.1.0) его
+          # поддерживает — апгрейд AGP/Gradle НЕ нужен.
+          # Раньше здесь стоял compileSdk 36: он тянул AGP 8.7 + Gradle 8.9
+          # и ломал встроенный Gradle-плагин Flutter (javawriter / asm).
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' android/app/build.gradle
-          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 35/' android/app/build.gradle
-          sed -i 's/compileSdkVersion .*/compileSdkVersion 36/' android/app/build.gradle
-          sed -i 's/minSdkVersion .*/minSdkVersion 23/' android/app/build.gradle
-          sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle
-          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
+          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 34/' android/app/build.gradle
           grep -nE 'compileSdk|minSdk|targetSdk' android/app/build.gradle
-      - name: Modernize Android toolchain (AGP + Gradle)
-        run: |
-          # compileSdk 36 требует AGP 8.6+ и Gradle 8.7+.
-          sed -i 's|id "com.android.application" version "[^"]*"|id "com.android.application" version "8.7.0"|' android/settings.gradle
-          sed -i 's|gradle-.*-all.zip|gradle-8.9-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
+          echo "--- AGP / Gradle (должны быть родные, из шаблона Flutter) ---"
           grep -nE 'com.android.application|distributionUrl' android/settings.gradle android/gradle/wrapper/gradle-wrapper.properties
-      - name: Fix Kotlin version
-        run: |
-          cd android
-          sed -i 's|id "org.jetbrains.kotlin.android" version ".*"|id "org.jetbrains.kotlin.android" version "1.9.24"|' settings.gradle
-          sed -i "s|ext.kotlin_version = .*|ext.kotlin_version = '1.9.24'|" build.gradle
-          cd ..
-      - name: Repositories → settings.gradle (PREFER_SETTINGS)
-        run: |
-          # Все репозитории — ТОЛЬКО в settings.gradle, из android/build.gradle
-          # кастомные maven удаляем. Плюс зеркала Maven Central.
-          python3 - <<'PY'
-          import re, pathlib
 
-          MIRRORS = (
-              '        maven { url "https://dl.google.com/dl/android/maven2/" }\n'
-              '        maven { url "https://maven.aliyun.com/repository/central" }\n'
-              '        maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }\n'
-              '        maven { url "https://repo1.maven.org/maven2/" }\n'
-              '        mavenCentral()'
-          )
-
-          p = pathlib.Path("android/settings.gradle")
-          s = p.read_text()
-
-          # 1) pluginManagement.repositories — зеркала перед mavenCentral()
-          s = s.replace("        mavenCentral()\n        gradlePluginPortal()",
-                        MIRRORS + "\n        gradlePluginPortal()", 1)
-
-          # 2) dependencyResolutionManagement — если нет, вставляем перед include
-          if "dependencyResolutionManagement" not in s:
-              block = (
-                  "dependencyResolutionManagement {\n"
-                  "    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)\n"
-                  "    repositories {\n"
-                  "        google()\n"
-                  + MIRRORS + "\n"
-                  "    }\n"
-                  "}\n\n"
-              )
-              if "include " in s:
-                  i = s.index("include ")
-                  s = s[:i] + block + s[i:]
-              else:
-                  s = s.rstrip() + "\n\n" + block
-          p.write_text(s)
-          print("=== settings.gradle ===")
-          print(s)
-
-          # 3) android/build.gradle — кастомные maven убираем
-          b = pathlib.Path("android/build.gradle")
-          if b.exists():
-              t = b.read_text()
-              out, i = [], 0
-              while True:
-                  m = re.search(r'allprojects\s*\{', t[i:])
-                  if not m:
-                      out.append(t[i:])
-                      break
-                  start = i + m.start()
-                  j = i + m.end() - 1
-                  depth = 0
-                  while j < len(t):
-                      if t[j] == '{':
-                          depth += 1
-                      elif t[j] == '}':
-                          depth -= 1
-                          if depth == 0:
-                              break
-                      j += 1
-                  out.append(t[i:start])
-                  i = j + 1
-              b.write_text("".join(out))
-              print("=== build.gradle ===")
-              print(b.read_text())
-          PY
-      - name: Maven Central mirrors (обход 404 на repo.maven.apache.org)
-        run: |
-          # Сбой «Could not find com.squareup:javawriter:2.5.0 / org.ow2.asm:asm:9.1»
-          # на шаге :gradle:compileGroovy — это НЕ ошибка кода: артефакты тянет
-          # встроенная сборка Gradle-плагина Flutter из самого SDK
-          # (packages/flutter_tools/gradle, AGP 7.3.0). Оба артефакта лежат
-          # ТОЛЬКО на Maven Central, и если runner до него не достучался —
-          # Gradle отдаёт «Could not find».
-          FLUTTER_ROOT="$(dirname "$(dirname "$(command -v flutter)")")"
-          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
-          PLUGIN_DIR="$FLUTTER_ROOT/packages/flutter_tools/gradle"
-          ls -la "$PLUGIN_DIR" || true
-
-          # ВАЖНО: Groovy (.gradle) и Kotlin DSL (.gradle.kts) — РАЗНЫЙ синтаксис.
-          # В .kts нельзя писать maven { url "..." } — только maven("...").
-          # Именно на этом падало: settings.gradle.kts:5 Unexpected tokens.
-          REPOS_GROOVY='maven { url "https://maven.aliyun.com/repository/central" }
-              maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
-              maven { url "https://repo1.maven.org/maven2/" }
-              mavenCentral()'
-          REPOS_KTS='maven("https://maven.aliyun.com/repository/central")
-              maven("https://maven-central.storage-download.googleapis.com/maven2/")
-              maven("https://repo1.maven.org/maven2/")
-              mavenCentral()'
-          export REPOS_GROOVY REPOS_KTS
-
-          # 1) Все gradle-файлы встроенного плагина Flutter — там и живёт :gradle
-          mapfile -t FILES < <(find "$PLUGIN_DIR" \( -name "*.gradle" -o -name "*.gradle.kts" \) 2>/dev/null)
-          echo "Файлов плагина найдено: ${#FILES[@]}"
-          for F in "${FILES[@]}"; do
-            case "$F" in
-              *.gradle.kts)
-                # Kotlin DSL: ТОЛЬКО замена mavenCentral() на mavenCentral() + maven("...")
-                # Никаких repositories { } и url "..." — иначе снова Unexpected tokens.
-                if grep -q "mavenCentral()" "$F"; then
-                  perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS_KTS}/g' "$F"
-                fi ;;
-              *)
-                if grep -q "mavenCentral()" "$F"; then
-                  perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS_GROOVY}/g' "$F"
-                else
-                  case "$(basename "$F")" in
-                    build.gradle|settings.gradle)
-                      printf '\nrepositories {\n    %s\n}\n' "$REPOS_GROOVY" >> "$F" ;;
-                  esac
-                fi ;;
-            esac
-            echo "--- $F"
-            grep -n "aliyun\|mavenCentral\|^repositories" "$F" || true
-          done
-
-          # 2) Файлы проекта (Groovy)
-          for F in android/settings.gradle android/build.gradle; do
-            [ -f "$F" ] || continue
-            if grep -q "mavenCentral()" "$F"; then
-              perl -0777 -pi -e 's/mavenCentral\(\)/$ENV{REPOS_GROOVY}/g' "$F"
-            fi
-          done
-
-          # 3) init.gradle — зеркала во ВСЕ проекты, включая included build :gradle
-          mkdir -p ~/.gradle
-          cat > ~/.gradle/init.gradle <<'EOF'
-          def addMirrors = { repos ->
-              // ВАЖНО: google() здесь НЕЛЬЗЯ — AGP ещё не применён, метода нет.
-              // Пишем Google-репозитории явными URL, иначе под PREFER_SETTINGS
-              // проектные репозитории перекрывают settings и androidx не находится.
-              repos.maven { url "https://dl.google.com/dl/android/maven2/" }
-              repos.maven { url "https://maven.google.com" }
-              repos.maven { url "https://maven.aliyun.com/repository/central" }
-              repos.maven { url "https://maven.aliyun.com/repository/google" }
-              repos.maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
-              repos.maven { url "https://repo1.maven.org/maven2/" }
-              repos.mavenCentral()
-          }
-          // Gradle 8.9: репозитории на уровне SETTINGS — покрывают
-          // и included build :gradle (встроенный плагин Flutter).
-          gradle.beforeSettings { s ->
-              try { addMirrors(s.pluginManagement.repositories) } catch (e) {}
-              try { addMirrors(s.dependencyResolutionManagement.repositories) } catch (e) {}
-          }
-          gradle.beforeProject { p ->
-              try { addMirrors(p.buildscript.repositories) } catch (e) {}
-              try { addMirrors(p.repositories) } catch (e) {}
-          }
-          gradle.allprojects { p ->
-              try { addMirrors(p.buildscript.repositories) } catch (e) {}
-              try { addMirrors(p.repositories) } catch (e) {}
-          }
-          EOF
-
-          # 4) Проверка — НЕ валим сборку. Если патч файлов не сработал,
-          #    зеркала всё равно даст init.gradle (шаг 3).
-          #    Отдельно ловим Groovy-синтаксис в .kts — это гарантированный краш.
-          if grep -rn 'url "' "$PLUGIN_DIR" --include="*.gradle.kts" 2>/dev/null; then
-            echo "!!! В .kts попал Groovy-синтаксис — откатываю правку файлов плагина"
-            for F in "${FILES[@]}"; do
-              case "$F" in *.gradle.kts) git checkout -- "$F" 2>/dev/null || true ;; esac
-            done
-          fi
-          if grep -rq "aliyun" "$PLUGIN_DIR" 2>/dev/null; then
-            echo "Зеркала Maven Central применены к файлам плагина"
-          else
-            echo "ВНИМАНИЕ: в файлах плагина зеркал нет — работают через init.gradle"
-          fi
-          echo "--- итоговый android/settings.gradle ---"
-          cat android/settings.gradle || true
-          echo "--- итоговый android/build.gradle ---"
-          cat android/build.gradle || true
       - name: Set app name
         run: |
           sed -i 's|android:label="[^"]*"|android:label="Замерщик окон Almas"|' android/app/src/main/AndroidManifest.xml
+
       - name: Add permissions
         run: |
           sed -i 's|<application|<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <uses-permission android:name="android.permission.INTERNET" />\n    <application|' android/app/src/main/AndroidManifest.xml
+
       - name: Decode keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
+
       - name: Create key.properties
         run: |
           cat > android/key.properties <<EOF
@@ -245,6 +64,7 @@ jobs:
           keyAlias=${{ secrets.KEY_ALIAS }}
           storeFile=upload-keystore.jks
           EOF
+
       - name: Configure signing
         run: |
           cd android/app
@@ -252,38 +72,27 @@ jobs:
           sed -i 's|    buildTypes {|    signingConfigs {\n        release {\n            keyAlias = keystoreProperties["keyAlias"]\n            keyPassword = keystoreProperties["keyPassword"]\n            storeFile = keystoreProperties["storeFile"] ? file(keystoreProperties["storeFile"]) : null\n            storePassword = keystoreProperties["storePassword"]\n        }\n    }\n    buildTypes {|' build.gradle
           sed -i 's|signingConfig = signingConfigs.debug|signingConfig = signingConfigs.release|' build.gradle
           cd ../..
-      - name: Build APK (3 попытки — Maven Central иногда отдаёт 404)
-        run: |
-          # Gradle запоминает «не найдено» на сутки — поэтому перед первой
-          # попыткой и между попытками чистим кэш модулей, иначе повтор
-          # упадёт с тем же текстом.
-          rm -rf ~/.gradle/caches/modules-2
-          for i in 1 2 3; do
-            echo "=== ПОПЫТКА СБОРКИ $i ИЗ 3 ==="
-            if flutter build apk --release; then
-              echo "СБОРКА УСПЕШНА (попытка $i)"
-              exit 0
-            fi
-            echo "Попытка $i не удалась — чищу кэш модулей Gradle и повторяю"
-            rm -rf ~/.gradle/caches/modules-2
-            sleep 20
-          done
-          echo "СБОРКА НЕ УДАЛАСЬ ПОСЛЕ 3 ПОПЫТОК"
-          exit 1
+
+      - name: Build APK
+        run: flutter build apk --release
+
       - name: Get version
         id: version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
       - name: Remove old release/tag (если тег уже есть)
         run: gh release delete "v${{ steps.version.outputs.version }}" --yes --cleanup-tag || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
