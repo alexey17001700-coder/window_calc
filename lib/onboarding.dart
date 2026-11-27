@@ -605,8 +605,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _visualStep() => _visualStepOld();
 
   Widget _visualStepOld() {
-    final windowType = _picked.length > 2 ? _picked[2] : '';
-    final house = _picked.length > 3 ? _picked[3] : '';
+    final windowType = _windowType;
     final sashes = _sashCount;
     final arched = windowType.toUpperCase().contains('ФИГУРН');
     // Обозначения створок: если ещё не заданы — все «поворотные».
