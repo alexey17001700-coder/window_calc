@@ -668,7 +668,10 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       ('ТЕЛЕФОН', _or(widget.phone, '—')),
       ('АДРЕС', _or(widget.addr, '—')),
       ('КВ. / ЭТАЖ', '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
-      ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
+      ('ПРОФИЛЬ', _or(widget.profile, '—')),
+      ('МАРКА', _or(widget.brand, '—')),
+      ('СЕРИЯ', _or(widget.series, '—')),
+      ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
       if (widget.sashModes.isNotEmpty)
         ('КОНСТРУКЦИЯ',
             '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
