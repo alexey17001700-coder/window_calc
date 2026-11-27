@@ -676,7 +676,8 @@ const Color _kSandwichFill = Color(0xFFFCFCF8);
 const Color _kInk = Color(0xFF16233A);
 
 /// Толщина ИМПОСТА двери балконного блока — реальный профиль, не палочка.
-const double _kImpostW = 7.0;
+/// 10 px ≈ 9 % ширины двери — импост читается как профиль, а не как линия.
+const double _kImpostW = 10.0;
 
 Paint _fillPaint(Color c) => Paint()..color = c;
 
