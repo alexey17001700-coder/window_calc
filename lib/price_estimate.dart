@@ -227,10 +227,15 @@ Estimate buildEstimate({
       lines.add(EstimateLine('Профиль $brand', area, 'м²', brandMarkup));
     }
 
-    // ── Серия профиля: пока ЗАГЛУШКА, надбавок нет ──
-    final seriesMarkup = PriceBook.seriesPerM2[series.toUpperCase()] ?? 0;
-    if (seriesMarkup > 0) {
-      lines.add(EstimateLine('Серия $series', area, 'м²', seriesMarkup));
+    // ── Серия профиля: премиум-толщина (75 мм и толще) ──
+    final sMarkup = seriesPerM2(series);
+    if (sMarkup > 0) {
+      lines.add(EstimateLine(
+        'Серия $series · премиум ${seriesMm(series)} мм',
+        area,
+        'м²',
+        _round2(sMarkup),
+      ));
     }
 
     // ── Комплектация ──────────────────────────────────────────
