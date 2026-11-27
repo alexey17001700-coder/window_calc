@@ -160,6 +160,20 @@ double seriesPerM2(String series) {
   return over * PriceBook.premiumPerMm;
 }
 
+/// АРМИРОВАНИЕ (армировка) профиля — по толщине серии, мм.
+/// 58–60 мм  → П-ОБРАЗНЫЙ ВКЛАДЫШ · 1,2 ММ
+/// 70–74 мм  → ЗАМКНУТЫЙ КОНТУР · 1,5 ММ
+/// 75 мм и ↑ → УСИЛЕННЫЙ ЗАМКНУТЫЙ · 2,0 ММ
+/// Пусто — ни серия, ни толщина рамы не заданы.
+String armirovkaFor(String series, int frameMm) {
+  final s = seriesMm(series);
+  final mm = s > 0 ? s : frameMm;
+  if (mm <= 0) return '';
+  if (mm <= 60) return 'П-ОБРАЗНЫЙ · 1,2 ММ';
+  if (mm < 75) return 'ЗАМКНУТЫЙ КОНТУР · 1,5 ММ';
+  return 'УСИЛЕННЫЙ ЗАМКНУТЫЙ · 2,0 ММ';
+}
+
 /// Цена изделия за м² по названию типа из дерева.
 /// Устойчиво к формулировкам: «ДВУХСТВОРЧАТОЕ», «ДВУХСТВОРЧАТЫЙ» и т.п.
 double windowPerM2For(String type) {
