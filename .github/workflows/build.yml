@@ -72,40 +72,16 @@ jobs:
           sed -i 's|    buildTypes {|    signingConfigs {\n        release {\n            keyAlias = keystoreProperties["keyAlias"]\n            keyPassword = keystoreProperties["keyPassword"]\n            storeFile = keystoreProperties["storeFile"] ? file(keystoreProperties["storeFile"]) : null\n            storePassword = keystoreProperties["storePassword"]\n        }\n    }\n    buildTypes {|' build.gradle
           sed -i 's|signingConfig = signingConfigs.debug|signingConfig = signingConfigs.release|' build.gradle
           cd ../..
-      - name: Harden Gradle against Maven flakiness
+      - name: Gradle settings (без init.gradle — он ломал сборку)
         run: |
-          # Причина падения прогона 45992354859:
-          #   Could not find com.squareup:javawriter:2.5.0 / org.ow2.asm:asm:9.1
-          #   Required by project :gradle > com.android.tools.build:gradle:7.3.0
-          # Это НЕ ошибка кода: оба артефакта есть в Maven Central. Gradle
-          # словил 404/таймаут, записал «не найдено» в кэш и повторы падали
-          # за 1 секунду (955 мс, 943 мс) — то есть в сеть уже не ходил.
-          # Лечим: длинные таймауты, повторы HTTP и отказ от демона — он
-          # держит негативный кэш в памяти и переживает чистку папок.
+          # init.gradle УБРАН: он добавлял репозитории в settings и ронял сборку
+          #   "prefer settings repositories over project repositories but
+          #    repository 'maven' was added by settings file 'settings.gradle'"
+          # Никаких зеркал не подменяем — Flutter-шаблон сам знает, где брать.
+          # От демона отказываемся: он держит негативный кэш в памяти и
+          # переживает чистку папок между попытками.
           echo "org.gradle.daemon=false" >> android/gradle.properties
-          mkdir -p ~/.gradle
-          cat > ~/.gradle/init.gradle <<'EOF'
-          def MIRRORS = ['https://repo1.maven.org/maven2',
-                         'https://dl.google.com/dl/android/maven2',
-                         'https://plugins.gradle.org/m2']
-          // ВАЖНО: НЕ добавляем репозитории в p.repositories (project-level).
-          // Flutter settings.gradle ставит RepositoriesMode.FAIL_ON_PROJECT_REPOS,
-          // и любая попытка добавить project-репозиторий роняет сборку:
-          //   "prefer settings repositories over project repositories but
-          //    repository 'maven' was added by settings file 'settings.gradle'"
-          // Поэтому зеркала добавляем ТОЛЬКО на уровне settings.
-          gradle.projectsLoaded {
-              gradle.rootProject.allprojects { p ->
-                  p.buildscript.repositories { MIRRORS.each { u -> maven { url u } } }
-              }
-          }
-          gradle.settingsEvaluated { s ->
-              s.pluginManagement.repositories { MIRRORS.each { u -> maven { url u } } }
-              try {
-                  s.dependencyResolutionManagement.repositories { MIRRORS.each { u -> maven { url u } } }
-              } catch (Exception ignored) {}
-          }
-          EOF
+          rm -f ~/.gradle/init.gradle
       - name: Build APK (3 попытки — репозитории Maven иногда отдают 404)
         env:
           GRADLE_OPTS: >-
