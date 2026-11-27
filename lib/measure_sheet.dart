@@ -56,6 +56,21 @@ class MeasureSheetView extends StatefulWidget {
   /// Выбранный стеклопакет ('' — не выбран).
   final String glass;
 
+  /// Толщина профиля (рамы) из дерева: 'ПРОФИЛЬ 60 ММ' / 'ПРОФИЛЬ 70 ММ'.
+  final String profile;
+
+  /// Марка профиля из дерева: REHAU, VEKA, KBE и т.п.
+  final String brand;
+
+  /// Серия профиля из дерева: GRAZIO · 70, SOFTLINE 70 и т.п.
+  final String series;
+
+  /// Толщина стеклопакета, ММ (24 / 32 / 40).
+  final int glassThk;
+
+  /// Толщина рамы, ММ (60 / 70 / 75 …). По ней видно, что влезает.
+  final int frameMm;
+
   /// Обозначения створок по ГОСТ (по порядку слева направо).
   final List<String> sashModes;
 
