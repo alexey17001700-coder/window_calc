@@ -46,6 +46,10 @@ class PriceBook {
   /// Пока ЗАГЛУШКА — пусто, надбавок нет. Цены задаст Босс позже.
   static const Map<String, double> brandPerM2 = {};
 
+  /// Надбавка за СЕРИЮ профиля, ₽/м².
+  /// Пока ЗАГЛУШКА — пусто, надбавок нет. Цены задаст Босс позже.
+  static const Map<String, double> seriesPerM2 = {};
+
   /// Комплектация.
   static const double sillPerM = 1400; // подоконник, ₽/м.п.
   static const double ebbPerM = 1200; // отлив, ₽/м.п.
