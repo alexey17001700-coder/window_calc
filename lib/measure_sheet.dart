@@ -185,13 +185,14 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   String get _dash => '─' * 26;
 
-  /// Стеклопакет одной строкой: «2-КАМ · 32 ММ · РАМА 70 ММ».
+  /// Стеклопакет одной строкой: «2-КАМ · 32 ММ».
   /// Камерность и толщина — ОДНИ на всё изделие (все стеклопакеты сразу).
+  /// ТОЛЩИНА РАМЫ здесь БОЛЬШЕ НЕ ПИШЕТСЯ: она дублировала строку
+  /// ПРОФИЛЬ («ПРОФИЛЬ 70 ММ») в спецификации листа.
   String get _glassLine {
     final g = widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass;
     final parts = <String>[g];
     if (widget.glassThk > 0) parts.add('${widget.glassThk} ММ');
-    if (widget.frameMm > 0) parts.add('РАМА ${widget.frameMm} ММ');
     return parts.join(' · ');
   }
 
@@ -200,6 +201,11 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     if (widget.widthMm > 0) return widget.widthMm;
     final v = widget.visSizes['ШИРИНА'] ?? 0;
     if (v > 0) return v;
+    // Балконный блок: общая ширина = окно + планка + дверь.
+    if (_balcony) {
+      final w = widget.winWidthMm + widget.doorWidthMm;
+      if (w > 0) return w + kBalconyPlankMm;
+    }
     var best = 0;
     for (final f in widget.sizes.values) {
       f.forEach((k, v) {
@@ -1078,22 +1084,14 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       case SheetRecipient.measurer:
         return _allRows();
       case SheetRecipient.factory:
-        return [
-          ..._visRows(),
-          for (final item in widget.multi)
-            if ((widget.sizes[item] ?? const <String, int>{}).isNotEmpty)
-              (item, _sizesLine(item)),
-        ];
+        return [for (final item in widget.multi) (item, _sizesLine(item))];
       case SheetRecipient.installer:
         return [
           ('АДРЕС', _or(widget.addr, '—')),
           ('КВ. / ЭТАЖ',
               '${_or(widget.flat, '—')} / ${_or(widget.floor, '—')}'),
           ('ТЕЛЕФОН', _or(widget.phone, '—')),
-          ..._visRows(),
-          for (final item in widget.multi)
-            if ((widget.sizes[item] ?? const <String, int>{}).isNotEmpty)
-              (item, _sizesLine(item)),
+          for (final item in widget.multi) (item, _sizesLine(item)),
         ];
       case SheetRecipient.client:
         return [];
