@@ -585,6 +585,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   winParts: _winParts,
                   winCellModes: _winCellModes,
                   winSectionWidths: _winSecW,
+                  // РАЗМЕРЫ БАЛКОННОГО БЛОКА. Без них чертёж рисовал «?»
+                  // вместо чисел: ширина окна, высота окна, ширина двери.
+                  winWidthMm: _mmOf('ШИРИНА ОКНА'),
+                  winHeightMm: _mmOf('ВЫСОТА ОКНА'),
+                  doorWidthMm: _mmOf('ШИРИНА ДВЕРИ'),
                   onWinTap: () => setState(() {
                     _glass = (_glass + 1 >= glassTypes.length
                         ? 0
