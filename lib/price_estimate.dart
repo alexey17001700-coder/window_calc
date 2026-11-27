@@ -78,6 +78,113 @@ class PriceBook {
   static const double delivery = 1500;
 }
 
+/// ПРАЙС ОДНОГО АДРЕСАТА. Те же числа, что в PriceBook, но СВОИ
+/// у замерщика, клиента и монтажника. Хранится в настройках.
+class PriceBookData {
+  const PriceBookData({
+    this.windowPerM2 = PriceBook.windowPerM2,
+    this.windowDefaultPerM2 = PriceBook.windowDefaultPerM2,
+    this.figuredMarkup = PriceBook.figuredMarkup,
+    this.glassEnergy = PriceBook.glassEnergy,
+    this.glassMulti = PriceBook.glassMulti,
+    this.glassSun = PriceBook.glassSun,
+    this.profile70PerM2 = PriceBook.profile70PerM2,
+    this.brandPerM2 = PriceBook.brandPerM2,
+    this.premiumPerMm = PriceBook.premiumPerMm,
+    this.premiumFromMm = PriceBook.premiumFromMm,
+    this.sillPerM = PriceBook.sillPerM,
+    this.ebbPerM = PriceBook.ebbPerM,
+    this.slopePerM = PriceBook.slopePerM,
+    this.psuPerM = PriceBook.psuPerM,
+    this.strippingPerM2 = PriceBook.strippingPerM2,
+    this.installPerM2 = PriceBook.installPerM2,
+    this.installMin = PriceBook.installMin,
+    this.delivery = PriceBook.delivery,
+  });
+
+  /// Стандартный прайс — числа из PriceBook.
+  static const standard = PriceBookData();
+
+  final Map<String, double> windowPerM2;
+  final double windowDefaultPerM2;
+  final double figuredMarkup;
+  final double glassEnergy;
+  final double glassMulti;
+  final double glassSun;
+  final double profile70PerM2;
+  final Map<String, double> brandPerM2;
+  final double premiumPerMm;
+  final int premiumFromMm;
+  final double sillPerM;
+  final double ebbPerM;
+  final double slopePerM;
+  final double psuPerM;
+  final double strippingPerM2;
+  final double installPerM2;
+  final double installMin;
+  final double delivery;
+
+  Map<String, dynamic> toJson() => {
+        'windowPerM2': windowPerM2,
+        'windowDefaultPerM2': windowDefaultPerM2,
+        'figuredMarkup': figuredMarkup,
+        'glassEnergy': glassEnergy,
+        'glassMulti': glassMulti,
+        'glassSun': glassSun,
+        'profile70PerM2': profile70PerM2,
+        'brandPerM2': brandPerM2,
+        'premiumPerMm': premiumPerMm,
+        'premiumFromMm': premiumFromMm,
+        'sillPerM': sillPerM,
+        'ebbPerM': ebbPerM,
+        'slopePerM': slopePerM,
+        'psuPerM': psuPerM,
+        'strippingPerM2': strippingPerM2,
+        'installPerM2': installPerM2,
+        'installMin': installMin,
+        'delivery': delivery,
+      };
+
+  static double _d(dynamic v, double fallback) =>
+      v is num ? v.toDouble() : fallback;
+
+  static int _i(dynamic v, int fallback) => v is num ? v.toInt() : fallback;
+
+  static Map<String, double> _m(dynamic v, Map<String, double> fallback) {
+    if (v is! Map) return fallback;
+    final out = <String, double>{};
+    v.forEach((k, val) {
+      if (val is num) out['$k'] = val.toDouble();
+    });
+    return out.isEmpty ? fallback : out;
+  }
+
+  /// Прайс из хранилища. Битое поле → стандартное значение.
+  static PriceBookData fromJson(Map<String, dynamic> j) {
+    final d = PriceBookData.standard;
+    return PriceBookData(
+      windowPerM2: _m(j['windowPerM2'], d.windowPerM2),
+      windowDefaultPerM2: _d(j['windowDefaultPerM2'], d.windowDefaultPerM2),
+      figuredMarkup: _d(j['figuredMarkup'], d.figuredMarkup),
+      glassEnergy: _d(j['glassEnergy'], d.glassEnergy),
+      glassMulti: _d(j['glassMulti'], d.glassMulti),
+      glassSun: _d(j['glassSun'], d.glassSun),
+      profile70PerM2: _d(j['profile70PerM2'], d.profile70PerM2),
+      brandPerM2: _m(j['brandPerM2'], d.brandPerM2),
+      premiumPerMm: _d(j['premiumPerMm'], d.premiumPerMm),
+      premiumFromMm: _i(j['premiumFromMm'], d.premiumFromMm),
+      sillPerM: _d(j['sillPerM'], d.sillPerM),
+      ebbPerM: _d(j['ebbPerM'], d.ebbPerM),
+      slopePerM: _d(j['slopePerM'], d.slopePerM),
+      psuPerM: _d(j['psuPerM'], d.psuPerM),
+      strippingPerM2: _d(j['strippingPerM2'], d.strippingPerM2),
+      installPerM2: _d(j['installPerM2'], d.installPerM2),
+      installMin: _d(j['installMin'], d.installMin),
+      delivery: _d(j['delivery'], d.delivery),
+    );
+  }
+}
+
 /// Одна позиция сметы.
 class EstimateLine {
   const EstimateLine(this.title, this.qty, this.unit, this.price);
