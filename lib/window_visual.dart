@@ -1785,20 +1785,20 @@ class _BalconyPainter extends CustomPainter {
     final cy = g.center.dy;
 
     if (mode == 1 || mode == 2) {
-      final h = g.width * 0.60;
-      final half = g.height * 0.24;
+      final topY = g.top + g.height * 0.10;
+      final botY = g.top + g.height * 0.90;
       final Path t;
       if (hingeLeft) {
         t = Path()
           ..moveTo(g.right - 3, cy)
-          ..lineTo(g.right - 3 - h, cy - half)
-          ..lineTo(g.right - 3 - h, cy + half)
+          ..lineTo(g.left + 3, topY)
+          ..lineTo(g.left + 3, botY)
           ..close();
       } else {
         t = Path()
           ..moveTo(g.left + 3, cy)
-          ..lineTo(g.left + 3 + h, cy - half)
-          ..lineTo(g.left + 3 + h, cy + half)
+          ..lineTo(g.right - 3, topY)
+          ..lineTo(g.right - 3, botY)
           ..close();
       }
       canvas.drawPath(t, p);
