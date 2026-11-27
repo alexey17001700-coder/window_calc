@@ -302,9 +302,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 Positioned.fill(
                   child: IgnorePointer(
                     child: AnimatedBuilder(
-                      animation: _shine,
+                      animation: _shineT,
                       builder: (_, __) => CustomPaint(
-                        painter: _ShinePainter(_shine.value),
+                        painter: _ShinePainter(_shineT.value),
                       ),
                     ),
                   ),
