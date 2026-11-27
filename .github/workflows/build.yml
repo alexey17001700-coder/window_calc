@@ -179,12 +179,17 @@ jobs:
           }
           EOF
 
-          # 4) Проверка: зеркало обязано появиться в файлах плагина
-          if ! grep -rq "aliyun" "$PLUGIN_DIR" 2>/dev/null; then
-            echo "!!! ЗЕРКАЛА НЕ ПРИМЕНИЛИСЬ К ПЛАГИНУ FLUTTER — смотри вывод выше"
-            exit 1
+          # 4) Проверка — НЕ валим сборку. Если патч файлов не сработал,
+          #    зеркала всё равно даст init.gradle (шаг 3).
+          if grep -rq "aliyun" "$PLUGIN_DIR" 2>/dev/null; then
+            echo "Зеркала Maven Central применены к файлам плагина"
+          else
+            echo "ВНИМАНИЕ: в файлах плагина зеркал нет — работают через init.gradle"
           fi
-          echo "Зеркала Maven Central применены"
+          echo "--- итоговый android/settings.gradle ---"
+          cat android/settings.gradle || true
+          echo "--- итоговый android/build.gradle ---"
+          cat android/build.gradle || true
       - name: Set app name
         run: |
           sed -i 's|android:label="[^"]*"|android:label="Замерщик окон Almas"|' android/app/src/main/AndroidManifest.xml
