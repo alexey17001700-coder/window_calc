@@ -813,6 +813,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       orderNo: _orderNo,
       widthMm: _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА'),
       sectionWidths: _secWidths,
+      hinges: _hingeCounts,
+      sandwich: _isBalcony && _doorKind == 1 ? 1 : 0,
       sashModes: [
         for (final m in (_sashModes.length == _sashCount
             ? _sashModes
