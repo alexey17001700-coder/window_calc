@@ -59,6 +59,7 @@ jobs:
           import re, pathlib
 
           MIRRORS = (
+              '        maven { url "https://dl.google.com/dl/android/maven2/" }\n'
               '        maven { url "https://maven.aliyun.com/repository/central" }\n'
               '        maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }\n'
               '        maven { url "https://repo1.maven.org/maven2/" }\n'
