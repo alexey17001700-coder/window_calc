@@ -295,17 +295,17 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
         if (_hingesTotal > 0) ('ПЕТЛИ, ШТ', '$_hingesTotal'),
         if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
         if (_heightMm > 0) ('ВЫСОТА', '$_heightMm ММ'),
-        if (widget.balcony && widget.winWidthMm > 0)
+        if (_balcony && widget.winWidthMm > 0)
           ('ШИРИНА ОКНА', '${widget.winWidthMm} ММ'),
-        if (widget.balcony && widget.winHeightMm > 0)
+        if (_balcony && widget.winHeightMm > 0)
           ('ВЫСОТА ОКНА', '${widget.winHeightMm} ММ'),
-        if (widget.balcony && widget.doorWidthMm > 0)
+        if (_balcony && widget.doorWidthMm > 0)
           ('ШИРИНА ДВЕРИ', '${widget.doorWidthMm} ММ'),
-        if (widget.balcony)
+        if (_balcony)
           ('СТОРОНА ДВЕРИ', widget.doorOnLeft ? 'СЛЕВА' : 'СПРАВА'),
-        if (!widget.balcony &&
-            widget.sashModes.isNotEmpty &&
-            widget.widthMm > 0)
+        if (_balcony) ('ДВЕРЬ', _doorKindName),
+        if (_balcony) ('ОКОННАЯ ЧАСТЬ', '$_winParts ЧАСТ.'),
+        if (!_balcony && widget.sashModes.isNotEmpty && widget.widthMm > 0)
           ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
         ('КОМПЛЕКТАЦИЯ', widget.multi.isEmpty ? '—' : widget.multi.join(' · ')),
       ];
