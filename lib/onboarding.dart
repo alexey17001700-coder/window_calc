@@ -558,6 +558,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return '';
   }
 
+  /// Серия профиля из дерева: BLITZ NEW · 60, SOFTLINE 70 и т.п.
+  /// Идёт сразу после марки. Пока заглушка — надбавок нет.
+  String get _series {
+    for (final p in _picked) {
+      if (allSeriesNames.contains(p)) return p;
+    }
+    return '';
+  }
+
   /// Вид изделия из цепочки дерева (ОДНОСТВОРЧАТОЕ, БАЛКОННЫЙ БЛОК и т.п.).
   /// Ищем по смыслу, а не по номеру: после профиля и его названия
   /// номера в цепочке сдвинулись.
