@@ -718,6 +718,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       glass: glass,
       profile: _profile,
       brand: _brand,
+      series: _series,
     );
     return EstimateView(
       estimate: estimate,
