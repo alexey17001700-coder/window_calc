@@ -540,12 +540,32 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _picked.length > 1 && _picked[1].toUpperCase() == 'БАЛКОННЫЙ БЛОК';
 
   /// Толщина профиля (рамы) из дерева: 'ПРОФИЛЬ 60 ММ' / 'ПРОФИЛЬ 70 ММ'.
-  /// Выбирается у БАЛКОННОГО БЛОКА после типа дома, участвует в смете.
+  /// Выбирается СРАЗУ после изделия (до типа дома) у всех ПВХ-изделий:
+  /// окно, балкон, лоджия, балконный блок. Участвует в смете.
   String get _profile {
     for (final p in _picked) {
       if (p.toUpperCase().contains('ПРОФИЛЬ')) return p;
     }
     return '';
+  }
+
+  /// Название профиля (марка) из дерева: REHAU, VEKA, KBE и т.п.
+  /// Идёт сразу после толщины профиля. Пока заглушка — надбавок нет.
+  String get _brand {
+    for (final p in _picked) {
+      if (brandNames.contains(p.toUpperCase())) return p;
+    }
+    return '';
+  }
+
+  /// Вид изделия из цепочки дерева (ОДНОСТВОРЧАТОЕ, БАЛКОННЫЙ БЛОК и т.п.).
+  /// Ищем по смыслу, а не по номеру: после профиля и его названия
+  /// номера в цепочке сдвинулись.
+  String get _windowType {
+    if (_picked.length < 2) return '';
+    final p2 = _picked.length > 2 ? _picked[2] : '';
+    if (p2.toUpperCase().contains('ПРОФИЛЬ')) return _picked[1];
+    return p2;
   }
 
   /// Простая ДВЕРЬ ПВХ (не балконный блок) — у неё есть кнопка «ПЕТЛИ»
