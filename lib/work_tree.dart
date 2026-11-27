@@ -25,14 +25,13 @@ class WorkNode {
   final List<WorkNode> children;
 }
 
-/// Стеклопакет — выбор ПОД визуальным окном (в дерево не входит).
+/// Стеклопакет — выбор СВАЙПОМ по стеклу на чертеже (в дерево не входит).
+/// Плашки под чертежом убраны приказом Босса: камерность меняется
+/// СВАЙПОМ ВВЕРХ, толщина — СВАЙПОМ ВНИЗ. Пока только два варианта
+/// камерности: однокамерный и двухкамерный (стандарт).
 const List<WorkNode> glassTypes = [
   WorkNode(Icons.crop_square_rounded, 'ОДНОКАМЕРНЫЙ'),
   WorkNode(Icons.layers_rounded, 'ДВУХКАМЕРНЫЙ'),
-  WorkNode(Icons.layers_clear_rounded, 'ТРЁХКАМЕРНЫЙ'),
-  WorkNode(Icons.energy_savings_leaf_rounded, 'ЭНЕРГОСБЕРЕГАЮЩИЙ'),
-  WorkNode(Icons.shield_rounded, 'УДАРОПРОЧНЫЙ'),
-  WorkNode(Icons.blur_on_rounded, 'МАТОВЫЙ'),
 ];
 
 /// Финальный уровень дерева — КОМПЛЕКТАЦИЯ. Мультивыбор.
