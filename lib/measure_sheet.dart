@@ -68,6 +68,10 @@ class MeasureSheetView extends StatefulWidget {
   /// Серия профиля из дерева: GRAZIO · 70, SOFTLINE 70 и т.п.
   final String series;
 
+  /// АРМИРОВКА (армирование) профиля: «ЗАМКНУТЫЙ КОНТУР · 1,5 ММ».
+  /// Считается по толщине серии (lib/price_estimate.dart → armirovkaFor).
+  final String armirovka;
+
   /// Толщина стеклопакета, ММ (24 / 32 / 40).
   final int glassThk;
 
