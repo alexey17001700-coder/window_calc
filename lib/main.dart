@@ -752,9 +752,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   index: 2,
                   icon: Icons.tune_rounded,
                   title: 'Настройки прайса',
-                  subtitle: 'Цены и коэффициенты',
+                  subtitle: 'Свой прайс: себе · клиенту · монтажнику',
                   accent: AppColors.bronze,
-                  onTap: () => _soon('Настройки прайса'),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => const PriceEditorScreen()),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 AppUi.sectionTitle(context, 'Сервис'),
