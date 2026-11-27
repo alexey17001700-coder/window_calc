@@ -730,6 +730,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     final html = SheetExport.html(
       client: _or(widget.name, '—'),
       product: widget.path.isEmpty ? '—' : widget.path.join(' · '),
+      order: widget.orderNo.trim(),
       rows: rows,
       photos: photos,
     );
