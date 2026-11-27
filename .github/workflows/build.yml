@@ -182,9 +182,16 @@ jobs:
           mkdir -p ~/.gradle
           cat > ~/.gradle/init.gradle <<'EOF'
           def addMirrors = { repos ->
+              // ВАЖНО: google() здесь НЕЛЬЗЯ — AGP ещё не применён, метода нет.
+              // Пишем Google-репозитории явными URL, иначе под PREFER_SETTINGS
+              // проектные репозитории перекрывают settings и androidx не находится.
+              repos.maven { url "https://dl.google.com/dl/android/maven2/" }
+              repos.maven { url "https://maven.google.com" }
               repos.maven { url "https://maven.aliyun.com/repository/central" }
+              repos.maven { url "https://maven.aliyun.com/repository/google" }
               repos.maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
               repos.maven { url "https://repo1.maven.org/maven2/" }
+              repos.mavenCentral()
           }
           // Gradle 8.9: репозитории на уровне SETTINGS — покрывают
           // и included build :gradle (встроенный плагин Flutter).
