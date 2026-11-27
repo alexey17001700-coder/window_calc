@@ -249,6 +249,18 @@ class _WindowVisualState extends State<WindowVisual> {
             if (widget.balcony) {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
+                // СВАЙП ВЕРТИКАЛЬНО по стеклопакету: вверх — камерность,
+                // вниз — толщина. Один выбор на ВСЕ стеклопакеты изделия.
+                onVerticalDragEnd: (d) {
+                  final v = d.primaryVelocity ?? 0;
+                  if (v <= -120) {
+                    HapticFeedback.selectionClick();
+                    widget.onGlassSwipeUp?.call();
+                  } else if (v >= 120) {
+                    HapticFeedback.selectionClick();
+                    widget.onGlassSwipeDown?.call();
+                  }
+                },
                 onTapUp: (d) {
                   final g = _balconyGeo(
                       size, widget.doorOnLeft, _bWinFrac, _bWinHFrac);
