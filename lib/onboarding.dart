@@ -807,6 +807,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       profile: _profile,
       brand: _brand,
       series: _series,
+      armirovka: _armirovka,
       glassThk: _glassThkSafe,
       frameMm: _frameMm,
       orderNo: _orderNo,
