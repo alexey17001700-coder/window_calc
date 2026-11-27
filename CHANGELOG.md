@@ -1,5 +1,35 @@
 # Changelog
 
+## 3.4.87+152
+
+### СБОРКА: Kotlin 1.9.24 + aapt2 / android-35.jar
+
+**Две независимые ошибки из лога — обе закрыты.**
+
+**1. Kotlin version mismatch.** Шаг «Fix Kotlin version» поднимает версию плагина
+Kotlin с **1.9.22 → 1.9.24**:
+
+- схема `plugins {}` — `id "org.jetbrains.kotlin.android" version "1.9.24" apply false`
+  (обрабатываются оба вида кавычек — `"..."` и `'...'`)
+- старая схема — `ext.kotlin_version = '1.9.24'` в `android/build.gradle`
+- после правки шаг печатает `android/settings.gradle` и `android/build.gradle`
+  целиком, затем выполняется **`flutter clean`** — сборка идёт с нуля
+
+**2. aapt2 не читает `android-35.jar`.** В шаг «Set Android SDK levels» добавлена
+строка в `android/gradle.properties`:
+
+```
+android.suppressUnsupportedCompileSdk=35
+```
+
+файл печатается в лог целиком.
+
+**Не тронуто:** AGP и Gradle — родные из шаблона Flutter 3.24, compileSdk 34 /
+minSdk 23 / targetSdk 34, Java 17. Зеркал Maven и `init.gradle` нет. Зависимости
+`pubspec.yaml` не менялись.
+
+`pubspec.yaml`: **3.4.86+151 → 3.4.87+152** — новый тег, свежий прогон.
+
 ## 3.4.86+151
 
 ### СБОРКА: шаг «Fix Kotlin version» сделан пуленепробиваемым
