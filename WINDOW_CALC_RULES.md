@@ -88,6 +88,27 @@ Flutter-приложение под Android (APK). Сборка — GitHub Actio
 > Подтверждено словом Босса: «сборка прошла успешно». Сам прогон я не читал.
 > Предыдущая зелёная — 3.4.95+160 (планка 2 мм). Откат по умолчанию — на 3.4.96+161.
 
+### 3.4.97+162 — профиль 60/70 у ВСЕХ ПВХ-изделий + название профиля (марка)
+- ФАЙЛЫ: `lib/work_tree.dart` — новый `brandNames` (10 марок) и `brandTypes`
+  (REHAU, VEKA, KBE, SALAMANDER, NOVOTEX, ALUPLAST, МОНБЛАН, ПРОПЛЕКС, ПЛАФЕН,
+  КАЛЕВА; дети — `houseTypes`); `profileTypes` (дети: было `finishingTypes` →
+  стало `brandTypes`); `windowKinds` / `balconyKinds` / `loggiaKinds` (дети: было
+  `houseTypes` → стало `profileTypes`); узел БАЛКОННЫЙ БЛОК (дети: было
+  `balconyHouseTypes` → стало `profileTypes`); список `balconyHouseTypes` УДАЛЁН.
+  `lib/price_estimate.dart` — новый `PriceBook.brandPerM2` (пустая заглушка);
+  `buildEstimate(...)` получил параметр `brand = ''`; строка «Профиль <марка>»
+  добавляется только если надбавка > 0 (сейчас 0 у всех).
+  `lib/onboarding.dart` — новые геттеры `_brand` и `_windowType`; `_pickedBar()`
+  (было `_pickedBar(windowType, house)`, стало без аргументов — показывает всю
+  цепочку без «ЗАМЕР»); `_visualStepOld()` / `_estimateStep()` / `_saveRecord()`
+  (было `_picked[2]`, стало `_windowType`); `brand: _brand` добавлен в оба вызова
+  `buildEstimate`.
+- КАК: цепочка стала ИЗДЕЛИЕ → ПРОФИЛЬ 60/70 → МАРКА → ТИП ДОМА → комплектация.
+  Профиль теперь у окна, балкона, лоджии и балконного блока. Вид изделия в смете
+  определяется по смыслу (`_windowType`), а не по номеру в цепочке.
+- СБОРКА: ⏳ идёт — после коммита не проверяю, жду слова Босса.
+- ОТКАТ: ⬅ **3.4.96+161** (последняя зелёная)
+
 ### 3.4.96+161 — дерево: у БАЛКОННОГО БЛОКА выбор ПРОФИЛЯ (60 / 70 мм)
 - ФАЙЛЫ: `lib/work_tree.dart` — новые `profileTypes` (ПРОФИЛЬ 60 ММ / ПРОФИЛЬ 70 ММ,
   дети — `finishingTypes`) и `balconyHouseTypes` (типы дома балконного блока, дети —
