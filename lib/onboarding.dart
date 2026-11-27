@@ -710,11 +710,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   winWidthMm: _mmOf('ШИРИНА ОКНА'),
                   winHeightMm: _mmOf('ВЫСОТА ОКНА'),
                   doorWidthMm: _mmOf('ШИРИНА ДВЕРИ'),
-                  onWinTap: () => setState(() {
-                    _glass = (_glass + 1 >= glassTypes.length
-                        ? 0
-                        : _glass + 1);
-                  }),
+                  // СТЕКЛОПАКЕТ: подпись «1-КАМ / 2-КАМ» и толщина рисуются
+                  // в углу КАЖДОГО стеклопакета изделия. Один выбор на всё.
+                  glassLabel: _glassLabel,
+                  glassThk: _glassThkSafe,
+                  onGlassSwipeUp: _glassUp,
+                  onGlassSwipeDown: _glassDown,
+                  onWinTap: () => setState(
+                      () => _glassCam = _glassCam == 0 ? 1 : 0),
                   onDoorTap: () => setState(
                       () => _doorKind = (_doorKind + 1) % _doorKindNames.length),
                   onDimTap: _askDim,
