@@ -285,19 +285,26 @@ String armirovkaFor(String series, int frameMm) {
 
 /// Цена изделия за м² по названию типа из дерева.
 /// Устойчиво к формулировкам: «ДВУХСТВОРЧАТОЕ», «ДВУХСТВОРЧАТЫЙ» и т.п.
-double windowPerM2For(String type) {
+double windowPerM2For(String type, [PriceBookData? book]) {
+  final bk = book ?? PriceBookData.standard;
+  final m = bk.windowPerM2;
+  double at(String k) => m[k] ?? bk.windowDefaultPerM2;
   final t = type.toUpperCase();
-  if (t.contains('ТРЁХСТВ') || t.contains('ТРЕХСТВ')) return 15500;
-  if (t.contains('ДВУХСТВ') || t.contains('ДВУСТВ')) return 14500;
-  if (t.contains('ОДНОСТВ')) return 13000;
-  if (t.contains('ФИГУРН')) return 13000;
-  if (t.contains('БАЛКОННЫЙ БЛОК')) return 15000;
+  if (t.contains('ТРЁХСТВ') || t.contains('ТРЕХСТВ')) {
+    return at('ТРЁХСТВОРЧАТОЕ');
+  }
+  if (t.contains('ДВУХСТВ') || t.contains('ДВУСТВ')) {
+    return at('ДВУХСТВОРЧАТОЕ');
+  }
+  if (t.contains('ОДНОСТВ')) return at('ОДНОСТВОРЧАТОЕ');
+  if (t.contains('ФИГУРН')) return at('ФИГУРНОЕ');
+  if (t.contains('БАЛКОННЫЙ БЛОК')) return at('БАЛКОННЫЙ БЛОК');
   if (t.contains('ДВЕРЬ')) return 16000;
   if (t.contains('ФАСАД') || t.contains('ВИТРАЖ') || t.contains('ПАНОРАМ')) {
     return 17000;
   }
   if (t.contains('ЛОДЖИЯ') || t.contains('БАЛКОН')) return 14000;
-  return PriceBook.windowDefaultPerM2;
+  return bk.windowDefaultPerM2;
 }
 
 /// Собрать смету из данных замера.
