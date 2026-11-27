@@ -539,6 +539,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   bool get _isBalcony =>
       _picked.length > 1 && _picked[1].toUpperCase() == 'БАЛКОННЫЙ БЛОК';
 
+  /// Толщина профиля (рамы) из дерева: 'ПРОФИЛЬ 60 ММ' / 'ПРОФИЛЬ 70 ММ'.
+  /// Выбирается у БАЛКОННОГО БЛОКА после типа дома, участвует в смете.
+  String get _profile {
+    for (final p in _picked) {
+      if (p.toUpperCase().contains('ПРОФИЛЬ')) return p;
+    }
+    return '';
+  }
+
   /// Простая ДВЕРЬ ПВХ (не балконный блок) — у неё есть кнопка «ПЕТЛИ»
   /// с выпадающим меню: количество 2..4 и режим открывания.
   bool get _isDoor =>
