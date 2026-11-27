@@ -1179,6 +1179,23 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     await SheetExport.share(path, _sheetText());
   }
 
+  /// Размеры С ЧЕРТЕЖА (изделия с визуалкой: окно, балконный блок, дверь).
+  /// У них размеры вводятся тапом по цифре, а не по пунктам комплектации.
+  List<(String, String)> _visRows() {
+    final out = <(String, String)>[];
+    for (final f in const [
+      'ШИРИНА',
+      'ВЫСОТА',
+      'ШИРИНА ОКНА',
+      'ВЫСОТА ОКНА',
+      'ШИРИНА ДВЕРИ',
+    ]) {
+      final v = widget.visSizes[f] ?? 0;
+      if (v > 0) out.add((f, '$v ММ'));
+    }
+    return out;
+  }
+
   /// «ШИРИНА: 1300 мм · ВЫСОТА: 1400 мм» — размеры одного пункта.
   String _sizesLine(String item) {
     final f = widget.sizes[item];
