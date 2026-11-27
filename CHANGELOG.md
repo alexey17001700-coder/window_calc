@@ -1,5 +1,34 @@
 # Changelog
 
+## 3.4.94+159 — сборка: ошибка волны закрыта в коде, свежий прогон
+
+**Прочитано в этом ответе:** `BUILD_ERROR.md`, `CHANGELOG.md`,
+`.github/workflows/build.yml`, `pubspec.yaml`, `lib/screen_flash.dart`,
+`lib/theme.dart` (window_calc) и `nexus_chat/CHAT_AI_GUIDE.md`.
+
+**Ошибка из `BUILD_ERROR.md` (прогон 45999895421):**
+
+```
+lib/screen_flash.dart:104:36: Error: The argument type 'Offset' can't be assigned
+to the parameter type 'Alignment'.
+                      return _wave(origin);
+```
+
+**Проверка кода — ошибка уже закрыта, подтверждено чтением файла:**
+
+- `lib/screen_flash.dart`: метод объявлен `Widget _wave(Offset center, Size size)`,
+  вызов в `build()` — `return _wave(origin, size);` — типы совпадают
+- `AppColors.goldLight` и `AppColors.gold` есть в `lib/theme.dart`
+- других вызовов `_wave` в файле нет (один)
+
+**Последняя сборка без ошибки по журналу — 3.4.89+154** (балконный блок).
+Сломал её не Android-стек, а правка анимаций **3.4.90+155** — волна `_wave`
+(в логе 45999895421 видно: NDK — только предупреждение, компиляция встала
+именно на Dart-ошибке).
+
+**Что сделано:** `pubspec.yaml` **3.4.93+158 → 3.4.94+159** — новый тег,
+свежий прогон. Код приложения и workflow не менялись.
+
 ## 3.4.93+158 — сборка: ошибка типа в волне `screen_flash.dart` (Offset → Alignment)
 
 **Причина падения прогона 45999895421 (прочитан `BUILD_ERROR.md`):**
