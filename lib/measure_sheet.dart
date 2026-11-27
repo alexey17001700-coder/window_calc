@@ -72,6 +72,9 @@ class MeasureSheetView extends StatefulWidget {
   /// Толщина рамы, ММ (60 / 70 / 75 …). По ней видно, что влезает.
   final int frameMm;
 
+  /// НОМЕР ЗАКАЗА — свой у каждого замера («ЗК-0001»). Пусто — не присвоен.
+  final String orderNo;
+
   /// Обозначения створок по ГОСТ (по порядку слева направо).
   final List<String> sashModes;
 
