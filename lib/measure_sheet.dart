@@ -1056,10 +1056,11 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
         return [
           if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
           if (_heightMm > 0) ('ВЫСОТА', '$_heightMm ММ'),
-          if (widget.sashModes.isNotEmpty)
+          if (_balcony) ('КОНСТРУКЦИЯ', _balconyLine),
+          if (!_balcony && widget.sashModes.isNotEmpty)
             ('КОНСТРУКЦИЯ',
                 '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
-          if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
+          if (!_balcony && widget.sashModes.isNotEmpty && widget.widthMm > 0)
             ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
         ];
     }
