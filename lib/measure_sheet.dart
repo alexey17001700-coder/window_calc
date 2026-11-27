@@ -950,7 +950,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
 
   /// Подпись итога под адресата.
   String _priceLabel(SheetRecipient r) => switch (r) {
-        SheetRecipient.client => 'ИТОГО',
+        SheetRecipient.client => 'ИТОГО · ПРИБЛИЗИТЕЛЬНО',
         SheetRecipient.installer => 'ИТОГО ЗА РАБОТУ',
         _ => 'ИТОГО · ПРИБЛИЗИТЕЛЬНО',
       };
