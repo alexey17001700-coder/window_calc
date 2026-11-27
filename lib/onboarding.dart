@@ -560,7 +560,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// Рисуется отдельным чертежом: окно сверху, дверь во всю высоту,
   /// под окном простенок.
   bool get _isBalcony =>
-      _picked.length > 1 && _picked[1].toUpperCase() == 'БАЛКОННЫЙ БЛОК';
+      _picked.any((p) => p.toUpperCase() == 'БАЛКОННЫЙ БЛОК');
 
   /// Толщина профиля (рамы) из дерева: 'ПРОФИЛЬ 60 ММ' / 'ПРОФИЛЬ 70 ММ'.
   /// Выбирается СРАЗУ после изделия (до типа дома) у всех ПВХ-изделий:
