@@ -746,6 +746,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// (верхняя и нижняя). Дополнительные петли замерщик добавляет вручную.
   List<int> get _hingeCounts {
     final n = _sashCount;
+    // Простая дверь ПВХ — число петель из кнопки «ПЕТЛИ» (2..4).
+    if (_isDoor) return List<int>.filled(n, _doorHinges.clamp(2, 4));
     if (_hinges.length == n) return _hinges;
     return List<int>.filled(n, 2);
   }
