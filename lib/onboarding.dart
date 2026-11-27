@@ -132,8 +132,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void initState() {
     super.initState();
     _shine = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 4200))
+        vsync: this, duration: const Duration(milliseconds: 7000))
       ..repeat();
+    _shineT = CurvedAnimation(parent: _shine, curve: Curves.easeInOutSine);
   }
 
   @override
