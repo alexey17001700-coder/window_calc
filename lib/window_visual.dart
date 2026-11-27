@@ -280,6 +280,8 @@ class _WindowVisualState extends State<WindowVisual> {
                 child: CustomPaint(
                   size: size,
                   painter: _BalconyPainter(
+                    glassLabel: widget.glassLabel,
+                    glassThk: widget.glassThk,
                     doorOnLeft: widget.doorOnLeft,
                     doorKind: widget.doorKind,
                     winParts: widget.winParts,
