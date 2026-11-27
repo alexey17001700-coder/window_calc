@@ -410,6 +410,9 @@ class _WindowVisualState extends State<WindowVisual> {
     if (widget.balcony) {
       final g = _balconyGeo(size, widget.doorOnLeft, _bWinFrac, _bWinHFrac);
       final winOnRight = widget.doorOnLeft;
+      // ОБЩАЯ ШИРИНА — сверху (ведущий размер балконного блока)
+      final dimTop = g.wall.top - 15;
+      if (_near(p, Offset(g.opening.center.dx, dimTop - 8))) return 'ШИРИНА';
       // высота двери — на стороне двери
       final doorX = winOnRight ? g.wall.left - 17 : g.wall.right + 17;
       if (_near(p, Offset(doorX - 9, g.doorOuter.center.dy))) {
