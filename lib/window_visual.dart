@@ -1525,6 +1525,21 @@ class _BalconyPainter extends CustomPainter {
         size: 7.5, color: const Color(0xFF7E93AC), alignLeft: true);
   }
 
+  // ─────────────── СОЕДИНИТЕЛЬНАЯ ПЛАНКА (окно ⇄ дверь) ───────────────
+  /// Планка между окном и дверью — kBalconyPlankMm.
+  /// На чертеже это тонкая стойка профиля на стыке: минимум 2 px,
+  /// иначе при масштабе 2 мм на 2000 мм её просто не видно.
+  void _plankStrip(Canvas canvas, _BalconyGeo g) {
+    final x = doorOnLeft ? g.winOuter.left : g.winOuter.right;
+    final w = math.max(
+      2.0,
+      g.opening.width * kBalconyPlankMm / math.max(1, widthMm),
+    );
+    final r = Rect.fromLTWH(x - w / 2, g.opening.top, w, g.opening.height);
+    canvas.drawRect(r, Paint()..color = const Color(0xFFD5DCE7));
+    canvas.drawRect(r, _line(_ink, 0.9));
+  }
+
   // ─────────────── ОКОННАЯ ЧАСТЬ (1 или 2 части) ───────────────
   void _windowCells(Canvas canvas, _BalconyGeo g) {
     final n = winParts.clamp(1, 2);
