@@ -39,6 +39,7 @@ class MeasureSheetView extends StatefulWidget {
     this.orderNo = '',
     this.sashModes = const [],
     this.widthMm = 0,
+    this.visSizes = const {},
     this.sectionWidths = const [],
     this.hinges = const [],
     this.sandwich = 0,
