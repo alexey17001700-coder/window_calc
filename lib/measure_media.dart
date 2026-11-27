@@ -614,6 +614,16 @@ class SheetExport {
           '${_esc(price)}</span></div>');
     }
 
+    if (price.isNotEmpty && priceLines.isNotEmpty) {
+      b.writeln('<div class="card"><div class="t">ЦЕНЫ · ПРИБЛИЗИТЕЛЬНО'
+          '</div><table>');
+      for (final r in priceLines) {
+        b.writeln('<tr><td class="k">${_esc(r.$1)}</td>'
+            '<td class="v">${_esc(r.$2)}</td></tr>');
+      }
+      b.writeln('</table></div>');
+    }
+
     if (showRows && rows.isNotEmpty) {
       b.writeln('<div class="card"><div class="t">ДАННЫЕ ЗАМЕРА</div><table>');
       for (final r in rows) {
