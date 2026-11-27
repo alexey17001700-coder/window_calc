@@ -1066,16 +1066,34 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     final photos = r.showPhotos
         ? await PhotoStore.asBase64(_photos)
         : <(MeasurePhoto, String)>[];
+    // БАЛКОННЫЙ БЛОК рисуется СВОИМ чертежом (окно + дверь в одной раме).
+    // Иначе в PDF выходило одностворчатое окно: у блока створок в замере
+    // одна, и обычный чертёж рисовал её как целое изделие.
     final visual = r.showVisual
-        ? SheetVisual.svg(
-            sashes: widget.sashModes.isEmpty ? 1 : widget.sashModes.length,
-            modes: [for (final m in widget.sashModes) _modeIndex(m)],
-            sectionWidths: widget.sectionWidths,
-            widthMm: _widthMm,
-            heightMm: _heightMm,
-            glassLabel: widget.glass.isEmpty ? '' : widget.glass,
-            glassThk: widget.glassThk,
-          )
+        ? (widget.balcony
+            ? SheetVisual.balconySvg(
+                widthMm: _widthMm,
+                heightMm: _heightMm,
+                winWidthMm: widget.winWidthMm,
+                winHeightMm: widget.winHeightMm,
+                doorWidthMm: widget.doorWidthMm,
+                doorOnLeft: widget.doorOnLeft,
+                doorKind: widget.doorKind,
+                winParts: widget.winParts,
+                winCellModes: widget.winCellModes,
+                winSectionWidths: widget.winSectionWidths,
+                glassLabel: widget.glass.isEmpty ? '' : widget.glass,
+                glassThk: widget.glassThk,
+              )
+            : SheetVisual.svg(
+                sashes: widget.sashModes.isEmpty ? 1 : widget.sashModes.length,
+                modes: [for (final m in widget.sashModes) _modeIndex(m)],
+                sectionWidths: widget.sectionWidths,
+                widthMm: _widthMm,
+                heightMm: _heightMm,
+                glassLabel: widget.glass.isEmpty ? '' : widget.glass,
+                glassThk: widget.glassThk,
+              ))
         : '';
     final est = await _estimateFor(r);
     final html = SheetExport.html(
