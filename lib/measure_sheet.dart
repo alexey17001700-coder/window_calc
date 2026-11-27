@@ -277,8 +277,11 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
                 _block('ИЗДЕЛИЕ', [
                   ('ЦЕПОЧКА',
                       widget.path.isEmpty ? '—' : widget.path.join(' · ')),
+                  ('ПРОФИЛЬ', _or(widget.profile, '—')),
+                  ('МАРКА', _or(widget.brand, '—')),
+                  ('СЕРИЯ', _or(widget.series, '—')),
                   ('СТЕКЛОПАКЕТ',
-                      widget.glass.isEmpty ? 'НЕ ВЫБРАН' : widget.glass),
+                      widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
                 ]),
                 const SizedBox(height: 12),
                 if (widget.sashModes.isNotEmpty) ...[
