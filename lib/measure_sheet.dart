@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'theme.dart';
 import 'screen_flash.dart';
 import 'measure_media.dart';
+import 'sheet_visual.dart';
 import 'window_visual.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
