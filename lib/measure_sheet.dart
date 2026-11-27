@@ -1043,7 +1043,8 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
           ('ИЗДЕЛИЕ', widget.path.isEmpty ? '—' : widget.path.join(' · ')),
           ('ПРОФИЛЬ', _or(widget.series, _or(widget.brand, '—'))),
           ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
-          if (widget.sashModes.isNotEmpty)
+          if (_balcony) ('КОНСТРУКЦИЯ', _balconyLine),
+          if (!_balcony && widget.sashModes.isNotEmpty)
             ('КОНСТРУКЦИЯ',
                 '${widget.sashModes.length} СТВ. · ${_sashLetters()}'),
           if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
