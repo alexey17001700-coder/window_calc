@@ -1403,7 +1403,11 @@ class _BalconyPainter extends CustomPainter {
   static const _axis = Color(0xFF5B6B80);
 
   /// Доля ширины окна в общем габарите.
+  /// Считаем от ОБЩЕЙ ширины (окно + планка + дверь) — планка учтена.
   double get _winFrac {
+    if (winWidthMm > 0 && widthMm > 0) {
+      return (winWidthMm / widthMm).clamp(0.15, 0.85);
+    }
     if (winWidthMm > 0 && doorWidthMm > 0) {
       return winWidthMm / (winWidthMm + doorWidthMm);
     }
