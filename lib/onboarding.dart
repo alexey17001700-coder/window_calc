@@ -53,6 +53,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// 4 — замерный лист (отправка).
   int _step = 0;
 
+  /// НОМЕР ЗАКАЗА этого замера («ЗК-0001»). Присваивается при подтверждении
+  /// дерева и растёт с каждым новым замером (lib/order_number.dart).
+  String _orderNo = '';
+
   /// Выбранная цепочка дерева: ЗАМЕР → ОКНО → вид → тип дома.
   List<String> _picked = const [];
 
