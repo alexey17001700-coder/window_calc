@@ -1572,9 +1572,9 @@ class _BalconyPainter extends CustomPainter {
   void _doorRail(Canvas canvas, Rect o, {required bool hingesOnLeft}) {
     final ink = Paint()..color = _ink;
 
-    // петли — 3 штуки по стороне петель
+    // петли — ДВЕ: одна СВЕРХУ, одна СНИЗУ (Босс)
     final hx = hingesOnLeft ? o.left + 1.2 : o.right - 4.2;
-    for (final t in const [0.06, 0.50, 0.94]) {
+    for (final t in const [0.06, 0.94]) {
       canvas.drawRect(
         Rect.fromLTWH(hx, o.top + o.height * t - 7, 3, 14),
         ink,
