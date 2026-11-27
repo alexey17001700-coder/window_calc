@@ -10,6 +10,7 @@ import 'update_checker.dart';
 import 'wizard_screen.dart';
 import 'onboarding.dart';
 import 'measure_history.dart';
+import 'price_editor.dart';
 
 /// Глобальный навигатор: позволяет переключать экраны из колбэков,
 /// даже когда контекст исходного экрана уже уничтожен (pushReplacement).
