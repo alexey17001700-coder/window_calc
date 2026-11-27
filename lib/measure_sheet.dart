@@ -234,8 +234,46 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   /// так чертёж в PDF всё равно будет балконным блоком, а не окном.
   bool get _balcony =>
       widget.balcony ||
-      (widget.path.length > 1 &&
-          widget.path[1].toUpperCase() == 'БАЛКОННЫЙ БЛОК');
+      widget.path.any((p) => p.toUpperCase().contains('БАЛКОННЫЙ БЛОК'));
+
+  /// Размер с чертежа по имени поля (0 — не задан).
+  int _visInt(String key) => widget.visSizes[key] ?? 0;
+
+  /// ШИРИНА ОКНА балконного блока, ММ.
+  /// Не задана — считаем из общего габарита: всего − планка − дверь.
+  int get _winW {
+    final v =
+        widget.winWidthMm > 0 ? widget.winWidthMm : _visInt('ШИРИНА ОКНА');
+    if (v > 0) return v;
+    final t = _widthMm;
+    final d =
+        widget.doorWidthMm > 0 ? widget.doorWidthMm : _visInt('ШИРИНА ДВЕРИ');
+    if (t > 0 && d > 0) return t - d - kBalconyPlankMm;
+    return 0;
+  }
+
+  /// ШИРИНА ДВЕРИ балконного блока, ММ.
+  /// Не задана — считаем из общего габарита: всего − планка − окно.
+  int get _doorW {
+    final v =
+        widget.doorWidthMm > 0 ? widget.doorWidthMm : _visInt('ШИРИНА ДВЕРИ');
+    if (v > 0) return v;
+    final t = _widthMm;
+    final w =
+        widget.winWidthMm > 0 ? widget.winWidthMm : _visInt('ШИРИНА ОКНА');
+    if (t > 0 && w > 0) return t - w - kBalconyPlankMm;
+    return 0;
+  }
+
+  /// ВЫСОТА ОКНА балконного блока, ММ.
+  int get _winH {
+    if (widget.winHeightMm > 0) return widget.winHeightMm;
+    return _visInt('ВЫСОТА ОКНА');
+  }
+
+  /// Все размеры для балконного чертежа собраны (нет «?»).
+  bool get _balconySized =>
+      _widthMm > 0 && _heightMm > 0 && _winW > 0 && _winH > 0 && _doorW > 0;
 
   /// Вид низа балконной двери: 0 — стекло в пол, 1 — стекло + сэндвич,
   /// 2 — стекло + стекло.
