@@ -1732,8 +1732,8 @@ class _BalconyPainter extends CustomPainter {
   void _doorMarks(Canvas canvas, Rect g, {required bool hingesOnLeft}) {
     final p = _line(_ink, 1.15);
 
-    // ── П · ПОВОРОТНАЯ: вершина — к РУЧКЕ, основание — к ПЕТЛЯМ.
-    //    Растянут почти на всю высоту двери (34% + 34% = 68%).
+    // ── П · ПОВОРОТНАЯ: вершина — к РУЧКЕ, два угла основания — К ПЕТЛЯМ
+    //    (верхняя петля 6% и нижняя 94% высоты двери) — на всю высоту.
     final topY = g.top + g.height * 0.06;
     final botY = g.top + g.height * 0.94;
     final Path tp;
