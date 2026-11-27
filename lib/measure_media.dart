@@ -520,6 +520,8 @@ class SheetExport {
     b.writeln('h1{font-size:20px;letter-spacing:1px;margin:0 0 4px}');
     b.writeln('.sub{font-size:11px;letter-spacing:1.6px;color:#8A7A45;'
         'font-weight:700;margin-bottom:18px}');
+    b.writeln('.ord{font-size:13px;letter-spacing:1.2px;color:#0B1524;'
+        'font-weight:800;margin-bottom:4px}');
     b.writeln('.card{border:1px solid #D8C98F;border-radius:12px;'
         'padding:14px 16px;margin-bottom:14px}');
     b.writeln('.t{font-size:10px;letter-spacing:1.6px;font-weight:800;'
