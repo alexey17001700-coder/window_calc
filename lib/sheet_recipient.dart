@@ -42,7 +42,7 @@ extension SheetRecipientInfo on SheetRecipient {
 
   /// Подсказка под названием — что попадёт в лист.
   String get hint => switch (this) {
-        SheetRecipient.measurer => 'ПОЛНЫЙ ЛИСТ · ВСЁ',
+        SheetRecipient.measurer => 'ПОЛНЫЙ ЛИСТ · ВСЁ · ЦЕНА',
         SheetRecipient.client => 'ИЗДЕЛИЕ · КОМПЛЕКТУЮЩИЕ · ЦЕНА',
         SheetRecipient.factory => 'ПРОФИЛЬ · СТЕКЛОПАКЕТ · АРМИРОВКА',
         SheetRecipient.installer => 'РАЗМЕРЫ · ПРОЁМ · ФОТО',
