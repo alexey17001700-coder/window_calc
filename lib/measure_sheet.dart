@@ -971,6 +971,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
             glassThk: widget.glassThk,
           )
         : '';
+    final est = await _estimateFor(r);
     final html = SheetExport.html(
       client: _or(widget.name, '—'),
       product: widget.path.isEmpty ? '—' : widget.path.join(' · '),
@@ -985,7 +986,11 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       showRows: r.showRows,
       showPhotos: r.showPhotos,
       showClient: r.showClient,
-      price: r.showPrice ? _estimateTotal() : '',
+      price: est == null ? '' : money(est.total),
+      priceLabel: _priceLabel(r),
+      priceLines: r == SheetRecipient.measurer && est != null
+          ? [for (final l in est.lines) (l.title, money(l.sum))]
+          : const [],
     );
     final path = await SheetExport.save(html, 'zamer_${r.name}');
     if (!mounted) return;
