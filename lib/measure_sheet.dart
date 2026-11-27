@@ -131,6 +131,9 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
   String _sheetText() {
     final b = StringBuffer();
     b.writeln('ЗАМЕРНЫЙ ЛИСТ');
+    if (widget.orderNo.trim().isNotEmpty) {
+      b.writeln('ЗАКАЗ № ${widget.orderNo.trim()}');
+    }
     b.writeln(_dash);
 
     b.writeln('КЛИЕНТ: ${_or(widget.name, '—')}');
