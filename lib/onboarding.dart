@@ -458,6 +458,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     });
   }
 
+  /// НОМЕР ЗАКАЗА: свой у каждого нового замера («ЗК-0001», «ЗК-0002» …).
+  /// Счётчик растёт от 1 вверх, хранится локально (lib/order_number.dart).
+  Future<void> _assignOrder() async {
+    final no = await OrderNumber.next();
+    if (!mounted) return;
+    setState(() => _orderNo = no);
+  }
+
   /// Стандартные размеры-заглушки для чертежа (ММ).
   Map<String, int> _defaultSizes() {
     final t = (_picked.length > 1 ? _picked[1] : '').toUpperCase();
