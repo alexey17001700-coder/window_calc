@@ -55,7 +55,7 @@ class ScreenFlashState extends State<ScreenFlash>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 2600));
+        vsync: this, duration: const Duration(milliseconds: 1500));
     _spread = CurvedAnimation(parent: _c, curve: Curves.easeOutSine);
   }
 
