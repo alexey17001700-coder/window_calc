@@ -190,6 +190,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     b.writeln('ПРОФИЛЬ: ${_or(widget.profile, '—')}');
     b.writeln('МАРКА: ${_or(widget.brand, '—')}');
     b.writeln('СЕРИЯ: ${_or(widget.series, '—')}');
+    b.writeln('АРМИРОВКА: ${_or(widget.armirovka, '—')}');
     b.writeln('СТЕКЛОПАКЕТ: ${widget.glass.isEmpty ? '—' : _glassLine}');
     b.writeln('ФОТО ПРОЁМА: ${_photos.isEmpty ? '—' : '${_photos.length} шт'}');
     if (widget.sashModes.isNotEmpty) {
