@@ -1527,23 +1527,32 @@ class _BalconyPainter extends CustomPainter {
     final kind = doorKind.clamp(0, 2);
 
     if (kind == 0) {
-      // 0 — стекло во всю дверь
-      canvas.drawRect(glass, _line(_ink, 0.9));
+      // 0 — стекло во всю дверь, БЕЗ импоста
+      _glassPanel(canvas, glass);
     } else {
+      // ИМПОСТ — реальный профиль, а не тонкая палочка.
       final splitY = inner.top + inner.height * 0.62;
-      final top = Rect.fromLTWH(
-          glass.left, glass.top, glass.width, math.max(2, splitY - glass.top));
-      final bot = Rect.fromLTWH(
-          glass.left, splitY, glass.width, math.max(2, glass.bottom - splitY));
+      final half = _kImpostW / 2;
+      final top = Rect.fromLTWH(glass.left, glass.top, glass.width,
+          math.max(2, splitY - half - glass.top));
+      final bot = Rect.fromLTWH(glass.left, splitY + half, glass.width,
+          math.max(2, glass.bottom - splitY - half));
+      final impost = Rect.fromLTWH(
+          glass.left, splitY - half, glass.width, _kImpostW);
 
       // верх — стекло
-      canvas.drawRect(top, _line(_ink, 0.9));
+      _glassPanel(canvas, top);
 
       // низ — белый сэндвич (1) или стекло (2)
       if (kind == 1) {
-        canvas.drawRect(bot, Paint()..color = const Color(0xFFEDF1F7));
+        _sandwichPanel(canvas, bot);
+      } else {
+        _glassPanel(canvas, bot);
       }
-      canvas.drawRect(bot, _line(_ink, 0.9));
+
+      // сам импост поверх — толстая планка профиля
+      canvas.drawRect(impost, Paint()..color = const Color(0xFFD5DCE7));
+      canvas.drawRect(impost, _line(_ink, 1.1));
     }
 
     // ── ФУРНИТУРА ДВЕРИ ──
