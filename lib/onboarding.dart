@@ -2012,3 +2012,138 @@ class _DimDialogState extends State<_DimDialog> {
     );
   }
 }
+
+/// ═══════════════════════════════════════════════════════════════════
+///  ВЫПАДАЮЩЕЕ МЕНЮ ПЕТЕЛЬ (простая дверь ПВХ)
+///  Количество 2..4 + режим открывания. Возвращает [кол-во, режим].
+///  2 петли — стандартные: поворотно-откидной (2) или поворотный (1).
+///  3 и более — только поворотный, петли усиленные.
+/// ═══════════════════════════════════════════════════════════════════
+class _HingeSheet extends StatefulWidget {
+  const _HingeSheet({required this.count, required this.mode});
+
+  final int count;
+  final int mode;
+
+  @override
+  State<_HingeSheet> createState() => _HingeSheetState();
+}
+
+class _HingeSheetState extends State<_HingeSheet> {
+  late int _n = widget.count.clamp(2, 4);
+  late int _m = widget.mode.clamp(1, 2);
+
+  @override
+  Widget build(BuildContext context) {
+    final forced = _n >= 3;
+    final mode = forced ? 1 : _m;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 3,
+                  height: 15,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.goldGradient,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'ПЕТЛИ ДВЕРИ',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.3,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'КОЛИЧЕСТВО',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+            const SizedBox(height: 7),
+            Wrap(
+              spacing: 6,
+              children: [
+                for (var i = 2; i <= 4; i++)
+                  _OptChip(
+                    label: '$i ШТ',
+                    selected: _n == i,
+                    onTap: () => setState(() => _n = i),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'РЕЖИМ ОТКРЫВАНИЯ',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+                color: Color(0xFF7E93AC),
+              ),
+            ),
+            const SizedBox(height: 7),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _OptChip(
+                  label: 'ПОВОРОТНО-ОТКИДНОЙ',
+                  selected: mode == 2,
+                  onTap: forced ? () {} : () => setState(() => _m = 2),
+                ),
+                _OptChip(
+                  label: 'ПОВОРОТНЫЙ',
+                  selected: mode == 1,
+                  onTap: () => setState(() => _m = 1),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              forced
+                  ? '3 И БОЛЕЕ ПЕТЕЛЬ — ТОЛЬКО ПОВОРОТНЫЙ, ПЕТЛИ УСИЛЕННЫЕ'
+                  : '2 ПЕТЛИ — СТАНДАРТНЫЕ, РЕЖИМ НА ВЫБОР',
+              style: const TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+                color: AppColors.gold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _GhostButton('ОТМЕНА', Icons.close_rounded,
+                      () => Navigator.of(context).pop()),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _GoldButton('ОК', Icons.check_rounded,
+                      () => Navigator.of(context).pop([_n, mode])),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
