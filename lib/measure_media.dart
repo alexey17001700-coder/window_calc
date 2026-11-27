@@ -539,6 +539,9 @@ class SheetExport {
     b.writeln('@media print{body{padding:0}}');
     b.writeln('</style></head><body>');
     b.writeln('<h1>ЗАМЕРНЫЙ ЛИСТ</h1>');
+    if (order.isNotEmpty) {
+      b.writeln('<div class="ord">ЗАКАЗ № ${_esc(order)}</div>');
+    }
     b.writeln('<div class="sub">ВСЕ РАЗМЕРЫ В МИЛЛИМЕТРАХ</div>');
 
     b.writeln('<div class="card"><div class="t">КЛИЕНТ</div>'
