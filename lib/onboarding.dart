@@ -745,6 +745,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       windowType: windowType,
       parts: _multi,
       glass: glass,
+      profile: _profile,
     );
     final modes = _sashModes.length == _sashCount
         ? _sashModes
