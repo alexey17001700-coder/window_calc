@@ -168,6 +168,56 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     return best;
   }
 
+  /// СТВОРОК ВСЕГО, ШТ.
+  int get _sashTotal => widget.sashModes.length;
+
+  /// ОТКРЫВАЮЩИХСЯ створок (не глухих) — по обозначениям ГОСТ.
+  int get _openingSashes =>
+      widget.sashModes.where((m) => _modeIndex(m) != 0).length;
+
+  /// РУЧКИ, ШТ — по одной на каждую ОТКРЫВАЮЩУЮСЯ створку (авто).
+  int get _handles => _openingSashes;
+
+  /// ПЕТЛИ, ШТ — по створкам: по 2 на открывающуюся, если не задано иначе.
+  int get _hingesTotal {
+    final n = widget.sashModes.length;
+    if (n == 0) return 0;
+    final h = widget.hinges;
+    var sum = 0;
+    for (var i = 0; i < n; i++) {
+      if (_modeIndex(widget.sashModes[i]) == 0) continue; // глухая — без петель
+      sum += (h.length == n ? h[i] : 2).clamp(2, 6);
+    }
+    return sum;
+  }
+
+  /// СТЕКЛОПАКЕТОВ, ШТ — по одному на каждую створку.
+  int get _glassUnits => widget.sashModes.isEmpty ? 0 : widget.sashModes.length;
+
+  /// СПЕЦИФИКАЦИЯ ДЛЯ ЗАВОДА — всё, что завод изготавливает и поставляет:
+  /// название изделия, размеры, профиль, армировка, стеклопакеты,
+  /// сэндвич-панели, фурнитура (ручки и петли — количество авто),
+  /// комплектация.
+  List<(String, String)> get _factorySpec => [
+        ('ИЗДЕЛИЕ', widget.path.isEmpty ? '—' : widget.path.join(' · ')),
+        ('ПРОФИЛЬ', _or(widget.profile, '—')),
+        ('МАРКА', _or(widget.brand, '—')),
+        ('СЕРИЯ', _or(widget.series, '—')),
+        ('АРМИРОВКА', _or(widget.armirovka, '—')),
+        ('СТЕКЛОПАКЕТ', widget.glass.isEmpty ? 'НЕ ВЫБРАН' : _glassLine),
+        if (_glassUnits > 0) ('СТЕКЛОПАКЕТОВ, ШТ', '$_glassUnits'),
+        if (widget.sandwich > 0) ('СЭНДВИЧ-ПАНЕЛИ, ШТ', '${widget.sandwich}'),
+        if (_sashTotal > 0) ('СТВОРОК, ШТ', '$_sashTotal'),
+        if (_sashTotal > 0) ('ОТКРЫВАЮЩИХСЯ, ШТ', '$_openingSashes'),
+        if (_handles > 0) ('РУЧКИ, ШТ', '$_handles'),
+        if (_hingesTotal > 0) ('ПЕТЛИ, ШТ', '$_hingesTotal'),
+        if (_widthMm > 0) ('ШИРИНА', '$_widthMm ММ'),
+        if (_heightMm > 0) ('ВЫСОТА', '$_heightMm ММ'),
+        if (widget.sashModes.isNotEmpty && widget.widthMm > 0)
+          ('ШИРИНА СЕКЦИЙ', _sectionsMm()),
+        ('КОМПЛЕКТАЦИЯ', widget.multi.isEmpty ? '—' : widget.multi.join(' · ')),
+      ];
+
   /// Строки СПЕЦИФИКАЦИИ для правой колонки A4-листа.
   List<(String, String)> get _specRows => [
         ('ПРОФИЛЬ', _or(widget.profile, '—')),
