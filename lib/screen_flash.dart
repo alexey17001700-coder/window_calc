@@ -168,7 +168,7 @@ class ScreenFlashState extends State<ScreenFlash>
           decoration: BoxDecoration(
             gradient: RadialGradient(
               center: align,
-              radius: 1.8,
+              radius: radius,
               colors: colors,
               stops: stops,
             ),
