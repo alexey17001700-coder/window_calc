@@ -1043,6 +1043,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               color: AppColors.gold,
             ),
           ),
+          const SizedBox(height: 4),
+          const Text(
+            'ПЛАНКА МЕЖДУ ОКНОМ И ДВЕРЬЮ: 2 ММ · '
+            'ВСЕГО = ОКНО + ПЛАНКА + ДВЕРЬ',
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+              color: Color(0xFF7E93AC),
+            ),
+          ),
           const SizedBox(height: 12),
           _ctrlLabel('ДВЕРЬ'),
           const SizedBox(height: 7),
