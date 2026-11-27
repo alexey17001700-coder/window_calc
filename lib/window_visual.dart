@@ -380,7 +380,12 @@ class _WindowVisualState extends State<WindowVisual> {
   }
 
   /// Доля ширины окна в габарите балконного блока — как в художнике.
+  /// Считаем от ОБЩЕЙ ширины (окно + планка + дверь), а не от суммы частей:
+  /// иначе планка не учитывалась бы в пропорциях чертежа.
   double get _bWinFrac {
+    if (widget.winWidthMm > 0 && widget.widthMm > 0) {
+      return (widget.winWidthMm / widget.widthMm).clamp(0.15, 0.85);
+    }
     if (widget.winWidthMm > 0 && widget.doorWidthMm > 0) {
       return widget.winWidthMm / (widget.winWidthMm + widget.doorWidthMm);
     }
