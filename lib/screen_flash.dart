@@ -101,11 +101,7 @@ class ScreenFlashState extends State<ScreenFlash>
                         return const SizedBox.shrink();
                       }
                       final origin = _localOrigin(size);
-                      final align = Alignment(
-                        (origin.dx / size.width) * 2 - 1,
-                        (origin.dy / size.height) * 2 - 1,
-                      );
-                      return _wave(align);
+                      return _wave(origin);
                     },
                   );
                 },
