@@ -43,12 +43,27 @@ class PriceBook {
   static const double profile70PerM2 = 1200;
 
   /// Надбавка за НАЗВАНИЕ ПРОФИЛЯ (марку), ₽/м².
-  /// Пока ЗАГЛУШКА — пусто, надбавок нет. Цены задаст Босс позже.
-  static const Map<String, double> brandPerM2 = {};
+  /// ⚠️ ВСЕ ЦИФРЫ — ВРЕМЕННЫЕ ЗАГЛУШКИ. Реальные цены Босс задаст
+  /// в меню настроек ценника. Ключ = название марки в дереве.
+  static const Map<String, double> brandPerM2 = {
+    'REHAU': 3000,
+    'VEKA': 2800,
+    'KBE': 2600,
+    'SALAMANDER': 3400,
+    'NOVOTEX': 2000,
+    'ALUPLAST': 2200,
+    'МОНБЛАН': 1800,
+    'ПРОПЛЕКС': 2400,
+    'ПЛАФЕН': 1600,
+    'INNOVA D-LINE': 1500,
+  };
 
-  /// Надбавка за СЕРИЮ профиля, ₽/м².
-  /// Пока ЗАГЛУШКА — пусто, надбавок нет. Цены задаст Босс позже.
-  static const Map<String, double> seriesPerM2 = {};
+  /// Шаг премиальности по ТОЛЩИНЕ СЕРИИ, ₽/м² за каждый мм свыше 70.
+  /// ⚠️ ЗАГЛУШКА.
+  static const double premiumPerMm = 220;
+
+  /// Порог, с которого серия считается премиальной (мм).
+  static const int premiumFromMm = 75;
 
   /// Комплектация.
   static const double sillPerM = 1400; // подоконник, ₽/м.п.
