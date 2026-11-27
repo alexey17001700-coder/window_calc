@@ -1184,9 +1184,9 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
             ? SheetVisual.balconySvg(
                 widthMm: _widthMm,
                 heightMm: _heightMm,
-                winWidthMm: widget.winWidthMm,
-                winHeightMm: widget.winHeightMm,
-                doorWidthMm: widget.doorWidthMm,
+                winWidthMm: _winW,
+                winHeightMm: _winH,
+                doorWidthMm: _doorW,
                 doorOnLeft: widget.doorOnLeft,
                 doorKind: widget.doorKind,
                 winParts: widget.winParts,
