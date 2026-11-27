@@ -94,6 +94,14 @@ class MeasureSheetView extends StatefulWidget {
   /// Доли ширины секций (сумма ≈ 1.0). Пусто — секции равные.
   final List<double> sectionWidths;
 
+  /// Число петель на каждой створке (пусто — по 2: верхняя и нижняя).
+  /// Нужно ЗАВОДУ: сколько петель заказывать на изделие.
+  final List<int> hinges;
+
+  /// Число СЭНДВИЧ-ПАНЕЛЕЙ в изделии (0 — нет).
+  /// Балконная дверь с низом из сэндвича — 1 панель.
+  final int sandwich;
+
   /// Назад — к визуальному замеру.
   final VoidCallback onBack;
 
