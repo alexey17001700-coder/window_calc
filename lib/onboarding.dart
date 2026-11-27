@@ -576,6 +576,40 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return '';
   }
 
+  /// ТОЛЩИНА РАМЫ в ММ: серия (если выбрана) или кнопка ПРОФИЛЬ 60/70.
+  /// По ней считается, какой стеклопакет в эту раму влезает.
+  int get _frameMm {
+    final s = seriesMm(_series);
+    if (s > 0) return s;
+    final p = _profile;
+    if (p.contains('70')) return 70;
+    if (p.contains('60')) return 60;
+    return 0;
+  }
+
+  /// ДОПУСТИМЫЕ ТОЛЩИНЫ стеклопакета для этой рамы:
+  /// 60 мм → только 24 и 32 (40 в такую раму не влезает),
+  /// 70 мм и толще → 24 / 32 / 40.
+  List<int> get _glassThkList =>
+      _frameMm >= 70 ? const [24, 32, 40] : const [24, 32];
+
+  /// Толщина стеклопакета, приведённая к допустимым для рамы.
+  int get _glassThkSafe =>
+      _glassThkList.contains(_glassThk) ? _glassThk : _glassThkList.last;
+
+  /// Подпись стеклопакета на чертеже: «1-КАМ» или «2-КАМ».
+  String get _glassLabel => _glassCam == 0 ? '1-КАМ' : '2-КАМ';
+
+  /// СВАЙП ВВЕРХ по стеклопакету — камерность: 1-КАМ ⇄ 2-КАМ.
+  void _glassUp() => setState(() => _glassCam = _glassCam == 0 ? 1 : 0);
+
+  /// СВАЙП ВНИЗ по стеклопакету — толщина по кругу из допустимых.
+  void _glassDown() {
+    final list = _glassThkList;
+    final i = list.indexOf(_glassThkSafe);
+    setState(() => _glassThk = list[(i + 1) % list.length]);
+  }
+
   /// Вид изделия из цепочки дерева (ОДНОСТВОРЧАТОЕ, БАЛКОННЫЙ БЛОК и т.п.).
   /// Ищем по смыслу, а не по номеру: после профиля и его названия
   /// номера в цепочке сдвинулись.
