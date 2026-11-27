@@ -476,8 +476,42 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       builder: (_) => _DimDialog(field: field, controller: ctrl),
     );
     if (res != null && res > 0) {
-      setState(() => _visSizes = {..._visSizes, field: res});
+      setState(() {
+        final next = {..._visSizes, field: res};
+        _visSizes = _isBalcony ? _fixBalcony(next, field) : next;
+      });
     }
+  }
+
+  /// Пересчёт размеров БАЛКОННОГО БЛОКА.
+  /// Между окном и дверью — соединительная планка kBalconyPlankMm.
+  /// ОБЩАЯ ШИРИНА — ВЕДУЩАЯ: окно + планка + дверь = всего.
+  /// Меняешь дверь — окно пересчитывается, ОБЩАЯ ШИРИНА НЕ МЕНЯЕТСЯ.
+  Map<String, int> _fixBalcony(Map<String, int> src, String changed) {
+    final out = Map<String, int>.from(src);
+    const plank = kBalconyPlankMm;
+    var win = out['ШИРИНА ОКНА'] ?? 0;
+    var door = out['ШИРИНА ДВЕРИ'] ?? 0;
+    var total = out['ШИРИНА'] ?? 0;
+    if (total <= 0) total = win + door + plank;
+    if (changed == 'ШИРИНА ОКНА') {
+      door = total - plank - win;
+    } else {
+      win = total - plank - door;
+    }
+    // Ни одна часть не уходит в минус: минимум 100 мм на часть.
+    if (win < 100) {
+      win = 100;
+      door = total - plank - win;
+    }
+    if (door < 100) {
+      door = 100;
+      win = total - plank - door;
+    }
+    out['ШИРИНА'] = total;
+    out['ШИРИНА ОКНА'] = win;
+    out['ШИРИНА ДВЕРИ'] = door;
+    return out;
   }
 
   /// Есть ли у выбранного изделия визуальный чертёж.
