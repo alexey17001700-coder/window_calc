@@ -80,9 +80,10 @@ jobs:
           # Flutter из самого SDK (packages/flutter_tools/gradle, AGP 7.3.0).
           # Gradle запоминает «не найдено» на сутки — поэтому между попытками
           # чистим кэш модулей, иначе повтор упадёт с тем же текстом.
+          set -o pipefail
           for i in 1 2 3; do
             echo "=== ПОПЫТКА СБОРКИ $i ИЗ 3 ==="
-            if flutter build apk --release; then
+            if flutter build apk --release 2>&1 | tee /tmp/build_$i.log; then
               echo "СБОРКА УСПЕШНА (попытка $i)"
               exit 0
             fi
