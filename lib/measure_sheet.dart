@@ -920,8 +920,20 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     }
   }
 
-  /// ИТОГО по смете ('' — считать нечего).
-  String _estimateTotal() {
+  /// Чей прайс брать для адресата. ЗАВОД цен не видит — null.
+  PriceOwner? _ownerFor(SheetRecipient r) => switch (r) {
+        SheetRecipient.measurer => PriceOwner.measurer,
+        SheetRecipient.client => PriceOwner.client,
+        SheetRecipient.installer => PriceOwner.installer,
+        SheetRecipient.factory => null,
+      };
+
+  /// СМЕТА под адресата — по ЕГО прайсу из настроек.
+  /// null — считать нечего или цену показывать не нужно.
+  Future<Estimate?> _estimateFor(SheetRecipient r) async {
+    final owner = _ownerFor(r);
+    if (owner == null) return null;
+    final book = await PriceSettings.load(owner);
     final e = buildEstimate(
       widthMm: _widthMm,
       heightMm: _heightMm,
@@ -931,9 +943,17 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       profile: widget.profile,
       brand: widget.brand,
       series: widget.series,
+      book: book,
     );
-    return e.isEmpty ? '' : money(e.total);
+    return e.isEmpty ? null : e;
   }
+
+  /// Подпись итога под адресата.
+  String _priceLabel(SheetRecipient r) => switch (r) {
+        SheetRecipient.client => 'ИТОГО',
+        SheetRecipient.installer => 'ИТОГО ЗА РАБОТУ',
+        _ => 'ИТОГО · ПРИБЛИЗИТЕЛЬНО',
+      };
 
   /// Собрать лист ПОД АДРЕСАТА и отдать на печать → PDF / отправку.
   Future<void> _exportFor(SheetRecipient r) async {
