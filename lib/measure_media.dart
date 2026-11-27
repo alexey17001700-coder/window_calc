@@ -568,6 +568,19 @@ class SheetExport {
         '<table><tr><td class="k">ЦЕПОЧКА</td>'
         '<td class="v">${_esc(product)}</td></tr></table></div>');
 
+    // ── ГЛАВНЫЙ БЛОК A4: слева ЧЕРТЁЖ изделия, справа СПЕЦИФИКАЦИЯ ──
+    if (visual.isNotEmpty || spec.isNotEmpty) {
+      b.writeln('<div class="main">');
+      b.writeln('<div class="left">$visual</div>');
+      b.writeln('<div class="right"><div class="spec">'
+          '<div class="t">ИЗДЕЛИЕ И КОМПЛЕКТУЮЩИЕ</div><table>');
+      for (final r in spec) {
+        b.writeln('<tr><td class="k">${_esc(r.$1)}</td>'
+            '<td class="v">${_esc(r.$2)}</td></tr>');
+      }
+      b.writeln('</table></div></div></div>');
+    }
+
     if (rows.isNotEmpty) {
       b.writeln('<div class="card"><div class="t">ДАННЫЕ ЗАМЕРА</div><table>');
       for (final r in rows) {
