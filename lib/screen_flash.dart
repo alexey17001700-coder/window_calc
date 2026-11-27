@@ -114,18 +114,35 @@ class ScreenFlashState extends State<ScreenFlash>
   }
 
   /// Мягкая волна без резких граней: плавный «колокол» яркости.
-  Widget _wave(Alignment align) {
+  /// [center] — точка старта в координатах виджета, [size] — размер области.
+  /// Радиус волны ограничен ~130 px: чуть больше кнопки, экран не заливает.
+  Widget _wave(Offset center, Size size) {
     final t = _spread.value; // плавное расширение
     final life = _c.value; // линейное время для затухания
 
     // Растворение: мягко в начале, ровно в ноль в конце — без обрыва.
     final fade = math.pow(1 - life, 2.2).toDouble() * (1 - 0.25 * life);
 
-    // Кольцо расходится от кнопки наружу.
-    final double r = 0.05 + t * 0.95;
-    const double w = 0.28; // широкая мягкая полоса — граней не видно
-    final double a = (r - w).clamp(0.0, 1.0);
-    final double b = (r + w).clamp(0.0, 1.0);
+    final double shortest = math.min(size.width, size.height);
+    if (shortest <= 0) return const SizedBox.shrink();
+
+    // Предел расхождения и ширина мягкой полосы — в пикселях.
+    const double maxR = 130.0; // дальше кнопки в ~2 раза и стоп
+    const double ringPx = 26.0; // широкая полоса — граней не видно
+    final double ringR = 8.0 + t * maxR; // текущий радиус кольца
+
+    // Радиус градиента с запасом под полосу, переводим в доли shortestSide.
+    final double gradPx = maxR + ringPx * 2;
+    final double radius = gradPx / shortest;
+
+    // Точка старта в Alignment (-1..1) — координаты виджета в доли размера.
+    final Alignment align = Alignment(
+      (center.dx / size.width) * 2 - 1,
+      (center.dy / size.height) * 2 - 1,
+    );
+
+    final double a = ((ringR - ringPx) / gradPx).clamp(0.0, 1.0);
+    final double b = ((ringR + ringPx) / gradPx).clamp(0.0, 1.0);
 
     const int n = 28;
     final stops = <double>[];
