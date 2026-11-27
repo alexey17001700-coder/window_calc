@@ -281,8 +281,99 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     _snack('ЗАМЕРНЫЙ ЛИСТ СКОПИРОВАН');
   }
 
-  Future<void> _share() async {
-    await Share.share(_sheetText(), subject: 'Замерный лист');
+  /// Выбор адресата: лист ПЕРЕСОБИРАЕТСЯ под того, кому отправляем.
+  Future<void> _pickRecipient() async {
+    final r = await showModalBottomSheet<SheetRecipient>(
+      context: context,
+      backgroundColor: const Color(0xFF0B1524),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (_) => _recipientSheet(),
+    );
+    if (r == null) return;
+    await _exportFor(r);
+  }
+
+  /// Шторка «КОМУ ОТПРАВИТЬ ЛИСТ».
+  Widget _recipientSheet() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'КОМУ ОТПРАВИТЬ ЛИСТ',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.4,
+                color: AppColors.gold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (final r in SheetRecipient.values) ...[
+              _recipientTile(r),
+              const SizedBox(height: 8),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _recipientTile(SheetRecipient r) {
+    return GestureDetector(
+      onTap: () {
+        flashScreen();
+        Navigator.pop(context, r);
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A1220),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.gold.withOpacity(0.42)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.send_rounded, size: 16, color: AppColors.gold),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    r.label,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    r.hint,
+                    style: const TextStyle(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.9,
+                      color: Color(0xFF7E93AC),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                size: 18, color: Color(0xFF7E93AC)),
+          ],
+        ),
+      ),
+    );
   }
 
   void _snack(String text) {
