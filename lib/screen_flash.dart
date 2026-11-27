@@ -179,7 +179,7 @@ class ScreenFlashState extends State<ScreenFlash>
             decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: align,
-                radius: 0.35,
+                radius: 46.0 / shortest,
                 colors: [
                   AppColors.goldLight.withOpacity(core),
                   AppColors.gold.withOpacity(core * 0.40),
