@@ -1454,6 +1454,9 @@ class _BalconyPainter extends CustomPainter {
     canvas.drawRect(g.doorOuter, _line(_ink, 1.2));
     canvas.drawRect(g.doorInner, _line(_ink, 1.0));
 
+    // ── СОЕДИНИТЕЛЬНАЯ ПЛАНКА между окном и дверью ──
+    _plankStrip(canvas, g);
+
     // ── ОКОННАЯ ЧАСТЬ ──
     _windowCells(canvas, g);
 
