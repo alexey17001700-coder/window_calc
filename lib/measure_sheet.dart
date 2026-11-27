@@ -353,6 +353,12 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
     b.writeln('СЕРИЯ: ${_or(widget.series, '—')}');
     b.writeln('АРМИРОВКА: ${_or(widget.armirovka, '—')}');
     b.writeln('СТЕКЛОПАКЕТ: ${widget.glass.isEmpty ? '—' : _glassLine}');
+    if (_balcony) {
+      b.writeln('БАЛКОННЫЙ БЛОК: $_balconyLine');
+      for (final r in _visRows()) {
+        b.writeln('${r.$1}: ${r.$2}');
+      }
+    }
     b.writeln('ФОТО ПРОЁМА: ${_photos.isEmpty ? '—' : '${_photos.length} шт'}');
     if (widget.sashModes.isNotEmpty) {
       final s = <String>[];
