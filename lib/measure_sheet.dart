@@ -763,6 +763,7 @@ class _MeasureSheetViewState extends State<MeasureSheetView> {
       'profile': widget.profile,
       'brand': widget.brand,
       'series': widget.series,
+      'order': widget.orderNo.trim(),
       'sash': widget.sashModes,
       'widthMm': widget.widthMm,
       'sizes': widget.sizes,
