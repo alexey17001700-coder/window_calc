@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 
 import 'theme.dart';
 import 'screen_flash.dart';
 import 'measure_media.dart';
+import 'price_estimate.dart';
+import 'sheet_recipient.dart';
 import 'sheet_visual.dart';
 import 'window_visual.dart';
 
