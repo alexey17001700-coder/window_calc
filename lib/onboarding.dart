@@ -590,6 +590,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return '';
   }
 
+  /// АРМИРОВКА профиля — по толщине серии (lib/price_estimate.dart).
+  /// 58–60 → П-ОБРАЗНЫЙ 1,2 · 70–74 → ЗАМКНУТЫЙ 1,5 · 75+ → УСИЛЕННЫЙ 2,0.
+  String get _armirovka => armirovkaFor(_series, _frameMm);
+
   /// ТОЛЩИНА РАМЫ в ММ: серия (если выбрана) или кнопка ПРОФИЛЬ 60/70.
   /// По ней считается, какой стеклопакет в эту раму влезает.
   int get _frameMm {
