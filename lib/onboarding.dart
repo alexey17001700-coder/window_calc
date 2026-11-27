@@ -804,9 +804,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   /// Готовый замер уходит в историю (lib/measure_history.dart).
   Future<void> _saveRecord() async {
-    final glass = (_glass >= 0 && _glass < glassTypes.length)
-        ? glassTypes[_glass].title
-        : '';
+    final glass = glassTypes[_glassCam.clamp(0, glassTypes.length - 1)].title;
     final w = _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА');
     final h = _mmOf('ВЫСОТА');
     final est = buildEstimate(
