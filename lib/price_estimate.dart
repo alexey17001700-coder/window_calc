@@ -318,7 +318,9 @@ Estimate buildEstimate({
   String profile = '',
   String brand = '',
   String series = '',
+  PriceBookData? book,
 }) {
+  final bk = book ?? PriceBookData.standard;
   final lines = <EstimateLine>[];
 
   final w = widthMm / 1000.0; // м
@@ -328,11 +330,11 @@ Estimate buildEstimate({
 
   if (area > 0) {
     // ── Изделие ───────────────────────────────────────────────
-    final base = windowPerM2For(windowType);
-    var perM2 = base + glassPerM2(glass);
+    final base = windowPerM2For(windowType, bk);
+    var perM2 = base + glassPerM2(glass, bk);
     final figured =
         windowType.toUpperCase().contains('ФИГУРН') || parts.contains('АБРИС');
-    if (figured) perM2 *= 1 + PriceBook.figuredMarkup;
+    if (figured) perM2 *= 1 + bk.figuredMarkup;
 
     lines.add(EstimateLine(
       figured ? 'Изделие · $windowType · фигурное' : 'Изделие · $windowType',
@@ -347,18 +349,18 @@ Estimate buildEstimate({
         'Профиль 70 мм · тёплый',
         area,
         'м²',
-        PriceBook.profile70PerM2,
+        bk.profile70PerM2,
       ));
     }
 
     // ── Название профиля (марка): пока ЗАГЛУШКА, надбавок нет ──
-    final brandMarkup = PriceBook.brandPerM2[brand.toUpperCase()] ?? 0;
+    final brandMarkup = bk.brandPerM2[brand.toUpperCase()] ?? 0;
     if (brandMarkup > 0) {
       lines.add(EstimateLine('Профиль $brand', area, 'м²', brandMarkup));
     }
 
     // ── Серия профиля: премиум-толщина (75 мм и толще) ──
-    final sMarkup = seriesPerM2(series);
+    final sMarkup = seriesPerM2(series, bk);
     if (sMarkup > 0) {
       lines.add(EstimateLine(
         'Серия $series · премиум ${seriesMm(series)} мм',
@@ -372,25 +374,25 @@ Estimate buildEstimate({
     for (final p in parts) {
       switch (p) {
         case 'С ОТЛИВОМ':
-          lines.add(EstimateLine('Отлив', w, 'м.п.', PriceBook.ebbPerM));
+          lines.add(EstimateLine('Отлив', w, 'м.п.', bk.ebbPerM));
           break;
         case 'С ПОДОКОННИКОМ':
-          lines.add(EstimateLine('Подоконник', w, 'м.п.', PriceBook.sillPerM));
+          lines.add(EstimateLine('Подоконник', w, 'м.п.', bk.sillPerM));
           break;
         case 'С ОТКОСАМИ':
           lines.add(EstimateLine('Откосы (периметр)', perim, 'м.п.',
-              PriceBook.slopePerM));
+              bk.slopePerM));
           break;
         case 'ПСУЛ':
-          lines.add(EstimateLine('ПСУЛ', perim, 'м.п.', PriceBook.psuPerM));
+          lines.add(EstimateLine('ПСУЛ', perim, 'м.п.', bk.psuPerM));
           break;
         case 'ОТМАЗКА':
           lines.add(
-              EstimateLine('Отмазка, 1 сторона', area, 'м²', PriceBook.strippingPerM2));
+              EstimateLine('Отмазка, 1 сторона', area, 'м²', bk.strippingPerM2));
           break;
         case 'ОТМАЗКА С ДВУХ СТОРОН':
           lines.add(EstimateLine('Отмазка, 2 стороны', area, 'м²',
-              PriceBook.strippingPerM2 * 2));
+              bk.strippingPerM2 * 2));
           break;
         default:
           break;
@@ -398,14 +400,14 @@ Estimate buildEstimate({
     }
 
     // ── Монтаж и доставка ────────────────────────────────────
-    final install = _round2(area * PriceBook.installPerM2);
+    final install = _round2(area * bk.installPerM2);
     lines.add(EstimateLine(
       'Монтаж',
       1,
       'шт',
-      install < PriceBook.installMin ? PriceBook.installMin : install,
+      install < bk.installMin ? bk.installMin : install,
     ));
-    lines.add(EstimateLine('Доставка', 1, 'шт', PriceBook.delivery));
+    lines.add(EstimateLine('Доставка', 1, 'шт', bk.delivery));
   }
 
   return Estimate(widthMm: widthMm, heightMm: heightMm, lines: lines);
