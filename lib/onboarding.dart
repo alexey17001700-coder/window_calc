@@ -812,6 +812,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       frameMm: _frameMm,
       orderNo: _orderNo,
       widthMm: _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА'),
+      visSizes: _visSizes,
       sectionWidths: _secWidths,
       hinges: _hingeCounts,
       sandwich: _isBalcony && _doorKind == 1 ? 1 : 0,
