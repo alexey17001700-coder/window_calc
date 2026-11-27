@@ -393,14 +393,45 @@ class _WorkTreeViewState extends State<WorkTreeView>
   }
 
   // ─────────────────────── ДАННЫЕ УРОВНЯ ───────────────────────
+  /// Толщина выбранного профиля (60 или 70) из цепочки; 0 — не выбрана.
+  /// Профиль стоит ДО марки, поэтому идём по «сырым» детям — фильтр
+  /// серий (он ниже по дереву) на этот путь не влияет.
+  int _profileMm() {
+    var nodes = workTree;
+    for (var i = 0; i < _path.length; i++) {
+      final n = nodes[_path[i]];
+      if (n.title.contains('ПРОФИЛЬ 70')) return 70;
+      if (n.title.contains('ПРОФИЛЬ 60')) return 60;
+      nodes = n.children;
+    }
+    return 0;
+  }
+
+  /// Дети узла nodes[idx]. У МАРКИ дети-серии фильтруются по толщине
+  /// профиля: 60 → серии до 60 мм, 70 → серии от 70 мм.
+  List<WorkNode> _kids(List<WorkNode> nodes, int idx) {
+    final node = nodes[idx];
+    var ch = node.children;
+    if (brandNames.contains(node.title)) {
+      final mm = _profileMm();
+      if (mm > 0) {
+        ch = [
+          for (final n in ch)
+            if (n.mm == 0 || (mm <= 60 ? n.mm <= 60 : n.mm >= 70)) n,
+        ];
+      }
+    }
+    return ch;
+  }
+
   /// Дети узла, стоящего на уровне k-1 (k ≥ 1).
   List<WorkNode> _level(int k) {
+    if (_path.length < k) return const [];
     var nodes = workTree;
     for (var i = 0; i < k - 1; i++) {
-      nodes = nodes[_path[i]].children;
+      nodes = _kids(nodes, _path[i]);
     }
-    if (_path.length < k) return const [];
-    return nodes[_path[k - 1]].children;
+    return _kids(nodes, _path[k - 1]);
   }
 
   /// Колонки дерева: 0 — все 4 карточки 1-го уровня, дальше — раскрытые ветки.
