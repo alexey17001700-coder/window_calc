@@ -786,6 +786,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       multi: _multi,
       sizes: _sizes,
       glass: glass,
+      profile: _profile,
+      brand: _brand,
+      series: _series,
+      glassThk: _glassThkSafe,
+      frameMm: _frameMm,
       widthMm: _isBalcony ? _balconyTotalW : _mmOf('ШИРИНА'),
       sectionWidths: _secWidths,
       sashModes: [
